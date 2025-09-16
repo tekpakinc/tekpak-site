@@ -1,73 +1,191 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tek-Pak Inc.</title>
-  <style>
-    :root {
-      --yellow: #ffd500;
-      --blue: #1e5ab6;
-      --lime: #6eea3b;
-      --bg: #f6f8fb;
-      --card: rgba(255,255,255,0.85);
-      --ink: #0e1726;
-    }
-    body {
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      background: linear-gradient(135deg, var(--blue), var(--lime));
-      color: var(--ink);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .card {
-      background: var(--card);
-      backdrop-filter: blur(10px);
-      padding: 2rem 3rem;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      max-width: 700px;
-      text-align: center;
-    }
-    h1 {
-      margin-top: 0;
-      font-size: 2.5rem;
-      color: var(--blue);
-    }
-    p {
-      margin: 1rem 0;
-      line-height: 1.5;
-    }
-    a.button {
-      display: inline-block;
-      margin-top: 1.5rem;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      background: var(--lime);
-      color: black;
-      font-weight: bold;
-      text-decoration: none;
-      transition: 0.2s ease;
-    }
-    a.button:hover {
-      background: var(--yellow);
-    }
-    footer {
-      margin-top: 2rem;
-      font-size: 0.9rem;
-      color: #444;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>Tek-Pak Inc.</h1>
-    <p>Green Means Go. We provide IT solutions, e-waste recycling, data destruction, and rapid response services to keep your business moving forward.</p>
-    <a class="button" href="mailto:info@tekpak.com">Contact Us</a>
-    <footer>© 2025 Tek-Pak Inc.</footer>
+
+<!-- header.html -->
+<header>
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <img src="tekpak-logo.png" alt="Tek-Pak Logo">
+    </a>
+    <ul class="menu">
+      <li><a href="index.html">HOME</a></li>
+      <li><a href="services.html">SERVICES</a></li>
+      <li><a href="about.html">ABOUT</a></li>
+      <li><a href="contact.html">CONTACT</a></li>
+    </ul>
+  </nav>
+</header>
+
+<style>
+  :root {
+    --lime-light: #b8f6a8; /* much lighter green */
+    --green-soft: #8ed88c; /* soft muted green */
+    --ink: #0e1726;
+    --bg: #ffffff;
+    --grey: #cccccc;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    font-family: "Segoe UI", Roboto, sans-serif;
+  }
+
+  header {
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #f5f5f5 45%,
+      #eaeaea 100%
+    );
+    border-bottom: 2px solid var(--grey);
+    box-shadow:
+      inset 0 6px 10px rgba(255,255,255,0.9),
+      inset 0 -6px 12px rgba(0,0,0,0.1),
+      0 6px 18px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1.8rem;
+  }
+
+  .logo img {
+    height: 50px;
+    display: block;
+    filter: drop-shadow(0 0 6px rgba(0,0,0,0.25))
+            drop-shadow(0 0 8px var(--lime-light));
+    transition: transform 0.25s ease, filter 0.25s ease;
+  }
+
+  .logo img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.3))
+            drop-shadow(0 0 16px var(--green-soft));
+  }
+
+  .menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2rem;
+  }
+
+  .menu a {
+    font-family: "Segoe UI", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem; /* smaller text */
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: 1.2px;
+
+    /* subtle engraved look */
+    text-shadow:
+      1px 1px 2px rgba(0,0,0,0.15),
+      -1px -1px 1px rgba(255,255,255,0.8);
+    transition: all 0.25s ease;
+  }
+
+  .menu a:hover {
+    color: var(--green-soft);
+    text-shadow:
+      0 0 3px rgba(0,0,0,0.15),
+      -1px -1px 1px rgba(255,255,255,0.8),
+      0 0 8px rgba(184,246,168,0.6);
+    transform: translateY(-1px);
+  }
+</style>
+
+
+
+<!-- footer.html -->
+<footer>
+  <div class="footer-container">
+    <p class="copyright">© 2025 Tek-Pak Inc. • All Rights Reserved</p>
+    <ul class="footer-menu">
+      <li><a href="privacy.html">PRIVACY</a></li>
+      <li><a href="terms.html">TERMS</a></li>
+      <li><a href="contact.html">CONTACT</a></li>
+    </ul>
   </div>
-</body>
-</html>
+</footer>
+
+<style>
+  :root {
+    --lime-light: #b8f6a8;
+    --green-soft: #8ed88c;
+    --ink: #0e1726;
+    --bg: #ffffff;
+    --grey: #cccccc;
+  }
+
+  footer {
+    background: linear-gradient(
+      180deg,
+      #fdfdfd 0%,
+      #f2f2f2 60%,
+      #e8e8e8 100%
+    );
+    border-top: 2px solid var(--grey);
+    box-shadow:
+      inset 0 6px 10px rgba(255,255,255,0.9),
+      inset 0 -6px 12px rgba(0,0,0,0.1),
+      0 -6px 18px rgba(0,0,0,0.15);
+    padding: 1rem 2rem;
+    text-align: center;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  .copyright {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-shadow:
+      1px 1px 2px rgba(0,0,0,0.15),
+      -1px -1px 1px rgba(255,255,255,0.8);
+  }
+
+  .footer-menu {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    padding: 0;
+    margin: 0;
+  }
+
+  .footer-menu a {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: 1.2px;
+    text-shadow:
+      1px 1px 2px rgba(0,0,0,0.15),
+      -1px -1px 1px rgba(255,255,255,0.8);
+    transition: all 0.25s ease;
+  }
+
+  .footer-menu a:hover {
+    color: var(--green-soft);
+    text-shadow:
+      0 0 3px rgba(0,0,0,0.15),
+      -1px -1px 1px rgba(255,255,255,0.8),
+      0 0 8px rgba(184,246,168,0.6);
+    transform: translateY(-1px);
+  }
+</style>
