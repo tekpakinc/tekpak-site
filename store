@@ -1,0 +1,56 @@
+<!-- header.html -->
+<header>
+  <nav class="navbar">
+    <a href="index.html" class="logo">Tek-Pak Inc.</a>
+    <ul class="menu">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<style>
+  :root {
+    --yellow: #ffd500;
+    --blue: #1e5ab6;
+    --lime: #6eea3b;
+    --ink: #0e1726;
+    --bg: #f6f8fb;
+  }
+  header {
+    background: linear-gradient(90deg, var(--blue), var(--lime));
+    padding: 0.5rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+  }
+  .menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.5rem;
+  }
+  .menu a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  .menu a:hover {
+    color: var(--yellow);
+  }
+</style>
