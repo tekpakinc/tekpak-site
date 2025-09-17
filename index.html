@@ -6,101 +6,296 @@
   <title>Rapid Response • Tek-Pak</title>
   <style>
     :root {
-      --lime:#6eea3b;
-      --silver:#d9d9d9;
-      --ink:#0e1726;
-      --bg:#f5f7fa;
-      --glass:#ffffffcc;
-      --radius:20px;
-      --blur:12px;
+      --rr-yellow:#f6d43a;
+      --rr-blue:#2a6bbf;
+      --rr-dark:#0f0f0f;
+      --rr-grey:#1a1a1a;
+      --rr-light:#f4f4f4;
+      --rr-border:#333;
+      --radius:10px;
     }
     * { box-sizing:border-box; }
     body {
       margin:0;
-      font-family: system-ui, sans-serif;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background:linear-gradient(135deg, var(--rr-dark), #1f1f1f);
+      color:var(--rr-light);
+      min-height:100vh;
       display:flex;
       justify-content:center;
-      align-items:center;
-      min-height:100vh;
-      background: linear-gradient(135deg, var(--silver), var(--bg));
+      padding:2rem;
+    }
+    .wrapper {
+      position:relative;
+      background:rgba(30,30,30,0.85);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:var(--radius);
+      width:100%;
+      max-width:860px;
+      padding:1.5rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.5rem;
+      box-shadow:
+        0 8px 24px rgba(0,0,0,0.7),
+        inset 0 1px 2px rgba(255,255,255,0.2),
+        inset 0 -1px 3px rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       overflow:hidden;
     }
-    body::before {
+    /* Gloss overlay */
+    .wrapper::after {
       content:"";
       position:absolute;
-      width:200%;
-      height:200%;
-      background:
-        radial-gradient(circle at 30% 30%, #fff8 0%, transparent 60%),
-        linear-gradient(45deg, #ccc3 25%, transparent 25% 75%, #ccc3 75%);
-      transform:rotate(10deg);
+      top:0; left:0; right:0;
+      height:40%;
+      background:linear-gradient(to bottom, rgba(255,255,255,0.15), transparent);
+      pointer-events:none;
     }
-    .app {
+    /* Logo */
+    .logo {
+      display:flex;
+      justify-content:center;
+      margin-bottom:0.5rem;
+    }
+    .logo img {
+      max-width:220px;
+      height:auto;
+    }
+    /* Search bar */
+    .search-bar {
+      display:flex;
+      gap:0.5rem;
+      background:#111;
+      border:2px solid var(--rr-blue);
+      border-radius:40px;
+      padding:0.5rem 0.8rem;
+      box-shadow:inset 0 0 8px rgba(0,0,0,0.8);
+    }
+    .search-bar input {
+      flex:1;
+      padding:0.7rem 1rem;
+      font-size:1rem;
+      border:none;
+      border-radius:40px;
+      background:transparent;
+      color:var(--rr-light);
+    }
+    .search-bar input:focus { outline:none; }
+    .search-bar button {
+      padding:0.7rem 1.4rem;
+      background:var(--rr-yellow);
+      color:#000;
+      border:none;
+      border-radius:40px;
+      font-weight:600;
+      cursor:pointer;
+      transition:all 0.2s;
+      box-shadow:0 3px 8px rgba(0,0,0,0.6);
       position:relative;
-      background:var(--glass);
-      backdrop-filter:blur(var(--blur));
-      -webkit-backdrop-filter:blur(var(--blur));
-      border-radius:var(--radius);
-      padding:2rem;
-      width:90%;
-      max-width:420px;
-      box-shadow:0 8px 24px #0002;
-      text-align:center;
+      overflow:hidden;
     }
-    h1 {
-      font-size:1.8rem;
-      font-style:italic;
-      color:var(--ink);
-      text-shadow:0 0 6px var(--lime);
-      margin-bottom:1rem;
+    .search-bar button::after {
+      content:"";
+      position:absolute;
+      top:0; left:-50%;
+      width:40%; height:100%;
+      background:linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent);
+      transform:skewX(-20deg);
+      animation: shine 5s infinite;
+    }
+    .search-bar button:hover {
+      background:#ffe15c;
+      transform:translateY(-1px);
+    }
+    @keyframes shine {
+      0% { left:-50%; }
+      50% { left:120%; }
+      100% { left:120%; }
+    }
+    /* Tab navigation */
+    .tabs {
+      display:flex;
+      gap:1rem;
+      border-bottom:2px solid rgba(255,255,255,0.1);
+    }
+    .tab {
+      padding:0.6rem 1.2rem;
+      cursor:pointer;
+      font-weight:600;
+      border-radius:8px 8px 0 0;
+      background:rgba(255,255,255,0.05);
+      transition:all 0.2s;
+      position:relative;
+    }
+    .tab.active {
+      background:var(--rr-blue);
+      color:#fff;
+      box-shadow:0 -2px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.2);
+    }
+    .tab.active::after {
+      content:"";
+      position:absolute;
+      bottom:-2px; left:0; right:0;
+      height:3px;
+      background:var(--rr-yellow);
+      border-radius:2px;
+    }
+    .cards {
+      display:grid;
+      gap:1rem;
+      margin-top:1rem;
     }
     .card {
-      background:var(--glass);
-      border-radius:var(--radius);
+      background:rgba(24,24,24,0.9);
       padding:1rem;
-      margin:1rem 0;
-      box-shadow:0 4px 12px #0001;
-      transition:transform 0.2s ease, box-shadow 0.2s ease;
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:var(--radius);
+      transition:border 0.2s, transform 0.15s;
+      position:relative;
+      overflow:hidden;
     }
     .card:hover {
-      transform:translateY(-4px);
-      box-shadow:0 8px 24px #0003;
+      border-color:var(--rr-blue);
+      transform:translateY(-2px);
     }
-    .btn {
-      display:block;
-      margin:1rem auto;
-      padding:0.8rem 1.4rem;
-      border-radius:var(--radius);
-      border:none;
-      background:var(--lime);
-      color:#000;
-      font-weight:bold;
-      font-size:1rem;
-      cursor:pointer;
-      box-shadow:0 0 12px var(--lime);
-      transition:all 0.2s ease;
+    .card p {
+      margin:0.3rem 0;
+      font-size:0.95rem;
     }
-    .btn:hover {
-      background:#8eff60;
-      box-shadow:0 0 20px var(--lime);
+    .card::after {
+      content:"";
+      position:absolute;
+      top:0; left:-60%;
+      width:50%; height:100%;
+      background:linear-gradient(120deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform:skewX(-20deg);
+      transition:0.3s;
+    }
+    .card:hover::after {
+      left:120%;
+    }
+    /* Scroll areas */
+    .results-container,
+    .inventory-container {
+      max-height:300px;
+      overflow-y:auto;
+    }
+    .results-container::-webkit-scrollbar,
+    .inventory-container::-webkit-scrollbar {
+      width:8px;
+    }
+    .results-container::-webkit-scrollbar-thumb,
+    .inventory-container::-webkit-scrollbar-thumb {
+      background:var(--rr-blue);
+      border-radius:4px;
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <h1>Find your parts fast &amp; get them fast too!</h1>
-    <div class="card">
-      <p>Browse Tek-Pak’s Rapid Response inventory and locate the part you need in seconds.</p>
-      <button class="btn">Browse Parts</button>
+  <div class="wrapper">
+    <!-- Logo -->
+    <div class="logo">
+      <img src="logo.png" alt="Rapid Response Logo"/>
     </div>
-    <div class="card">
-      <p>Need it delivered right away? Select priority shipping and we’ll get it on the road now.</p>
-      <button class="btn">Request Delivery</button>
+
+    <!-- Search -->
+    <form class="search-bar" onsubmit="searchParts(event)">
+      <input id="searchInput" type="text" placeholder="Search parts, models, or IDs..."/>
+      <button type="submit">Search</button>
+    </form>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('results')">Search Results</div>
+      <div class="tab" onclick="showTab('inventory')">General Inventory</div>
     </div>
-    <div class="card">
-      <p>Already ordered? Track your shipment in real time and stay updated.</p>
-      <button class="btn">Track Order</button>
-    </div>
+
+    <!-- Search Results -->
+    <div id="results" class="results-container cards"></div>
+
+    <!-- Full Inventory -->
+    <div id="inventory" class="inventory-container cards" style="display:none;"></div>
   </div>
+
+  <script>
+    function showTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.results-container, .inventory-container').forEach(c => c.style.display='none');
+
+      if(tab === 'results'){
+        document.querySelector('.tab:nth-child(1)').classList.add('active');
+        document.getElementById('results').style.display='grid';
+      } else {
+        document.querySelector('.tab:nth-child(2)').classList.add('active');
+        document.getElementById('inventory').style.display='grid';
+      }
+    }
+
+    async function searchParts(event) {
+      event.preventDefault();
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+
+      try {
+        const res = await fetch(
+          `YOUR_SCRIPT_URL_HERE?q=${encodeURIComponent(query)}`
+        );
+        const data = await res.json();
+
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = "";
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML = `<div class="card"><p>No results found.</p></div>`;
+          return;
+        }
+
+        data.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <p><strong>${item.Name || item.Description || item.PartName || "Part"}</strong></p>
+            <p>ID: ${item.ItemNumber || item.ID || "N/A"}</p>
+            <p>Condition: ${item.Condition || "Unknown"}</p>
+          `;
+          resultsDiv.appendChild(card);
+        });
+      } catch (err) {
+        console.error(err);
+        document.getElementById('results').innerHTML =
+          `<div class="card"><p>Error fetching results.</p></div>`;
+      }
+    }
+
+    async function loadInventory() {
+      try {
+        const res = await fetch(`YOUR_SCRIPT_URL_HERE`);
+        const data = await res.json();
+
+        const invDiv = document.getElementById('inventory');
+        invDiv.innerHTML = "";
+
+        data.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <p><strong>${item.Name || item.Description || item.PartName || "Part"}</strong></p>
+            <p>ID: ${item.ItemNumber || item.ID || "N/A"}</p>
+            <p>Condition: ${item.Condition || "Unknown"}</p>
+          `;
+          invDiv.appendChild(card);
+        });
+      } catch (err) {
+        console.error(err);
+        document.getElementById('inventory').innerHTML =
+          `<div class="card"><p>Error loading inventory.</p></div>`;
+      }
+    }
+
+    loadInventory();
+  </script>
 </body>
 </html>
+
