@@ -22,7 +22,8 @@
       color:var(--rr-light);
       min-height:100vh;
       display:flex;
-      justify-content:center;
+      flex-direction:column;
+      align-items:center;
       padding:2rem;
     }
     .wrapper {
@@ -56,12 +57,22 @@
     /* Logo */
     .logo {
       display:flex;
-      justify-content:center;
-      margin-bottom:0.5rem;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
     }
     .logo img {
       max-width:220px;
       height:auto;
+    }
+    .tagline {
+      font-size:0.95rem;
+      color:#ddd;
+      margin-top:0.5rem;
+      font-style:italic;
+    }
+    .tagline span {
+      color:var(--rr-blue);
     }
     /* Search bar */
     .search-bar {
@@ -114,7 +125,7 @@
       50% { left:120%; }
       100% { left:120%; }
     }
-    /* Tab navigation */
+    /* Tabs */
     .tabs {
       display:flex;
       gap:1rem;
@@ -142,6 +153,7 @@
       background:var(--rr-yellow);
       border-radius:2px;
     }
+    /* Cards */
     .cards {
       display:grid;
       gap:1rem;
@@ -191,13 +203,25 @@
       background:var(--rr-blue);
       border-radius:4px;
     }
+    /* Footer logo */
+    .footer {
+      margin-top:2rem;
+      display:flex;
+      justify-content:center;
+    }
+    .footer img {
+      max-width:200px;
+      height:auto;
+      opacity:0.9;
+    }
   </style>
 </head>
 <body>
   <div class="wrapper">
-    <!-- Logo -->
+    <!-- Logo + tagline -->
     <div class="logo">
-      <img src="logo.png" alt="Rapid Response Logo"/>
+      <img src="rapid-logo.png" alt="Rapid Response Logo"/>
+      <div class="tagline">a service of <span>Tek-Pak Inc.</span></div>
     </div>
 
     <!-- Search -->
@@ -217,6 +241,11 @@
 
     <!-- Full Inventory -->
     <div id="inventory" class="inventory-container cards" style="display:none;"></div>
+  </div>
+
+  <!-- Footer Tek-Pak logo -->
+  <div class="footer">
+    <img src="tekpak-logo.png" alt="Tek-Pak Inc Logo"/>
   </div>
 
   <script>
@@ -271,7 +300,7 @@
 
     async function loadInventory() {
       try {
-        const res = await fetch(`https://script.google.com/macros/s/AKfycbyabkMqko_NEQ997rXvDrH_6qpdoGbWFVgmNizV33CfEB0rcJWtm_I4INGcUQ-L9l8d/exec`);
+        const res = await fetch(`YOUR_SCRIPT_URL_HERE`);
         const data = await res.json();
 
         const invDiv = document.getElementById('inventory');
@@ -298,5 +327,3 @@
   </script>
 </body>
 </html>
-
-
