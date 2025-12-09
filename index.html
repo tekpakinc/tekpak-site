@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tek-Pak Inventory Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #05060a;
+      --bg-panel: #11131a;
+      --bg-panel-alt: #181b22;
+      --accent: #d4ff3f;
+      --accent-soft: #90a83a;
+      --text: #f5f5f5;
+      --muted: #a0a4af;
+      --border: #272b34;
+      --danger: #ff4b5c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, #232836 0, #05060a 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shell {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px;
+      gap: 12px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.7));
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-pill {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      background: radial-gradient(circle at top left, var(--accent), #3a430d);
+      box-shadow: 0 0 18px rgba(212,255,63,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      color: #05060a;
+    }
+
+    .nav-title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-title-main {
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .nav-title-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px rgba(212,255,63,0.5);
+    }
+
+    .pill {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+      padding: 4px 8px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.8));
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.7));
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      box-shadow:
+        0 18px 40px rgba(0,0,0,0.75),
+        inset 0 0 40px rgba(255,255,255,0.02);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+    }
+
+    .panel-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 960px) {
+      .filters {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .field-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.75));
+      color: var(--text);
+      font-size: 11px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 54px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 0 1px rgba(212,255,63,0.25);
+    }
+
+    .inventory-list {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 4px;
+      padding-right: 4px;
+    }
+
+    .inventory-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .inventory-list::-webkit-scrollbar-track {
+      background: #101218;
+      border-radius: 999px;
+    }
+    .inventory-list::-webkit-scrollbar-thumb {
+      background: #363b46;
+      border-radius: 999px;
+    }
+
+    .card {
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: radial-gradient(circle at top left, rgba(255,255,255,0.04), rgba(0,0,0,0.9));
+      padding: 8px 9px;
+      margin-bottom: 6px;
+      display: grid;
+      grid-template-columns: 2fr 1.4fr auto;
+      gap: 8px;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    @media (max-width: 800px) {
+      .card {
+        grid-template-columns: 1fr;
+        align-items: flex-start;
+      }
+    }
+
+    .card-main-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .card-line {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .tag {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      border-radius: 999px;
+      padding: 3px 6px;
+      border: 1px solid rgba(255,255,255,0.14);
+      color: var(--muted);
+    }
+
+    .tag-status-listed {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .tag-status-sold {
+      border-color: var(--danger);
+      color: #ffd6dc;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.85));
+      color: var(--text);
+      padding: 6px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      filter: brightness(1.07);
+      box-shadow: 0 0 14px rgba(212,255,63,0.25);
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at top left, rgba(212,255,63,0.18), rgba(0,0,0,0.9));
+      border-color: rgba(212,255,63,0.5);
+    }
+
+    .btn-danger {
+      border-color: rgba(255,75,92,0.6);
+      background: radial-gradient(circle at top left, rgba(255,75,92,0.2), rgba(0,0,0,0.9));
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    @media (max-width: 800px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section-divider {
+      margin: 6px 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .section-caption {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stack-vert {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .btn-row-right {
+      display: flex;
+      gap: 6px;
+    }
+
+    .status-bar {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .small-input {
+      font-size: 10px;
+      padding: 4px 6px;
+    }
+
+    .list-editor {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    @media (max-width: 800px) {
+      .list-editor {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="nav">
+      <div class="nav-left">
+        <div class="logo-pill">TP</div>
+        <div class="nav-title">
+          <div class="nav-title-main">Tek-Pak Inventory</div>
+          <div class="nav-title-sub">Luxury Warehouse Employee Portal</div>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="status-dot"></div>
+        <span id="apiStatus">Connecting…</span>
+        <div class="pill">Everyone: Full Access</div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- LEFT: INVENTORY VIEW -->
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Inventory</div>
+            <div class="panel-sub">Search, filter, and edit any item in the system.</div>
+          </div>
+          <button class="btn btn-primary" onclick="reloadData()">⟳ Refresh</button>
+        </div>
+
+        <div class="filters">
+          <div>
+            <div class="field-label">Search</div>
+            <input type="text" id="searchInput" placeholder="Title, Model, Serial, SKU…" oninput="onFilterChange()">
+          </div>
+          <div>
+            <div class="field-label">Category</div>
+            <select id="filterCategory" onchange="onFilterChange()">
+              <option value="">All</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">Status</div>
+            <select id="filterStatus" onchange="onFilterChange()">
+              <option value="">All</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">Location</div>
+            <select id="filterLocation" onchange="onFilterChange()">
+              <option value="">All</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="inventoryList" class="inventory-list">
+          <!-- Cards injected here -->
+        </div>
+      </section>
+
+      <!-- RIGHT: FORMS / LIST EDITOR -->
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Item Editor</div>
+            <div class="panel-sub">Add new items or update existing entries.</div>
+          </div>
+          <span id="editModeBadge" class="pill">Add Mode</span>
+        </div>
+
+        <form id="itemForm" onsubmit="onSubmitItem(event)">
+          <div class="form-grid">
+            <div>
+              <div class="field-label">TP-SKU (auto if blank)</div>
+              <input type="text" id="fTP_SKU">
+            </div>
+            <div>
+              <div class="field-label">Title</div>
+              <input type="text" id="fTitle" required>
+            </div>
+            <div>
+              <div class="field-label">Manufacturer</div>
+              <select id="fManufacturer"></select>
+            </div>
+            <div>
+              <div class="field-label">Model</div>
+              <input type="text" id="fModel">
+            </div>
+            <div>
+              <div class="field-label">Serial</div>
+              <input type="text" id="fSerial">
+            </div>
+            <div>
+              <div class="field-label">Color</div>
+              <input type="text" id="fColor">
+            </div>
+            <div>
+              <div class="field-label">Category</div>
+              <select id="fCategory"></select>
+            </div>
+            <div>
+              <div class="field-label">Status</div>
+              <select id="fStatus"></select>
+            </div>
+            <div>
+              <div class="field-label">Location</div>
+              <select id="fLocation"></select>
+            </div>
+            <div>
+              <div class="field-label">Condition</div>
+              <input type="text" id="fCondition">
+            </div>
+            <div>
+              <div class="field-label">eBay Item ID</div>
+              <input type="text" id="fEbayID">
+            </div>
+            <div>
+              <div class="field-label">eBay URL</div>
+              <input type="text" id="fEbayURL">
+            </div>
+            <div>
+              <div class="field-label">Image 1 URL</div>
+              <input type="text" id="fImage1">
+            </div>
+            <div>
+              <div class="field-label">Image 2 URL</div>
+              <input type="text" id="fImage2">
+            </div>
+            <div>
+              <div class="field-label">Image 3 URL</div>
+              <input type="text" id="fImage3">
+            </div>
+            <div>
+              <div class="field-label">Image 4 URL</div>
+              <input type="text" id="fImage4">
+            </div>
+            <div>
+              <div class="field-label">Dimensions</div>
+              <input type="text" id="fDimensions">
+            </div>
+            <div>
+              <div class="field-label">Weight</div>
+              <input type="text" id="fWeight" class="small-input">
+            </div>
+            <div>
+              <div class="field-label">Acquired Price</div>
+              <input type="number" step="0.01" id="fAcquiredPrice" class="small-input">
+            </div>
+            <div>
+              <div class="field-label">Sold (Y/N or details)</div>
+              <input type="text" id="fSold">
+            </div>
+          </div>
+
+          <div class="section-divider"></div>
+
+          <div class="stack-vert">
+            <div class="field-label">Notes</div>
+            <textarea id="fNotes"></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="btn" onclick="resetForm()">Clear / New</button>
+            <div class="btn-row-right">
+              <button type="submit" class="btn btn-primary">💾 Save Item</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="section-divider" style="margin-top:8px;"></div>
+
+        <div>
+          <div class="section-caption">List Manager (Categories, Locations, etc.)</div>
+          <div class="panel-sub" style="margin-bottom:4px;">Edit dropdown lists directly. This updates the Google Sheet and all dropdowns.</div>
+          <div class="list-editor">
+            <div>
+              <div class="field-label">Categories (one per line)</div>
+              <textarea id="listCategories"></textarea>
+            </div>
+            <div>
+              <div class="field-label">Manufacturers (one per line)</div>
+              <textarea id="listManufacturers"></textarea>
+            </div>
+            <div>
+              <div class="field-label">Locations (one per line)</div>
+              <textarea id="listLocations"></textarea>
+            </div>
+            <div>
+              <div class="field-label">Status (one per line)</div>
+              <textarea id="listStatus"></textarea>
+            </div>
+          </div>
+          <div class="btn-row">
+            <span></span>
+            <div class="btn-row-right">
+              <button class="btn btn-danger" onclick="resetListsUi()">Reset UI</button>
+              <button class="btn btn-primary" onclick="saveLists()">Save Lists</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-bar">
+          <span id="statusText">Ready.</span>
+          <span style="opacity:0.8;">GitHub Pages · Tek-Pak Portal</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // 🔧 SET THIS TO YOUR WEB APP URL
+    const API_BASE = 'https://script.google.com/macros/s/YOUR_WEB_APP_ID_HERE/exec';
+
+    let inventory = [];
+    let lists = {
+      categories: [],
+      locations: [],
+      status: [],
+      manufacturers: []
+    };
+    let currentFilters = {
+      search: '',
+      category: '',
+      status: '',
+      location: ''
+    };
+    let currentEditRowIndex = null;
+
+    function setApiStatus(msg) {
+      document.getElementById('apiStatus').textContent = msg;
+    }
+
+    function setStatus(msg) {
+      document.getElementById('statusText').textContent = msg;
+    }
+
+    async function apiGet(action) {
+      const res = await fetch(`${API_BASE}?action=${encodeURIComponent(action)}`);
+      return res.json();
+    }
+
+    async function apiPost(action, payload) {
+      const res = await fetch(`${API_BASE}?action=${encodeURIComponent(action)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload || {})
+      });
+      return res.json();
+    }
+
+    async function reloadData() {
+      setStatus('Loading inventory & lists...');
+      setApiStatus('Contacting API…');
+      try {
+        const [invRes, listRes] = await Promise.all([
+          apiGet('getInventory'),
+          apiGet('getLists')
+        ]);
+
+        if (!invRes.ok) throw new Error(invRes.error || 'Error loading inventory');
+        if (!listRes.ok) throw new Error(listRes.error || 'Error loading lists');
+
+        inventory = invRes.data || [];
+        lists = {
+          categories: listRes.data.categories || [],
+          locations: listRes.data.locations || [],
+          status: listRes.data.status || [],
+          manufacturers: listRes.data.manufacturers || []
+        };
+
+        fillFilterDropdowns();
+        fillFormDropdowns();
+        fillListsTextareas();
+        renderInventory();
+        setStatus(`Loaded ${inventory.length} items.`);
+        setApiStatus('Online');
+      } catch (err) {
+        console.error(err);
+        setStatus('Error: ' + err.message);
+        setApiStatus('Error');
+      }
+    }
+
+    function fillFilterDropdowns() {
+      const catSel = document.getElementById('filterCategory');
+      const statSel = document.getElementById('filterStatus');
+      const locSel = document.getElementById('filterLocation');
+
+      function resetOptions(sel, list) {
+        const value = sel.value;
+        sel.innerHTML = '<option value="">All</option>';
+        (list || []).forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v;
+          opt.textContent = v;
+          sel.appendChild(opt);
+        });
+        if (value) sel.value = value;
+      }
+
+      resetOptions(catSel, lists.categories);
+      resetOptions(statSel, lists.status);
+      resetOptions(locSel, lists.locations);
+    }
+
+    function fillFormDropdowns() {
+      const catSel = document.getElementById('fCategory');
+      const statSel = document.getElementById('fStatus');
+      const locSel = document.getElementById('fLocation');
+      const mfgSel = document.getElementById('fManufacturer');
+
+      function fill(sel, list) {
+        sel.innerHTML = '<option value=""></option>';
+        (list || []).forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v;
+          opt.textContent = v;
+          sel.appendChild(opt);
+        });
+      }
+
+      fill(catSel, lists.categories);
+      fill(statSel, lists.status);
+      fill(locSel, lists.locations);
+      fill(mfgSel, lists.manufacturers);
+    }
+
+    function fillListsTextareas() {
+      document.getElementById('listCategories').value = (lists.categories || []).join('\n');
+      document.getElementById('listManufacturers').value = (lists.manufacturers || []).join('\n');
+      document.getElementById('listLocations').value = (lists.locations || []).join('\n');
+      document.getElementById('listStatus').value = (lists.status || []).join('\n');
+    }
+
+    function resetListsUi() {
+      fillListsTextareas();
+      setStatus('List editor reset to current values.');
+    }
+
+    function onFilterChange() {
+      currentFilters.search = document.getElementById('searchInput').value.trim().toLowerCase();
+      currentFilters.category = document.getElementById('filterCategory').value;
+      currentFilters.status = document.getElementById('filterStatus').value;
+      currentFilters.location = document.getElementById('filterLocation').value;
+      renderInventory();
+    }
+
+    function renderInventory() {
+      const container = document.getElementById('inventoryList');
+      container.innerHTML = '';
+
+      let filtered = inventory.slice();
+
+      if (currentFilters.search) {
+        const q = currentFilters.search;
+        filtered = filtered.filter(item => {
+          const fields = [
+            item['Title'],
+            item['Model'],
+            item['Serial'],
+            item['TP-SKU'],
+            item['Manufacturer']
+          ].join(' ').toLowerCase();
+          return fields.includes(q);
+        });
+      }
+      if (currentFilters.category) {
+        filtered = filtered.filter(i => (i['Category'] || '') === currentFilters.category);
+      }
+      if (currentFilters.status) {
+        filtered = filtered.filter(i => (i['Status'] || '') === currentFilters.status);
+      }
+      if (currentFilters.location) {
+        filtered = filtered.filter(i => (i['Location'] || '') === currentFilters.location);
+      }
+
+      if (filtered.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'panel-sub';
+        empty.textContent = 'No items match your filters.';
+        container.appendChild(empty);
+        return;
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const left = document.createElement('div');
+        const middle = document.createElement('div');
+        const right = document.createElement('div');
+
+        // Left column
+        const title = document.createElement('div');
+        title.className = 'card-main-title';
+        title.textContent = item['Title'] || '(No title)';
+        left.appendChild(title);
+
+        const line1 = document.createElement('div');
+        line1.className = 'card-line';
+        line1.textContent = `${item['Manufacturer'] || ''} ${item['Model'] || ''}`.trim();
+        left.appendChild(line1);
+
+        const line2 = document.createElement('div');
+        line2.className = 'card-line';
+        line2.textContent = `SKU: ${item['TP-SKU'] || '—'} · Serial: ${item['Serial'] || '—'}`;
+        left.appendChild(line2);
+
+        const tags = document.createElement('div');
+        tags.className = 'tag-row';
+
+        const catTag = document.createElement('div');
+        catTag.className = 'tag';
+        catTag.textContent = item['Category'] || 'Uncategorized';
+        tags.appendChild(catTag);
+
+        const locTag = document.createElement('div');
+        locTag.className = 'tag';
+        locTag.textContent = item['Location'] || 'No location';
+        tags.appendChild(locTag);
+
+        const statusTag = document.createElement('div');
+        statusTag.className = 'tag';
+        const statusValue = (item['Status'] || '').toLowerCase();
+        if (statusValue === 'listed') statusTag.classList.add('tag-status-listed');
+        if (statusValue === 'sold') statusTag.classList.add('tag-status-sold');
+        statusTag.textContent = item['Status'] || 'No status';
+        tags.appendChild(statusTag);
+
+        left.appendChild(tags);
+
+        // Middle column
+        const line3 = document.createElement('div');
+        line3.className = 'card-line';
+        line3.textContent = item['Notes'] ? `Notes: ${item['Notes']}` : 'Notes: —';
+        middle.appendChild(line3);
+
+        const line4 = document.createElement('div');
+        line4.className = 'card-line';
+        const ebayUrl = item['eBay Web URL'] || item['eBay Web URL '] || '';
+        if (ebayUrl) {
+          const link = document.createElement('a');
+          link.href = ebayUrl;
+          link.target = '_blank';
+          link.textContent = 'Open eBay listing';
+          link.style.color = '#84ff6e';
+          line4.appendChild(link);
+        } else {
+          line4.textContent = 'No eBay link';
+        }
+        middle.appendChild(line4);
+
+        const line5 = document.createElement('div');
+        line5.className = 'card-line';
+        const price = item['Acquired Price'];
+        const sold = item['Sold'];
+        line5.textContent = `Cost: ${price ? '$' + price : '—'} · Sold: ${sold || 'No'}`;
+        middle.appendChild(line5);
+
+        // Right column (actions)
+        right.style.display = 'flex';
+        right.style.flexDirection = 'column';
+        right.style.alignItems = 'flex-end';
+        right.style.gap = '4px';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-primary';
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => startEditItem(item);
+        right.appendChild(editBtn);
+
+        const img1 = item['Image 1'] || item['Image1'];
+        if (img1) {
+          const imgBtn = document.createElement('button');
+          imgBtn.className = 'btn';
+          imgBtn.textContent = 'View Image 1';
+          imgBtn.onclick = () => window.open(img1, '_blank');
+          right.appendChild(imgBtn);
+        }
+
+        card.appendChild(left);
+        card.appendChild(middle);
+        card.appendChild(right);
+        container.appendChild(card);
+      });
+    }
+
+    function startEditItem(item) {
+      currentEditRowIndex = item.rowIndex || null;
+      document.getElementById('editModeBadge').textContent = 'Edit Mode';
+      document.getElementById('editModeBadge').style.borderColor = '#ffce6e';
+
+      document.getElementById('fTP_SKU').value = item['TP-SKU'] || '';
+      document.getElementById('fTitle').value = item['Title'] || '';
+      document.getElementById('fManufacturer').value = item['Manufacturer'] || '';
+      document.getElementById('fModel').value = item['Model'] || '';
+      document.getElementById('fSerial').value = item['Serial'] || '';
+      document.getElementById('fColor').value = item['Color'] || '';
+      document.getElementById('fCategory').value = item['Category'] || '';
+      document.getElementById('fStatus').value = item['Status'] || '';
+      document.getElementById('fLocation').value = item['Location'] || '';
+      document.getElementById('fCondition').value = item['Condition'] || '';
+      document.getElementById('fEbayID').value = item['eBay Item ID'] || '';
+      document.getElementById('fEbayURL').value = item['eBay Web URL'] || '';
+      document.getElementById('fImage1').value = item['Image 1'] || '';
+      document.getElementById('fImage2').value = item['Image 2'] || '';
+      document.getElementById('fImage3').value = item['Image 3'] || '';
+      document.getElementById('fImage4').value = item['Image 4'] || '';
+      document.getElementById('fDimensions').value = item['Dimensions'] || '';
+      document.getElementById('fWeight').value = item['Weight'] || '';
+      document.getElementById('fAcquiredPrice').value = item['Acquired Price'] || '';
+      document.getElementById('fSold').value = item['Sold'] || '';
+      document.getElementById('fNotes').value = item['Notes'] || '';
+
+      setStatus('Editing existing item (row ' + currentEditRowIndex + ').');
+    }
+
+    function resetForm() {
+      currentEditRowIndex = null;
+      document.getElementById('editModeBadge').textContent = 'Add Mode';
+      document.getElementById('editModeBadge').style.borderColor = 'rgba(255,255,255,0.16)';
+      document.getElementById('itemForm').reset();
+      setStatus('Form cleared, ready for new item.');
+    }
+
+    async function onSubmitItem(evt) {
+      evt.preventDefault();
+
+      const fields = {
+        'TP-SKU': document.getElementById('fTP_SKU').value.trim(),
+        'Title': document.getElementById('fTitle').value.trim(),
+        'Manufacturer': document.getElementById('fManufacturer').value,
+        'Model': document.getElementById('fModel').value.trim(),
+        'Serial': document.getElementById('fSerial').value.trim(),
+        'Color': document.getElementById('fColor').value.trim(),
+        'Category': document.getElementById('fCategory').value,
+        'Status': document.getElementById('fStatus').value,
+        'Location': document.getElementById('fLocation').value,
+        'Condition': document.getElementById('fCondition').value.trim(),
+        'eBay Item ID': document.getElementById('fEbayID').value.trim(),
+        'eBay Web URL': document.getElementById('fEbayURL').value.trim(),
+        'Image 1': document.getElementById('fImage1').value.trim(),
+        'Image 2': document.getElementById('fImage2').value.trim(),
+        'Image 3': document.getElementById('fImage3').value.trim(),
+        'Image 4': document.getElementById('fImage4').value.trim(),
+        'Dimensions': document.getElementById('fDimensions').value.trim(),
+        'Weight': document.getElementById('fWeight').value.trim(),
+        'Acquired Price': document.getElementById('fAcquiredPrice').value.trim(),
+        'Sold': document.getElementById('fSold').value.trim(),
+        'Notes': document.getElementById('fNotes').value.trim()
+      };
+
+      try {
+        if (currentEditRowIndex) {
+          setStatus('Saving changes to existing item...');
+          const res = await apiPost('updateItem', {
+            rowIndex: currentEditRowIndex,
+            fields
+          });
+          if (!res.ok) throw new Error(res.error || 'Failed to update item');
+          setStatus('Item updated. Refreshing list…');
+        } else {
+          setStatus('Adding new item to inventory...');
+          const res = await apiPost('addItem', fields);
+          if (!res.ok) throw new Error(res.error || 'Failed to add item');
+          const sku = res.data && res.data.TP_SKU ? res.data.TP_SKU : 'new item';
+          setStatus('New item added (' + sku + '). Refreshing list…');
+        }
+        await reloadData();
+        resetForm();
+      } catch (err) {
+        console.error(err);
+        setStatus('Error: ' + err.message);
+      }
+    }
+
+    async function saveLists() {
+      const categories = document.getElementById('listCategories').value
+        .split('\n').map(s => s.trim()).filter(Boolean);
+      const manufacturers = document.getElementById('listManufacturers').value
+        .split('\n').map(s => s.trim()).filter(Boolean);
+      const locations = document.getElementById('listLocations').value
+        .split('\n').map(s => s.trim()).filter(Boolean);
+      const status = document.getElementById('listStatus').value
+        .split('\n').map(s => s.trim()).filter(Boolean);
+
+      try {
+        setStatus('Saving dropdown lists to Google Sheet...');
+        const res = await apiPost('saveLists', {
+          lists: {
+            categories,
+            manufacturers,
+            locations,
+            status
+          }
+        });
+        if (!res.ok) throw new Error(res.error || 'Failed to save lists');
+        setStatus('Lists saved. Reloading from API…');
+        await reloadData();
+      } catch (err) {
+        console.error(err);
+        setStatus('Error saving lists: ' + err.message);
+      }
+    }
+
+    window.addEventListener('load', () => {
+      reloadData();
+    });
+  </script>
+</body>
+</html>
