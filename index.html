@@ -114,4 +114,749 @@
 
     /* ---------- PANELS ---------- */
     .panel {
-      background: linear-gradient(135deg
+      background: linear-gradient(135deg,#ffffffee,#f0f1f3cc);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+
+    .panel-title {
+      font-size:14px;
+      text-transform:uppercase;
+      font-weight:700;
+      color:var(--accent);
+      margin-bottom:3px;
+      letter-spacing:0.1em;
+    }
+
+    .panel-sub {
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    /* ---------- FILTERS ---------- */
+    .filters {
+      display:grid;
+      grid-template-columns:1.4fr 1fr 1fr 1fr;
+      gap:8px;
+      margin-bottom:10px;
+    }
+
+    @media(max-width:900px){
+      .filters{ grid-template-columns:1fr 1fr; }
+    }
+
+    .field-label {
+      font-size:11px;
+      color:var(--muted);
+      margin-bottom:3px;
+    }
+
+    input,select,textarea {
+      width:100%;
+      padding:7px 10px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:#ffffffee;
+      box-shadow: inset 0 0 3px rgba(0,0,0,0.1);
+      font-size:12px;
+    }
+
+    input:focus,select:focus,textarea:focus {
+      border-color:var(--accent);
+      box-shadow:0 0 5px rgba(74,110,168,0.3);
+      outline:none;
+    }
+
+    /* ---------- INVENTORY LIST ---------- */
+    .inventory-list {
+      flex:1;
+      overflow-y:auto;
+      padding-right:6px;
+    }
+
+    .card {
+      display:grid;
+      grid-template-columns:2fr 1.4fr auto;
+      gap:8px;
+      padding:10px 12px;
+      margin-bottom:8px;
+      background:#ffffffee;
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.05);
+      font-size:12px;
+    }
+
+    @media(max-width:800px){
+      .card{ grid-template-columns:1fr; }
+    }
+
+    .card-main-title {
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:2px;
+    }
+
+    .tag-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:4px;
+      margin-top:4px;
+    }
+
+    .tag {
+      font-size:10px;
+      border-radius:999px;
+      padding:3px 7px;
+      border:1px solid var(--border);
+      background:#f8f9fa;
+      color:var(--muted);
+    }
+
+    .tag-status-listed { color:var(--accent); border-color:var(--accent); }
+    .tag-status-sold { color:var(--danger); border-color:var(--danger); }
+    .tag-status-hold { color:#e6a200; border-color:#e6a200; }
+
+    /* ---------- BUTTONS ---------- */
+    .btn {
+      border-radius:999px;
+      padding:6px 12px;
+      font-size:12px;
+      border:1px solid var(--border);
+      background:#ffffffdd;
+      cursor:pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color:white;
+      border-color:#2e4a78;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg,#d9534f,#b9403d);
+      color:white;
+      border-color:#9e2f2c;
+    }
+
+    .btn:hover {
+      filter:brightness(1.05);
+    }
+
+    /* ---------- FORM GRID ---------- */
+    .form-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+
+    @media(max-width:800px){
+      .form-grid{ grid-template-columns:1fr; }
+    }
+
+    .section-divider{
+      margin:10px 0;
+      border-top:1px solid var(--border);
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+
+    <!-- ========================== HEADER ========================== -->
+    <header class="nav">
+      <div class="nav-left">
+        <img src="tekpak-logo.png" class="tp-logo" alt="Tek-Pak Logo">
+
+        <div class="nav-title">
+          <div class="nav-title-main">Tek-Pak Inventory</div>
+          <div class="nav-title-sub">Employee Portal · Light Metal Edition</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="status-dot"></div>
+        <span id="apiStatus">Connecting…</span>
+      </div>
+    </header>
+
+    <!-- ========================== MAIN LAYOUT ========================== -->
+    <main class="layout">
+
+      <!-- ====================== LEFT: INVENTORY ====================== -->
+      <section class="panel">
+        <div class="panel-title">Inventory</div>
+        <div class="panel-sub">Browse, search, and edit items.</div>
+
+        <button class="btn btn-primary" onclick="reloadData()">Refresh</button>
+
+        <div class="filters" style="margin-top:10px;">
+          <div>
+            <div class="field-label">Search</div>
+            <input type="text" id="searchInput" placeholder="Title, Model, Serial…" oninput="onFilterChange()">
+          </div>
+
+          <div>
+            <div class="field-label">Category</div>
+            <select id="filterCategory" onchange="onFilterChange()">
+              <option value="">All</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="field-label">Status</div>
+            <select id="filterStatus" onchange="onFilterChange()">
+              <option value="">All</option>
+              <option>Hold</option>
+              <option>Listed</option>
+              <option>Sold</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="field-label">Location</div>
+            <select id="filterLocation" onchange="onFilterChange()">
+              <option value="">All</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="inventoryList" class="inventory-list"></div>
+      </section>
+
+      <!-- ====================== RIGHT: ITEM EDITOR ====================== -->
+      <section class="panel">
+        <div class="panel-title">Item Editor</div>
+        <div class="panel-sub">Add new items or update existing entries.</div>
+
+        <form id="itemForm" onsubmit="onSubmitItem(event)">
+          <div class="form-grid">
+
+            <div>
+              <div class="field-label">TP-SKU (auto if blank)</div>
+              <input type="text" id="fTP_SKU">
+            </div>
+
+            <div>
+              <div class="field-label">Title</div>
+              <input type="text" id="fTitle" required>
+            </div>
+
+            <div>
+              <div class="field-label">Manufacturer</div>
+              <select id="fManufacturer"></select>
+            </div>
+
+            <div>
+              <div class="field-label">Model</div>
+              <input type="text" id="fModel">
+            </div>
+
+            <div>
+              <div class="field-label">Serial</div>
+              <input type="text" id="fSerial">
+            </div>
+
+            <div>
+              <div class="field-label">Color</div>
+              <select id="fColor">
+                <option value="">—</option>
+                <option>Black</option>
+                <option>White</option>
+                <option>Silver</option>
+                <option>Grey</option>
+                <option>Blue</option>
+                <option>Red</option>
+                <option>Green</option>
+                <option>Yellow</option>
+                <option>Gold</option>
+                <option>Purple</option>
+                <option>Orange</option>
+                <option>Pink</option>
+                <option>Brown</option>
+              </select>
+            </div>
+
+            <div>
+              <div class="field-label">Category</div>
+              <select id="fCategory"></select>
+            </div>
+
+            <div>
+              <div class="field-label">Status</div>
+              <select id="fStatus">
+                <option value="">—</option>
+                <option>Hold</option>
+                <option>Listed</option>
+                <option>Sold</option>
+              </select>
+            </div>
+
+            <div>
+              <div class="field-label">Location</div>
+              <select id="fLocation"></select>
+            </div>
+
+            <div>
+              <div class="field-label">Condition</div>
+              <input type="text" id="fCondition">
+            </div>
+
+            <div>
+              <div class="field-label">eBay Item ID</div>
+              <input type="text" id="fEbayID">
+            </div>
+
+            <div>
+              <div class="field-label">eBay URL</div>
+              <input type="text" id="fEbayURL">
+            </div>
+
+            <div><div class="field-label">Image 1</div><input type="text" id="fImage1"></div>
+            <div><div class="field-label">Image 2</div><input type="text" id="fImage2"></div>
+            <div><div class="field-label">Image 3</div><input type="text" id="fImage3"></div>
+            <div><div class="field-label">Image 4</div><input type="text" id="fImage4"></div>
+
+            <div>
+              <div class="field-label">Dimensions</div>
+              <input type="text" id="fDimensions">
+            </div>
+
+            <div>
+              <div class="field-label">Weight</div>
+              <input type="text" id="fWeight">
+            </div>
+
+            <div>
+              <div class="field-label">Acquired Price</div>
+              <input type="number" step="0.01" id="fAcquiredPrice">
+            </div>
+
+            <div>
+              <div class="field-label">Sold</div>
+              <input type="text" id="fSold">
+            </div>
+
+          </div>
+
+          <div class="section-divider"></div>
+
+          <div>
+            <div class="field-label">Notes</div>
+            <textarea id="fNotes"></textarea>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:10px;">
+            <button type="button" class="btn" onclick="resetForm()">Clear</button>
+            <button type="submit" class="btn btn-primary">Save Item</button>
+          </div>
+        </form>
+
+        <div class="section-divider"></div>
+
+        <!-- LIST MANAGER -->
+        <div>
+          <div class="panel-title">List Manager</div>
+          <div class="panel-sub">Update dropdown lists (categories, manufacturers, etc).</div>
+
+          <div class="form-grid">
+            <div>
+              <div class="field-label">Categories</div>
+              <textarea id="listCategories"></textarea>
+            </div>
+
+            <div>
+              <div class="field-label">Manufacturers</div>
+              <textarea id="listManufacturers"></textarea>
+            </div>
+
+            <div>
+              <div class="field-label">Locations</div>
+              <textarea id="listLocations"></textarea>
+            </div>
+
+            <div>
+              <div class="field-label">Status</div>
+              <textarea id="listStatus"></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:10px;">
+            <button class="btn btn-danger" onclick="resetListsUi()">Reset</button>
+            <button class="btn btn-primary" onclick="saveLists()">Save Lists</button>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;font-size:12px;color:var(--muted);">
+          <span id="statusText">Ready.</span>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- ========================== JAVASCRIPT ========================== -->
+  <script>
+    // Your live Apps Script URL:
+    const API_BASE = "https://script.google.com/macros/s/AKfycbxMFRWzaYn0lstQDjKgTkZFUnqWrg_FI1XGwUPwKnrW49zEw6S5cwKmoabviWP5RcBhjQ/exec";
+
+    let inventory = [];
+    let lists = { categories: [], locations: [], status: [], manufacturers: [] };
+    let currentFilters = { search: "", category: "", status: "", location: "" };
+    let currentEditRowIndex = null;
+
+    function setApiStatus(msg){ document.getElementById("apiStatus").textContent = msg; }
+    function setStatus(msg){ document.getElementById("statusText").textContent = msg; }
+
+    async function apiGet(action){
+      const res = await fetch(`${API_BASE}?action=${encodeURIComponent(action)}`);
+      return res.json();
+    }
+
+    async function apiPost(action, payload){
+      const res = await fetch(`${API_BASE}?action=${encodeURIComponent(action)}`, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload || {})
+      });
+      return res.json();
+    }
+
+    async function reloadData(){
+      try {
+        setApiStatus("Loading…");
+        setStatus("Refreshing inventory…");
+
+        const [invRes, listRes] = await Promise.all([
+          apiGet("getInventory"),
+          apiGet("getLists")
+        ]);
+
+        if (!invRes.ok) throw new Error(invRes.error || "Error loading inventory");
+        if (!listRes.ok) throw new Error(listRes.error || "Error loading lists");
+
+        inventory = invRes.data || [];
+        lists = listRes.data || lists;
+
+        fillFormDropdowns();
+        fillFilterDropdowns();
+        fillListsTextareas();
+        renderInventory();
+
+        setApiStatus("Online");
+        setStatus(`Loaded ${inventory.length} items.`);
+      } catch (err) {
+        console.error(err);
+        setApiStatus("Error");
+        setStatus("Error: " + err.message);
+      }
+    }
+
+    function fillFormDropdowns(){
+      const fill = (id, arr) => {
+        const s = document.getElementById(id);
+        s.innerHTML = `<option value=""></option>`;
+        (arr || []).forEach(v => s.innerHTML += `<option>${v}</option>`);
+      };
+      fill("fManufacturer", lists.manufacturers);
+      fill("fCategory", lists.categories);
+      fill("fLocation", lists.locations);
+      // Status + Color are hard-coded in HTML
+    }
+
+    function fillFilterDropdowns(){
+      const fill = (id, arr) => {
+        const s = document.getElementById(id);
+        const cur = s.value;
+        s.innerHTML = `<option value="">All</option>`;
+        (arr || []).forEach(v => s.innerHTML += `<option>${v}</option>`);
+        if (cur) s.value = cur;
+      };
+      fill("filterCategory", lists.categories);
+      fill("filterLocation", lists.locations);
+      // Status filter has hard-coded options Hold/Listed/Sold
+    }
+
+    function fillListsTextareas(){
+      document.getElementById("listCategories").value = (lists.categories || []).join("\n");
+      document.getElementById("listManufacturers").value = (lists.manufacturers || []).join("\n");
+      document.getElementById("listLocations").value = (lists.locations || []).join("\n");
+      document.getElementById("listStatus").value = (lists.status || []).join("\n");
+    }
+
+    function resetListsUi(){
+      fillListsTextareas();
+      setStatus("List editor reset.");
+    }
+
+    function onFilterChange(){
+      currentFilters.search = document.getElementById("searchInput").value.toLowerCase();
+      currentFilters.category = document.getElementById("filterCategory").value;
+      currentFilters.status = document.getElementById("filterStatus").value;
+      currentFilters.location = document.getElementById("filterLocation").value;
+      renderInventory();
+    }
+
+    function renderInventory(){
+      const box = document.getElementById("inventoryList");
+      box.innerHTML = "";
+
+      let result = inventory.slice();
+
+      if (currentFilters.search) {
+        const q = currentFilters.search;
+        result = result.filter(i => (
+          (i["Title"] || "") +
+          (i["Model"] || "") +
+          (i["Serial"] || "") +
+          (i["TP-SKU"] || "")
+        ).toLowerCase().includes(q));
+      }
+
+      if (currentFilters.category) {
+        result = result.filter(i => i["Category"] === currentFilters.category);
+      }
+
+      if (currentFilters.status) {
+        result = result.filter(i => i["Status"] === currentFilters.status);
+      }
+
+      if (currentFilters.location) {
+        result = result.filter(i => i["Location"] === currentFilters.location);
+      }
+
+      if (!result.length) {
+        box.innerHTML = `<div style="padding:10px;color:var(--muted);">No items match your filters.</div>`;
+        return;
+      }
+
+      result.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const left = document.createElement("div");
+        const middle = document.createElement("div");
+        const right = document.createElement("div");
+
+        // Left section
+        const title = document.createElement("div");
+        title.className = "card-main-title";
+        title.textContent = item["Title"] || "(No title)";
+        left.appendChild(title);
+
+        const mm = document.createElement("div");
+        mm.textContent = `${item["Manufacturer"] || ""} ${item["Model"] || ""}`.trim();
+        left.appendChild(mm);
+
+        const skuLine = document.createElement("div");
+        skuLine.style.color = "var(--muted)";
+        skuLine.style.fontSize = "11px";
+        skuLine.textContent = `SKU: ${item["TP-SKU"] || "—"} · Serial: ${item["Serial"] || "—"}`;
+        left.appendChild(skuLine);
+
+        const tagRow = document.createElement("div");
+        tagRow.className = "tag-row";
+
+        const tagCat = document.createElement("span");
+        tagCat.className = "tag";
+        tagCat.textContent = item["Category"] || "Uncategorized";
+        tagRow.appendChild(tagCat);
+
+        const tagLoc = document.createElement("span");
+        tagLoc.className = "tag";
+        tagLoc.textContent = item["Location"] || "No location";
+        tagRow.appendChild(tagLoc);
+
+        const tagStatus = document.createElement("span");
+        tagStatus.className = "tag";
+        const statusVal = (item["Status"] || "").toLowerCase();
+        if (statusVal === "listed") tagStatus.classList.add("tag-status-listed");
+        if (statusVal === "sold") tagStatus.classList.add("tag-status-sold");
+        if (statusVal === "hold" || statusVal === "on hold") tagStatus.classList.add("tag-status-hold");
+        tagStatus.textContent = item["Status"] || "Status";
+        tagRow.appendChild(tagStatus);
+
+        left.appendChild(tagRow);
+
+        // Middle section
+        const notes = document.createElement("div");
+        notes.style.color = "var(--muted)";
+        notes.style.fontSize = "11px";
+        notes.textContent = item["Notes"] || "No notes";
+        middle.appendChild(notes);
+
+        const ebayLine = document.createElement("div");
+        ebayLine.style.marginTop = "4px";
+        if (item["eBay Web URL"]) {
+          const link = document.createElement("a");
+          link.href = item["eBay Web URL"];
+          link.target = "_blank";
+          link.textContent = "Open eBay";
+          link.style.color = "var(--accent)";
+          ebayLine.appendChild(link);
+        } else {
+          ebayLine.textContent = "No eBay link";
+        }
+        middle.appendChild(ebayLine);
+
+        const priceLine = document.createElement("div");
+        priceLine.style.color = "var(--muted)";
+        priceLine.style.marginTop = "4px";
+        priceLine.style.fontSize = "11px";
+        priceLine.textContent =
+          `Cost: ${item["Acquired Price"] ? "$" + item["Acquired Price"] : "—"} · Sold: ${item["Sold"] || "No"}`;
+        middle.appendChild(priceLine);
+
+        // Right section
+        right.style.display = "flex";
+        right.style.flexDirection = "column";
+        right.style.gap = "6px";
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn btn-primary";
+        editBtn.textContent = "Edit";
+        editBtn.onclick = () => startEditItem(item);
+        right.appendChild(editBtn);
+
+        if (item["Image 1"]) {
+          const imgBtn = document.createElement("button");
+          imgBtn.className = "btn";
+          imgBtn.textContent = "Image";
+          imgBtn.onclick = () => window.open(item["Image 1"], "_blank");
+          right.appendChild(imgBtn);
+        }
+
+        card.appendChild(left);
+        card.appendChild(middle);
+        card.appendChild(right);
+
+        box.appendChild(card);
+      });
+    }
+
+    function startEditItem(item){
+      currentEditRowIndex = item.rowIndex;
+      setStatus("Editing item…");
+
+      const fill = (id, v) => document.getElementById(id).value = v || "";
+
+      fill("fTP_SKU", item["TP-SKU"]);
+      fill("fTitle", item["Title"]);
+      fill("fManufacturer", item["Manufacturer"]);
+      fill("fModel", item["Model"]);
+      fill("fSerial", item["Serial"]);
+      fill("fColor", item["Color"]);
+      fill("fCategory", item["Category"]);
+      fill("fStatus", item["Status"]);
+      fill("fLocation", item["Location"]);
+      fill("fCondition", item["Condition"]);
+      fill("fEbayID", item["eBay Item ID"]);
+      fill("fEbayURL", item["eBay Web URL"]);
+      fill("fImage1", item["Image 1"]);
+      fill("fImage2", item["Image 2"]);
+      fill("fImage3", item["Image 3"]);
+      fill("fImage4", item["Image 4"]);
+      fill("fDimensions", item["Dimensions"]);
+      fill("fWeight", item["Weight"]);
+      fill("fAcquiredPrice", item["Acquired Price"]);
+      fill("fSold", item["Sold"]);
+      fill("fNotes", item["Notes"]);
+    }
+
+    function resetForm(){
+      currentEditRowIndex = null;
+      document.getElementById("itemForm").reset();
+      setStatus("Cleared.");
+    }
+
+    async function onSubmitItem(e){
+      e.preventDefault();
+
+      const val = id => document.getElementById(id).value.trim();
+
+      const fields = {
+        "TP-SKU": val("fTP_SKU"),
+        "Title": val("fTitle"),
+        "Manufacturer": val("fManufacturer"),
+        "Model": val("fModel"),
+        "Serial": val("fSerial"),
+        "Color": val("fColor"),
+        "Category": val("fCategory"),
+        "Status": val("fStatus"),
+        "Location": val("fLocation"),
+        "Condition": val("fCondition"),
+        "eBay Item ID": val("fEbayID"),
+        "eBay Web URL": val("fEbayURL"),
+        "Image 1": val("fImage1"),
+        "Image 2": val("fImage2"),
+        "Image 3": val("fImage3"),
+        "Image 4": val("fImage4"),
+        "Dimensions": val("fDimensions"),
+        "Weight": val("fWeight"),
+        "Acquired Price": val("fAcquiredPrice"),
+        "Sold": val("fSold"),
+        "Notes": val("fNotes")
+      };
+
+      // Auto-generate TP-SKU if blank
+      if (!fields["TP-SKU"]) {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let r = "";
+        for (let i = 0; i < 9; i++) r += chars[Math.floor(Math.random()*chars.length)];
+        fields["TP-SKU"] = "TP-" + r;
+      }
+
+      try {
+        if (currentEditRowIndex) {
+          setStatus("Saving changes…");
+          const res = await apiPost("updateItem", {
+            rowIndex: currentEditRowIndex,
+            fields
+          });
+          if (!res.ok) throw new Error(res.error || "Failed to update item");
+        } else {
+          setStatus("Adding new item…");
+          const res = await apiPost("addItem", fields);
+          if (!res.ok) throw new Error(res.error || "Failed to add item");
+        }
+        resetForm();
+        reloadData();
+      } catch (err) {
+        console.error(err);
+        setStatus("Error: " + err.message);
+      }
+    }
+
+    async function saveLists(){
+      const payload = {
+        lists: {
+          categories: document.getElementById("listCategories").value.split("\n").map(s => s.trim()).filter(Boolean),
+          manufacturers: document.getElementById("listManufacturers").value.split("\n").map(s => s.trim()).filter(Boolean),
+          locations: document.getElementById("listLocations").value.split("\n").map(s => s.trim()).filter(Boolean),
+          status: document.getElementById("listStatus").value.split("\n").map(s => s.trim()).filter(Boolean)
+        }
+      };
+
+      try {
+        setStatus("Saving lists…");
+        const res = await apiPost("saveLists", payload);
+        if (!res.ok) throw new Error(res.error || "Failed to save lists");
+        reloadData();
+      } catch (err) {
+        console.error(err);
+        setStatus("Error: " + err.message);
+      }
+    }
+
+    window.addEventListener("load", reloadData);
+  </script>
+</body>
+</html>
