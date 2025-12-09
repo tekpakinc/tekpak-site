@@ -4,28 +4,33 @@
   <meta charset="UTF-8">
   <title>Tek-Pak Inventory Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
+    /* ================================
+       LIGHT MODE + BRUSHED METAL THEME
+       ================================ */
+
     :root {
-      --bg: #05060a;
-      --bg-panel: #11131a;
-      --bg-panel-alt: #181b22;
-      --accent: #d4ff3f;
-      --accent-soft: #90a83a;
-      --text: #f5f5f5;
-      --muted: #a0a4af;
-      --border: #272b34;
-      --danger: #ff4b5c;
+      --bg: #e6e7ea; 
+      --bg-panel: #f4f5f7;
+      --bg-panel-alt: #ffffff;
+      --metal: #c8cdd2;
+      --accent: #4a6ea8; 
+      --accent-soft: #7fa0d6;
+      --text: #111317;
+      --muted: #4d535a;
+      --border: #b9bcc0;
+      --danger: #d9534f;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       background:
-        radial-gradient(circle at top, #232836 0, #05060a 55%);
+        linear-gradient(135deg, rgba(255,255,255,0.8), rgba(215,218,225,0.85)),
+        url("https://www.transparenttextures.com/patterns/brushed-alum.png");
       color: var(--text);
       min-height: 100vh;
       display: flex;
@@ -42,36 +47,30 @@
       gap: 12px;
     }
 
+    /* ---------- NAV BAR ---------- */
     .nav {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 10px 14px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.7));
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(14px);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+      align-items: center;
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: linear-gradient(120deg,#ffffffdd,#eceef0dd);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      backdrop-filter: blur(8px);
     }
 
     .nav-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
     }
 
-    .logo-pill {
-      width: 32px;
-      height: 32px;
-      border-radius: 12px;
-      background: radial-gradient(circle at top left, var(--accent), #3a430d);
-      box-shadow: 0 0 18px rgba(212,255,63,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 16px;
-      color: #05060a;
+    .tp-logo {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
     }
 
     .nav-title {
@@ -80,358 +79,247 @@
     }
 
     .nav-title-main {
-      font-size: 14px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--accent);
     }
 
     .nav-title-sub {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 16px rgba(212,255,63,0.5);
-    }
-
-    .pill {
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.16);
-      padding: 4px 8px;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.8));
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 12px;
-      flex: 1;
-      min-height: 0;
-    }
-
-    @media (max-width: 960px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .panel {
-      background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.7));
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(12px);
-      box-shadow:
-        0 18px 40px rgba(0,0,0,0.75),
-        inset 0 0 40px rgba(255,255,255,0.02);
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 8px;
-      gap: 8px;
-    }
-
-    .panel-title {
       font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--accent);
-    }
-
-    .panel-sub {
-      font-size: 11px;
       color: var(--muted);
-    }
-
-    .filters {
-      display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    @media (max-width: 960px) {
-      .filters {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    .field-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      margin-bottom: 3px;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 6px 8px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.75));
-      color: var(--text);
-      font-size: 11px;
-      outline: none;
-    }
-
-    textarea {
-      min-height: 54px;
-      resize: vertical;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      border-color: var(--accent-soft);
-      box-shadow: 0 0 0 1px rgba(212,255,63,0.25);
-    }
-
-    .inventory-list {
-      flex: 1;
-      overflow-y: auto;
-      margin-top: 4px;
-      padding-right: 4px;
-    }
-
-    .inventory-list::-webkit-scrollbar {
-      width: 6px;
-    }
-    .inventory-list::-webkit-scrollbar-track {
-      background: #101218;
-      border-radius: 999px;
-    }
-    .inventory-list::-webkit-scrollbar-thumb {
-      background: #363b46;
-      border-radius: 999px;
-    }
-
-    .card {
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: radial-gradient(circle at top left, rgba(255,255,255,0.04), rgba(0,0,0,0.9));
-      padding: 8px 9px;
-      margin-bottom: 6px;
-      display: grid;
-      grid-template-columns: 2fr 1.4fr auto;
-      gap: 8px;
-      align-items: center;
-      font-size: 11px;
-    }
-
-    @media (max-width: 800px) {
-      .card {
-        grid-template-columns: 1fr;
-        align-items: flex-start;
-      }
-    }
-
-    .card-main-title {
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-
-    .card-line {
-      color: var(--muted);
-      font-size: 10px;
-    }
-
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
       margin-top: 2px;
     }
 
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #3bb44b;
+      box-shadow: 0 0 6px rgba(59,180,75,0.5);
+      margin-right: 5px;
+    }
+
+    /* ---------- LAYOUT ---------- */
+    .layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    @media(max-width: 960px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    /* ---------- PANELS ---------- */
+    .panel {
+      background: linear-gradient(135deg,#ffffffee,#f0f1f3cc);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+
+    .panel-title {
+      font-size:14px;
+      text-transform:uppercase;
+      font-weight:700;
+      color:var(--accent);
+      margin-bottom:3px;
+      letter-spacing:0.1em;
+    }
+
+    .panel-sub {
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    /* ---------- FILTERS ---------- */
+    .filters {
+      display:grid;
+      grid-template-columns:1.4fr 1fr 1fr 1fr;
+      gap:8px;
+      margin-bottom:10px;
+    }
+
+    @media(max-width:900px){
+      .filters{ grid-template-columns:1fr 1fr; }
+    }
+
+    .field-label {
+      font-size:11px;
+      color:var(--muted);
+      margin-bottom:3px;
+    }
+
+    input,select,textarea {
+      width:100%;
+      padding:7px 10px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:#ffffffee;
+      box-shadow: inset 0 0 3px rgba(0,0,0,0.1);
+      font-size:12px;
+    }
+
+    input:focus,select:focus,textarea:focus {
+      border-color:var(--accent);
+      box-shadow:0 0 5px rgba(74,110,168,0.3);
+      outline:none;
+    }
+
+    /* ---------- INVENTORY LIST ---------- */
+    .inventory-list {
+      flex:1;
+      overflow-y:auto;
+      padding-right:6px;
+    }
+
+    .card {
+      display:grid;
+      grid-template-columns:2fr 1.4fr auto;
+      gap:8px;
+      padding:10px 12px;
+      margin-bottom:8px;
+      background:#ffffffee;
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    @media(max-width:800px){
+      .card{ grid-template-columns:1fr; }
+    }
+
+    .card-main-title {
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:2px;
+    }
+
     .tag {
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.11em;
-      border-radius: 999px;
-      padding: 3px 6px;
-      border: 1px solid rgba(255,255,255,0.14);
-      color: var(--muted);
+      font-size:10px;
+      border-radius:999px;
+      padding:3px 7px;
+      border:1px solid var(--border);
+      background:#f8f9fa;
+      color:var(--muted);
+      margin-right:4px;
     }
 
-    .tag-status-listed {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+    .tag-status-listed { color:var(--accent); border-color:var(--accent); }
+    .tag-status-sold { color:var(--danger); border-color:var(--danger); }
+    .tag-status-hold { color:#e6a200; border-color:#e6a200; }
 
-    .tag-status-sold {
-      border-color: var(--danger);
-      color: #ffd6dc;
-    }
-
+    /* ---------- BUTTONS ---------- */
     .btn {
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.16);
-      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.85));
-      color: var(--text);
-      padding: 6px 10px;
-      font-size: 11px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      white-space: nowrap;
-    }
-
-    .btn:hover {
-      filter: brightness(1.07);
-      box-shadow: 0 0 14px rgba(212,255,63,0.25);
+      border-radius:999px;
+      padding:6px 12px;
+      font-size:12px;
+      border:1px solid var(--border);
+      background:#ffffffdd;
+      cursor:pointer;
     }
 
     .btn-primary {
-      background: radial-gradient(circle at top left, rgba(212,255,63,0.18), rgba(0,0,0,0.9));
-      border-color: rgba(212,255,63,0.5);
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color:white;
+      border-color:#2e4a78;
     }
 
     .btn-danger {
-      border-color: rgba(255,75,92,0.6);
-      background: radial-gradient(circle at top left, rgba(255,75,92,0.2), rgba(0,0,0,0.9));
+      background: linear-gradient(135deg,#d9534f,#b9403d);
+      color:white;
+      border-color:#9e2f2c;
     }
 
+    .btn:hover {
+      filter:brightness(1.05);
+    }
+
+    /* ---------- FORM GRID ---------- */
     .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
     }
 
-    @media (max-width: 800px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
+    @media(max-width:800px){
+      .form-grid{ grid-template-columns:1fr; }
     }
 
-    .section-divider {
-      margin: 6px 0;
-      border-top: 1px solid rgba(255,255,255,0.08);
+    .section-divider{
+      margin:10px 0;
+      border-top:1px solid var(--border);
     }
 
-    .section-caption {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
-    .stack-vert {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .btn-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      margin-top: 4px;
-    }
-
-    .btn-row-right {
-      display: flex;
-      gap: 6px;
-    }
-
-    .status-bar {
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .small-input {
-      font-size: 10px;
-      padding: 4px 6px;
-    }
-
-    .list-editor {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-
-    @media (max-width: 800px) {
-      .list-editor {
-        grid-template-columns: 1fr;
-      }
-    }
   </style>
 </head>
+
 <body>
   <div class="shell">
+
+    <!-- ========================================================= -->
+    <!--              BRANDED HEADER WITH LOGO                     -->
+    <!-- ========================================================= -->
     <header class="nav">
       <div class="nav-left">
-        <div class="logo-pill">TP</div>
+        <img src="tekpak-logo.png" class="tp-logo" alt="Tek-Pak Logo">
+
         <div class="nav-title">
           <div class="nav-title-main">Tek-Pak Inventory</div>
-          <div class="nav-title-sub">Luxury Warehouse Employee Portal</div>
+          <div class="nav-title-sub">Employee Portal · Light Metal Edition</div>
         </div>
       </div>
-      <div class="nav-right">
+
+      <div class="nav-right" style="display:flex;align-items:center;gap:6px;">
         <div class="status-dot"></div>
         <span id="apiStatus">Connecting…</span>
-        <div class="pill">Everyone: Full Access</div>
       </div>
     </header>
 
+    <!-- ========================================================= -->
+    <!--                       MAIN LAYOUT                         -->
+    <!-- ========================================================= -->
     <main class="layout">
-      <!-- LEFT: INVENTORY VIEW -->
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">Inventory</div>
-            <div class="panel-sub">Search, filter, and edit any item in the system.</div>
-          </div>
-          <button class="btn btn-primary" onclick="reloadData()">⟳ Refresh</button>
-        </div>
 
-        <div class="filters">
+      <!-- ========================================================= -->
+      <!--                      INVENTORY PANEL                      -->
+      <!-- ========================================================= -->
+      <section class="panel">
+        <div class="panel-title">Inventory</div>
+        <div class="panel-sub">Browse, search, and edit items.</div>
+
+        <button class="btn btn-primary" onclick="reloadData()">Refresh</button>
+
+        <div class="filters" style="margin-top:10px;">
           <div>
             <div class="field-label">Search</div>
-            <input type="text" id="searchInput" placeholder="Title, Model, Serial, SKU…" oninput="onFilterChange()">
+            <input type="text" id="searchInput" placeholder="Title, Model, Serial…" oninput="onFilterChange()">
           </div>
+
           <div>
             <div class="field-label">Category</div>
             <select id="filterCategory" onchange="onFilterChange()">
               <option value="">All</option>
             </select>
           </div>
+
           <div>
             <div class="field-label">Status</div>
             <select id="filterStatus" onchange="onFilterChange()">
               <option value="">All</option>
+              <option>Hold</option>
+              <option>Listed</option>
+              <option>Sold</option>
             </select>
           </div>
+
           <div>
             <div class="field-label">Location</div>
             <select id="filterLocation" onchange="onFilterChange()">
@@ -440,559 +328,479 @@
           </div>
         </div>
 
-        <div id="inventoryList" class="inventory-list">
-          <!-- Cards injected here -->
-        </div>
+        <div id="inventoryList" class="inventory-list"></div>
       </section>
 
-      <!-- RIGHT: FORMS / LIST EDITOR -->
+      <!-- ========================================================= -->
+      <!--                      ITEM EDITOR PANEL                    -->
+      <!-- ========================================================= -->
       <section class="panel">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">Item Editor</div>
-            <div class="panel-sub">Add new items or update existing entries.</div>
-          </div>
-          <span id="editModeBadge" class="pill">Add Mode</span>
-        </div>
+        <div class="panel-title">Item Editor</div>
+        <div class="panel-sub">Add new items or update existing entries.</div">
 
         <form id="itemForm" onsubmit="onSubmitItem(event)">
           <div class="form-grid">
+
             <div>
               <div class="field-label">TP-SKU (auto if blank)</div>
               <input type="text" id="fTP_SKU">
             </div>
+
             <div>
               <div class="field-label">Title</div>
               <input type="text" id="fTitle" required>
             </div>
+
             <div>
               <div class="field-label">Manufacturer</div>
               <select id="fManufacturer"></select>
             </div>
+
             <div>
               <div class="field-label">Model</div>
               <input type="text" id="fModel">
             </div>
+
             <div>
               <div class="field-label">Serial</div>
               <input type="text" id="fSerial">
             </div>
+
             <div>
               <div class="field-label">Color</div>
-              <input type="text" id="fColor">
+              <select id="fColor">
+                <option value="">—</option>
+                <option>Black</option>
+                <option>White</option>
+                <option>Silver</option>
+                <option>Grey</option>
+                <option>Blue</option>
+                <option>Red</option>
+                <option>Green</option>
+                <option>Yellow</option>
+                <option>Gold</option>
+                <option>Purple</option>
+                <option>Orange</option>
+                <option>Pink</option>
+                <option>Brown</option>
+              </select>
             </div>
+
             <div>
               <div class="field-label">Category</div>
               <select id="fCategory"></select>
             </div>
+
             <div>
               <div class="field-label">Status</div>
-              <select id="fStatus"></select>
+              <select id="fStatus">
+                <option value="">—</option>
+                <option>Hold</option>
+                <option>Listed</option>
+                <option>Sold</option>
+              </select>
             </div>
+
             <div>
               <div class="field-label">Location</div>
               <select id="fLocation"></select>
             </div>
+
             <div>
               <div class="field-label">Condition</div>
               <input type="text" id="fCondition">
             </div>
+
             <div>
               <div class="field-label">eBay Item ID</div>
               <input type="text" id="fEbayID">
             </div>
+
             <div>
               <div class="field-label">eBay URL</div>
               <input type="text" id="fEbayURL">
             </div>
-            <div>
-              <div class="field-label">Image 1 URL</div>
-              <input type="text" id="fImage1">
-            </div>
-            <div>
-              <div class="field-label">Image 2 URL</div>
-              <input type="text" id="fImage2">
-            </div>
-            <div>
-              <div class="field-label">Image 3 URL</div>
-              <input type="text" id="fImage3">
-            </div>
-            <div>
-              <div class="field-label">Image 4 URL</div>
-              <input type="text" id="fImage4">
-            </div>
+
+            <div><div class="field-label">Image 1</div><input type="text" id="fImage1"></div>
+            <div><div class="field-label">Image 2</div><input type="text" id="fImage2"></div>
+            <div><div class="field-label">Image 3</div><input type="text" id="fImage3"></div>
+            <div><div class="field-label">Image 4</div><input type="text" id="fImage4"></div>
+
             <div>
               <div class="field-label">Dimensions</div>
               <input type="text" id="fDimensions">
             </div>
+
             <div>
               <div class="field-label">Weight</div>
-              <input type="text" id="fWeight" class="small-input">
+              <input type="text" id="fWeight">
             </div>
+
             <div>
               <div class="field-label">Acquired Price</div>
-              <input type="number" step="0.01" id="fAcquiredPrice" class="small-input">
+              <input type="number" step="0.01" id="fAcquiredPrice">
             </div>
+
             <div>
-              <div class="field-label">Sold (Y/N or details)</div>
+              <div class="field-label">Sold</div>
               <input type="text" id="fSold">
             </div>
-          </div>
+
+          </div><!-- form grid end -->
 
           <div class="section-divider"></div>
 
-          <div class="stack-vert">
+          <div>
             <div class="field-label">Notes</div>
             <textarea id="fNotes"></textarea>
           </div>
 
-          <div class="btn-row">
-            <button type="button" class="btn" onclick="resetForm()">Clear / New</button>
-            <div class="btn-row-right">
-              <button type="submit" class="btn btn-primary">💾 Save Item</button>
-            </div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px;">
+            <button type="button" class="btn" onclick="resetForm()">Clear</button>
+            <button type="submit" class="btn btn-primary">Save Item</button>
           </div>
+
         </form>
 
-        <div class="section-divider" style="margin-top:8px;"></div>
+        <div class="section-divider"></div>
 
+        <!-- LIST MANAGER -->
         <div>
-          <div class="section-caption">List Manager (Categories, Locations, etc.)</div>
-          <div class="panel-sub" style="margin-bottom:4px;">Edit dropdown lists directly. This updates the Google Sheet and all dropdowns.</div>
-          <div class="list-editor">
+          <div class="panel-title">List Manager</div>
+          <div class="panel-sub">Update dropdown lists (categories, manufacturers, etc).</div>
+
+          <div class="form-grid">
             <div>
-              <div class="field-label">Categories (one per line)</div>
+              <div class="field-label">Categories</div>
               <textarea id="listCategories"></textarea>
             </div>
+
             <div>
-              <div class="field-label">Manufacturers (one per line)</div>
+              <div class="field-label">Manufacturers</div>
               <textarea id="listManufacturers"></textarea>
             </div>
+
             <div>
-              <div class="field-label">Locations (one per line)</div>
+              <div class="field-label">Locations</div>
               <textarea id="listLocations"></textarea>
             </div>
+
             <div>
-              <div class="field-label">Status (one per line)</div>
+              <div class="field-label">Status</div>
               <textarea id="listStatus"></textarea>
             </div>
           </div>
-          <div class="btn-row">
-            <span></span>
-            <div class="btn-row-right">
-              <button class="btn btn-danger" onclick="resetListsUi()">Reset UI</button>
-              <button class="btn btn-primary" onclick="saveLists()">Save Lists</button>
-            </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:10px;">
+            <button class="btn btn-danger" onclick="resetListsUi()">Reset</button>
+            <button class="btn btn-primary" onclick="saveLists()">Save Lists</button>
           </div>
+
         </div>
 
-        <div class="status-bar">
+        <div style="margin-top:10px;font-size:12px;color:var(--muted);">
           <span id="statusText">Ready.</span>
-          <span style="opacity:0.8;">GitHub Pages · Tek-Pak Portal</span>
         </div>
+
       </section>
     </main>
   </div>
 
+  <!-- ========================================================= -->
+  <!--                      JAVASCRIPT LOGIC                      -->
+  <!-- ========================================================= -->
   <script>
-    // 🔧 SET THIS TO YOUR WEB APP URL
-    const API_BASE = 'https://script.google.com/macros/s/YOUR_WEB_APP_ID_HERE/exec';
+    /* ===============================
+       SET YOUR API URL HERE
+    =============================== */
+    const API_BASE = "https://script.google.com/macros/s/YOUR_DEPLOYMENT/exec";
 
-    let inventory = [];
-    let lists = {
-      categories: [],
-      locations: [],
-      status: [],
-      manufacturers: []
-    };
-    let currentFilters = {
-      search: '',
-      category: '',
-      status: '',
-      location: ''
-    };
-    let currentEditRowIndex = null;
 
-    function setApiStatus(msg) {
-      document.getElementById('apiStatus').textContent = msg;
+    let inventory=[];
+    let lists={categories:[],locations:[],status:[],manufacturers:[]};
+    let currentFilters={search:"",category:"",status:"",location:""};
+    let currentEditRowIndex=null;
+
+    function setApiStatus(m){document.getElementById("apiStatus").textContent=m;}
+    function setStatus(m){document.getElementById("statusText").textContent=m;}
+
+    async function apiGet(action){
+      const r=await fetch(`${API_BASE}?action=${action}`);
+      return r.json();
     }
 
-    function setStatus(msg) {
-      document.getElementById('statusText').textContent = msg;
-    }
-
-    async function apiGet(action) {
-      const res = await fetch(`${API_BASE}?action=${encodeURIComponent(action)}`);
-      return res.json();
-    }
-
-    async function apiPost(action, payload) {
-      const res = await fetch(`${API_BASE}?action=${encodeURIComponent(action)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload || {})
+    async function apiPost(action,data){
+      const r=await fetch(`${API_BASE}?action=${action}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(data||{})
       });
-      return res.json();
+      return r.json();
     }
 
-    async function reloadData() {
-      setStatus('Loading inventory & lists...');
-      setApiStatus('Contacting API…');
-      try {
-        const [invRes, listRes] = await Promise.all([
-          apiGet('getInventory'),
-          apiGet('getLists')
-        ]);
+    /* ===============================
+       LOAD DATA
+    =============================== */
+    async function reloadData(){
+      setApiStatus("Loading…");
+      setStatus("Refreshing inventory…");
 
-        if (!invRes.ok) throw new Error(invRes.error || 'Error loading inventory');
-        if (!listRes.ok) throw new Error(listRes.error || 'Error loading lists');
+      const [inv, lst] = await Promise.all([
+        apiGet("getInventory"),
+        apiGet("getLists")
+      ]);
 
-        inventory = invRes.data || [];
-        lists = {
-          categories: listRes.data.categories || [],
-          locations: listRes.data.locations || [],
-          status: listRes.data.status || [],
-          manufacturers: listRes.data.manufacturers || []
-        };
+      inventory = inv.ok ? inv.data : [];
+      lists = lst.ok ? lst.data : lists;
 
-        fillFilterDropdowns();
-        fillFormDropdowns();
-        fillListsTextareas();
-        renderInventory();
-        setStatus(`Loaded ${inventory.length} items.`);
-        setApiStatus('Online');
-      } catch (err) {
-        console.error(err);
-        setStatus('Error: ' + err.message);
-        setApiStatus('Error');
-      }
-    }
-
-    function fillFilterDropdowns() {
-      const catSel = document.getElementById('filterCategory');
-      const statSel = document.getElementById('filterStatus');
-      const locSel = document.getElementById('filterLocation');
-
-      function resetOptions(sel, list) {
-        const value = sel.value;
-        sel.innerHTML = '<option value="">All</option>';
-        (list || []).forEach(v => {
-          const opt = document.createElement('option');
-          opt.value = v;
-          opt.textContent = v;
-          sel.appendChild(opt);
-        });
-        if (value) sel.value = value;
-      }
-
-      resetOptions(catSel, lists.categories);
-      resetOptions(statSel, lists.status);
-      resetOptions(locSel, lists.locations);
-    }
-
-    function fillFormDropdowns() {
-      const catSel = document.getElementById('fCategory');
-      const statSel = document.getElementById('fStatus');
-      const locSel = document.getElementById('fLocation');
-      const mfgSel = document.getElementById('fManufacturer');
-
-      function fill(sel, list) {
-        sel.innerHTML = '<option value=""></option>';
-        (list || []).forEach(v => {
-          const opt = document.createElement('option');
-          opt.value = v;
-          opt.textContent = v;
-          sel.appendChild(opt);
-        });
-      }
-
-      fill(catSel, lists.categories);
-      fill(statSel, lists.status);
-      fill(locSel, lists.locations);
-      fill(mfgSel, lists.manufacturers);
-    }
-
-    function fillListsTextareas() {
-      document.getElementById('listCategories').value = (lists.categories || []).join('\n');
-      document.getElementById('listManufacturers').value = (lists.manufacturers || []).join('\n');
-      document.getElementById('listLocations').value = (lists.locations || []).join('\n');
-      document.getElementById('listStatus').value = (lists.status || []).join('\n');
-    }
-
-    function resetListsUi() {
+      fillFormDropdowns();
+      fillFilterDropdowns();
       fillListsTextareas();
-      setStatus('List editor reset to current values.');
+      renderInventory();
+
+      setApiStatus("Online");
+      setStatus(`Loaded ${inventory.length} items.`);
     }
 
-    function onFilterChange() {
-      currentFilters.search = document.getElementById('searchInput').value.trim().toLowerCase();
-      currentFilters.category = document.getElementById('filterCategory').value;
-      currentFilters.status = document.getElementById('filterStatus').value;
-      currentFilters.location = document.getElementById('filterLocation').value;
+    /* ===============================
+       FILL DROPDOWNS
+    =============================== */
+    function fillFormDropdowns(){
+      const fill=(id,arr)=>{
+        const s=document.getElementById(id);
+        s.innerHTML=`<option value=""></option>`;
+        arr.forEach(v=>s.innerHTML+=`<option>${v}</option>`);
+      };
+
+      fill("fManufacturer", lists.manufacturers);
+      fill("fCategory", lists.categories);
+      fill("fLocation", lists.locations);
+    }
+
+    function fillFilterDropdowns(){
+      const fill=(id,arr)=>{
+        const s=document.getElementById(id);
+        const cur=s.value;
+        s.innerHTML=`<option value="">All</option>`;
+        arr.forEach(v=>s.innerHTML+=`<option>${v}</option>`);
+        if(cur) s.value=cur;
+      };
+
+      fill("filterCategory", lists.categories);
+      fill("filterLocation", lists.locations);
+    }
+
+    function fillListsTextareas(){
+      document.getElementById("listCategories").value = lists.categories.join("\n");
+      document.getElementById("listManufacturers").value = lists.manufacturers.join("\n");
+      document.getElementById("listLocations").value = lists.locations.join("\n");
+      document.getElementById("listStatus").value = lists.status.join("\n");
+    }
+
+    /* ===============================
+       FILTER LOGIC
+    =============================== */
+    function onFilterChange(){
+      currentFilters.search = document.getElementById("searchInput").value.toLowerCase();
+      currentFilters.category = document.getElementById("filterCategory").value;
+      currentFilters.status = document.getElementById("filterStatus").value;
+      currentFilters.location = document.getElementById("filterLocation").value;
       renderInventory();
     }
 
-    function renderInventory() {
-      const container = document.getElementById('inventoryList');
-      container.innerHTML = '';
+    /* ===============================
+       RENDER INVENTORY CARDS
+    =============================== */
+    function renderInventory(){
+      const box=document.getElementById("inventoryList");
+      box.innerHTML="";
 
-      let filtered = inventory.slice();
+      let result = inventory.slice();
 
-      if (currentFilters.search) {
-        const q = currentFilters.search;
-        filtered = filtered.filter(item => {
-          const fields = [
-            item['Title'],
-            item['Model'],
-            item['Serial'],
-            item['TP-SKU'],
-            item['Manufacturer']
-          ].join(' ').toLowerCase();
-          return fields.includes(q);
-        });
-      }
-      if (currentFilters.category) {
-        filtered = filtered.filter(i => (i['Category'] || '') === currentFilters.category);
-      }
-      if (currentFilters.status) {
-        filtered = filtered.filter(i => (i['Status'] || '') === currentFilters.status);
-      }
-      if (currentFilters.location) {
-        filtered = filtered.filter(i => (i['Location'] || '') === currentFilters.location);
+      if(currentFilters.search){
+        const q=currentFilters.search;
+        result = result.filter(i=>(
+          (i["Title"]||"")+
+          (i["Model"]||"")+
+          (i["Serial"]||"")+
+          (i["TP-SKU"]||"")
+        ).toLowerCase().includes(q));
       }
 
-      if (filtered.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'panel-sub';
-        empty.textContent = 'No items match your filters.';
-        container.appendChild(empty);
+      if(currentFilters.category){
+        result = result.filter(i=>i["Category"]===currentFilters.category);
+      }
+
+      if(currentFilters.status){
+        result = result.filter(i=>i["Status"]===currentFilters.status);
+      }
+
+      if(currentFilters.location){
+        result = result.filter(i=>i["Location"]===currentFilters.location);
+      }
+
+      if(result.length===0){
+        box.innerHTML=`<div style="padding:10px;color:var(--muted);">No items match your filters.</div>`;
         return;
       }
 
-      filtered.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card';
+      result.forEach(item=>{
+        const c=document.createElement("div");
+        c.className="card";
 
-        const left = document.createElement('div');
-        const middle = document.createElement('div');
-        const right = document.createElement('div');
+        c.innerHTML=`
+          <div>
+            <div class="card-main-title">${item["Title"]||"(No title)"}</div>
+            <div>${item["Manufacturer"]||""} ${item["Model"]||""}</div>
+            <div style="color:var(--muted);font-size:11px;">SKU: ${item["TP-SKU"]||"—"} · Serial: ${item["Serial"]||"—"}</div>
+            <div style="margin-top:3px;">
+              <span class="tag">${item["Category"]||"Uncategorized"}</span>
+              <span class="tag">${item["Location"]||"No location"}</span>
+              <span class="tag tag-status-${(item["Status"]||"").toLowerCase()}">${item["Status"]||"Status"}</span>
+            </div>
+          </div>
 
-        // Left column
-        const title = document.createElement('div');
-        title.className = 'card-main-title';
-        title.textContent = item['Title'] || '(No title)';
-        left.appendChild(title);
+          <div>
+            <div style="color:var(--muted);font-size:11px;">${item["Notes"]||"No notes"}</div>
 
-        const line1 = document.createElement('div');
-        line1.className = 'card-line';
-        line1.textContent = `${item['Manufacturer'] || ''} ${item['Model'] || ''}`.trim();
-        left.appendChild(line1);
+            <div style="margin-top:4px;">
+              ${item["eBay Web URL"] ? `<a href="${item["eBay Web URL"]}" target="_blank" style="color:var(--accent);">Open eBay</a>` : "No eBay link"}
+            </div>
 
-        const line2 = document.createElement('div');
-        line2.className = 'card-line';
-        line2.textContent = `SKU: ${item['TP-SKU'] || '—'} · Serial: ${item['Serial'] || '—'}`;
-        left.appendChild(line2);
+            <div style="color:var(--muted);margin-top:4px;font-size:11px;">
+              Cost: ${item["Acquired Price"]?"$"+item["Acquired Price"]:"—"} · Sold: ${item["Sold"]||"No"}
+            </div>
+          </div>
 
-        const tags = document.createElement('div');
-        tags.className = 'tag-row';
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <button class="btn btn-primary" onclick="startEditItem(${item.rowIndex})">Edit</button>
+            ${item["Image 1"]? `<button class="btn" onclick="window.open('${item["Image 1"]}','_blank')">Image</button>` : ""}
+          </div>
+        `;
 
-        const catTag = document.createElement('div');
-        catTag.className = 'tag';
-        catTag.textContent = item['Category'] || 'Uncategorized';
-        tags.appendChild(catTag);
-
-        const locTag = document.createElement('div');
-        locTag.className = 'tag';
-        locTag.textContent = item['Location'] || 'No location';
-        tags.appendChild(locTag);
-
-        const statusTag = document.createElement('div');
-        statusTag.className = 'tag';
-        const statusValue = (item['Status'] || '').toLowerCase();
-        if (statusValue === 'listed') statusTag.classList.add('tag-status-listed');
-        if (statusValue === 'sold') statusTag.classList.add('tag-status-sold');
-        statusTag.textContent = item['Status'] || 'No status';
-        tags.appendChild(statusTag);
-
-        left.appendChild(tags);
-
-        // Middle column
-        const line3 = document.createElement('div');
-        line3.className = 'card-line';
-        line3.textContent = item['Notes'] ? `Notes: ${item['Notes']}` : 'Notes: —';
-        middle.appendChild(line3);
-
-        const line4 = document.createElement('div');
-        line4.className = 'card-line';
-        const ebayUrl = item['eBay Web URL'] || item['eBay Web URL '] || '';
-        if (ebayUrl) {
-          const link = document.createElement('a');
-          link.href = ebayUrl;
-          link.target = '_blank';
-          link.textContent = 'Open eBay listing';
-          link.style.color = '#84ff6e';
-          line4.appendChild(link);
-        } else {
-          line4.textContent = 'No eBay link';
-        }
-        middle.appendChild(line4);
-
-        const line5 = document.createElement('div');
-        line5.className = 'card-line';
-        const price = item['Acquired Price'];
-        const sold = item['Sold'];
-        line5.textContent = `Cost: ${price ? '$' + price : '—'} · Sold: ${sold || 'No'}`;
-        middle.appendChild(line5);
-
-        // Right column (actions)
-        right.style.display = 'flex';
-        right.style.flexDirection = 'column';
-        right.style.alignItems = 'flex-end';
-        right.style.gap = '4px';
-
-        const editBtn = document.createElement('button');
-        editBtn.className = 'btn btn-primary';
-        editBtn.textContent = 'Edit';
-        editBtn.onclick = () => startEditItem(item);
-        right.appendChild(editBtn);
-
-        const img1 = item['Image 1'] || item['Image1'];
-        if (img1) {
-          const imgBtn = document.createElement('button');
-          imgBtn.className = 'btn';
-          imgBtn.textContent = 'View Image 1';
-          imgBtn.onclick = () => window.open(img1, '_blank');
-          right.appendChild(imgBtn);
-        }
-
-        card.appendChild(left);
-        card.appendChild(middle);
-        card.appendChild(right);
-        container.appendChild(card);
+        c.querySelector("button.btn-primary").onclick=()=>startEditItem(item);
+        box.appendChild(c);
       });
+
     }
 
-    function startEditItem(item) {
-      currentEditRowIndex = item.rowIndex || null;
-      document.getElementById('editModeBadge').textContent = 'Edit Mode';
-      document.getElementById('editModeBadge').style.borderColor = '#ffce6e';
+    /* ===============================
+       EDIT ITEM
+    =============================== */
+    function startEditItem(item){
+      currentEditRowIndex=item.rowIndex;
+      setStatus("Editing item…");
 
-      document.getElementById('fTP_SKU').value = item['TP-SKU'] || '';
-      document.getElementById('fTitle').value = item['Title'] || '';
-      document.getElementById('fManufacturer').value = item['Manufacturer'] || '';
-      document.getElementById('fModel').value = item['Model'] || '';
-      document.getElementById('fSerial').value = item['Serial'] || '';
-      document.getElementById('fColor').value = item['Color'] || '';
-      document.getElementById('fCategory').value = item['Category'] || '';
-      document.getElementById('fStatus').value = item['Status'] || '';
-      document.getElementById('fLocation').value = item['Location'] || '';
-      document.getElementById('fCondition').value = item['Condition'] || '';
-      document.getElementById('fEbayID').value = item['eBay Item ID'] || '';
-      document.getElementById('fEbayURL').value = item['eBay Web URL'] || '';
-      document.getElementById('fImage1').value = item['Image 1'] || '';
-      document.getElementById('fImage2').value = item['Image 2'] || '';
-      document.getElementById('fImage3').value = item['Image 3'] || '';
-      document.getElementById('fImage4').value = item['Image 4'] || '';
-      document.getElementById('fDimensions').value = item['Dimensions'] || '';
-      document.getElementById('fWeight').value = item['Weight'] || '';
-      document.getElementById('fAcquiredPrice').value = item['Acquired Price'] || '';
-      document.getElementById('fSold').value = item['Sold'] || '';
-      document.getElementById('fNotes').value = item['Notes'] || '';
+      const fill=(id,v)=>document.getElementById(id).value=v||"";
 
-      setStatus('Editing existing item (row ' + currentEditRowIndex + ').');
+      fill("fTP_SKU", item["TP-SKU"]);
+      fill("fTitle", item["Title"]);
+      fill("fManufacturer", item["Manufacturer"]);
+      fill("fModel", item["Model"]);
+      fill("fSerial", item["Serial"]);
+      fill("fColor", item["Color"]);
+      fill("fCategory", item["Category"]);
+      fill("fStatus", item["Status"]);
+      fill("fLocation", item["Location"]);
+      fill("fCondition", item["Condition"]);
+      fill("fEbayID", item["eBay Item ID"]);
+      fill("fEbayURL", item["eBay Web URL"]);
+      fill("fImage1", item["Image 1"]);
+      fill("fImage2", item["Image 2"]);
+      fill("fImage3", item["Image 3"]);
+      fill("fImage4", item["Image 4"]);
+      fill("fDimensions", item["Dimensions"]);
+      fill("fWeight", item["Weight"]);
+      fill("fAcquiredPrice", item["Acquired Price"]);
+      fill("fSold", item["Sold"]);
+      fill("fNotes", item["Notes"]);
     }
 
-    function resetForm() {
-      currentEditRowIndex = null;
-      document.getElementById('editModeBadge').textContent = 'Add Mode';
-      document.getElementById('editModeBadge').style.borderColor = 'rgba(255,255,255,0.16)';
-      document.getElementById('itemForm').reset();
-      setStatus('Form cleared, ready for new item.');
+    function resetForm(){
+      currentEditRowIndex=null;
+      document.getElementById("itemForm").reset();
+      setStatus("Cleared.");
     }
 
-    async function onSubmitItem(evt) {
-      evt.preventDefault();
+    /* ===============================
+       SAVE ITEM
+    =============================== */
+    async function onSubmitItem(e){
+      e.preventDefault();
 
-      const fields = {
-        'TP-SKU': document.getElementById('fTP_SKU').value.trim(),
-        'Title': document.getElementById('fTitle').value.trim(),
-        'Manufacturer': document.getElementById('fManufacturer').value,
-        'Model': document.getElementById('fModel').value.trim(),
-        'Serial': document.getElementById('fSerial').value.trim(),
-        'Color': document.getElementById('fColor').value.trim(),
-        'Category': document.getElementById('fCategory').value,
-        'Status': document.getElementById('fStatus').value,
-        'Location': document.getElementById('fLocation').value,
-        'Condition': document.getElementById('fCondition').value.trim(),
-        'eBay Item ID': document.getElementById('fEbayID').value.trim(),
-        'eBay Web URL': document.getElementById('fEbayURL').value.trim(),
-        'Image 1': document.getElementById('fImage1').value.trim(),
-        'Image 2': document.getElementById('fImage2').value.trim(),
-        'Image 3': document.getElementById('fImage3').value.trim(),
-        'Image 4': document.getElementById('fImage4').value.trim(),
-        'Dimensions': document.getElementById('fDimensions').value.trim(),
-        'Weight': document.getElementById('fWeight').value.trim(),
-        'Acquired Price': document.getElementById('fAcquiredPrice').value.trim(),
-        'Sold': document.getElementById('fSold').value.trim(),
-        'Notes': document.getElementById('fNotes').value.trim()
+      const f=(id)=>document.getElementById(id).value.trim();
+
+      const fields={
+        "TP-SKU": f("fTP_SKU"),
+        "Title": f("fTitle"),
+        "Manufacturer": f("fManufacturer"),
+        "Model": f("fModel"),
+        "Serial": f("fSerial"),
+        "Color": f("fColor"),
+        "Category": f("fCategory"),
+        "Status": f("fStatus"),
+        "Location": f("fLocation"),
+        "Condition": f("fCondition"),
+        "eBay Item ID": f("fEbayID"),
+        "eBay Web URL": f("fEbayURL"),
+        "Image 1": f("fImage1"),
+        "Image 2": f("fImage2"),
+        "Image 3": f("fImage3"),
+        "Image 4": f("fImage4"),
+        "Dimensions": f("fDimensions"),
+        "Weight": f("fWeight"),
+        "Acquired Price": f("fAcquiredPrice"),
+        "Sold": f("fSold"),
+        "Notes": f("fNotes")
       };
 
-      try {
-        if (currentEditRowIndex) {
-          setStatus('Saving changes to existing item...');
-          const res = await apiPost('updateItem', {
-            rowIndex: currentEditRowIndex,
-            fields
-          });
-          if (!res.ok) throw new Error(res.error || 'Failed to update item');
-          setStatus('Item updated. Refreshing list…');
+      /* Auto-generate TP-SKU if blank */
+      if(!fields["TP-SKU"]){
+        const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let r="";
+        for(let i=0;i<9;i++) r+=chars[Math.floor(Math.random()*chars.length)];
+        fields["TP-SKU"]="TP-"+r;
+      }
+
+      try{
+        if(currentEditRowIndex){
+          const r=await apiPost("updateItem",{rowIndex:currentEditRowIndex,fields});
+          if(!r.ok) throw new Error(r.error);
         } else {
-          setStatus('Adding new item to inventory...');
-          const res = await apiPost('addItem', fields);
-          if (!res.ok) throw new Error(res.error || 'Failed to add item');
-          const sku = res.data && res.data.TP_SKU ? res.data.TP_SKU : 'new item';
-          setStatus('New item added (' + sku + '). Refreshing list…');
+          const r=await apiPost("addItem", fields);
+          if(!r.ok) throw new Error(r.error);
         }
-        await reloadData();
         resetForm();
-      } catch (err) {
-        console.error(err);
-        setStatus('Error: ' + err.message);
+        reloadData();
+      } catch(err){
+        setStatus("Error: "+err.message);
       }
     }
 
-    async function saveLists() {
-      const categories = document.getElementById('listCategories').value
-        .split('\n').map(s => s.trim()).filter(Boolean);
-      const manufacturers = document.getElementById('listManufacturers').value
-        .split('\n').map(s => s.trim()).filter(Boolean);
-      const locations = document.getElementById('listLocations').value
-        .split('\n').map(s => s.trim()).filter(Boolean);
-      const status = document.getElementById('listStatus').value
-        .split('\n').map(s => s.trim()).filter(Boolean);
+    /* ===============================
+       SAVE LISTS
+    =============================== */
+    async function saveLists(){
+      const listsPayload={
+        categories: document.getElementById("listCategories").value.split("\n").filter(Boolean),
+        manufacturers: document.getElementById("listManufacturers").value.split("\n").filter(Boolean),
+        locations: document.getElementById("listLocations").value.split("\n").filter(Boolean),
+        status: document.getElementById("listStatus").value.split("\n").filter(Boolean),
+      };
 
-      try {
-        setStatus('Saving dropdown lists to Google Sheet...');
-        const res = await apiPost('saveLists', {
-          lists: {
-            categories,
-            manufacturers,
-            locations,
-            status
-          }
-        });
-        if (!res.ok) throw new Error(res.error || 'Failed to save lists');
-        setStatus('Lists saved. Reloading from API…');
-        await reloadData();
-      } catch (err) {
-        console.error(err);
-        setStatus('Error saving lists: ' + err.message);
+      try{
+        setStatus("Saving lists…");
+        const r=await apiPost("saveLists",{lists:listsPayload});
+        if(!r.ok) throw new Error(r.error);
+        reloadData();
+      }catch(err){
+        setStatus("Error: "+err.message);
       }
     }
 
-    window.addEventListener('load', () => {
-      reloadData();
-    });
+    window.addEventListener("load", reloadData);
   </script>
+
 </body>
 </html>
+
