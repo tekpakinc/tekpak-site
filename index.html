@@ -288,16 +288,17 @@
       </div>
     </header>
 
-    <!-- ========================== MAIN LAYOUT ========================== -->
+    <!-- ========================== MAIN ========================== -->
     <main class="layout">
 
-      <!-- ====================== LEFT: INVENTORY ====================== -->
+      <!-- ====================== LEFT: INVENTORY LIST ====================== -->
       <section class="panel">
         <div class="panel-title">Inventory</div>
-        <div class="panel-sub">Browse, search, and edit items.</div>
+        <div class="panel-sub">Browse, search, filter, and edit items.</div>
 
         <button class="btn btn-primary" onclick="reloadData()">Refresh</button>
 
+        <!-- FILTERS -->
         <div class="filters" style="margin-top:10px;">
           <div>
             <div class="field-label">Search</div>
@@ -569,7 +570,6 @@
       fill("fManufacturer", lists.manufacturers);
       fill("fCategory", lists.categories);
       fill("fLocation", lists.locations);
-      // Status + Color are hard-coded in HTML
     }
 
     function fillFilterDropdowns(){
@@ -582,7 +582,6 @@
       };
       fill("filterCategory", lists.categories);
       fill("filterLocation", lists.locations);
-      // Status filter has hard-coded options Hold/Listed/Sold
     }
 
     function fillListsTextareas(){
@@ -646,7 +645,6 @@
         const middle = document.createElement("div");
         const right = document.createElement("div");
 
-        // Left section
         const title = document.createElement("div");
         title.className = "card-main-title";
         title.textContent = item["Title"] || "(No title)";
@@ -686,36 +684,16 @@
 
         left.appendChild(tagRow);
 
-        // Middle section
-        const notes = document.createElement("div");
-        notes.style.color = "var(--muted)";
-        notes.style.fontSize = "11px";
-        notes.textContent = item["Notes"] || "No notes";
-        middle.appendChild(notes);
+        middle.innerHTML = `
+          <div style="color:var(--muted);font-size:11px;">${item["Notes"] || "No notes"}</div>
+          <div style="margin-top:4px;">
+            ${item["eBay Web URL"] ? `<a href="${item["eBay Web URL"]}" target="_blank" style="color:var(--accent);">Open eBay</a>` : "No eBay link"}
+          </div>
+          <div style="color:var(--muted);margin-top:4px;font-size:11px;">
+            Cost: ${item["Acquired Price"] ? "$" + item["Acquired Price"] : "—"} · Sold: ${item["Sold"] || "No"}
+          </div>
+        `;
 
-        const ebayLine = document.createElement("div");
-        ebayLine.style.marginTop = "4px";
-        if (item["eBay Web URL"]) {
-          const link = document.createElement("a");
-          link.href = item["eBay Web URL"];
-          link.target = "_blank";
-          link.textContent = "Open eBay";
-          link.style.color = "var(--accent)";
-          ebayLine.appendChild(link);
-        } else {
-          ebayLine.textContent = "No eBay link";
-        }
-        middle.appendChild(ebayLine);
-
-        const priceLine = document.createElement("div");
-        priceLine.style.color = "var(--muted)";
-        priceLine.style.marginTop = "4px";
-        priceLine.style.fontSize = "11px";
-        priceLine.textContent =
-          `Cost: ${item["Acquired Price"] ? "$" + item["Acquired Price"] : "—"} · Sold: ${item["Sold"] || "No"}`;
-        middle.appendChild(priceLine);
-
-        // Right section
         right.style.display = "flex";
         right.style.flexDirection = "column";
         right.style.gap = "6px";
