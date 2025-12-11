@@ -249,15 +249,16 @@
       DEFAULT PASSWORD:
       TekPak2025!
 
-      HASH FOR PASSWORD ABOVE (SHA-256):
-      2b4db0d573f6e4e9ab898b96114b6b42dfad13141a523ad52deead3a41052f66
+      CORRECT HASH FOR PASSWORD ABOVE (SHA-256):
+      0805801ac80f4349594f547ca9ad8871a476282dbe2b7552be782011536e22e1
 
-      To change password:
-      - Use the browser console to generate a new SHA-256 hash.
-      - Replace EXPECTED_HASH below.
+      To change password later:
+      - Open browser dev tools (F12)
+      - Run a small script to compute SHA-256 for your new password
+      - Replace EXPECTED_HASH below with the new hex string
     */
 
-    const EXPECTED_HASH = "2b4db0d573f6e4e9ab898b96114b6b42dfad13141a523ad52deead3a41052f66";
+    const EXPECTED_HASH = "0805801ac80f4349594f547ca9ad8871a476282dbe2b7552be782011536e22e1";
     const STORAGE_KEY = "tekpak_employee_portal_authed_v1";
 
     const loginScreen = document.getElementById("login-screen");
@@ -295,12 +296,17 @@
         return;
       }
 
-      const hash = await sha256Hex(pwd);
-      if (hash === EXPECTED_HASH) {
-        localStorage.setItem(STORAGE_KEY, "true");
-        showPortal();
-      } else {
-        errorBox.textContent = "Invalid password.";
+      try {
+        const hash = await sha256Hex(pwd);
+        if (hash === EXPECTED_HASH) {
+          localStorage.setItem(STORAGE_KEY, "true");
+          showPortal();
+        } else {
+          errorBox.textContent = "Invalid password.";
+        }
+      } catch (e) {
+        console.error(e);
+        errorBox.textContent = "Error verifying password.";
       }
     }
 
