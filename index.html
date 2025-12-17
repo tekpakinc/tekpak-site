@@ -1,330 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Tek-Pak Employee Inventory Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #111827;
-      --accent: #a3e635;
-      --accent-soft: rgba(163, 230, 53, 0.12);
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --danger: #f97373;
-    }
+<meta charset="UTF-8">
+<title>Tek-Pak Surplus Inventory</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+<style>
+:root{
+  --bg:#f4f6f8;
+  --panel:#ffffff;
+  --steel:#e2e6ea;
+  --border:#cfd6dd;
+  --text:#1e2933;
+  --muted:#5f6b7a;
+  --accent:#2b6cb0;
+  --buy:#2f855a;
+  --bid:#d69e2e;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:var(--bg);
+  color:var(--text);
+}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #1f2933, #020617);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text);
-    }
+/* HEADER */
+header{
+  background:#ffffff;
+  border-bottom:2px solid var(--steel);
+}
+.wrap{
+  max-width:1300px;
+  margin:auto;
+  padding:16px;
+}
+.top{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+}
+h1{
+  margin:0;
+  font-size:20px;
+}
+.sub{
+  font-size:12px;
+  color:var(--muted);
+}
 
-    .wrapper {
-      width: 100%;
-      max-width: 1120px;
-      padding: 16px;
-    }
+/* CONTROLS */
+.controls{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+input,select{
+  padding:10px 12px;
+  border-radius:6px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-size:14px;
+}
 
-    /* LOGIN SCREEN */
-    #login-screen {
-      max-width: 420px;
-      margin: 0 auto;
-      background: radial-gradient(circle at top left, #111827, #020617);
-      border-radius: 18px;
-      padding: 24px 24px 20px;
-      box-shadow: 0 18px 45px rgba(0,0,0,0.6);
-      border: 1px solid rgba(148,163,184,0.35);
-      backdrop-filter: blur(8px);
-    }
+/* GRID */
+main{padding-top:18px}
+.grid{
+  display:grid;
+  gap:14px;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+}
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  display:flex;
+  flex-direction:column;
+}
+.img{
+  height:150px;
+  border-bottom:1px solid var(--steel);
+  background:#fafafa;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:zoom-in;
+}
+.img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.ph{
+  font-size:12px;
+  color:var(--muted);
+}
 
-    .tp-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 12px;
-    }
+/* CONTENT */
+.content{
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+.title{
+  font-size:14px;
+  font-weight:600;
+  margin-bottom:6px;
+}
+.meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  font-size:11px;
+  margin-bottom:8px;
+}
+.tag{
+  border:1px solid var(--border);
+  padding:4px 7px;
+  border-radius:4px;
+  background:#f8fafc;
+}
+.price{
+  margin-left:auto;
+  font-weight:700;
+}
+.desc{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+.actions{
+  margin-top:auto;
+  display:flex;
+  gap:8px;
+}
+.btn{
+  flex:1;
+  padding:9px;
+  border-radius:6px;
+  text-align:center;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:600;
+  color:#fff;
+}
+.buy{background:var(--buy)}
+.bid{background:var(--bid); color:#000}
+.disabled{
+  opacity:.4;
+  pointer-events:none;
+}
 
-    .tp-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
-    }
+/* FOOTER */
+footer{
+  margin-top:28px;
+  padding-top:14px;
+  border-top:2px solid var(--steel);
+  font-size:12px;
+  color:var(--muted);
+}
 
-    h1 {
-      margin: 0 0 4px;
-      font-size: 22px;
-    }
-
-    .sub {
-      margin: 0 0 18px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .field {
-      margin-bottom: 14px;
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      margin-bottom: 4px;
-      color: var(--muted);
-    }
-
-    input[type="password"] {
-      width: 100%;
-      padding: 10px 11px;
-      border-radius: 10px;
-      border: 1px solid rgba(148,163,184,0.5);
-      background: rgba(15,23,42,0.9);
-      color: var(--text);
-      font-size: 13px;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(163,230,53,0.35);
-    }
-
-    .actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 6px;
-      gap: 8px;
-    }
-
-    button {
-      cursor: pointer;
-      border: none;
-      border-radius: 999px;
-      font-size: 13px;
-      padding: 9px 16px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    #login-btn {
-      background: linear-gradient(135deg, #bef264, #84cc16);
-      color: #052e16;
-      font-weight: 600;
-      min-width: 120px;
-      box-shadow: 0 12px 30px rgba(163,230,53,0.4);
-    }
-
-    #login-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 8px 22px rgba(163,230,53,0.3);
-    }
-
-    .hint {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .error {
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--danger);
-      min-height: 16px;
-    }
-
-    /* EMPLOYEE PORTAL */
-    #portal-shell {
-      display: none;
-      background: rgba(15,23,42,0.9);
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: 0 18px 45px rgba(0,0,0,0.6);
-      border: 1px solid rgba(148,163,184,0.35);
-    }
-
-    .portal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .portal-title {
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .portal-meta {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    #logout-btn {
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.7);
-      color: var(--muted);
-      padding-inline: 10px;
-    }
-
-    #app {
-      margin-top: 10px;
-      background: #020617;
-      border-radius: 12px;
-      padding: 12px;
-      max-height: 70vh;
-      overflow: auto;
-      border: 1px solid rgba(30,64,175,0.6);
-    }
-  </style>
+/* LIGHTBOX */
+#lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+#lightbox img{
+  max-width:90%;
+  max-height:90%;
+  background:#fff;
+  padding:8px;
+  border-radius:6px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+</style>
 </head>
+
 <body>
-  <div class="wrapper">
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen">
-      <div class="tp-badge">
-        <span class="tp-dot"></span> Tek-Pak • Employee Access
-      </div>
-
-      <h1>Employee Portal Login</h1>
-      <p class="sub">Authorized staff only. Activity may be monitored.</p>
-
-      <div class="field">
-        <label for="password">Access Password</label>
-        <input type="password" id="password" placeholder="Enter portal password" />
-      </div>
-
-      <div class="actions">
-        <button id="login-btn">Unlock Portal</button>
-        <div class="hint">Contact HR if you forgot the password.</div>
-      </div>
-
-      <div id="error" class="error"></div>
+<header>
+  <div class="wrap top">
+    <div>
+      <h1>Tek-Pak Surplus Inventory</h1>
+      <div class="sub">Live public inventory • Buy Now or Bid</div>
     </div>
-
-    <!-- PORTAL CONTENT WRAPPER -->
-    <div id="portal-shell">
-      <div class="portal-header">
-        <div>
-          <div class="portal-title">Tek-Pak Employee Inventory Portal</div>
-          <div class="portal-meta">Internal Use Only • Inventory / Adjustments / Lookups</div>
-        </div>
-        <button id="logout-btn">Log out</button>
-      </div>
-
-      <div id="app">
-        <h2 style="margin-top:0;">Welcome to the Tek-Pak Employee Inventory Portal</h2>
-        <p style="color:#9ca3af;font-size:14px;">
-          Your secured employee portal is active — paste your actual inventory system,
-          forms, tables, lookup tools, or eBay-sync modules here whenever you're ready.
-        </p>
-      </div>
+    <div class="controls">
+      <input id="search" placeholder="Search part, SKU, model…">
+      <select id="category">
+        <option value="">All categories</option>
+      </select>
     </div>
   </div>
+</header>
 
-  <script>
-    /* 
-      DEFAULT PASSWORD:
-      TekPak2025!
+<main class="wrap">
+  <div class="grid" id="grid"></div>
 
-      CORRECT HASH FOR PASSWORD ABOVE (SHA-256):
-      0805801ac80f4349594f547ca9ad8871a476282dbe2b7552be782011536e22e1
+  <footer>
+    Inventory updates automatically.  
+    Internal asset items are not displayed.
+  </footer>
+</main>
 
-      To change password later:
-      - Open browser dev tools (F12)
-      - Run a small script to compute SHA-256 for your new password
-      - Replace EXPECTED_HASH below with the new hex string
-    */
+<!-- IMAGE LIGHTBOX -->
+<div id="lightbox">
+  <img id="lightbox-img">
+</div>
 
-    const EXPECTED_HASH = "0805801ac80f4349594f547ca9ad8871a476282dbe2b7552be782011536e22e1";
-    const STORAGE_KEY = "tekpak_employee_portal_authed_v1";
+<script>
+/* ================= CONFIG ================= */
+const DATA_URL =
+"https://script.google.com/macros/s/AKfycbyLMf07vAWn1qdtL_FMVvCRf6GytYvXAtbzTLgqZRHurZisb7Qba4gYtsTwkhL-8vJu/exec";
 
-    const loginScreen = document.getElementById("login-screen");
-    const portalShell = document.getElementById("portal-shell");
-    const passwordInput = document.getElementById("password");
-    const loginBtn = document.getElementById("login-btn");
-    const logoutBtn = document.getElementById("logout-btn");
-    const errorBox = document.getElementById("error");
+/* ================= STATE ================= */
+let INVENTORY = [];
 
-    async function sha256Hex(str) {
-      const enc = new TextEncoder();
-      const data = enc.encode(str);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-    }
+const els = {
+  grid: document.getElementById("grid"),
+  search: document.getElementById("search"),
+  category: document.getElementById("category")
+};
 
-    function showPortal() {
-      loginScreen.style.display = "none";
-      portalShell.style.display = "block";
-    }
+/* ================= HELPERS ================= */
+const txt = v => (v ?? "").toString().toLowerCase();
+const money = v => {
+  const n = Number(v);
+  return isFinite(n)
+    ? n.toLocaleString("en-US",{style:"currency",currency:"USD"})
+    : "—";
+};
 
-    function showLogin() {
-      portalShell.style.display = "none";
-      loginScreen.style.display = "block";
-      passwordInput.value = "";
-      errorBox.textContent = "";
-    }
+/* ================= FETCH ================= */
+async function loadInventory(){
+  const res = await fetch(DATA_URL);
+  const json = await res.json();
+  INVENTORY = Array.isArray(json) ? json : (json.data || []);
+  populateCategories();
+  applyFilters();
+}
 
-    async function handleLogin() {
-      errorBox.textContent = "";
-      const pwd = passwordInput.value.trim();
-      if (!pwd) {
-        errorBox.textContent = "Please enter the password.";
-        return;
-      }
+/* ================= UI ================= */
+function populateCategories(){
+  const cats=[...new Set(
+    INVENTORY
+      .filter(i => !txt(i.description).includes("asset"))
+      .map(i=>i.category)
+      .filter(Boolean)
+  )].sort();
 
-      try {
-        const hash = await sha256Hex(pwd);
-        if (hash === EXPECTED_HASH) {
-          localStorage.setItem(STORAGE_KEY, "true");
-          showPortal();
-        } else {
-          errorBox.textContent = "Invalid password.";
-        }
-      } catch (e) {
-        console.error(e);
-        errorBox.textContent = "Error verifying password.";
-      }
-    }
+  els.category.innerHTML=`<option value="">All categories</option>`;
+  cats.forEach(c=>{
+    const o=document.createElement("option");
+    o.value=c;
+    o.textContent=c;
+    els.category.appendChild(o);
+  });
+}
 
-    loginBtn.addEventListener("click", handleLogin);
-    passwordInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") handleLogin();
-    });
+function render(list){
+  els.grid.innerHTML="";
+  list.forEach(i=>{
+    els.grid.innerHTML+=`
+      <div class="card">
+        <div class="img">
+          ${i.image
+            ? `<img src="${i.image}" onclick="openLightbox('${i.image.replace(/'/g,"\\'")}')">`
+            : `<div class="ph">No Image</div>`
+          }
+        </div>
+        <div class="content">
+          <div class="title">${i.title || "Unnamed Item"}</div>
+          <div class="meta">
+            <span class="tag">${i.category || "—"}</span>
+            <span class="tag">${i.sku || "No SKU"}</span>
+            <span class="tag"><strong>Condition:</strong> ${i.condition || "Not specified"}</span>
+            <span class="price">${money(i.price)}</span>
+          </div>
+          <div class="desc">${i.description || ""}</div>
+          <div class="actions">
+            <a class="btn buy ${i.buy_url?"":"disabled"}"
+               href="${i.buy_url||"#"}" target="_blank">Buy Now</a>
+            <a class="btn bid ${i.bid_url?"":"disabled"}"
+               href="${i.bid_url||"#"}" target="_blank">Bid</a>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
 
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem(STORAGE_KEY);
-      showLogin();
-    });
+/* ================= FILTERS ================= */
+function applyFilters(){
+  const q = txt(els.search.value);
+  const c = els.category.value;
 
-    if (localStorage.getItem(STORAGE_KEY) === "true") {
-      showPortal();
-    } else {
-      showLogin();
-    }
-  </script>
+  render(
+    INVENTORY
+      // 🚫 HIDE INTERNAL ASSETS
+      .filter(i => !txt(i.description).includes("asset"))
+      // 🔍 PUBLIC FILTERS
+      .filter(i => {
+        return (
+          (!q ||
+            txt(i.title).includes(q) ||
+            txt(i.sku).includes(q) ||
+            txt(i.description).includes(q)
+          ) &&
+          (!c || i.category === c)
+        );
+      })
+  );
+}
+
+/* ================= EVENTS ================= */
+els.search.addEventListener("input",applyFilters);
+els.category.addEventListener("change",applyFilters);
+
+/* ================= LIGHTBOX ================= */
+function openLightbox(src){
+  document.getElementById("lightbox-img").src = src;
+  document.getElementById("lightbox").style.display="flex";
+}
+document.getElementById("lightbox").addEventListener("click",()=>{
+  document.getElementById("lightbox").style.display="none";
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){
+    document.getElementById("lightbox").style.display="none";
+  }
+});
+
+/* ================= INIT ================= */
+loadInventory();
+</script>
+
 </body>
 </html>
+
