@@ -4,126 +4,333 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Tek-Pak Inventory Admin</title>
+
   <style>
-    :root {
-      --bg: #f8fafc;
-      --panel: #ffffff;
-      --steel: #e2e8f0;
-      --border: #cbd5e1;
-      --text: #0f172a;
-      --muted: #64748b;
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --good: #10b981;
-      --bad: #ef4444;
-      --radius: 12px;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      --sans: 'Inter', system-ui, -apple-system, sans-serif;
-      color-scheme: light;
+    :root{
+      /* Light theme (default) */
+      --bg:#f4f6f8;
+      --bg2:#eef2f6;
+      --panel:#ffffff;
+      --panel2:#fbfcfe;
+      --steel:#e2e6ea;
+      --border:#cfd6dd;
+
+      --text:#1e2933;
+      --muted:#5f6b7a;
+
+      --accent:#2b6cb0;
+      --accent2:#1f5a96;
+
+      --good:#2f855a;
+      --warn:#d69e2e;
+      --bad:#c53030;
+
+      --radius:12px;
+      --shadow: 0 12px 30px rgba(0,0,0,.08);
+      --shadow2: 0 8px 20px rgba(0,0,0,.08);
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+
+      /* UI polish */
+      --ring: 0 0 0 3px rgba(43,108,176,.18);
+      --stickyTop: 78px; /* used by table header sticky offset */
     }
 
-    [data-theme="dark"] {
-      --bg: #0f172a;
-      --panel: #1e293b;
-      --steel: #334155;
-      --border: #475569;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-      --accent: #3b82f6;
-      --accent-hover: #60a5fa;
-      --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
-      color-scheme: dark;
+    /* Dark theme overrides */
+    body[data-theme="dark"]{
+      --bg:#060a10;
+      --bg2:#0a111c;
+
+      --panel:#0f1724;
+      --panel2:#0b121d;
+
+      --steel:#1b2737;
+      --border:#243447;
+
+      --text:#e7eef7;
+      --muted:#95a3b4;
+
+      --accent:#5aa7ff;
+      --accent2:#2f7fe6;
+
+      --good:#33b07a;
+      --warn:#f2c14e;
+      --bad:#ff5b62;
+
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --shadow2: 0 10px 26px rgba(0,0,0,.35);
+
+      --ring: 0 0 0 3px rgba(90,167,255,.22);
     }
 
-    *, *::before, *::after { box-sizing: border-box; }
-    
-    body { 
-      margin: 0; background: var(--bg); color: var(--text); 
-      font-family: var(--sans); line-height: 1.5;
+    *{box-sizing:border-box}
+    html{scrollbar-gutter: stable;}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 800px at 20% -10%, rgba(43,108,176,.10), transparent 60%),
+        radial-gradient(900px 600px at 110% 10%, rgba(47,133,90,.08), transparent 55%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      color:var(--text);
+      font-family:var(--sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Dark Mode Scrollbar */
-    html { scrollbar-width: thin; scrollbar-color: var(--border) var(--bg); }
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { 
-      background: var(--border); border-radius: 10px; border: 2px solid var(--bg); 
+    header{
+      position:sticky;top:0;z-index:5;
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
+      border-bottom:1px solid var(--steel);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 22px rgba(0,0,0,.06);
+    }
+    body[data-theme="dark"] header{
+      box-shadow: 0 10px 28px rgba(0,0,0,.35);
     }
 
-    header {
-      position: sticky; top: 0; z-index: 50;
-      background: var(--panel); border-bottom: 1px solid var(--steel);
+    .wrap{max-width:1400px;margin:0 auto;padding:16px}
+    .top{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .sub{color:var(--muted);font-size:12px;margin-top:3px}
+
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .row > *{max-width:100%}
+
+    .pill{
+      font-family:var(--mono);
+      font-size:12px;color:var(--muted);
+      padding:8px 10px;border:1px solid var(--border);
+      border-radius:999px;background:var(--panel2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
+    }
+    body[data-theme="dark"] .pill{
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+
+    input, select, textarea{
+      font-family:var(--sans);
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--panel);
+      color:var(--text);
+      font-size:14px;
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease, transform .06s ease, background .15s ease;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+    }
+    textarea{min-height:90px;resize:vertical}
+
+    input:focus, select:focus, textarea:focus{
+      border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+      box-shadow: var(--ring);
+    }
+    input::placeholder, textarea::placeholder{color: color-mix(in srgb, var(--muted) 70%, transparent)}
+    select{appearance:none; background-image:
+      linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+      linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%;
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right:34px;
+    }
+
+    .btn{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, var(--panel), color-mix(in srgb, var(--panel) 86%, var(--steel)));
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      box-shadow: var(--shadow2);
+      transition: transform .06s ease, filter .12s ease, box-shadow .12s ease, border-color .12s ease;
+      user-select:none;
+    }
+    .btn:hover{filter: brightness(1.02)}
+    .btn:active{transform: translateY(1px)}
+    .btn:disabled{opacity:.55;cursor:not-allowed;filter:none}
+
+    .btn.primary{
+      background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff), var(--accent2));
+      border-color: color-mix(in srgb, var(--accent) 80%, var(--border));
+      color:#fff;
+      box-shadow: 0 10px 26px rgba(43,108,176,.25);
+    }
+    body[data-theme="dark"] .btn.primary{
+      box-shadow: 0 12px 30px rgba(90,167,255,.18);
+    }
+
+    .btn.good{
+      background: linear-gradient(180deg, color-mix(in srgb, var(--good) 92%, #fff), color-mix(in srgb, var(--good) 80%, #0b0f14));
+      border-color: color-mix(in srgb, var(--good) 70%, var(--border));
+      color:#fff;
+    }
+    .btn.bad{
+      background: linear-gradient(180deg, color-mix(in srgb, var(--bad) 92%, #fff), color-mix(in srgb, var(--bad) 80%, #0b0f14));
+      border-color: color-mix(in srgb, var(--bad) 70%, var(--border));
+      color:#fff;
+    }
+
+    .grid{
+      display:grid;gap:14px;
+      grid-template-columns: 420px 1fr;
+      align-items:start;
+      padding:16px;
+      max-width:1400px;
+      margin:0 auto;
+    }
+    @media (max-width: 1100px){
+      .grid{grid-template-columns: 1fr;}
+      :root{ --stickyTop: 122px; } /* header usually wraps on smaller screens */
+      body[data-theme="dark"]{ --stickyTop: 122px; }
+    }
+
+    .card{
+      background:linear-gradient(180deg, var(--panel), var(--panel2));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .cardHead{
+      padding:12px 14px;
+      border-bottom:1px solid var(--steel);
+      background: linear-gradient(180deg, var(--panel), color-mix(in srgb, var(--panel) 82%, var(--steel)));
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    .cardHead h2{margin:0;font-size:14px;letter-spacing:.2px}
+
+    .cardBody{padding:14px}
+
+    .formGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .formGrid .full{grid-column:1 / -1}
+
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+    .field{display:flex;flex-direction:column}
+    .field input, .field select, .field textarea{width:100%}
+    .hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
+
+    /* Table */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:13px;
+    }
+
+    thead th{
+      position:sticky;
+      top: var(--stickyTop);
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
+      z-index:3;
+      border-bottom:1px solid var(--steel);
+      text-align:left;
+      padding:11px 10px;
+      color:var(--muted);
+      font-weight:700;
+      white-space:nowrap;
       backdrop-filter: blur(8px);
     }
 
-    .wrap { max-width: 1600px; margin: 0 auto; padding: 12px 20px; }
-    .top { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-    
-    h1 { margin: 0; font-size: 18px; font-weight: 800; color: var(--accent); }
-    .sub { color: var(--muted); font-size: 12px; }
-
-    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-
-    input, select, textarea {
-      font-family: var(--sans); width: 100%;
-      padding: 10px 12px; border-radius: 8px;
-      border: 1px solid var(--border); background: var(--panel);
-      color: var(--text); font-size: 14px; outline: none;
-    }
-    input:focus, textarea:focus { border-color: var(--accent); }
-
-    .btn {
-      font-weight: 600; font-size: 13px; border: 1px solid var(--border);
-      background: var(--panel); color: var(--text); padding: 8px 16px; 
-      border-radius: 8px; cursor: pointer; white-space: nowrap;
-    }
-    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .grid {
-      display: grid; gap: 20px; grid-template-columns: 380px 1fr;
-      padding: 20px; max-width: 1600px; margin: 0 auto;
-    }
-    @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
-
-    .card {
-      background: var(--panel); border: 1px solid var(--steel);
-      border-radius: var(--radius); box-shadow: var(--shadow);
-      position: relative; overflow: hidden;
+    tbody td{
+      border-bottom:1px solid var(--steel);
+      padding:11px 10px;
+      vertical-align:top;
     }
 
-    .cardHead {
-      padding: 12px 16px; border-bottom: 1px solid var(--steel);
-      display: flex; align-items: center; justify-content: space-between;
+    tbody tr:nth-child(even){
+      background: color-mix(in srgb, var(--panel2) 68%, transparent);
+    }
+    tbody tr:hover{
+      background: color-mix(in srgb, var(--accent) 10%, var(--panel2));
     }
 
-    .cardBody { padding: 16px; }
-    .formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .formGrid .full { grid-column: 1 / -1; }
-    
-    label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+    .sku{font-family:var(--mono);font-size:12px}
+    .nowrap{white-space:nowrap}
 
-    .tableWrap { overflow: auto; max-height: calc(100vh - 180px); }
-    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
-    thead th {
-      position: sticky; top: 0; background: var(--panel);
-      z-index: 10; border-bottom: 2px solid var(--steel);
-      text-align: left; padding: 12px; color: var(--muted);
+    .mini{
+      display:inline-block;
+      padding:3px 8px;border-radius:999px;
+      border:1px solid var(--border);
+      background: color-mix(in srgb, var(--panel2) 86%, transparent);
+      color:var(--muted);
+      font-size:11px;
     }
-    tbody td { border-bottom: 1px solid var(--steel); padding: 10px 12px; }
 
-    .modalOverlay {
-      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
-      display: none; align-items: center; justify-content: center;
-      z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .link{
+      color:var(--accent);
+      text-decoration:none;
+      font-size:12px;
+      word-break:break-all;
     }
-    .modal {
-      width: min(800px, 100%); max-height: 85vh; 
-      background: var(--panel); border-radius: 16px;
-      display: flex; flex-direction: column;
+    .link:hover{text-decoration:underline}
+
+    /* Modal */
+    .modalOverlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;align-items:center;justify-content:center;
+      z-index:9999;
+      padding:18px;
     }
-    .modalBody { padding: 20px; overflow-y: auto; }
+
+    .modal{
+      width:min(980px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      background:linear-gradient(180deg, var(--panel), var(--panel2));
+      border-radius:16px;
+      border:1px solid var(--border);
+      box-shadow:0 30px 80px rgba(0,0,0,.35);
+    }
+
+    .modalHead{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:12px 14px;border-bottom:1px solid var(--steel);
+      background: linear-gradient(180deg, var(--panel), color-mix(in srgb, var(--panel) 82%, var(--steel)));
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .modalHead h3{margin:0;font-size:14px}
+    .modalBody{padding:14px}
+
+    /* Header controls sizing so nothing hangs off */
+    #q{flex:1 1 260px; min-width:220px}
+    #cat{flex:0 1 220px}
+    #refresh{white-space:nowrap}
+    #themeToggle{white-space:nowrap}
+
+    /* Nice checkbox alignment */
+    input[type="checkbox"]{
+      width:16px;height:16px;
+      accent-color: var(--accent);
+      box-shadow:none;
+    }
+
+    /* Subtle scrollbars */
+    *::-webkit-scrollbar{height:10px;width:10px}
+    *::-webkit-scrollbar-thumb{
+      background: color-mix(in srgb, var(--muted) 28%, transparent);
+      border-radius:999px;
+      border:2px solid transparent;
+      background-clip: padding-box;
+    }
+    *::-webkit-scrollbar-track{background: transparent}
   </style>
 </head>
 
@@ -132,216 +339,598 @@
   <div class="wrap">
     <div class="top">
       <div>
-        <h1>Tek-Pak Admin</h1>
-        <div class="sub">Inventory Control Panel</div>
+        <h1>Tek-Pak Inventory Admin</h1>
+        <div class="sub">Add, edit, and manage inventory (sheet-backed)</div>
       </div>
+
       <div class="row">
-        <input id="q" placeholder="Search..." style="width:200px">
-        <select id="cat" style="width:150px"><option value="">Categories</option></select>
+        <input id="q" placeholder="Search title / SKU / category..." style="min-width:280px">
+
+        <select id="cat" style="min-width:220px">
+          <option value="">All categories</option>
+        </select>
+
+        <label class="row" style="gap:8px;font-size:12px;color:var(--muted)">
+          <input type="checkbox" id="showAssets">
+          Show Asset items
+        </label>
+
+        <!-- NEW: Dark mode toggle (no data logic touched) -->
+        <button class="btn" id="themeToggle" type="button" aria-label="Toggle dark mode">🌙 Dark</button>
+
         <button class="btn" id="refresh">Refresh</button>
-        <button class="btn" id="themeToggle" style="width:40px; padding:0">🌓</button>
+        <span class="pill" id="countPill">—</span>
       </div>
     </div>
   </div>
 </header>
 
 <div class="grid">
-  <aside>
-    <section class="card">
-      <div class="cardHead">
-        <h2 style="font-size:14px; margin:0">Add New Item</h2>
-        <button class="btn primary" id="addBtn">Add to Sheet</button>
-      </div>
-      <div class="cardBody">
-        <div class="formGrid">
-          <div class="field full"><label>Title</label><input id="f_title"></div>
-          <div class="field"><label>SKU</label><input id="f_sku"></div>
-          <div class="field"><label>Category</label><input id="f_category"></div>
-          <div class="field"><label>Condition</label><input id="f_condition"></div>
-          <div class="field"><label>Price</label><input id="f_price"></div>
-          <div class="field full"><label>Description</label><textarea id="f_description" style="height:60px"></textarea></div>
-          <div class="field full">
-            <label>Images (Comma separated)</label>
-            <textarea id="f_images" placeholder="URL 1, URL 2..." style="height:50px"></textarea>
-          </div>
-          <div class="field full"><label>Buy URL</label><input id="f_buy_url"></div>
-          <div class="field full"><label>Bid URL</label><input id="f_bid_url"></div>
+  <!-- ADD PANEL -->
+  <section class="card">
+    <div class="cardHead">
+      <h2>Add item</h2>
+      <button class="btn primary" id="addBtn">Add to Inventory</button>
+    </div>
+
+    <div class="cardBody">
+      <div class="formGrid">
+        <div class="field full">
+          <label>Title</label>
+          <input id="f_title" placeholder="e.g., Dell Latitude 7420" />
+        </div>
+
+        <div class="field">
+          <label>SKU</label>
+          <input id="f_sku" placeholder="e.g., DL7420" />
+        </div>
+
+        <div class="field">
+          <label>Category</label>
+          <input id="f_category" placeholder="e.g., Laptops" />
+        </div>
+
+        <div class="field">
+          <label>Condition</label>
+          <input id="f_condition" placeholder="e.g., Refurbished - Grade A" />
+        </div>
+
+        <div class="field">
+          <label>Price</label>
+          <input id="f_price" placeholder="e.g., 449.99" />
+        </div>
+
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="f_description" placeholder="Specs, notes, included accessories..."></textarea>
+          <div class="hint">If description contains the word <b>asset</b>, the public page will hide it.</div>
+        </div>
+
+        <div class="field full">
+          <label>Images (up to 6 URLs)</label>
+          <input id="f_img1" placeholder="Image URL #1" />
+          <input id="f_img2" placeholder="Image URL #2" style="margin-top:8px" />
+          <input id="f_img3" placeholder="Image URL #3" style="margin-top:8px" />
+          <input id="f_img4" placeholder="Image URL #4" style="margin-top:8px" />
+          <input id="f_img5" placeholder="Image URL #5" style="margin-top:8px" />
+          <input id="f_img6" placeholder="Image URL #6" style="margin-top:8px" />
+          <div class="hint">Stored as a single comma-separated <span style="font-family:var(--mono)">images</span> value in the sheet/API.</div>
+        </div>
+
+        <div class="field full">
+          <label>Buy Now URL</label>
+          <input id="f_buy_url" placeholder="PayPal/Stripe/Square/Checkout link" />
+        </div>
+
+        <div class="field full">
+          <label>Bid URL</label>
+          <input id="f_bid_url" placeholder="eBay auction link (optional)" />
         </div>
       </div>
-    </section>
-  </aside>
+    </div>
+  </section>
 
-  <main class="card">
+  <!-- LIST PANEL -->
+  <section class="card">
     <div class="cardHead">
-      <h2 style="font-size:14px; margin:0">Current Inventory</h2>
-      <span id="countPill" style="font-size:11px; opacity:0.6">0 Items</span>
+      <h2>Inventory</h2>
+      <div class="row">
+        <span class="pill" id="updatedPill">Last updated: —</span>
+      </div>
     </div>
-    <div class="tableWrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>SKU</th>
-            <th>Price</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
+
+    <div class="cardBody" style="padding:0">
+      <div style="overflow:auto; max-height: calc(100vh - 190px);">
+        <table>
+          <thead>
+            <tr>
+              <th class="nowrap">Title</th>
+              <th>SKU</th>
+              <th>Category</th>
+              <th>Condition</th>
+              <th class="nowrap">Price</th>
+              <th>Description</th>
+              <th>Images</th>
+              <th>Buy / Bid</th>
+              <th class="nowrap">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
     </div>
-  </main>
+  </section>
 </div>
 
+<!-- EDIT MODAL -->
 <div class="modalOverlay" id="modalOverlay">
   <div class="modal">
-    <div class="cardHead">
-      <h3>Edit Item</h3>
+    <div class="modalHead">
+      <h3>Edit item</h3>
       <div class="row">
-        <button class="btn" id="closeModal">Cancel</button>
-        <button class="btn primary" id="saveModal" style="background:var(--good); border-color:var(--good)">Save Changes</button>
+        <button class="btn" id="closeModal">Close</button>
+        <button class="btn good" id="saveModal">Save changes</button>
+        <button class="btn bad" id="deleteModal">Delete</button>
       </div>
     </div>
+
     <div class="modalBody">
-      <div class="formGrid" id="modalFields">
+      <div class="formGrid">
+        <div class="field full">
+          <label>Row ID (readonly)</label>
+          <input id="m_id" readonly style="font-family:var(--mono)" />
+          <div class="hint">This should be a stable ID from your Apps Script (recommended), or a sheet row number if you built it that way.</div>
         </div>
+
+        <div class="field full">
+          <label>Title</label>
+          <input id="m_title" />
+        </div>
+
+        <div class="field">
+          <label>SKU</label>
+          <input id="m_sku" />
+        </div>
+
+        <div class="field">
+          <label>Category</label>
+          <input id="m_category" />
+        </div>
+
+        <div class="field">
+          <label>Condition</label>
+          <input id="m_condition" />
+        </div>
+
+        <div class="field">
+          <label>Price</label>
+          <input id="m_price" />
+        </div>
+
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="m_description"></textarea>
+        </div>
+
+        <div class="field full">
+          <label>Images (comma-separated, up to 6)</label>
+          <textarea id="m_images" placeholder="https://img1.jpg, https://img2.jpg, ..."></textarea>
+          <div class="hint">Tip: keep it clean (no extra commas). Up to 6 used by the public page.</div>
+        </div>
+
+        <div class="field full">
+          <label>Buy Now URL</label>
+          <input id="m_buy_url" />
+        </div>
+
+        <div class="field full">
+          <label>Bid URL</label>
+          <input id="m_bid_url" />
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+/* ===========================
+   CONFIG
+   =========================== */
 const API_URL = "https://script.google.com/macros/s/AKfycbyLMf07vAWn1qdtL_FMVvCRf6GytYvXAtbzTLgqZRHurZisb7Qba4gYtsTwkhL-8vJu/exec";
+
+/*
+  Expected API (recommended):
+  - GET  ?action=list                 -> { data:[...] } or [...]
+  - POST action=add   + item fields   -> { ok:true }
+  - POST action=update + id + fields  -> { ok:true }
+  - POST action=delete + id           -> { ok:true }
+*/
 
 const els = {
   q: document.getElementById('q'),
   cat: document.getElementById('cat'),
+  showAssets: document.getElementById('showAssets'),
   refresh: document.getElementById('refresh'),
+  countPill: document.getElementById('countPill'),
+  updatedPill: document.getElementById('updatedPill'),
   tbody: document.getElementById('tbody'),
+
   addBtn: document.getElementById('addBtn'),
-  themeToggle: document.getElementById('themeToggle'),
+  f: {
+    title: document.getElementById('f_title'),
+    sku: document.getElementById('f_sku'),
+    category: document.getElementById('f_category'),
+    condition: document.getElementById('f_condition'),
+    price: document.getElementById('f_price'),
+    description: document.getElementById('f_description'),
+    buy_url: document.getElementById('f_buy_url'),
+    bid_url: document.getElementById('f_bid_url'),
+    img: [
+      document.getElementById('f_img1'),
+      document.getElementById('f_img2'),
+      document.getElementById('f_img3'),
+      document.getElementById('f_img4'),
+      document.getElementById('f_img5'),
+      document.getElementById('f_img6'),
+    ]
+  },
+
   modalOverlay: document.getElementById('modalOverlay'),
   closeModal: document.getElementById('closeModal'),
   saveModal: document.getElementById('saveModal'),
-  // Form inputs
-  f_title: document.getElementById('f_title'),
-  f_sku: document.getElementById('f_sku'),
-  f_category: document.getElementById('f_category'),
-  f_condition: document.getElementById('f_condition'),
-  f_price: document.getElementById('f_price'),
-  f_description: document.getElementById('f_description'),
-  f_images: document.getElementById('f_images'),
-  f_buy_url: document.getElementById('f_buy_url'),
-  f_bid_url: document.getElementById('f_bid_url'),
+  deleteModal: document.getElementById('deleteModal'),
+  m: {
+    id: document.getElementById('m_id'),
+    title: document.getElementById('m_title'),
+    sku: document.getElementById('m_sku'),
+    category: document.getElementById('m_category'),
+    condition: document.getElementById('m_condition'),
+    price: document.getElementById('m_price'),
+    description: document.getElementById('m_description'),
+    images: document.getElementById('m_images'),
+    buy_url: document.getElementById('m_buy_url'),
+    bid_url: document.getElementById('m_bid_url'),
+  },
+
+  /* NEW: theme toggle element */
+  themeToggle: document.getElementById('themeToggle'),
 };
 
-let ALL_DATA = [];
+let ALL = [];
+let EDITING = null;
 
-// --- THEME ---
-const setTheme = (t) => {
-  document.documentElement.setAttribute('data-theme', t);
-  localStorage.setItem('tekpak-theme', t);
+const txt = v => (v ?? '').toString().toLowerCase().trim();
+const money = v => {
+  const n = Number(v);
+  return isFinite(n) ? n.toLocaleString(undefined,{style:'currency',currency:'USD'}) : '—';
 };
-setTheme(localStorage.getItem('tekpak-theme') || 'light');
-els.themeToggle.onclick = () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 
-// --- API HANDLING ---
-async function loadData() {
+function normalize(raw){
+  // Try to be forgiving about field names coming from the sheet.
+  return {
+    id: raw.id ?? raw.ID ?? raw.rowId ?? raw.row_id ?? raw.RowID ?? raw.row ?? raw.Row ?? '',
+    title: raw.title ?? raw.name ?? raw.item ?? raw.Item ?? '',
+    sku: raw.sku ?? raw.SKU ?? '',
+    category: raw.category ?? raw.Category ?? '',
+    condition: raw.condition ?? raw.Condition ?? '',
+    price: raw.price ?? raw.Price ?? '',
+    description: raw.description ?? raw.Description ?? raw.notes ?? raw.Notes ?? '',
+    image: raw.image ?? raw.Image ?? '',
+    images: raw.images ?? raw.Images ?? '',
+    buy_url: raw.buy_url ?? raw.BuyURL ?? raw.checkout ?? '',
+    bid_url: raw.bid_url ?? raw.BidURL ?? raw.ebay ?? '',
+  };
+}
+
+function extractImages(item){
+  // Prefer "images" (comma-separated); fall back to single "image".
+  let list = [];
+  const images = (item.images ?? '').toString().trim();
+  const image = (item.image ?? '').toString().trim();
+  if(images){
+    list = images.split(',').map(s=>s.trim()).filter(Boolean);
+  } else if(image){
+    list = [image];
+  }
+  return list.slice(0,6);
+}
+
+async function apiGet(params){
+  const url = API_URL + (API_URL.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
+  const res = await fetch(url, { method:'GET' });
+  return res.json();
+}
+
+async function apiPost(body){
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+    body: new URLSearchParams(body).toString()
+  });
+  return res.json();
+}
+
+async function load(){
   els.refresh.disabled = true;
-  els.refresh.textContent = "Loading...";
-  try {
-    const res = await fetch(`${API_URL}?action=list`);
-    const json = await res.json();
-    ALL_DATA = Array.isArray(json) ? json : (json.data || []);
-    render();
-  } catch (e) {
-    console.error("Load failed", e);
+  els.refresh.textContent = "Refreshing…";
+  try{
+    const json = await apiGet({ action:'list' });
+    const rows = Array.isArray(json) ? json : (json.data || []);
+    ALL = rows.map(normalize);
+
+    populateCategories();
+    applyFilters();
+
+    els.updatedPill.textContent = "Last updated: " + new Date().toLocaleString();
+  } catch(err){
+    console.error(err);
+    alert("Could not load inventory. Check Console for details.\n\nCommon causes:\n- API doesn't support ?action=list\n- CORS / permissions\n- Returned HTML instead of JSON");
   } finally {
     els.refresh.disabled = false;
     els.refresh.textContent = "Refresh";
   }
 }
 
-function render() {
-  const q = els.q.value.toLowerCase();
-  const filtered = ALL_DATA.filter(i => 
-    (i.title || i.item || '').toLowerCase().includes(q) || 
-    (i.sku || '').toLowerCase().includes(q)
-  );
-  
-  document.getElementById('countPill').textContent = `${filtered.length} Items`;
-  els.tbody.innerHTML = filtered.map(i => `
-    <tr>
-      <td><b>${i.title || i.item || 'N/A'}</b></td>
-      <td>${i.sku || '-'}</td>
-      <td>$${i.price || '0'}</td>
-      <td><button class="btn" onclick="openEdit('${i.id || i.ID}')">Edit</button></td>
-    </tr>
-  `).join('');
+function populateCategories(){
+  const cats = [...new Set(ALL.map(x=>x.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  els.cat.innerHTML = `<option value="">All categories</option>` + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
 }
 
-async function addItem() {
-  const title = els.f_title.value.trim();
-  if (!title) return alert("Please enter a title");
+function shouldHideAsset(item){
+  // Admin default: hide assets unless checkbox enabled.
+  return txt(item.description).includes('asset');
+}
 
-  const payload = {
-    action: 'add',
-    title: title,
-    sku: els.f_sku.value.trim(),
-    category: els.f_category.value.trim(),
-    condition: els.f_condition.value.trim(),
-    price: els.f_price.value.trim(),
-    description: els.f_description.value.trim(),
-    images: els.f_images.value.trim(),
-    buy_url: els.f_buy_url.value.trim(),
-    bid_url: els.f_bid_url.value.trim()
+function applyFilters(){
+  const q = txt(els.q.value);
+  const cat = els.cat.value;
+  const showAssets = els.showAssets.checked;
+
+  const filtered = ALL.filter(i=>{
+    if(!showAssets && shouldHideAsset(i)) return false;
+
+    const matchesQ = !q ||
+      txt(i.title).includes(q) ||
+      txt(i.sku).includes(q) ||
+      txt(i.category).includes(q) ||
+      txt(i.condition).includes(q) ||
+      txt(i.description).includes(q);
+
+    const matchesCat = !cat || i.category === cat;
+    return matchesQ && matchesCat;
+  });
+
+  els.countPill.textContent = `${filtered.length} items`;
+  render(filtered);
+}
+
+function render(list){
+  els.tbody.innerHTML = list.map(i=>{
+    const imgs = extractImages(i);
+    const imgCount = imgs.length;
+    const buy = i.buy_url ? `<a class="link" href="${escapeAttr(i.buy_url)}" target="_blank">Buy</a>` : `<span class="mini">—</span>`;
+    const bid = i.bid_url ? `<a class="link" href="${escapeAttr(i.bid_url)}" target="_blank">Bid</a>` : `<span class="mini">—</span>`;
+
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:700">${escapeHtml(i.title || 'Unnamed Item')}</div>
+        </td>
+        <td class="sku">${escapeHtml(i.sku || '')}</td>
+        <td>${escapeHtml(i.category || '')}</td>
+        <td><span class="mini">${escapeHtml(i.condition || 'Not specified')}</span></td>
+        <td class="nowrap" style="font-family:var(--mono)">${money(i.price)}</td>
+        <td style="max-width:420px; color:var(--muted); line-height:1.35">${escapeHtml(i.description || '')}</td>
+        <td class="nowrap">${imgCount ? `<span class="mini">${imgCount} img</span>` : `<span class="mini">0 img</span>`}</td>
+        <td class="nowrap">${buy} &nbsp; ${bid}</td>
+        <td class="nowrap">
+          <div class="actions">
+            <button class="btn" onclick="openEdit('${escapeAttr(i.id)}')">Edit</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function collectAddPayload(){
+  const imgs = els.f.img.map(x=>x.value.trim()).filter(Boolean).slice(0,6);
+  return {
+    title: els.f.title.value.trim(),
+    sku: els.f.sku.value.trim(),
+    category: els.f.category.value.trim(),
+    condition: els.f.condition.value.trim(),
+    price: els.f.price.value.trim(),
+    description: els.f.description.value.trim(),
+    images: imgs.join(','),
+    buy_url: els.f.buy_url.value.trim(),
+    bid_url: els.f.bid_url.value.trim(),
   };
+}
+
+function clearAddForm(){
+  Object.values(els.f).forEach(v=>{
+    if(Array.isArray(v)) v.forEach(x=>x.value='');
+    else if(v && v.tagName) v.value='';
+  });
+}
+
+async function addItem(){
+  const payload = collectAddPayload();
+  if(!payload.title){
+    alert("Title is required.");
+    return;
+  }
 
   els.addBtn.disabled = true;
-  els.addBtn.textContent = "Sending...";
-
-  try {
-    // Mode 'no-cors' prevents the browser from hanging on Google's redirect
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors', 
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(payload)
-    });
-
-    // We can't read the response in 'no-cors', so we just wait a moment and reload
-    setTimeout(() => {
-      alert("Item submitted successfully!");
-      clearForm();
-      loadData();
-      els.addBtn.disabled = false;
-      els.addBtn.textContent = "Add to Sheet";
-    }, 1000);
-
-  } catch (err) {
-    alert("Error adding item. See console.");
+  els.addBtn.textContent = "Adding…";
+  try{
+    const res = await apiPost({ action:'add', ...payload });
+    if(!res || res.ok === false){
+      throw new Error(res?.error || "Add failed.");
+    }
+    clearAddForm();
+    await load();
+  } catch(err){
     console.error(err);
+    alert("Could not add item.\n\n" + err.message);
+  } finally {
     els.addBtn.disabled = false;
-    els.addBtn.textContent = "Add to Sheet";
+    els.addBtn.textContent = "Add to Inventory";
   }
 }
 
-function clearForm() {
-  [els.f_title, els.f_sku, els.f_category, els.f_condition, els.f_price, els.f_description, els.f_images, els.f_buy_url, els.f_bid_url].forEach(i => i.value = '');
-}
+/* ====== MODAL EDIT ====== */
+window.openEdit = function(id){
+  const item = ALL.find(x => String(x.id) === String(id));
+  if(!item){
+    alert("Could not find item by id: " + id);
+    return;
+  }
+  EDITING = item;
 
-// Global scope for button clicks
-window.openEdit = (id) => {
-  const item = ALL_DATA.find(x => String(x.id || x.ID) === String(id));
-  if(!item) return;
-  // Simplified for brevity - you can expand this modal logic
-  alert("Editing: " + (item.title || item.item));
+  els.m.id.value = item.id;
+  els.m.title.value = item.title || '';
+  els.m.sku.value = item.sku || '';
+  els.m.category.value = item.category || '';
+  els.m.condition.value = item.condition || '';
+  els.m.price.value = item.price || '';
+  els.m.description.value = item.description || '';
+  // Keep images as comma-separated; if only "image" exists, promote it.
+  const imgs = extractImages(item).join(', ');
+  els.m.images.value = imgs;
+  els.m.buy_url.value = item.buy_url || '';
+  els.m.bid_url.value = item.bid_url || '';
+
+  els.modalOverlay.style.display = 'flex';
 };
 
-els.q.oninput = render;
-els.refresh.onclick = loadData;
-els.addBtn.onclick = addItem;
-els.closeModal.onclick = () => els.modalOverlay.style.display = 'none';
+function closeModal(){
+  els.modalOverlay.style.display = 'none';
+  EDITING = null;
+}
 
-loadData();
+async function saveEdit(){
+  if(!EDITING) return;
+  const id = els.m.id.value;
+
+  const payload = {
+    id,
+    title: els.m.title.value.trim(),
+    sku: els.m.sku.value.trim(),
+    category: els.m.category.value.trim(),
+    condition: els.m.condition.value.trim(),
+    price: els.m.price.value.trim(),
+    description: els.m.description.value.trim(),
+    images: els.m.images.value.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6).join(','),
+    buy_url: els.m.buy_url.value.trim(),
+    bid_url: els.m.bid_url.value.trim(),
+  };
+
+  els.saveModal.disabled = true;
+  els.saveModal.textContent = "Saving…";
+  try{
+    const res = await apiPost({ action:'update', ...payload });
+    if(!res || res.ok === false){
+      throw new Error(res?.error || "Update failed.");
+    }
+    closeModal();
+    await load();
+  } catch(err){
+    console.error(err);
+    alert("Could not save changes.\n\n" + err.message);
+  } finally {
+    els.saveModal.disabled = false;
+    els.saveModal.textContent = "Save changes";
+  }
+}
+
+async function deleteItem(){
+  if(!EDITING) return;
+  const id = els.m.id.value;
+  const ok = confirm("Delete this item?\n\nThis cannot be undone.");
+  if(!ok) return;
+
+  els.deleteModal.disabled = true;
+  els.deleteModal.textContent = "Deleting…";
+  try{
+    const res = await apiPost({ action:'delete', id });
+    if(!res || res.ok === false){
+      throw new Error(res?.error || "Delete failed.");
+    }
+    closeModal();
+    await load();
+  } catch(err){
+    console.error(err);
+    alert("Could not delete item.\n\n" + err.message);
+  } finally {
+    els.deleteModal.disabled = false;
+    els.deleteModal.textContent = "Delete";
+  }
+}
+
+/* ====== Tiny HTML escaping for safety ====== */
+function escapeHtml(str){
+  return (str ?? '').toString()
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+function escapeAttr(str){
+  return escapeHtml(str).replaceAll('`','&#096;');
+}
+
+/* ===========================
+   THEME (NEW - SAFE)
+   =========================== */
+function applyTheme(theme){
+  const t = (theme === 'dark') ? 'dark' : 'light';
+  document.body.setAttribute('data-theme', t);
+  try{ localStorage.setItem('tp_theme', t); }catch(e){}
+  // Update toggle label without touching any inventory logic.
+  if(els.themeToggle){
+    els.themeToggle.textContent = (t === 'dark') ? "☀️ Light" : "🌙 Dark";
+    els.themeToggle.setAttribute('aria-label', (t === 'dark') ? "Switch to light mode" : "Switch to dark mode");
+  }
+}
+
+function initTheme(){
+  let saved = null;
+  try{ saved = localStorage.getItem('tp_theme'); }catch(e){}
+  if(saved === 'light' || saved === 'dark'){
+    applyTheme(saved);
+    return;
+  }
+  // Default to system preference if nothing saved
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(prefersDark ? 'dark' : 'light');
+}
+
+/* EVENTS */
+els.q.addEventListener('input', applyFilters);
+els.cat.addEventListener('change', applyFilters);
+els.showAssets.addEventListener('change', applyFilters);
+els.refresh.addEventListener('click', load);
+els.addBtn.addEventListener('click', addItem);
+els.closeModal.addEventListener('click', closeModal);
+els.modalOverlay.addEventListener('click', (e)=>{ if(e.target === els.modalOverlay) closeModal(); });
+els.saveModal.addEventListener('click', saveEdit);
+els.deleteModal.addEventListener('click', deleteItem);
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
+
+/* NEW: theme toggle click */
+if(els.themeToggle){
+  els.themeToggle.addEventListener('click', ()=>{
+    const current = document.body.getAttribute('data-theme') || 'light';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+}
+
+/* INIT */
+initTheme();
+load();
 </script>
 </body>
 </html>
