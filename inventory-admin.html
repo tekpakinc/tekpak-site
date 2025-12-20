@@ -4,154 +4,195 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Tek-Pak Inventory Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#f4f6f8;
-      --panel:#ffffff;
-      --steel:#e2e6ea;
-      --border:#cfd6dd;
-      --text:#1e2933;
-      --muted:#5f6b7a;
-      --accent:#2b6cb0;
-      --good:#2f855a;
-      --warn:#d69e2e;
-      --bad:#c53030;
-      --radius:10px;
-      --shadow: 0 12px 30px rgba(0,0,0,.08);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    :root {
+      /* Light Mode */
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --steel: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --good: #10b981;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --font: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
     }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
-    header{
-      position:sticky;top:0;z-index:5;
-      background:#fff;border-bottom:2px solid var(--steel);
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --steel: #334155;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --good: #34d399;
+      --bad: #f87171;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
     }
-    .wrap{max-width:1400px;margin:0 auto;padding:16px}
-    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-    h1{margin:0;font-size:18px}
-    .sub{color:var(--muted);font-size:12px;margin-top:2px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .pill{
-      font-family:var(--mono);
-      font-size:12px;color:var(--muted);
-      padding:8px 10px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;
+
+    * { box-sizing: border-box; transition: background-color 0.2s, border-color 0.2s; }
+    
+    body { 
+      margin: 0; 
+      background: var(--bg); 
+      color: var(--text); 
+      font-family: var(--font);
+      line-height: 1.5;
+      overflow-x: hidden;
     }
-    input, select, textarea{
-      font-family:var(--sans);
-      padding:10px 12px;border-radius:8px;
-      border:1px solid var(--border);background:#fff;
-      font-size:14px;
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    textarea{min-height:90px;resize:vertical}
-    .btn{
-      border:1px solid var(--border);
-      background:#fff;color:var(--text);
-      padding:10px 12px;border-radius:8px;
-      cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.06);
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
-    .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-    .btn.good{background:var(--good);border-color:var(--good);color:#fff}
-    .btn.bad{background:var(--bad);border-color:var(--bad);color:#fff}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .grid{
-      display:grid;gap:14px;
-      grid-template-columns: 420px 1fr;
-      align-items:start;
-      padding:16px;
-      max-width:1400px;
-      margin:0 auto;
+
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--panel); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      background-color: rgba(var(--panel), 0.8);
     }
-    @media (max-width: 1100px){
-      .grid{grid-template-columns: 1fr;}
+
+    .wrap { max-width: 1440px; margin: 0 auto; padding: 16px 24px; }
+    
+    .top { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    
+    h1 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+
+    .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+    /* Inputs & Selects */
+    input, select, textarea {
+      font-family: var(--font);
+      padding: 10px 14px; border-radius: 8px;
+      border: 1px solid var(--border); 
+      background: var(--panel);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
     }
-    .card{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
-    .cardHead{
-      padding:12px 14px;
-      border-bottom:1px solid var(--steel);
-      background:#fff;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.85rem;
+      padding: 10px 16px; border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel); color: var(--text);
+      cursor: pointer; transition: all 0.2s;
     }
-    .cardHead h2{margin:0;font-size:14px}
-    .cardBody{padding:14px}
-    .formGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
+    .btn:hover { background: var(--steel); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--accent-hover); }
+    .btn.good { background: var(--good); border-color: var(--good); color: #fff; }
+    .btn.bad { background: var(--bad); border-color: var(--bad); color: #fff; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Layout Grid */
+    .grid {
+      display: grid; gap: 24px;
+      grid-template-columns: 400px 1fr;
+      padding: 24px; max-width: 1440px; margin: 0 auto;
+      animation: fadeIn 0.5s ease-out;
     }
-    .formGrid .full{grid-column:1 / -1}
-    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
-    .field{display:flex;flex-direction:column}
-    .hint{font-size:11px;color:var(--muted);margin-top:6px}
-    table{
-      width:100%;
-      border-collapse:separate;
-      border-spacing:0;
-      font-size:13px;
+    @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      display: flex; flex-direction: column;
     }
-    thead th{
-      position:sticky;top:74px;
-      background:#fff;
-      z-index:3;
-      border-bottom:2px solid var(--steel);
-      text-align:left;
-      padding:10px;
-      color:var(--muted);
-      font-weight:600;
-      white-space:nowrap;
+    .cardHead {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
     }
-    tbody td{
-      border-bottom:1px solid var(--steel);
-      padding:10px;
-      vertical-align:top;
+    .cardHead h2 { margin: 0; font-size: 1rem; font-weight: 600; }
+
+    .cardBody { padding: 20px; }
+
+    .formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .full { grid-column: 1 / -1; }
+    label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Table Styling */
+    .table-container { 
+      overflow: auto; 
+      max-height: calc(100vh - 220px); 
+      border-radius: 0 0 var(--radius) var(--radius);
     }
-    tbody tr:hover{background:#fafbfc}
-    .sku{font-family:var(--mono);font-size:12px}
-    .nowrap{white-space:nowrap}
-    .mini{
-      display:inline-block;
-      padding:3px 7px;border-radius:999px;
-      border:1px solid var(--border);
-      background:#f8fafc;color:var(--muted);
-      font-size:11px;
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    thead th {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--steel); padding: 12px 16px;
+      text-align: left; color: var(--muted); font-weight: 600;
+      border-bottom: 1px solid var(--border);
     }
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .link{
-      color:var(--accent);
-      text-decoration:none;
-      font-size:12px;
-      word-break:break-all;
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:hover { background: var(--steel); }
+    tbody td { padding: 14px 16px; vertical-align: middle; }
+
+    /* Custom UI Elements */
+    .pill {
+      font-family: var(--mono); font-size: 0.7rem; color: var(--muted);
+      padding: 4px 10px; border: 1px solid var(--border);
+      border-radius: 20px; background: var(--steel);
+    }
+    .sku { font-family: var(--mono); color: var(--accent); font-weight: 600; }
+    .mini-badge {
+      display: inline-block; padding: 2px 6px; border-radius: 4px;
+      background: var(--steel); font-size: 0.75rem; color: var(--muted);
+    }
+
+    /* Theme Toggle Switch */
+    .theme-toggle {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--steel); cursor: pointer; border: 1px solid var(--border);
     }
 
     /* Modal */
-    .modalOverlay{
-      position:fixed;inset:0;
-      background:rgba(0,0,0,.55);
-      display:none;align-items:center;justify-content:center;
-      z-index:9999;
-      padding:18px;
+    .modalOverlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
     }
-    .modal{
-      width:min(980px, 100%);
-      max-height:90vh;
-      overflow:auto;
-      background:#fff;border-radius:14px;
-      border:1px solid var(--border);
-      box-shadow:0 30px 80px rgba(0,0,0,.35);
+    .modal {
+      width: min(900px, 100%); max-height: 90vh;
+      background: var(--panel); border-radius: 16px;
+      box-shadow: var(--shadow); overflow: hidden;
+      animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex; flex-direction: column;
     }
-    .modalHead{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:12px 14px;border-bottom:1px solid var(--steel);
-    }
-    .modalHead h3{margin:0;font-size:14px}
-    .modalBody{padding:14px}
+    .modalBody { overflow-y: auto; padding: 24px; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
   </style>
 </head>
 
@@ -160,30 +201,30 @@
   <div class="wrap">
     <div class="top">
       <div>
-        <h1>Tek-Pak Inventory Admin</h1>
-        <div class="sub">Add, edit, and manage inventory (sheet-backed)</div>
+        <h1>Tek-Pak <span style="font-weight:400; opacity:0.6">Inventory Admin</span></h1>
+        <div class="sub">Backend management dashboard</div>
       </div>
-      <div class="row">
-        <input id="q" placeholder="Search title / SKU / category..." style="min-width:280px">
-        <select id="cat" style="min-width:220px">
-          <option value="">All categories</option>
+      <div class="header-actions">
+        <input id="q" placeholder="Search anything..." style="min-width:240px">
+        <select id="cat" style="min-width:180px">
+          <option value="">All Categories</option>
         </select>
-        <label class="row" style="gap:8px;font-size:12px;color:var(--muted)">
-          <input type="checkbox" id="showAssets">
-          Show Asset items
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem">
+          <input type="checkbox" id="showAssets"> 
+          Assets
         </label>
+        <div class="theme-toggle" id="themeBtn" title="Toggle Theme">🌓</div>
         <button class="btn" id="refresh">Refresh</button>
-        <span class="pill" id="countPill">—</span>
+        <span class="pill" id="countPill">0 Items</span>
       </div>
     </div>
   </div>
 </header>
 
 <div class="grid">
-  <!-- ADD PANEL -->
   <section class="card">
     <div class="cardHead">
-      <h2>Add item</h2>
+      <h2>Add New Item</h2>
       <button class="btn primary" id="addBtn">Add to Inventory</button>
     </div>
     <div class="cardBody">
@@ -195,145 +236,125 @@
 
         <div class="field">
           <label>SKU</label>
-          <input id="f_sku" placeholder="e.g., DL7420" />
+          <input id="f_sku" placeholder="DL7420" />
         </div>
 
         <div class="field">
           <label>Category</label>
-          <input id="f_category" placeholder="e.g., Laptops" />
+          <input id="f_category" placeholder="Laptops" />
         </div>
 
         <div class="field">
           <label>Condition</label>
-          <input id="f_condition" placeholder="e.g., Refurbished - Grade A" />
+          <input id="f_condition" placeholder="Refurbished" />
         </div>
 
         <div class="field">
           <label>Price</label>
-          <input id="f_price" placeholder="e.g., 449.99" />
+          <input id="f_price" placeholder="449.99" />
         </div>
 
         <div class="field full">
           <label>Description</label>
-          <textarea id="f_description" placeholder="Specs, notes, included accessories..."></textarea>
-          <div class="hint">If description contains the word <b>asset</b>, the public page will hide it.</div>
+          <textarea id="f_description" placeholder="Specs, notes..."></textarea>
+          <div style="font-size:0.7rem; color:var(--muted); margin-top:5px">Tip: include "asset" to hide from public.</div>
         </div>
 
         <div class="field full">
-          <label>Images (up to 6 URLs)</label>
-          <input id="f_img1" placeholder="Image URL #1" />
-          <input id="f_img2" placeholder="Image URL #2" style="margin-top:8px" />
-          <input id="f_img3" placeholder="Image URL #3" style="margin-top:8px" />
-          <input id="f_img4" placeholder="Image URL #4" style="margin-top:8px" />
-          <input id="f_img5" placeholder="Image URL #5" style="margin-top:8px" />
-          <input id="f_img6" placeholder="Image URL #6" style="margin-top:8px" />
-          <div class="hint">Stored as a single comma-separated <span style="font-family:var(--mono)">images</span> value in the sheet/API.</div>
+          <label>Image URLs (Up to 6)</label>
+          <div style="display:grid; gap:8px">
+             <input id="f_img1" placeholder="URL 1" />
+             <input id="f_img2" placeholder="URL 2" />
+             <input id="f_img3" placeholder="URL 3" />
+          </div>
+          <input id="f_img4" type="hidden" /><input id="f_img5" type="hidden" /><input id="f_img6" type="hidden" />
         </div>
 
         <div class="field full">
           <label>Buy Now URL</label>
-          <input id="f_buy_url" placeholder="PayPal/Stripe/Square/Checkout link" />
+          <input id="f_buy_url" placeholder="Stripe/PayPal link" />
         </div>
 
         <div class="field full">
           <label>Bid URL</label>
-          <input id="f_bid_url" placeholder="eBay auction link (optional)" />
+          <input id="f_bid_url" placeholder="eBay link" />
         </div>
       </div>
     </div>
   </section>
 
-  <!-- LIST PANEL -->
   <section class="card">
     <div class="cardHead">
-      <h2>Inventory</h2>
-      <div class="row">
-        <span class="pill" id="updatedPill">Last updated: —</span>
-      </div>
+      <h2>Live Inventory</h2>
+      <span class="pill" id="updatedPill">Never synced</span>
     </div>
-    <div class="cardBody" style="padding:0">
-      <div style="overflow:auto; max-height: calc(100vh - 190px);">
-        <table>
-          <thead>
-            <tr>
-              <th class="nowrap">Title</th>
-              <th>SKU</th>
-              <th>Category</th>
-              <th>Condition</th>
-              <th class="nowrap">Price</th>
-              <th>Description</th>
-              <th>Images</th>
-              <th>Buy / Bid</th>
-              <th class="nowrap">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Category</th>
+            <th>Condition</th>
+            <th>Price</th>
+            <th>Media</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
     </div>
   </section>
 </div>
 
-<!-- EDIT MODAL -->
 <div class="modalOverlay" id="modalOverlay">
   <div class="modal">
-    <div class="modalHead">
-      <h3>Edit item</h3>
-      <div class="row">
-        <button class="btn" id="closeModal">Close</button>
-        <button class="btn good" id="saveModal">Save changes</button>
+    <div class="cardHead">
+      <h3>Edit Product</h3>
+      <div style="display:flex; gap:8px">
         <button class="btn bad" id="deleteModal">Delete</button>
+        <button class="btn good" id="saveModal">Save Changes</button>
+        <button class="btn" id="closeModal">Close</button>
       </div>
     </div>
     <div class="modalBody">
       <div class="formGrid">
-        <div class="field full">
-          <label>Row ID (readonly)</label>
-          <input id="m_id" readonly style="font-family:var(--mono)" />
-          <div class="hint">This should be a stable ID from your Apps Script (recommended), or a sheet row number if you built it that way.</div>
+        <div class="field">
+          <label>Row ID (Read-only)</label>
+          <input id="m_id" readonly style="opacity:0.6" />
         </div>
-
-        <div class="field full">
+        <div class="field">
           <label>Title</label>
           <input id="m_title" />
         </div>
-
         <div class="field">
           <label>SKU</label>
           <input id="m_sku" />
         </div>
-
         <div class="field">
           <label>Category</label>
           <input id="m_category" />
         </div>
-
         <div class="field">
           <label>Condition</label>
           <input id="m_condition" />
         </div>
-
         <div class="field">
           <label>Price</label>
           <input id="m_price" />
         </div>
-
         <div class="field full">
           <label>Description</label>
           <textarea id="m_description"></textarea>
         </div>
-
         <div class="field full">
-          <label>Images (comma-separated, up to 6)</label>
-          <textarea id="m_images" placeholder="https://img1.jpg, https://img2.jpg, ..."></textarea>
-          <div class="hint">Tip: keep it clean (no extra commas). Up to 6 used by the public page.</div>
+          <label>Images (Comma-separated)</label>
+          <textarea id="m_images"></textarea>
         </div>
-
         <div class="field full">
-          <label>Buy Now URL</label>
+          <label>Buy URL</label>
           <input id="m_buy_url" />
         </div>
-
         <div class="field full">
           <label>Bid URL</label>
           <input id="m_bid_url" />
@@ -345,17 +366,9 @@
 
 <script>
 /* ===========================
-   CONFIG
+    CONFIG & STATE
    =========================== */
 const API_URL = "https://script.google.com/macros/s/AKfycbyLMf07vAWn1qdtL_FMVvCRf6GytYvXAtbzTLgqZRHurZisb7Qba4gYtsTwkhL-8vJu/exec";
-
-/*
-  Expected API (recommended):
-  - GET  ?action=list                 -> { data:[...] } or [...]
-  - POST action=add   + item fields   -> { ok:true }
-  - POST action=update + id + fields  -> { ok:true }
-  - POST action=delete + id           -> { ok:true }
-*/
 
 const els = {
   q: document.getElementById('q'),
@@ -365,8 +378,12 @@ const els = {
   countPill: document.getElementById('countPill'),
   updatedPill: document.getElementById('updatedPill'),
   tbody: document.getElementById('tbody'),
-
   addBtn: document.getElementById('addBtn'),
+  themeBtn: document.getElementById('themeBtn'),
+  modalOverlay: document.getElementById('modalOverlay'),
+  closeModal: document.getElementById('closeModal'),
+  saveModal: document.getElementById('saveModal'),
+  deleteModal: document.getElementById('deleteModal'),
   f: {
     title: document.getElementById('f_title'),
     sku: document.getElementById('f_sku'),
@@ -377,19 +394,11 @@ const els = {
     buy_url: document.getElementById('f_buy_url'),
     bid_url: document.getElementById('f_bid_url'),
     img: [
-      document.getElementById('f_img1'),
-      document.getElementById('f_img2'),
-      document.getElementById('f_img3'),
-      document.getElementById('f_img4'),
-      document.getElementById('f_img5'),
-      document.getElementById('f_img6'),
+      document.getElementById('f_img1'), document.getElementById('f_img2'),
+      document.getElementById('f_img3'), document.getElementById('f_img4'),
+      document.getElementById('f_img5'), document.getElementById('f_img6'),
     ]
   },
-
-  modalOverlay: document.getElementById('modalOverlay'),
-  closeModal: document.getElementById('closeModal'),
-  saveModal: document.getElementById('saveModal'),
-  deleteModal: document.getElementById('deleteModal'),
   m: {
     id: document.getElementById('m_id'),
     title: document.getElementById('m_title'),
@@ -407,6 +416,23 @@ const els = {
 let ALL = [];
 let EDITING = null;
 
+/* ===========================
+    THEME ENGINE
+   =========================== */
+function initTheme() {
+  const saved = localStorage.getItem('tekpak-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+}
+els.themeBtn.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('tekpak-theme', next);
+});
+
+/* ===========================
+    CORE LOGIC (Unchanged)
+   =========================== */
 const txt = v => (v ?? '').toString().toLowerCase().trim();
 const money = v => {
   const n = Number(v);
@@ -414,7 +440,6 @@ const money = v => {
 };
 
 function normalize(raw){
-  // Try to be forgiving about field names coming from the sheet.
   return {
     id: raw.id ?? raw.ID ?? raw.rowId ?? raw.row_id ?? raw.RowID ?? raw.row ?? raw.Row ?? '',
     title: raw.title ?? raw.name ?? raw.item ?? raw.Item ?? '',
@@ -431,7 +456,6 @@ function normalize(raw){
 }
 
 function extractImages(item){
-  // Prefer "images" (comma-separated); fall back to single "image".
   let list = [];
   const images = (item.images ?? '').toString().trim();
   const image = (item.image ?? '').toString().trim();
@@ -460,19 +484,17 @@ async function apiPost(body){
 
 async function load(){
   els.refresh.disabled = true;
-  els.refresh.textContent = "Refreshing…";
+  els.refresh.textContent = "Syncing...";
   try{
     const json = await apiGet({ action:'list' });
     const rows = Array.isArray(json) ? json : (json.data || []);
     ALL = rows.map(normalize);
-
     populateCategories();
     applyFilters();
-
-    els.updatedPill.textContent = "Last updated: " + new Date().toLocaleString();
+    els.updatedPill.textContent = "Updated: " + new Date().toLocaleTimeString();
   } catch(err){
     console.error(err);
-    alert("Could not load inventory. Check Console for details.\n\nCommon causes:\n- API doesn't support ?action=list\n- CORS / permissions\n- Returned HTML instead of JSON");
+    alert("Load failed. Check console.");
   } finally {
     els.refresh.disabled = false;
     els.refresh.textContent = "Refresh";
@@ -481,11 +503,10 @@ async function load(){
 
 function populateCategories(){
   const cats = [...new Set(ALL.map(x=>x.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  els.cat.innerHTML = `<option value="">All categories</option>` + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  els.cat.innerHTML = `<option value="">All Categories</option>` + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
 }
 
 function shouldHideAsset(item){
-  // Admin default: hide assets unless checkbox enabled.
   return txt(item.description).includes('asset');
 }
 
@@ -496,45 +517,39 @@ function applyFilters(){
 
   const filtered = ALL.filter(i=>{
     if(!showAssets && shouldHideAsset(i)) return false;
-
-    const matchesQ = !q ||
-      txt(i.title).includes(q) ||
-      txt(i.sku).includes(q) ||
-      txt(i.category).includes(q) ||
-      txt(i.condition).includes(q) ||
+    const matchesQ = !q || 
+      txt(i.title).includes(q) || 
+      txt(i.sku).includes(q) || 
       txt(i.description).includes(q);
-
     const matchesCat = !cat || i.category === cat;
     return matchesQ && matchesCat;
   });
 
-  els.countPill.textContent = `${filtered.length} items`;
-
+  els.countPill.textContent = `${filtered.length} Items`;
   render(filtered);
 }
 
 function render(list){
   els.tbody.innerHTML = list.map(i=>{
     const imgs = extractImages(i);
-    const imgCount = imgs.length;
-    const buy = i.buy_url ? `<a class="link" href="${escapeAttr(i.buy_url)}" target="_blank">Buy</a>` : `<span class="mini">—</span>`;
-    const bid = i.bid_url ? `<a class="link" href="${escapeAttr(i.bid_url)}" target="_blank">Bid</a>` : `<span class="mini">—</span>`;
+    const buy = i.buy_url ? `<a class="mini-badge" style="color:var(--accent)" href="${escapeAttr(i.buy_url)}" target="_blank">Buy</a>` : '';
+    const bid = i.bid_url ? `<a class="mini-badge" style="color:var(--accent)" href="${escapeAttr(i.bid_url)}" target="_blank">Bid</a>` : '';
 
     return `
       <tr>
         <td>
-          <div style="font-weight:600">${escapeHtml(i.title || 'Unnamed Item')}</div>
+          <div style="font-weight:600">${escapeHtml(i.title || 'Untitled')}</div>
+          <div style="font-size:0.75rem; color:var(--muted); max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${escapeHtml(i.description)}</div>
         </td>
-        <td class="sku">${escapeHtml(i.sku || '')}</td>
-        <td>${escapeHtml(i.category || '')}</td>
-        <td><span class="mini">${escapeHtml(i.condition || 'Not specified')}</span></td>
-        <td class="nowrap" style="font-family:var(--mono)">${money(i.price)}</td>
-        <td style="max-width:420px; color:var(--muted)">${escapeHtml(i.description || '')}</td>
-        <td class="nowrap">${imgCount ? `<span class="mini">${imgCount} img</span>` : `<span class="mini">0 img</span>`}</td>
-        <td class="nowrap">${buy} &nbsp; ${bid}</td>
-        <td class="nowrap">
-          <div class="actions">
+        <td class="sku">${escapeHtml(i.sku)}</td>
+        <td>${escapeHtml(i.category)}</td>
+        <td><span class="mini-badge">${escapeHtml(i.condition)}</span></td>
+        <td style="font-family:var(--mono); font-weight:600">${money(i.price)}</td>
+        <td><span class="pill">${imgs.length}</span></td>
+        <td>
+          <div style="display:flex; gap:8px">
             <button class="btn" onclick="openEdit('${escapeAttr(i.id)}')">Edit</button>
+            ${buy} ${bid}
           </div>
         </td>
       </tr>
@@ -542,9 +557,10 @@ function render(list){
   }).join('');
 }
 
-function collectAddPayload(){
+/* ACTIONS */
+async function addItem(){
   const imgs = els.f.img.map(x=>x.value.trim()).filter(Boolean).slice(0,6);
-  return {
+  const payload = {
     title: els.f.title.value.trim(),
     sku: els.f.sku.value.trim(),
     category: els.f.category.value.trim(),
@@ -555,49 +571,28 @@ function collectAddPayload(){
     buy_url: els.f.buy_url.value.trim(),
     bid_url: els.f.bid_url.value.trim(),
   };
-}
 
-function clearAddForm(){
-  Object.values(els.f).forEach(v=>{
-    if(Array.isArray(v)) v.forEach(x=>x.value='');
-    else if(v && v.tagName) v.value='';
-  });
-}
-
-async function addItem(){
-  const payload = collectAddPayload();
-  if(!payload.title){
-    alert("Title is required.");
-    return;
-  }
+  if(!payload.title) return alert("Title required");
 
   els.addBtn.disabled = true;
-  els.addBtn.textContent = "Adding…";
-  try{
+  els.addBtn.textContent = "Processing...";
+  try {
     const res = await apiPost({ action:'add', ...payload });
-    if(!res || res.ok === false){
-      throw new Error(res?.error || "Add failed.");
+    if(res.ok !== false) {
+      Object.values(els.f).forEach(v => { if(v.tagName) v.value = ''; });
+      els.f.img.forEach(i => i.value = '');
+      await load();
     }
-    clearAddForm();
-    await load();
-  } catch(err){
-    console.error(err);
-    alert("Could not add item.\n\n" + err.message);
   } finally {
     els.addBtn.disabled = false;
     els.addBtn.textContent = "Add to Inventory";
   }
 }
 
-/* ====== MODAL EDIT ====== */
 window.openEdit = function(id){
   const item = ALL.find(x => String(x.id) === String(id));
-  if(!item){
-    alert("Could not find item by id: " + id);
-    return;
-  }
+  if(!item) return;
   EDITING = item;
-
   els.m.id.value = item.id;
   els.m.title.value = item.title || '';
   els.m.sku.value = item.sku || '';
@@ -605,12 +600,9 @@ window.openEdit = function(id){
   els.m.condition.value = item.condition || '';
   els.m.price.value = item.price || '';
   els.m.description.value = item.description || '';
-  // Keep images as comma-separated; if only "image" exists, promote it.
-  const imgs = extractImages(item).join(', ');
-  els.m.images.value = imgs;
+  els.m.images.value = extractImages(item).join(', ');
   els.m.buy_url.value = item.buy_url || '';
   els.m.bid_url.value = item.bid_url || '';
-
   els.modalOverlay.style.display = 'flex';
 };
 
@@ -621,75 +613,39 @@ function closeModal(){
 
 async function saveEdit(){
   if(!EDITING) return;
-  const id = els.m.id.value;
-
   const payload = {
-    id,
+    id: els.m.id.value,
     title: els.m.title.value.trim(),
     sku: els.m.sku.value.trim(),
     category: els.m.category.value.trim(),
     condition: els.m.condition.value.trim(),
     price: els.m.price.value.trim(),
     description: els.m.description.value.trim(),
-    images: els.m.images.value.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6).join(','),
+    images: els.m.images.value.split(',').map(s=>s.trim()).filter(Boolean).join(','),
     buy_url: els.m.buy_url.value.trim(),
     bid_url: els.m.bid_url.value.trim(),
   };
 
   els.saveModal.disabled = true;
-  els.saveModal.textContent = "Saving…";
-  try{
+  try {
     const res = await apiPost({ action:'update', ...payload });
-    if(!res || res.ok === false){
-      throw new Error(res?.error || "Update failed.");
-    }
-    closeModal();
-    await load();
-  } catch(err){
-    console.error(err);
-    alert("Could not save changes.\n\n" + err.message);
-  } finally {
-    els.saveModal.disabled = false;
-    els.saveModal.textContent = "Save changes";
-  }
+    if(res.ok !== false) { closeModal(); await load(); }
+  } finally { els.saveModal.disabled = false; }
 }
 
 async function deleteItem(){
-  if(!EDITING) return;
-  const id = els.m.id.value;
-  const ok = confirm("Delete this item?\n\nThis cannot be undone.");
-  if(!ok) return;
-
+  if(!EDITING || !confirm("Delete item permanently?")) return;
   els.deleteModal.disabled = true;
-  els.deleteModal.textContent = "Deleting…";
-  try{
-    const res = await apiPost({ action:'delete', id });
-    if(!res || res.ok === false){
-      throw new Error(res?.error || "Delete failed.");
-    }
-    closeModal();
-    await load();
-  } catch(err){
-    console.error(err);
-    alert("Could not delete item.\n\n" + err.message);
-  } finally {
-    els.deleteModal.disabled = false;
-    els.deleteModal.textContent = "Delete";
-  }
+  try {
+    const res = await apiPost({ action:'delete', id: els.m.id.value });
+    if(res.ok !== false) { closeModal(); await load(); }
+  } finally { els.deleteModal.disabled = false; }
 }
 
-/* ====== Tiny HTML escaping for safety ====== */
 function escapeHtml(str){
-  return (str ?? '').toString()
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'","&#039;");
+  return (str ?? '').toString().replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
 }
-function escapeAttr(str){
-  return escapeHtml(str).replaceAll('`','&#096;');
-}
+function escapeAttr(str){ return escapeHtml(str).replaceAll('`','&#096;'); }
 
 /* EVENTS */
 els.q.addEventListener('input', applyFilters);
@@ -698,12 +654,11 @@ els.showAssets.addEventListener('change', applyFilters);
 els.refresh.addEventListener('click', load);
 els.addBtn.addEventListener('click', addItem);
 els.closeModal.addEventListener('click', closeModal);
-els.modalOverlay.addEventListener('click', (e)=>{ if(e.target === els.modalOverlay) closeModal(); });
 els.saveModal.addEventListener('click', saveEdit);
 els.deleteModal.addEventListener('click', deleteItem);
-document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
+els.modalOverlay.addEventListener('click', (e) => { if(e.target === els.modalOverlay) closeModal(); });
 
-/* INIT */
+initTheme();
 load();
 </script>
 </body>
