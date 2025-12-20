@@ -19,9 +19,12 @@
       --warn: #f59e0b;
       --bad: #ef4444;
       --radius: 12px;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       --sans: 'Inter', system-ui, -apple-system, sans-serif;
+      
+      /* Scrollbar Light */
+      color-scheme: light;
     }
 
     [data-theme="dark"] {
@@ -34,9 +37,16 @@
       --accent: #3b82f6;
       --accent-hover: #60a5fa;
       --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+      
+      /* Scrollbar Dark */
+      color-scheme: dark;
     }
 
-    * { box-sizing: border-box; transition: background-color 0.2s, border-color 0.2s; }
+    /* Force Border-Box on everything to prevent overflow */
+    *, *::before, *::after { 
+      box-sizing: border-box; 
+      transition: background-color 0.2s, border-color 0.2s; 
+    }
     
     body { 
       margin: 0; 
@@ -44,7 +54,22 @@
       color: var(--text); 
       font-family: var(--sans);
       line-height: 1.5;
+      overflow-x: hidden;
     }
+
+    /* Modern Scrollbar Styling */
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) var(--bg);
+    }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { 
+      background: var(--border); 
+      border-radius: 10px; 
+      border: 2px solid var(--bg); 
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
     header {
       position: sticky; top: 0; z-index: 100;
@@ -55,7 +80,6 @@
     }
 
     .wrap { max-width: 1600px; margin: 0 auto; padding: 12px 24px; }
-    
     .top { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
     
     h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.025em; color: var(--accent); }
@@ -63,7 +87,6 @@
 
     .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 
-    /* Modern Pill / Tags */
     .pill {
       font-family: var(--mono);
       font-size: 11px; font-weight: 600;
@@ -72,24 +95,26 @@
       border-radius: 999px; background: var(--bg);
     }
 
-    /* Modern Inputs */
+    /* Fix: Explicitly prevent overflow on inputs */
     input, select, textarea {
       font-family: var(--sans);
+      width: 100%; /* Fill container */
+      max-width: 100%; /* Prevent going 'off' */
       padding: 10px 14px; border-radius: var(--radius);
       border: 1px solid var(--border);
       background: var(--panel);
       color: var(--text);
       font-size: 14px;
       outline: none;
+      display: block;
     }
     input:focus, select:focus, textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 80%);
     }
 
-    textarea { min-height: 100px; resize: vertical; }
+    textarea { min-height: 80px; resize: vertical; }
 
-    /* Buttons */
     .btn {
       display: inline-flex; align-items: center; justify-content: center;
       font-weight: 600; font-size: 14px;
@@ -97,18 +122,15 @@
       background: var(--panel); color: var(--text);
       padding: 10px 16px; border-radius: var(--radius);
       cursor: pointer; gap: 8px;
+      white-space: nowrap;
     }
     .btn:hover { background: var(--bg); border-color: var(--muted); }
     .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .btn.primary:hover { background: var(--accent-hover); }
     .btn.good { background: var(--good); border-color: var(--good); color: #fff; }
     .btn.bad { background: var(--bad); border-color: var(--bad); color: #fff; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Theme Toggle Button */
-    #themeToggle {
-      padding: 8px; border-radius: 50%; width: 40px; height: 40px;
-    }
+    #themeToggle { width: 42px; height: 42px; border-radius: 50%; padding: 0; }
 
     .grid {
       display: grid; gap: 24px;
@@ -124,6 +146,7 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       display: flex; flex-direction: column;
+      overflow: hidden; /* Prevent child overflow */
     }
 
     .cardHead {
@@ -138,21 +161,19 @@
     .formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .formGrid .full { grid-column: 1 / -1; }
     
-    label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
     
-    .field { display: flex; flex-direction: column; }
-    .hint { font-size: 11px; color: var(--muted); margin-top: 6px; font-style: italic; }
+    .field { display: flex; flex-direction: column; min-width: 0; } /* min-width: 0 is key for grid children */
+    .hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
-    /* Table Styles */
     .tableContainer {
-      overflow: auto; max-height: calc(100vh - 200px);
-      border-radius: 0 0 var(--radius) var(--radius);
+      overflow: auto; max-height: calc(100vh - 220px);
     }
     table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
     
     thead th {
       position: sticky; top: 0;
-      background: var(--bg);
+      background: var(--panel);
       z-index: 10;
       border-bottom: 2px solid var(--steel);
       text-align: left; padding: 14px 12px;
@@ -160,11 +181,10 @@
     }
 
     tbody td { border-bottom: 1px solid var(--steel); padding: 14px 12px; vertical-align: top; }
-    tbody tr:hover { background: color-mix(in srgb, var(--bg), transparent 20%); }
+    tbody tr:hover { background: color-mix(in srgb, var(--bg), transparent 40%); }
 
     .sku { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 600; }
     .nowrap { white-space: nowrap; }
-    
     .mini {
       display: inline-block; padding: 2px 8px; border-radius: 6px;
       border: 1px solid var(--border); background: var(--bg);
@@ -172,27 +192,19 @@
     }
 
     .link { color: var(--accent); text-decoration: none; font-weight: 600; }
-    .link:hover { text-decoration: underline; }
 
-    /* Modal */
     .modalOverlay {
-      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7);
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
       display: none; align-items: center; justify-content: center;
       z-index: 9999; padding: 20px; backdrop-filter: blur(4px);
     }
     .modal {
-      width: min(900px, 100%); max-height: 90vh; overflow: hidden;
+      width: min(850px, 100%); max-height: 90vh; 
       background: var(--panel); border-radius: 16px;
       border: 1px solid var(--steel); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-      display: flex; flex-direction: column;
+      display: flex; flex-direction: column; overflow: hidden;
     }
     .modalBody { padding: 24px; overflow-y: auto; }
-
-    /* Checkbox Styling */
-    .checkbox-row {
-      cursor: pointer; user-select: none;
-    }
-    .checkbox-row input { width: 16px; height: 16px; cursor: pointer; }
   </style>
 </head>
 
@@ -205,15 +217,13 @@
         <div class="sub">Inventory Management System</div>
       </div>
       <div class="row">
-        <input id="q" placeholder="Search inventory..." style="min-width:300px">
-        <select id="cat" style="min-width:180px">
-          <option value="">All categories</option>
-        </select>
-        <label class="row checkbox-row" style="font-size:13px; font-weight: normal; color:var(--muted); text-transform: none;">
-          <input type="checkbox" id="showAssets"> Show Assets
+        <input id="q" placeholder="Search..." style="width:240px">
+        <select id="cat" style="width:160px"><option value="">All Categories</option></select>
+        <label class="row" style="font-size:13px; text-transform:none; cursor:pointer;">
+          <input type="checkbox" id="showAssets" style="width:auto"> Show Assets
         </label>
         <button class="btn" id="refresh">Refresh</button>
-        <button class="btn" id="themeToggle" title="Toggle Dark Mode">🌓</button>
+        <button class="btn" id="themeToggle">🌓</button>
         <span class="pill" id="countPill">—</span>
       </div>
     </div>
@@ -233,45 +243,36 @@
             <label>Title</label>
             <input id="f_title" placeholder="e.g., Dell Latitude 7420" />
           </div>
-
           <div class="field">
             <label>SKU</label>
             <input id="f_sku" placeholder="DL7420" />
           </div>
-
           <div class="field">
             <label>Category</label>
             <input id="f_category" placeholder="Laptops" />
           </div>
-
           <div class="field">
             <label>Condition</label>
             <input id="f_condition" placeholder="Refurbished" />
           </div>
-
           <div class="field">
             <label>Price</label>
             <input id="f_price" placeholder="449.99" />
           </div>
-
           <div class="field full">
             <label>Description</label>
             <textarea id="f_description" placeholder="Specs, notes..."></textarea>
-            <div class="hint">Includes 'asset' to hide from public.</div>
           </div>
-
           <div class="field full">
             <label>Image URLs</label>
             <input id="f_img1" placeholder="URL #1" />
             <input id="f_img2" placeholder="URL #2" style="margin-top:8px" />
             <input id="f_img3" placeholder="URL #3" style="margin-top:8px" />
           </div>
-
           <div class="field full">
             <label>Buy Now URL</label>
             <input id="f_buy_url" placeholder="Checkout link" />
           </div>
-
           <div class="field full">
             <label>Bid URL</label>
             <input id="f_bid_url" placeholder="eBay link" />
@@ -283,22 +284,22 @@
 
   <main class="card">
     <div class="cardHead">
-      <h2>Current Inventory</h2>
-      <span class="pill" id="updatedPill">Last updated: —</span>
+      <h2>Inventory</h2>
+      <span class="pill" id="updatedPill">Updated: —</span>
     </div>
     <div class="tableContainer">
       <table>
         <thead>
           <tr>
-            <th class="nowrap">Title</th>
+            <th>Title</th>
             <th>SKU</th>
             <th>Category</th>
             <th>Condition</th>
-            <th class="nowrap">Price</th>
+            <th>Price</th>
             <th>Description</th>
             <th>Images</th>
             <th>Links</th>
-            <th class="nowrap">Actions</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -310,76 +311,34 @@
 <div class="modalOverlay" id="modalOverlay">
   <div class="modal">
     <div class="modalHead">
-      <h3>Edit Inventory Item</h3>
+      <h3>Edit Item</h3>
       <div class="row">
         <button class="btn" id="closeModal">Close</button>
-        <button class="btn good" id="saveModal">Save Changes</button>
+        <button class="btn good" id="saveModal">Save</button>
         <button class="btn bad" id="deleteModal">Delete</button>
       </div>
     </div>
     <div class="modalBody">
       <div class="formGrid">
-        <div class="field full">
-          <label>Item ID (Read-only)</label>
-          <input id="m_id" readonly style="opacity: 0.6; font-family:var(--mono)" />
-        </div>
-
-        <div class="field full">
-          <label>Title</label>
-          <input id="m_title" />
-        </div>
-
-        <div class="field">
-          <label>SKU</label>
-          <input id="m_sku" />
-        </div>
-
-        <div class="field">
-          <label>Category</label>
-          <input id="m_category" />
-        </div>
-
-        <div class="field">
-          <label>Condition</label>
-          <input id="m_condition" />
-        </div>
-
-        <div class="field">
-          <label>Price</label>
-          <input id="m_price" />
-        </div>
-
-        <div class="field full">
-          <label>Description</label>
-          <textarea id="m_description"></textarea>
-        </div>
-
-        <div class="field full">
-          <label>Images (Comma separated)</label>
-          <textarea id="m_images" placeholder="URL1, URL2..."></textarea>
-        </div>
-
-        <div class="field full">
-          <label>Buy Now URL</label>
-          <input id="m_buy_url" />
-        </div>
-
-        <div class="field full">
-          <label>Bid URL</label>
-          <input id="m_bid_url" />
-        </div>
+        <div class="field full"><label>ID</label><input id="m_id" readonly style="opacity:0.6"></div>
+        <div class="field full"><label>Title</label><input id="m_title"></div>
+        <div class="field"><label>SKU</label><input id="m_sku"></div>
+        <div class="field"><label>Category</label><input id="m_category"></div>
+        <div class="field"><label>Condition</label><input id="m_condition"></div>
+        <div class="field"><label>Price</label><input id="m_price"></div>
+        <div class="field full"><label>Description</label><textarea id="m_description"></textarea></div>
+        <div class="field full"><label>Images</label><textarea id="m_images"></textarea></div>
+        <div class="field full"><label>Buy URL</label><input id="m_buy_url"></div>
+        <div class="field full"><label>Bid URL</label><input id="m_bid_url"></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-/* ===========================
-   CONFIG & CORE LOGIC
-   =========================== */
 const API_URL = "https://script.google.com/macros/s/AKfycbyLMf07vAWn1qdtL_FMVvCRf6GytYvXAtbzTLgqZRHurZisb7Qba4gYtsTwkhL-8vJu/exec";
 
-// Element references (kept original names)
+// Element references
 const els = {
   q: document.getElementById('q'),
   cat: document.getElementById('cat'),
@@ -399,14 +358,7 @@ const els = {
     description: document.getElementById('f_description'),
     buy_url: document.getElementById('f_buy_url'),
     bid_url: document.getElementById('f_bid_url'),
-    img: [
-      document.getElementById('f_img1'),
-      document.getElementById('f_img2'),
-      document.getElementById('f_img3'),
-      document.getElementById('f_img1'), // fallback mapping
-      document.getElementById('f_img1'),
-      document.getElementById('f_img1'),
-    ]
+    img: [document.getElementById('f_img1'), document.getElementById('f_img2'), document.getElementById('f_img3')]
   },
   modalOverlay: document.getElementById('modalOverlay'),
   closeModal: document.getElementById('closeModal'),
@@ -426,20 +378,16 @@ const els = {
   }
 };
 
-/* --- DARK MODE LOGIC --- */
+/* --- THEME --- */
 const toggleTheme = () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const target = current === 'dark' ? 'light' : 'dark';
+  const target = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', target);
   localStorage.setItem('tekpak-theme', target);
 };
-
-// Init theme
-const savedTheme = localStorage.getItem('tekpak-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-document.documentElement.setAttribute('data-theme', savedTheme);
+document.documentElement.setAttribute('data-theme', localStorage.getItem('tekpak-theme') || 'light');
 els.themeToggle.addEventListener('click', toggleTheme);
 
-/* --- DATA HANDLING (UNTOUCHED) --- */
+/* --- DATA HANDLING --- */
 let ALL = [];
 let EDITING = null;
 
@@ -451,35 +399,22 @@ const money = v => {
 
 function normalize(raw){
   return {
-    id: raw.id ?? raw.ID ?? raw.rowId ?? raw.row_id ?? raw.RowID ?? raw.row ?? raw.Row ?? '',
-    title: raw.title ?? raw.name ?? raw.item ?? raw.Item ?? '',
+    id: raw.id ?? raw.ID ?? raw.rowId ?? '',
+    title: raw.title ?? raw.name ?? raw.item ?? '',
     sku: raw.sku ?? raw.SKU ?? '',
     category: raw.category ?? raw.Category ?? '',
     condition: raw.condition ?? raw.Condition ?? '',
     price: raw.price ?? raw.Price ?? '',
-    description: raw.description ?? raw.Description ?? raw.notes ?? raw.Notes ?? '',
-    image: raw.image ?? raw.Image ?? '',
-    images: raw.images ?? raw.Images ?? '',
-    buy_url: raw.buy_url ?? raw.BuyURL ?? raw.checkout ?? '',
-    bid_url: raw.bid_url ?? raw.BidURL ?? raw.ebay ?? '',
+    description: raw.description ?? raw.Description ?? '',
+    images: raw.images ?? raw.Images ?? raw.image ?? '',
+    buy_url: raw.buy_url ?? raw.BuyURL ?? '',
+    bid_url: raw.bid_url ?? raw.BidURL ?? '',
   };
-}
-
-function extractImages(item){
-  let list = [];
-  const images = (item.images ?? '').toString().trim();
-  const image = (item.image ?? '').toString().trim();
-  if(images){
-    list = images.split(',').map(s=>s.trim()).filter(Boolean);
-  } else if(image){
-    list = [image];
-  }
-  return list.slice(0,6);
 }
 
 async function apiGet(params){
   const url = API_URL + (API_URL.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
-  const res = await fetch(url, { method:'GET' });
+  const res = await fetch(url);
   return res.json();
 }
 
@@ -494,30 +429,20 @@ async function apiPost(body){
 
 async function load(){
   els.refresh.disabled = true;
-  els.refresh.textContent = "Updating...";
-  try{
+  els.refresh.textContent = "...";
+  try {
     const json = await apiGet({ action:'list' });
-    const rows = Array.isArray(json) ? json : (json.data || []);
-    ALL = rows.map(normalize);
+    ALL = (Array.isArray(json) ? json : (json.data || [])).map(normalize);
     populateCategories();
     applyFilters();
-    els.updatedPill.textContent = "Updated: " + new Date().toLocaleTimeString();
-  } catch(err){
-    console.error(err);
-    alert("Load failed. Check console.");
-  } finally {
-    els.refresh.disabled = false;
-    els.refresh.textContent = "Refresh";
-  }
+    els.updatedPill.textContent = "Last: " + new Date().toLocaleTimeString();
+  } catch(e) { console.error(e); }
+  finally { els.refresh.disabled = false; els.refresh.textContent = "Refresh"; }
 }
 
 function populateCategories(){
-  const cats = [...new Set(ALL.map(x=>x.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  els.cat.innerHTML = `<option value="">All categories</option>` + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-}
-
-function shouldHideAsset(item){
-  return txt(item.description).includes('asset');
+  const cats = [...new Set(ALL.map(x=>x.category).filter(Boolean))].sort();
+  els.cat.innerHTML = `<option value="">All Categories</option>` + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
 }
 
 function applyFilters(){
@@ -525,15 +450,11 @@ function applyFilters(){
   const cat = els.cat.value;
   const showAssets = els.showAssets.checked;
 
-  const filtered = ALL.filter(i=>{
-    if(!showAssets && shouldHideAsset(i)) return false;
-    const matchesQ = !q ||
-      txt(i.title).includes(q) ||
-      txt(i.sku).includes(q) ||
-      txt(i.category).includes(q) ||
-      txt(i.description).includes(q);
-    const matchesCat = !cat || i.category === cat;
-    return matchesQ && matchesCat;
+  const filtered = ALL.filter(i => {
+    if(!showAssets && txt(i.description).includes('asset')) return false;
+    const matchQ = !q || [i.title, i.sku, i.category, i.description].some(s => txt(s).includes(q));
+    const matchC = !cat || i.category === cat;
+    return matchQ && matchC;
   });
 
   els.countPill.textContent = `${filtered.length} Items`;
@@ -541,33 +462,28 @@ function applyFilters(){
 }
 
 function render(list){
-  els.tbody.innerHTML = list.map(i=>{
-    const imgs = extractImages(i);
-    const buy = i.buy_url ? `<a class="link" href="${escapeAttr(i.buy_url)}" target="_blank">Buy</a>` : `—`;
-    const bid = i.bid_url ? `<a class="link" href="${escapeAttr(i.bid_url)}" target="_blank">Bid</a>` : `—`;
-
-    return `
-      <tr>
-        <td><div style="font-weight:700">${escapeHtml(i.title || 'Untitled')}</div></td>
-        <td class="sku">${escapeHtml(i.sku || '')}</td>
-        <td>${escapeHtml(i.category || '')}</td>
-        <td><span class="mini">${escapeHtml(i.condition || 'New')}</span></td>
-        <td class="nowrap" style="font-family:var(--mono); font-weight:700">${money(i.price)}</td>
-        <td style="max-width:300px; color:var(--muted); font-size:12px">${escapeHtml(i.description || '')}</td>
-        <td class="nowrap"><span class="mini">${imgs.length}</span></td>
-        <td class="nowrap">${buy} · ${bid}</td>
-        <td class="nowrap">
-          <button class="btn" style="padding: 5px 12px; font-size: 12px" onclick="openEdit('${escapeAttr(i.id)}')">Edit</button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+  els.tbody.innerHTML = list.map(i => `
+    <tr>
+      <td><b>${escapeHtml(i.title)}</b></td>
+      <td class="sku">${escapeHtml(i.sku)}</td>
+      <td>${escapeHtml(i.category)}</td>
+      <td><span class="mini">${escapeHtml(i.condition)}</span></td>
+      <td class="nowrap">${money(i.price)}</td>
+      <td style="color:var(--muted)">${escapeHtml(i.description.substring(0,60))}...</td>
+      <td><span class="mini">${(i.images||'').split(',').filter(Boolean).length}</span></td>
+      <td class="nowrap">
+        ${i.buy_url ? `<a class="link" href="${escapeAttr(i.buy_url)}" target="_blank">Buy</a>` : ''}
+        ${i.bid_url ? ` <a class="link" href="${escapeAttr(i.bid_url)}" target="_blank">Bid</a>` : ''}
+      </td>
+      <td><button class="btn" style="padding:4px 8px" onclick="openEdit('${escapeAttr(i.id)}')">Edit</button></td>
+    </tr>
+  `).join('');
 }
 
-/* --- ADD / EDIT / DELETE ACTIONS (UNTOUCHED) --- */
-function collectAddPayload(){
-  const imgs = els.f.img.map(x=>x.value?.trim()).filter(Boolean).slice(0,6);
-  return {
+async function addItem(){
+  const imgs = els.f.img.map(x=>x.value.trim()).filter(Boolean);
+  const payload = {
+    action: 'add',
     title: els.f.title.value.trim(),
     sku: els.f.sku.value.trim(),
     category: els.f.category.value.trim(),
@@ -576,83 +492,44 @@ function collectAddPayload(){
     description: els.f.description.value.trim(),
     images: imgs.join(','),
     buy_url: els.f.buy_url.value.trim(),
-    bid_url: els.f.bid_url.value.trim(),
+    bid_url: els.f.bid_url.value.trim()
   };
-}
-
-async function addItem(){
-  const payload = collectAddPayload();
-  if(!payload.title){ alert("Title required."); return; }
+  if(!payload.title) return alert("Title required");
   els.addBtn.disabled = true;
-  els.addBtn.textContent = "Working...";
-  try {
-    const res = await apiPost({ action:'add', ...payload });
-    if(res.ok === false) throw new Error(res.error);
-    Object.values(els.f).forEach(v => { if(v.tagName) v.value=''; if(Array.isArray(v)) v.forEach(x=>x.value='') });
-    await load();
-  } catch(err) { alert(err.message); }
-  finally { els.addBtn.disabled = false; els.addBtn.textContent = "Add to Sheet"; }
+  await apiPost(payload);
+  load();
+  els.addBtn.disabled = false;
 }
 
-window.openEdit = function(id){
-  const item = ALL.find(x => String(x.id) === String(id));
-  if(!item) return;
-  EDITING = item;
-  els.m.id.value = item.id;
-  els.m.title.value = item.title || '';
-  els.m.sku.value = item.sku || '';
-  els.m.category.value = item.category || '';
-  els.m.condition.value = item.condition || '';
-  els.m.price.value = item.price || '';
-  els.m.description.value = item.description || '';
-  els.m.images.value = extractImages(item).join(', ');
-  els.m.buy_url.value = item.buy_url || '';
-  els.m.bid_url.value = item.bid_url || '';
+window.openEdit = id => {
+  const i = ALL.find(x => String(x.id) === String(id));
+  if(!i) return;
+  EDITING = i;
+  els.m.id.value = i.id;
+  els.m.title.value = i.title;
+  els.m.sku.value = i.sku;
+  els.m.category.value = i.category;
+  els.m.condition.value = i.condition;
+  els.m.price.value = i.price;
+  els.m.description.value = i.description;
+  els.m.images.value = i.images;
+  els.m.buy_url.value = i.buy_url;
+  els.m.bid_url.value = i.bid_url;
   els.modalOverlay.style.display = 'flex';
 };
 
-function closeModal(){ els.modalOverlay.style.display = 'none'; EDITING = null; }
-
+function closeModal(){ els.modalOverlay.style.display = 'none'; }
 async function saveEdit(){
-  if(!EDITING) return;
-  const payload = {
-    id: els.m.id.value,
-    title: els.m.title.value.trim(),
-    sku: els.m.sku.value.trim(),
-    category: els.m.category.value.trim(),
-    condition: els.m.condition.value.trim(),
-    price: els.m.price.value.trim(),
-    description: els.m.description.value.trim(),
-    images: els.m.images.value.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6).join(','),
-    buy_url: els.m.buy_url.value.trim(),
-    bid_url: els.m.bid_url.value.trim(),
-  };
-  els.saveModal.disabled = true;
-  try {
-    await apiPost({ action:'update', ...payload });
-    closeModal();
-    await load();
-  } catch(err) { alert(err.message); }
-  finally { els.saveModal.disabled = false; }
+  await apiPost({ action:'update', ...Object.fromEntries(Object.entries(els.m).map(([k,v])=>[k,v.value])) });
+  closeModal(); load();
 }
-
 async function deleteItem(){
-  if(!EDITING || !confirm("Delete this item permanently?")) return;
-  els.deleteModal.disabled = true;
-  try {
-    await apiPost({ action:'delete', id: els.m.id.value });
-    closeModal();
-    await load();
-  } catch(err) { alert(err.message); }
-  finally { els.deleteModal.disabled = false; }
+  if(confirm("Delete?")) { await apiPost({ action:'delete', id:els.m.id.value }); closeModal(); load(); }
 }
 
-function escapeHtml(str){
-  return (str ?? '').toString().replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
-}
-function escapeAttr(str){ return escapeHtml(str).replaceAll('`','&#096;'); }
+function escapeHtml(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
 
-/* EVENTS */
 els.q.addEventListener('input', applyFilters);
 els.cat.addEventListener('change', applyFilters);
 els.showAssets.addEventListener('change', applyFilters);
@@ -661,10 +538,7 @@ els.addBtn.addEventListener('click', addItem);
 els.closeModal.addEventListener('click', closeModal);
 els.saveModal.addEventListener('click', saveEdit);
 els.deleteModal.addEventListener('click', deleteItem);
-els.modalOverlay.addEventListener('click', (e)=> { if(e.target === els.modalOverlay) closeModal(); });
-document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeModal(); });
 
-/* INIT */
 load();
 </script>
 </body>
