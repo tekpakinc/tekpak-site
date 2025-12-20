@@ -1,407 +1,407 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tek-Pak Inventory Admin</title>
-  <style>
-    :root{
-      --bg:#f4f6f8;
-      --panel:#ffffff;
-      --steel:#e2e6ea;
-      --border:#cfd6dd;
-      --text:#1e2933;
-      --muted:#5f6b7a;
-      --accent:#2b6cb0;
-      --good:#2f855a;
-      --warn:#d69e2e;
-      --bad:#c53030;
-      --radius:10px;
-      --shadow: 0 12px 30px rgba(0,0,0,.08);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
-    header{
-      position:sticky;top:0;z-index:5;
-      background:#fff;border-bottom:2px solid var(--steel);
-    }
-    .wrap{max-width:1400px;margin:0 auto;padding:16px}
-    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-    h1{margin:0;font-size:18px}
-    .sub{color:var(--muted);font-size:12px;margin-top:2px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .pill{
-      font-family:var(--mono);
-      font-size:12px;color:var(--muted);
-      padding:8px 10px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;
-    }
-    input, select, textarea{
-      font-family:var(--sans);
-      padding:10px 12px;border-radius:8px;
-      border:1px solid var(--border);background:#fff;
-      font-size:14px;
-    }
-    textarea{min-height:90px;resize:vertical}
-    .btn{
-      border:1px solid var(--border);
-      background:#fff;color:var(--text);
-      padding:10px 12px;border-radius:8px;
-      cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.06);
-    }
-    .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-    .btn.good{background:var(--good);border-color:var(--good);color:#fff}
-    .btn.bad{background:var(--bad);border-color:var(--bad);color:#fff}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .grid{
-      display:grid;gap:14px;
-      grid-template-columns: 420px 1fr;
-      align-items:start;
-      padding:16px;
-      max-width:1400px;
-      margin:0 auto;
-    }
-    @media (max-width: 1100px){
-      .grid{grid-template-columns: 1fr;}
-    }
-    .card{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .cardHead{
-      padding:12px 14px;
-      border-bottom:1px solid var(--steel);
-      background:#fff;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-    }
-    .cardHead h2{margin:0;font-size:14px}
-    .cardBody{padding:14px}
-    .formGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    .formGrid .full{grid-column:1 / -1}
-    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
-    .field{display:flex;flex-direction:column}
-    .hint{font-size:11px;color:var(--muted);margin-top:6px}
-    table{
-      width:100%;
-      border-collapse:separate;
-      border-spacing:0;
-      font-size:13px;
-    }
-    thead th{
-      position:sticky;top:74px;
-      background:#fff;
-      z-index:3;
-      border-bottom:2px solid var(--steel);
-      text-align:left;
-      padding:10px;
-      color:var(--muted);
-      font-weight:600;
-      white-space:nowrap;
-    }
-    tbody td{
-      border-bottom:1px solid var(--steel);
-      padding:10px;
-      vertical-align:top;
-    }
-    tbody tr:hover{background:#fafbfc}
-    .sku{font-family:var(--mono);font-size:12px}
-    .nowrap{white-space:nowrap}
-    .mini{
-      display:inline-block;
-      padding:3px 7px;border-radius:999px;
-      border:1px solid var(--border);
-      background:#f8fafc;color:var(--muted);
-      font-size:11px;
-    }
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .link{
-      color:var(--accent);
-      text-decoration:none;
-      font-size:12px;
-      word-break:break-all;
-    }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tek-Pak Inventory Admin</title>
+  <style>
+    :root{
+      --bg:#f4f6f8;
+      --panel:#ffffff;
+      --steel:#e2e6ea;
+      --border:#cfd6dd;
+      --text:#1e2933;
+      --muted:#5f6b7a;
+      --accent:#2b6cb0;
+      --good:#2f855a;
+      --warn:#d69e2e;
+      --bad:#c53030;
+      --radius:10px;
+      --shadow: 0 12px 30px rgba(0,0,0,.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
+    header{
+      position:sticky;top:0;z-index:5;
+      background:#fff;border-bottom:2px solid var(--steel);
+    }
+    .wrap{max-width:1400px;margin:0 auto;padding:16px}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:18px}
+    .sub{color:var(--muted);font-size:12px;margin-top:2px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .pill{
+      font-family:var(--mono);
+      font-size:12px;color:var(--muted);
+      padding:8px 10px;border:1px solid var(--border);
+      border-radius:999px;background:#fff;
+    }
+    input, select, textarea{
+      font-family:var(--sans);
+      padding:10px 12px;border-radius:8px;
+      border:1px solid var(--border);background:#fff;
+      font-size:14px;
+    }
+    textarea{min-height:90px;resize:vertical}
+    .btn{
+      border:1px solid var(--border);
+      background:#fff;color:var(--text);
+      padding:10px 12px;border-radius:8px;
+      cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.06);
+    }
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+    .btn.good{background:var(--good);border-color:var(--good);color:#fff}
+    .btn.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .grid{
+      display:grid;gap:14px;
+      grid-template-columns: 420px 1fr;
+      align-items:start;
+      padding:16px;
+      max-width:1400px;
+      margin:0 auto;
+    }
+    @media (max-width: 1100px){
+      .grid{grid-template-columns: 1fr;}
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:12px 14px;
+      border-bottom:1px solid var(--steel);
+      background:#fff;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    .cardHead h2{margin:0;font-size:14px}
+    .cardBody{padding:14px}
+    .formGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .formGrid .full{grid-column:1 / -1}
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+    .field{display:flex;flex-direction:column}
+    .hint{font-size:11px;color:var(--muted);margin-top:6px}
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:13px;
+    }
+    thead th{
+      position:sticky;top:74px;
+      background:#fff;
+      z-index:3;
+      border-bottom:2px solid var(--steel);
+      text-align:left;
+      padding:10px;
+      color:var(--muted);
+      font-weight:600;
+      white-space:nowrap;
+    }
+    tbody td{
+      border-bottom:1px solid var(--steel);
+      padding:10px;
+      vertical-align:top;
+    }
+    tbody tr:hover{background:#fafbfc}
+    .sku{font-family:var(--mono);font-size:12px}
+    .nowrap{white-space:nowrap}
+    .mini{
+      display:inline-block;
+      padding:3px 7px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#f8fafc;color:var(--muted);
+      font-size:11px;
+    }
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .link{
+      color:var(--accent);
+      text-decoration:none;
+      font-size:12px;
+      word-break:break-all;
+    }
 
-    /* Modal */
-    .modalOverlay{
-      position:fixed;inset:0;
-      background:rgba(0,0,0,.55);
-      display:none;align-items:center;justify-content:center;
-      z-index:9999;
-      padding:18px;
-    }
-    .modal{
-      width:min(980px, 100%);
-      max-height:90vh;
-      overflow:auto;
-      background:#fff;border-radius:14px;
-      border:1px solid var(--border);
-      box-shadow:0 30px 80px rgba(0,0,0,.35);
-    }
-    .modalHead{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:12px 14px;border-bottom:1px solid var(--steel);
-    }
-    .modalHead h3{margin:0;font-size:14px}
-    .modalBody{padding:14px}
-  </style>
+    /* Modal */
+    .modalOverlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;align-items:center;justify-content:center;
+      z-index:9999;
+      padding:18px;
+    }
+    .modal{
+      width:min(980px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      background:#fff;border-radius:14px;
+      border:1px solid var(--border);
+      box-shadow:0 30px 80px rgba(0,0,0,.35);
+    }
+    .modalHead{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:12px 14px;border-bottom:1px solid var(--steel);
+    }
+    .modalHead h3{margin:0;font-size:14px}
+    .modalBody{padding:14px}
+  </style>
 </head>
 
 <body>
 <header>
-  <div class="wrap">
-    <div class="top">
-      <div>
-        <h1>Tek-Pak Inventory Admin</h1>
-        <div class="sub">Add, edit, and manage inventory (sheet-backed)</div>
-      </div>
-      <div class="row">
-        <input id="q" placeholder="Search title / SKU / category..." style="min-width:280px">
-        <select id="cat" style="min-width:220px">
-          <option value="">All categories</option>
-        </select>
-        <label class="row" style="gap:8px;font-size:12px;color:var(--muted)">
-          <input type="checkbox" id="showAssets">
-          Show Asset items
-        </label>
-        <button class="btn" id="refresh">Refresh</button>
-        <span class="pill" id="countPill">—</span>
-      </div>
-    </div>
-  </div>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Tek-Pak Inventory Admin</h1>
+        <div class="sub">Add, edit, and manage inventory (sheet-backed)</div>
+      </div>
+      <div class="row">
+        <input id="q" placeholder="Search title / SKU / category..." style="min-width:280px">
+        <select id="cat" style="min-width:220px">
+          <option value="">All categories</option>
+        </select>
+        <label class="row" style="gap:8px;font-size:12px;color:var(--muted)">
+          <input type="checkbox" id="showAssets">
+          Show Asset items
+        </label>
+        <button class="btn" id="refresh">Refresh</button>
+        <span class="pill" id="countPill">—</span>
+      </div>
+    </div>
+  </div>
 </header>
 
 <div class="grid">
-  <!-- ADD PANEL -->
-  <section class="card">
-    <div class="cardHead">
-      <h2>Add item</h2>
-      <button class="btn primary" id="addBtn">Add to Inventory</button>
-    </div>
-    <div class="cardBody">
-      <div class="formGrid">
-        <div class="field full">
-          <label>Title</label>
-          <input id="f_title" placeholder="e.g., Dell Latitude 7420" />
-        </div>
+  <!-- ADD PANEL -->
+  <section class="card">
+    <div class="cardHead">
+      <h2>Add item</h2>
+      <button class="btn primary" id="addBtn">Add to Inventory</button>
+    </div>
+    <div class="cardBody">
+      <div class="formGrid">
+        <div class="field full">
+          <label>Title</label>
+          <input id="f_title" placeholder="e.g., Dell Latitude 7420" />
+        </div>
 
-        <div class="field">
-          <label>SKU</label>
-          <input id="f_sku" placeholder="e.g., DL7420" />
-        </div>
+        <div class="field">
+          <label>SKU</label>
+          <input id="f_sku" placeholder="e.g., DL7420" />
+        </div>
 
-        <div class="field">
-          <label>Category</label>
-          <input id="f_category" placeholder="e.g., Laptops" />
-        </div>
+        <div class="field">
+          <label>Category</label>
+          <input id="f_category" placeholder="e.g., Laptops" />
+        </div>
 
-        <div class="field">
-          <label>Condition</label>
-          <input id="f_condition" placeholder="e.g., Refurbished - Grade A" />
-        </div>
+        <div class="field">
+          <label>Condition</label>
+          <input id="f_condition" placeholder="e.g., Refurbished - Grade A" />
+        </div>
 
-        <div class="field">
-          <label>Price</label>
-          <input id="f_price" placeholder="e.g., 449.99" />
-        </div>
+        <div class="field">
+          <label>Price</label>
+          <input id="f_price" placeholder="e.g., 449.99" />
+        </div>
 
-        <div class="field full">
-          <label>Description</label>
-          <textarea id="f_description" placeholder="Specs, notes, included accessories..."></textarea>
-          <div class="hint">If description contains the word <b>asset</b>, the public page will hide it.</div>
-        </div>
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="f_description" placeholder="Specs, notes, included accessories..."></textarea>
+          <div class="hint">If description contains the word <b>asset</b>, the public page will hide it.</div>
+        </div>
 
-        <div class="field full">
-          <label>Images (up to 6 URLs)</label>
-          <input id="f_img1" placeholder="Image URL #1" />
-          <input id="f_img2" placeholder="Image URL #2" style="margin-top:8px" />
-          <input id="f_img3" placeholder="Image URL #3" style="margin-top:8px" />
-          <input id="f_img4" placeholder="Image URL #4" style="margin-top:8px" />
-          <input id="f_img5" placeholder="Image URL #5" style="margin-top:8px" />
-          <input id="f_img6" placeholder="Image URL #6" style="margin-top:8px" />
-          <div class="hint">Stored as a single comma-separated <span style="font-family:var(--mono)">images</span> value in the sheet/API.</div>
-        </div>
+        <div class="field full">
+          <label>Images (up to 6 URLs)</label>
+          <input id="f_img1" placeholder="Image URL #1" />
+          <input id="f_img2" placeholder="Image URL #2" style="margin-top:8px" />
+          <input id="f_img3" placeholder="Image URL #3" style="margin-top:8px" />
+          <input id="f_img4" placeholder="Image URL #4" style="margin-top:8px" />
+          <input id="f_img5" placeholder="Image URL #5" style="margin-top:8px" />
+          <input id="f_img6" placeholder="Image URL #6" style="margin-top:8px" />
+          <div class="hint">Stored as a single comma-separated <span style="font-family:var(--mono)">images</span> value in the sheet/API.</div>
+        </div>
 
-        <div class="field full">
-          <label>Buy Now URL</label>
-          <input id="f_buy_url" placeholder="PayPal/Stripe/Square/Checkout link" />
-        </div>
+        <div class="field full">
+          <label>Buy Now URL</label>
+          <input id="f_buy_url" placeholder="PayPal/Stripe/Square/Checkout link" />
+        </div>
 
-        <div class="field full">
-          <label>Bid URL</label>
-          <input id="f_bid_url" placeholder="eBay auction link (optional)" />
-        </div>
-      </div>
-    </div>
-  </section>
+        <div class="field full">
+          <label>Bid URL</label>
+          <input id="f_bid_url" placeholder="eBay auction link (optional)" />
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <!-- LIST PANEL -->
-  <section class="card">
-    <div class="cardHead">
-      <h2>Inventory</h2>
-      <div class="row">
-        <span class="pill" id="updatedPill">Last updated: —</span>
-      </div>
-    </div>
-    <div class="cardBody" style="padding:0">
-      <div style="overflow:auto; max-height: calc(100vh - 190px);">
-        <table>
-          <thead>
-            <tr>
-              <th class="nowrap">Title</th>
-              <th>SKU</th>
-              <th>Category</th>
-              <th>Condition</th>
-              <th class="nowrap">Price</th>
-              <th>Description</th>
-              <th>Images</th>
-              <th>Buy / Bid</th>
-              <th class="nowrap">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+  <!-- LIST PANEL -->
+  <section class="card">
+    <div class="cardHead">
+      <h2>Inventory</h2>
+      <div class="row">
+        <span class="pill" id="updatedPill">Last updated: —</span>
+      </div>
+    </div>
+    <div class="cardBody" style="padding:0">
+      <div style="overflow:auto; max-height: calc(100vh - 190px);">
+        <table>
+          <thead>
+            <tr>
+              <th class="nowrap">Title</th>
+              <th>SKU</th>
+              <th>Category</th>
+              <th>Condition</th>
+              <th class="nowrap">Price</th>
+              <th>Description</th>
+              <th>Images</th>
+              <th>Buy / Bid</th>
+              <th class="nowrap">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 </div>
 
 <!-- EDIT MODAL -->
 <div class="modalOverlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modalHead">
-      <h3>Edit item</h3>
-      <div class="row">
-        <button class="btn" id="closeModal">Close</button>
-        <button class="btn good" id="saveModal">Save changes</button>
-        <button class="btn bad" id="deleteModal">Delete</button>
-      </div>
-    </div>
-    <div class="modalBody">
-      <div class="formGrid">
-        <div class="field full">
-          <label>Row ID (readonly)</label>
-          <input id="m_id" readonly style="font-family:var(--mono)" />
-          <div class="hint">This should be a stable ID from your Apps Script (recommended), or a sheet row number if you built it that way.</div>
-        </div>
+  <div class="modal">
+    <div class="modalHead">
+      <h3>Edit item</h3>
+      <div class="row">
+        <button class="btn" id="closeModal">Close</button>
+        <button class="btn good" id="saveModal">Save changes</button>
+        <button class="btn bad" id="deleteModal">Delete</button>
+      </div>
+    </div>
+    <div class="modalBody">
+      <div class="formGrid">
+        <div class="field full">
+          <label>Row ID (readonly)</label>
+          <input id="m_id" readonly style="font-family:var(--mono)" />
+          <div class="hint">This should be a stable ID from your Apps Script (recommended), or a sheet row number if you built it that way.</div>
+        </div>
 
-        <div class="field full">
-          <label>Title</label>
-          <input id="m_title" />
-        </div>
+        <div class="field full">
+          <label>Title</label>
+          <input id="m_title" />
+        </div>
 
-        <div class="field">
-          <label>SKU</label>
-          <input id="m_sku" />
-        </div>
+        <div class="field">
+          <label>SKU</label>
+          <input id="m_sku" />
+        </div>
 
-        <div class="field">
-          <label>Category</label>
-          <input id="m_category" />
-        </div>
+        <div class="field">
+          <label>Category</label>
+          <input id="m_category" />
+        </div>
 
-        <div class="field">
-          <label>Condition</label>
-          <input id="m_condition" />
-        </div>
+        <div class="field">
+          <label>Condition</label>
+          <input id="m_condition" />
+        </div>
 
-        <div class="field">
-          <label>Price</label>
-          <input id="m_price" />
-        </div>
+        <div class="field">
+          <label>Price</label>
+          <input id="m_price" />
+        </div>
 
-        <div class="field full">
-          <label>Description</label>
-          <textarea id="m_description"></textarea>
-        </div>
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="m_description"></textarea>
+        </div>
 
-        <div class="field full">
-          <label>Images (comma-separated, up to 6)</label>
-          <textarea id="m_images" placeholder="https://img1.jpg, https://img2.jpg, ..."></textarea>
-          <div class="hint">Tip: keep it clean (no extra commas). Up to 6 used by the public page.</div>
-        </div>
+        <div class="field full">
+          <label>Images (comma-separated, up to 6)</label>
+          <textarea id="m_images" placeholder="https://img1.jpg, https://img2.jpg, ..."></textarea>
+          <div class="hint">Tip: keep it clean (no extra commas). Up to 6 used by the public page.</div>
+        </div>
 
-        <div class="field full">
-          <label>Buy Now URL</label>
-          <input id="m_buy_url" />
-        </div>
+        <div class="field full">
+          <label>Buy Now URL</label>
+          <input id="m_buy_url" />
+        </div>
 
-        <div class="field full">
-          <label>Bid URL</label>
-          <input id="m_bid_url" />
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="field full">
+          <label>Bid URL</label>
+          <input id="m_bid_url" />
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 /* ===========================
-   CONFIG
-   =========================== */
+   CONFIG
+   =========================== */
 const API_URL = "https://script.google.com/macros/s/AKfycbyLMf07vAWn1qdtL_FMVvCRf6GytYvXAtbzTLgqZRHurZisb7Qba4gYtsTwkhL-8vJu/exec";
 
 /*
-  Expected API (recommended):
-  - GET  ?action=list                 -> { data:[...] } or [...]
-  - POST action=add   + item fields   -> { ok:true }
-  - POST action=update + id + fields  -> { ok:true }
-  - POST action=delete + id           -> { ok:true }
+  Expected API (recommended):
+  - GET  ?action=list                 -> { data:[...] } or [...]
+  - POST action=add   + item fields   -> { ok:true }
+  - POST action=update + id + fields  -> { ok:true }
+  - POST action=delete + id           -> { ok:true }
 */
 
 const els = {
-  q: document.getElementById('q'),
-  cat: document.getElementById('cat'),
-  showAssets: document.getElementById('showAssets'),
-  refresh: document.getElementById('refresh'),
-  countPill: document.getElementById('countPill'),
-  updatedPill: document.getElementById('updatedPill'),
-  tbody: document.getElementById('tbody'),
+  q: document.getElementById('q'),
+  cat: document.getElementById('cat'),
+  showAssets: document.getElementById('showAssets'),
+  refresh: document.getElementById('refresh'),
+  countPill: document.getElementById('countPill'),
+  updatedPill: document.getElementById('updatedPill'),
+  tbody: document.getElementById('tbody'),
 
-  addBtn: document.getElementById('addBtn'),
-  f: {
-    title: document.getElementById('f_title'),
-    sku: document.getElementById('f_sku'),
-    category: document.getElementById('f_category'),
-    condition: document.getElementById('f_condition'),
-    price: document.getElementById('f_price'),
-    description: document.getElementById('f_description'),
-    buy_url: document.getElementById('f_buy_url'),
-    bid_url: document.getElementById('f_bid_url'),
-    img: [
-      document.getElementById('f_img1'),
-      document.getElementById('f_img2'),
-      document.getElementById('f_img3'),
-      document.getElementById('f_img4'),
-      document.getElementById('f_img5'),
-      document.getElementById('f_img6'),
-    ]
-  },
+  addBtn: document.getElementById('addBtn'),
+  f: {
+    title: document.getElementById('f_title'),
+    sku: document.getElementById('f_sku'),
+    category: document.getElementById('f_category'),
+    condition: document.getElementById('f_condition'),
+    price: document.getElementById('f_price'),
+    description: document.getElementById('f_description'),
+    buy_url: document.getElementById('f_buy_url'),
+    bid_url: document.getElementById('f_bid_url'),
+    img: [
+      document.getElementById('f_img1'),
+      document.getElementById('f_img2'),
+      document.getElementById('f_img3'),
+      document.getElementById('f_img4'),
+      document.getElementById('f_img5'),
+      document.getElementById('f_img6'),
+    ]
+  },
 
-  modalOverlay: document.getElementById('modalOverlay'),
-  closeModal: document.getElementById('closeModal'),
-  saveModal: document.getElementById('saveModal'),
-  deleteModal: document.getElementById('deleteModal'),
-  m: {
-    id: document.getElementById('m_id'),
-    title: document.getElementById('m_title'),
-    sku: document.getElementById('m_sku'),
-    category: document.getElementById('m_category'),
-    condition: document.getElementById('m_condition'),
-    price: document.getElementById('m_price'),
-    description: document.getElementById('m_description'),
-    images: document.getElementById('m_images'),
-    buy_url: document.getElementById('m_buy_url'),
-    bid_url: document.getElementById('m_bid_url'),
-  }
+  modalOverlay: document.getElementById('modalOverlay'),
+  closeModal: document.getElementById('closeModal'),
+  saveModal: document.getElementById('saveModal'),
+  deleteModal: document.getElementById('deleteModal'),
+  m: {
+    id: document.getElementById('m_id'),
+    title: document.getElementById('m_title'),
+    sku: document.getElementById('m_sku'),
+    category: document.getElementById('m_category'),
+    condition: document.getElementById('m_condition'),
+    price: document.getElementById('m_price'),
+    description: document.getElementById('m_description'),
+    images: document.getElementById('m_images'),
+    buy_url: document.getElementById('m_buy_url'),
+    bid_url: document.getElementById('m_bid_url'),
+  }
 };
 
 let ALL = [];
@@ -409,286 +409,286 @@ let EDITING = null;
 
 const txt = v => (v ?? '').toString().toLowerCase().trim();
 const money = v => {
-  const n = Number(v);
-  return isFinite(n) ? n.toLocaleString(undefined,{style:'currency',currency:'USD'}) : '—';
+  const n = Number(v);
+  return isFinite(n) ? n.toLocaleString(undefined,{style:'currency',currency:'USD'}) : '—';
 };
 
 function normalize(raw){
-  // Try to be forgiving about field names coming from the sheet.
-  return {
-    id: raw.id ?? raw.ID ?? raw.rowId ?? raw.row_id ?? raw.RowID ?? raw.row ?? raw.Row ?? '',
-    title: raw.title ?? raw.name ?? raw.item ?? raw.Item ?? '',
-    sku: raw.sku ?? raw.SKU ?? '',
-    category: raw.category ?? raw.Category ?? '',
-    condition: raw.condition ?? raw.Condition ?? '',
-    price: raw.price ?? raw.Price ?? '',
-    description: raw.description ?? raw.Description ?? raw.notes ?? raw.Notes ?? '',
-    image: raw.image ?? raw.Image ?? '',
-    images: raw.images ?? raw.Images ?? '',
-    buy_url: raw.buy_url ?? raw.BuyURL ?? raw.checkout ?? '',
-    bid_url: raw.bid_url ?? raw.BidURL ?? raw.ebay ?? '',
-  };
+  // Try to be forgiving about field names coming from the sheet.
+  return {
+    id: raw.id ?? raw.ID ?? raw.rowId ?? raw.row_id ?? raw.RowID ?? raw.row ?? raw.Row ?? '',
+    title: raw.title ?? raw.name ?? raw.item ?? raw.Item ?? '',
+    sku: raw.sku ?? raw.SKU ?? '',
+    category: raw.category ?? raw.Category ?? '',
+    condition: raw.condition ?? raw.Condition ?? '',
+    price: raw.price ?? raw.Price ?? '',
+    description: raw.description ?? raw.Description ?? raw.notes ?? raw.Notes ?? '',
+    image: raw.image ?? raw.Image ?? '',
+    images: raw.images ?? raw.Images ?? '',
+    buy_url: raw.buy_url ?? raw.BuyURL ?? raw.checkout ?? '',
+    bid_url: raw.bid_url ?? raw.BidURL ?? raw.ebay ?? '',
+  };
 }
 
 function extractImages(item){
-  // Prefer "images" (comma-separated); fall back to single "image".
-  let list = [];
-  const images = (item.images ?? '').toString().trim();
-  const image = (item.image ?? '').toString().trim();
-  if(images){
-    list = images.split(',').map(s=>s.trim()).filter(Boolean);
-  } else if(image){
-    list = [image];
-  }
-  return list.slice(0,6);
+  // Prefer "images" (comma-separated); fall back to single "image".
+  let list = [];
+  const images = (item.images ?? '').toString().trim();
+  const image = (item.image ?? '').toString().trim();
+  if(images){
+    list = images.split(',').map(s=>s.trim()).filter(Boolean);
+  } else if(image){
+    list = [image];
+  }
+  return list.slice(0,6);
 }
 
 async function apiGet(params){
-  const url = API_URL + (API_URL.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
-  const res = await fetch(url, { method:'GET' });
-  return res.json();
+  const url = API_URL + (API_URL.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
+  const res = await fetch(url, { method:'GET' });
+  return res.json();
 }
 
 async function apiPost(body){
-  const res = await fetch(API_URL, {
-    method:'POST',
-    headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
-    body: new URLSearchParams(body).toString()
-  });
-  return res.json();
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+    body: new URLSearchParams(body).toString()
+  });
+  return res.json();
 }
 
 async function load(){
-  els.refresh.disabled = true;
-  els.refresh.textContent = "Refreshing…";
-  try{
-    const json = await apiGet({ action:'list' });
-    const rows = Array.isArray(json) ? json : (json.data || []);
-    ALL = rows.map(normalize);
+  els.refresh.disabled = true;
+  els.refresh.textContent = "Refreshing…";
+  try{
+    const json = await apiGet({ action:'list' });
+    const rows = Array.isArray(json) ? json : (json.data || []);
+    ALL = rows.map(normalize);
 
-    populateCategories();
-    applyFilters();
+    populateCategories();
+    applyFilters();
 
-    els.updatedPill.textContent = "Last updated: " + new Date().toLocaleString();
-  } catch(err){
-    console.error(err);
-    alert("Could not load inventory. Check Console for details.\n\nCommon causes:\n- API doesn't support ?action=list\n- CORS / permissions\n- Returned HTML instead of JSON");
-  } finally {
-    els.refresh.disabled = false;
-    els.refresh.textContent = "Refresh";
-  }
+    els.updatedPill.textContent = "Last updated: " + new Date().toLocaleString();
+  } catch(err){
+    console.error(err);
+    alert("Could not load inventory. Check Console for details.\n\nCommon causes:\n- API doesn't support ?action=list\n- CORS / permissions\n- Returned HTML instead of JSON");
+  } finally {
+    els.refresh.disabled = false;
+    els.refresh.textContent = "Refresh";
+  }
 }
 
 function populateCategories(){
-  const cats = [...new Set(ALL.map(x=>x.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  els.cat.innerHTML = `<option value="">All categories</option>` + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  const cats = [...new Set(ALL.map(x=>x.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  els.cat.innerHTML = `<option value="">All categories</option>` + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
 }
 
 function shouldHideAsset(item){
-  // Admin default: hide assets unless checkbox enabled.
-  return txt(item.description).includes('asset');
+  // Admin default: hide assets unless checkbox enabled.
+  return txt(item.description).includes('asset');
 }
 
 function applyFilters(){
-  const q = txt(els.q.value);
-  const cat = els.cat.value;
-  const showAssets = els.showAssets.checked;
+  const q = txt(els.q.value);
+  const cat = els.cat.value;
+  const showAssets = els.showAssets.checked;
 
-  const filtered = ALL.filter(i=>{
-    if(!showAssets && shouldHideAsset(i)) return false;
+  const filtered = ALL.filter(i=>{
+    if(!showAssets && shouldHideAsset(i)) return false;
 
-    const matchesQ = !q ||
-      txt(i.title).includes(q) ||
-      txt(i.sku).includes(q) ||
-      txt(i.category).includes(q) ||
-      txt(i.condition).includes(q) ||
-      txt(i.description).includes(q);
+    const matchesQ = !q ||
+      txt(i.title).includes(q) ||
+      txt(i.sku).includes(q) ||
+      txt(i.category).includes(q) ||
+      txt(i.condition).includes(q) ||
+      txt(i.description).includes(q);
 
-    const matchesCat = !cat || i.category === cat;
-    return matchesQ && matchesCat;
-  });
+    const matchesCat = !cat || i.category === cat;
+    return matchesQ && matchesCat;
+  });
 
-  els.countPill.textContent = `${filtered.length} items`;
+  els.countPill.textContent = `${filtered.length} items`;
 
-  render(filtered);
+  render(filtered);
 }
 
 function render(list){
-  els.tbody.innerHTML = list.map(i=>{
-    const imgs = extractImages(i);
-    const imgCount = imgs.length;
-    const buy = i.buy_url ? `<a class="link" href="${escapeAttr(i.buy_url)}" target="_blank">Buy</a>` : `<span class="mini">—</span>`;
-    const bid = i.bid_url ? `<a class="link" href="${escapeAttr(i.bid_url)}" target="_blank">Bid</a>` : `<span class="mini">—</span>`;
+  els.tbody.innerHTML = list.map(i=>{
+    const imgs = extractImages(i);
+    const imgCount = imgs.length;
+    const buy = i.buy_url ? `<a class="link" href="${escapeAttr(i.buy_url)}" target="_blank">Buy</a>` : `<span class="mini">—</span>`;
+    const bid = i.bid_url ? `<a class="link" href="${escapeAttr(i.bid_url)}" target="_blank">Bid</a>` : `<span class="mini">—</span>`;
 
-    return `
-      <tr>
-        <td>
-          <div style="font-weight:600">${escapeHtml(i.title || 'Unnamed Item')}</div>
-        </td>
-        <td class="sku">${escapeHtml(i.sku || '')}</td>
-        <td>${escapeHtml(i.category || '')}</td>
-        <td><span class="mini">${escapeHtml(i.condition || 'Not specified')}</span></td>
-        <td class="nowrap" style="font-family:var(--mono)">${money(i.price)}</td>
-        <td style="max-width:420px; color:var(--muted)">${escapeHtml(i.description || '')}</td>
-        <td class="nowrap">${imgCount ? `<span class="mini">${imgCount} img</span>` : `<span class="mini">0 img</span>`}</td>
-        <td class="nowrap">${buy} &nbsp; ${bid}</td>
-        <td class="nowrap">
-          <div class="actions">
-            <button class="btn" onclick="openEdit('${escapeAttr(i.id)}')">Edit</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:600">${escapeHtml(i.title || 'Unnamed Item')}</div>
+        </td>
+        <td class="sku">${escapeHtml(i.sku || '')}</td>
+        <td>${escapeHtml(i.category || '')}</td>
+        <td><span class="mini">${escapeHtml(i.condition || 'Not specified')}</span></td>
+        <td class="nowrap" style="font-family:var(--mono)">${money(i.price)}</td>
+        <td style="max-width:420px; color:var(--muted)">${escapeHtml(i.description || '')}</td>
+        <td class="nowrap">${imgCount ? `<span class="mini">${imgCount} img</span>` : `<span class="mini">0 img</span>`}</td>
+        <td class="nowrap">${buy} &nbsp; ${bid}</td>
+        <td class="nowrap">
+          <div class="actions">
+            <button class="btn" onclick="openEdit('${escapeAttr(i.id)}')">Edit</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
 function collectAddPayload(){
-  const imgs = els.f.img.map(x=>x.value.trim()).filter(Boolean).slice(0,6);
-  return {
-    title: els.f.title.value.trim(),
-    sku: els.f.sku.value.trim(),
-    category: els.f.category.value.trim(),
-    condition: els.f.condition.value.trim(),
-    price: els.f.price.value.trim(),
-    description: els.f.description.value.trim(),
-    images: imgs.join(','),
-    buy_url: els.f.buy_url.value.trim(),
-    bid_url: els.f.bid_url.value.trim(),
-  };
+  const imgs = els.f.img.map(x=>x.value.trim()).filter(Boolean).slice(0,6);
+  return {
+    title: els.f.title.value.trim(),
+    sku: els.f.sku.value.trim(),
+    category: els.f.category.value.trim(),
+    condition: els.f.condition.value.trim(),
+    price: els.f.price.value.trim(),
+    description: els.f.description.value.trim(),
+    images: imgs.join(','),
+    buy_url: els.f.buy_url.value.trim(),
+    bid_url: els.f.bid_url.value.trim(),
+  };
 }
 
 function clearAddForm(){
-  Object.values(els.f).forEach(v=>{
-    if(Array.isArray(v)) v.forEach(x=>x.value='');
-    else if(v && v.tagName) v.value='';
-  });
+  Object.values(els.f).forEach(v=>{
+    if(Array.isArray(v)) v.forEach(x=>x.value='');
+    else if(v && v.tagName) v.value='';
+  });
 }
 
 async function addItem(){
-  const payload = collectAddPayload();
-  if(!payload.title){
-    alert("Title is required.");
-    return;
-  }
+  const payload = collectAddPayload();
+  if(!payload.title){
+    alert("Title is required.");
+    return;
+  }
 
-  els.addBtn.disabled = true;
-  els.addBtn.textContent = "Adding…";
-  try{
-    const res = await apiPost({ action:'add', ...payload });
-    if(!res || res.ok === false){
-      throw new Error(res?.error || "Add failed.");
-    }
-    clearAddForm();
-    await load();
-  } catch(err){
-    console.error(err);
-    alert("Could not add item.\n\n" + err.message);
-  } finally {
-    els.addBtn.disabled = false;
-    els.addBtn.textContent = "Add to Inventory";
-  }
+  els.addBtn.disabled = true;
+  els.addBtn.textContent = "Adding…";
+  try{
+    const res = await apiPost({ action:'add', ...payload });
+    if(!res || res.ok === false){
+      throw new Error(res?.error || "Add failed.");
+    }
+    clearAddForm();
+    await load();
+  } catch(err){
+    console.error(err);
+    alert("Could not add item.\n\n" + err.message);
+  } finally {
+    els.addBtn.disabled = false;
+    els.addBtn.textContent = "Add to Inventory";
+  }
 }
 
 /* ====== MODAL EDIT ====== */
 window.openEdit = function(id){
-  const item = ALL.find(x => String(x.id) === String(id));
-  if(!item){
-    alert("Could not find item by id: " + id);
-    return;
-  }
-  EDITING = item;
+  const item = ALL.find(x => String(x.id) === String(id));
+  if(!item){
+    alert("Could not find item by id: " + id);
+    return;
+  }
+  EDITING = item;
 
-  els.m.id.value = item.id;
-  els.m.title.value = item.title || '';
-  els.m.sku.value = item.sku || '';
-  els.m.category.value = item.category || '';
-  els.m.condition.value = item.condition || '';
-  els.m.price.value = item.price || '';
-  els.m.description.value = item.description || '';
-  // Keep images as comma-separated; if only "image" exists, promote it.
-  const imgs = extractImages(item).join(', ');
-  els.m.images.value = imgs;
-  els.m.buy_url.value = item.buy_url || '';
-  els.m.bid_url.value = item.bid_url || '';
+  els.m.id.value = item.id;
+  els.m.title.value = item.title || '';
+  els.m.sku.value = item.sku || '';
+  els.m.category.value = item.category || '';
+  els.m.condition.value = item.condition || '';
+  els.m.price.value = item.price || '';
+  els.m.description.value = item.description || '';
+  // Keep images as comma-separated; if only "image" exists, promote it.
+  const imgs = extractImages(item).join(', ');
+  els.m.images.value = imgs;
+  els.m.buy_url.value = item.buy_url || '';
+  els.m.bid_url.value = item.bid_url || '';
 
-  els.modalOverlay.style.display = 'flex';
+  els.modalOverlay.style.display = 'flex';
 };
 
 function closeModal(){
-  els.modalOverlay.style.display = 'none';
-  EDITING = null;
+  els.modalOverlay.style.display = 'none';
+  EDITING = null;
 }
 
 async function saveEdit(){
-  if(!EDITING) return;
-  const id = els.m.id.value;
+  if(!EDITING) return;
+  const id = els.m.id.value;
 
-  const payload = {
-    id,
-    title: els.m.title.value.trim(),
-    sku: els.m.sku.value.trim(),
-    category: els.m.category.value.trim(),
-    condition: els.m.condition.value.trim(),
-    price: els.m.price.value.trim(),
-    description: els.m.description.value.trim(),
-    images: els.m.images.value.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6).join(','),
-    buy_url: els.m.buy_url.value.trim(),
-    bid_url: els.m.bid_url.value.trim(),
-  };
+  const payload = {
+    id,
+    title: els.m.title.value.trim(),
+    sku: els.m.sku.value.trim(),
+    category: els.m.category.value.trim(),
+    condition: els.m.condition.value.trim(),
+    price: els.m.price.value.trim(),
+    description: els.m.description.value.trim(),
+    images: els.m.images.value.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6).join(','),
+    buy_url: els.m.buy_url.value.trim(),
+    bid_url: els.m.bid_url.value.trim(),
+  };
 
-  els.saveModal.disabled = true;
-  els.saveModal.textContent = "Saving…";
-  try{
-    const res = await apiPost({ action:'update', ...payload });
-    if(!res || res.ok === false){
-      throw new Error(res?.error || "Update failed.");
-    }
-    closeModal();
-    await load();
-  } catch(err){
-    console.error(err);
-    alert("Could not save changes.\n\n" + err.message);
-  } finally {
-    els.saveModal.disabled = false;
-    els.saveModal.textContent = "Save changes";
-  }
+  els.saveModal.disabled = true;
+  els.saveModal.textContent = "Saving…";
+  try{
+    const res = await apiPost({ action:'update', ...payload });
+    if(!res || res.ok === false){
+      throw new Error(res?.error || "Update failed.");
+    }
+    closeModal();
+    await load();
+  } catch(err){
+    console.error(err);
+    alert("Could not save changes.\n\n" + err.message);
+  } finally {
+    els.saveModal.disabled = false;
+    els.saveModal.textContent = "Save changes";
+  }
 }
 
 async function deleteItem(){
-  if(!EDITING) return;
-  const id = els.m.id.value;
-  const ok = confirm("Delete this item?\n\nThis cannot be undone.");
-  if(!ok) return;
+  if(!EDITING) return;
+  const id = els.m.id.value;
+  const ok = confirm("Delete this item?\n\nThis cannot be undone.");
+  if(!ok) return;
 
-  els.deleteModal.disabled = true;
-  els.deleteModal.textContent = "Deleting…";
-  try{
-    const res = await apiPost({ action:'delete', id });
-    if(!res || res.ok === false){
-      throw new Error(res?.error || "Delete failed.");
-    }
-    closeModal();
-    await load();
-  } catch(err){
-    console.error(err);
-    alert("Could not delete item.\n\n" + err.message);
-  } finally {
-    els.deleteModal.disabled = false;
-    els.deleteModal.textContent = "Delete";
-  }
+  els.deleteModal.disabled = true;
+  els.deleteModal.textContent = "Deleting…";
+  try{
+    const res = await apiPost({ action:'delete', id });
+    if(!res || res.ok === false){
+      throw new Error(res?.error || "Delete failed.");
+    }
+    closeModal();
+    await load();
+  } catch(err){
+    console.error(err);
+    alert("Could not delete item.\n\n" + err.message);
+  } finally {
+    els.deleteModal.disabled = false;
+    els.deleteModal.textContent = "Delete";
+  }
 }
 
 /* ====== Tiny HTML escaping for safety ====== */
 function escapeHtml(str){
-  return (str ?? '').toString()
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'","&#039;");
+  return (str ?? '').toString()
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
 }
 function escapeAttr(str){
-  return escapeHtml(str).replaceAll('`','&#096;');
+  return escapeHtml(str).replaceAll('`','&#096;');
 }
 
 /* EVENTS */
