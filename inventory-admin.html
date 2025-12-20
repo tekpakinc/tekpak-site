@@ -6,7 +6,6 @@
   <title>Tek-Pak Inventory Admin</title>
   <style>
     :root {
-      /* Light Mode Colors */
       --bg: #f8fafc;
       --panel: #ffffff;
       --steel: #e2e8f0;
@@ -16,14 +15,11 @@
       --accent: #2563eb;
       --accent-hover: #1d4ed8;
       --good: #10b981;
-      --warn: #f59e0b;
       --bad: #ef4444;
       --radius: 12px;
       --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       --sans: 'Inter', system-ui, -apple-system, sans-serif;
-      
-      /* Scrollbar Light */
       color-scheme: light;
     }
 
@@ -37,16 +33,11 @@
       --accent: #3b82f6;
       --accent-hover: #60a5fa;
       --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
-      
-      /* Scrollbar Dark */
       color-scheme: dark;
     }
 
-    /* Force Border-Box on everything to prevent overflow */
-    *, *::before, *::after { 
-      box-sizing: border-box; 
-      transition: background-color 0.2s, border-color 0.2s; 
-    }
+    /* Strict layout control */
+    *, *::before, *::after { box-sizing: border-box; }
     
     body { 
       margin: 0; 
@@ -54,90 +45,72 @@
       color: var(--text); 
       font-family: var(--sans);
       line-height: 1.5;
-      overflow-x: hidden;
     }
 
-    /* Modern Scrollbar Styling */
+    /* Fixed Dark Scrollbars */
     html {
       scrollbar-width: thin;
       scrollbar-color: var(--border) var(--bg);
     }
-    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { 
       background: var(--border); 
       border-radius: 10px; 
       border: 2px solid var(--bg); 
     }
-    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
     header {
-      position: sticky; top: 0; z-index: 100;
+      position: sticky; top: 0; z-index: 50;
       background: var(--panel);
       border-bottom: 1px solid var(--steel);
       backdrop-filter: blur(8px);
-      background: color-mix(in srgb, var(--panel), transparent 10%);
     }
 
-    .wrap { max-width: 1600px; margin: 0 auto; padding: 12px 24px; }
-    .top { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .wrap { max-width: 1600px; margin: 0 auto; padding: 12px 20px; }
+    .top { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
     
-    h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.025em; color: var(--accent); }
-    .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    h1 { margin: 0; font-size: 18px; font-weight: 800; color: var(--accent); }
+    .sub { color: var(--muted); font-size: 12px; }
 
-    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
-    .pill {
-      font-family: var(--mono);
-      font-size: 11px; font-weight: 600;
-      color: var(--muted);
-      padding: 4px 12px; border: 1px solid var(--border);
-      border-radius: 999px; background: var(--bg);
-    }
-
-    /* Fix: Explicitly prevent overflow on inputs */
+    /* Inputs - Max-width fix to prevent going "off" */
     input, select, textarea {
       font-family: var(--sans);
-      width: 100%; /* Fill container */
-      max-width: 100%; /* Prevent going 'off' */
-      padding: 10px 14px; border-radius: var(--radius);
+      width: 100%;
+      padding: 10px 12px; border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--panel);
       color: var(--text);
       font-size: 14px;
       outline: none;
-      display: block;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
     input:focus, select:focus, textarea:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 80%);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 85%);
     }
-
-    textarea { min-height: 80px; resize: vertical; }
 
     .btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      font-weight: 600; font-size: 14px;
+      font-weight: 600; font-size: 13px;
       border: 1px solid var(--border);
       background: var(--panel); color: var(--text);
-      padding: 10px 16px; border-radius: var(--radius);
-      cursor: pointer; gap: 8px;
-      white-space: nowrap;
+      padding: 8px 16px; border-radius: 8px;
+      cursor: pointer; white-space: nowrap;
+      transition: all 0.15s;
     }
-    .btn:hover { background: var(--bg); border-color: var(--muted); }
+    .btn:hover { border-color: var(--muted); background: var(--bg); }
     .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
     .btn.good { background: var(--good); border-color: var(--good); color: #fff; }
     .btn.bad { background: var(--bad); border-color: var(--bad); color: #fff; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    #themeToggle { width: 42px; height: 42px; border-radius: 50%; padding: 0; }
-
     .grid {
-      display: grid; gap: 24px;
-      grid-template-columns: 400px 1fr;
-      padding: 24px; max-width: 1600px; margin: 0 auto;
+      display: grid; gap: 20px;
+      grid-template-columns: 380px 1fr;
+      padding: 20px; max-width: 1600px; margin: 0 auto;
     }
-
     @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
 
     .card {
@@ -145,66 +118,53 @@
       border: 1px solid var(--steel);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      display: flex; flex-direction: column;
-      overflow: hidden; /* Prevent child overflow */
+      position: relative; overflow: hidden;
     }
 
     .cardHead {
-      padding: 16px 20px;
+      padding: 12px 16px;
       border-bottom: 1px solid var(--steel);
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .cardHead h2 { margin: 0; font-size: 16px; font-weight: 700; }
+    .cardHead h2 { margin: 0; font-size: 14px; font-weight: 700; }
 
-    .cardBody { padding: 20px; }
+    .cardBody { padding: 16px; }
 
-    .formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .formGrid .full { grid-column: 1 / -1; }
     
-    label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-    
-    .field { display: flex; flex-direction: column; min-width: 0; } /* min-width: 0 is key for grid children */
-    .hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+    .field { min-width: 0; }
+    .hint { font-size: 10px; color: var(--muted); margin-top: 4px; }
 
-    .tableContainer {
-      overflow: auto; max-height: calc(100vh - 220px);
-    }
+    .tableWrap { overflow: auto; max-height: calc(100vh - 180px); }
     table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
-    
     thead th {
-      position: sticky; top: 0;
-      background: var(--panel);
-      z-index: 10;
-      border-bottom: 2px solid var(--steel);
-      text-align: left; padding: 14px 12px;
-      color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 11px;
+      position: sticky; top: 0; background: var(--panel);
+      z-index: 10; border-bottom: 2px solid var(--steel);
+      text-align: left; padding: 12px; color: var(--muted); font-size: 11px;
     }
+    tbody td { border-bottom: 1px solid var(--steel); padding: 10px 12px; vertical-align: top; }
+    tbody tr:hover { background: color-mix(in srgb, var(--accent), transparent 96%); }
 
-    tbody td { border-bottom: 1px solid var(--steel); padding: 14px 12px; vertical-align: top; }
-    tbody tr:hover { background: color-mix(in srgb, var(--bg), transparent 40%); }
-
-    .sku { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 600; }
-    .nowrap { white-space: nowrap; }
-    .mini {
-      display: inline-block; padding: 2px 8px; border-radius: 6px;
-      border: 1px solid var(--border); background: var(--bg);
-      color: var(--muted); font-size: 11px; font-weight: 600;
+    .pill {
+      font-family: var(--mono); font-size: 11px;
+      padding: 3px 10px; border: 1px solid var(--border);
+      border-radius: 20px; background: var(--bg);
     }
-
-    .link { color: var(--accent); text-decoration: none; font-weight: 600; }
 
     .modalOverlay {
       position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
       display: none; align-items: center; justify-content: center;
-      z-index: 9999; padding: 20px; backdrop-filter: blur(4px);
+      z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
     }
     .modal {
-      width: min(850px, 100%); max-height: 90vh; 
+      width: min(800px, 100%); max-height: 85vh; 
       background: var(--panel); border-radius: 16px;
-      border: 1px solid var(--steel); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      display: flex; flex-direction: column;
     }
-    .modalBody { padding: 24px; overflow-y: auto; }
+    .modalBody { padding: 20px; overflow-y: auto; }
   </style>
 </head>
 
@@ -214,16 +174,13 @@
     <div class="top">
       <div>
         <h1>Tek-Pak Admin</h1>
-        <div class="sub">Inventory Management System</div>
+        <div class="sub">Inventory Control</div>
       </div>
       <div class="row">
-        <input id="q" placeholder="Search..." style="width:240px">
-        <select id="cat" style="width:160px"><option value="">All Categories</option></select>
-        <label class="row" style="font-size:13px; text-transform:none; cursor:pointer;">
-          <input type="checkbox" id="showAssets" style="width:auto"> Show Assets
-        </label>
+        <input id="q" placeholder="Quick Search..." style="width:200px">
+        <select id="cat" style="width:150px"><option value="">Categories</option></select>
         <button class="btn" id="refresh">Refresh</button>
-        <button class="btn" id="themeToggle">🌓</button>
+        <button class="btn" id="themeToggle" style="width:40px; padding:0">🌓</button>
         <span class="pill" id="countPill">—</span>
       </div>
     </div>
@@ -234,49 +191,26 @@
   <aside>
     <section class="card">
       <div class="cardHead">
-        <h2>Add Item</h2>
-        <button class="btn primary" id="addBtn">Add to Sheet</button>
+        <h2>Add New Item</h2>
+        <button class="btn primary" id="addBtn">Add Item</button>
       </div>
       <div class="cardBody">
         <div class="formGrid">
+          <div class="field full"><label>Title</label><input id="f_title"></div>
+          <div class="field"><label>SKU</label><input id="f_sku"></div>
+          <div class="field"><label>Category</label><input id="f_category"></div>
+          <div class="field"><label>Condition</label><input id="f_condition"></div>
+          <div class="field"><label>Price</label><input id="f_price"></div>
+          <div class="field full"><label>Description</label><textarea id="f_description" style="height:60px"></textarea></div>
           <div class="field full">
-            <label>Title</label>
-            <input id="f_title" placeholder="e.g., Dell Latitude 7420" />
+            <label>Images (URLs)</label>
+            <input id="f_img1" placeholder="Img 1" style="margin-bottom:5px">
+            <input id="f_img2" placeholder="Img 2" style="margin-bottom:5px">
+            <input id="f_img3" placeholder="Img 3">
+            <div class="hint">Top 3 images for preview.</div>
           </div>
-          <div class="field">
-            <label>SKU</label>
-            <input id="f_sku" placeholder="DL7420" />
-          </div>
-          <div class="field">
-            <label>Category</label>
-            <input id="f_category" placeholder="Laptops" />
-          </div>
-          <div class="field">
-            <label>Condition</label>
-            <input id="f_condition" placeholder="Refurbished" />
-          </div>
-          <div class="field">
-            <label>Price</label>
-            <input id="f_price" placeholder="449.99" />
-          </div>
-          <div class="field full">
-            <label>Description</label>
-            <textarea id="f_description" placeholder="Specs, notes..."></textarea>
-          </div>
-          <div class="field full">
-            <label>Image URLs</label>
-            <input id="f_img1" placeholder="URL #1" />
-            <input id="f_img2" placeholder="URL #2" style="margin-top:8px" />
-            <input id="f_img3" placeholder="URL #3" style="margin-top:8px" />
-          </div>
-          <div class="field full">
-            <label>Buy Now URL</label>
-            <input id="f_buy_url" placeholder="Checkout link" />
-          </div>
-          <div class="field full">
-            <label>Bid URL</label>
-            <input id="f_bid_url" placeholder="eBay link" />
-          </div>
+          <div class="field full"><label>Buy URL</label><input id="f_buy_url"></div>
+          <div class="field full"><label>Bid URL</label><input id="f_bid_url"></div>
         </div>
       </div>
     </section>
@@ -284,21 +218,18 @@
 
   <main class="card">
     <div class="cardHead">
-      <h2>Inventory</h2>
+      <h2>Live Inventory</h2>
       <span class="pill" id="updatedPill">Updated: —</span>
     </div>
-    <div class="tableContainer">
+    <div class="tableWrap">
       <table>
         <thead>
           <tr>
             <th>Title</th>
             <th>SKU</th>
-            <th>Category</th>
-            <th>Condition</th>
+            <th>Cat</th>
             <th>Price</th>
             <th>Description</th>
-            <th>Images</th>
-            <th>Links</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -310,24 +241,24 @@
 
 <div class="modalOverlay" id="modalOverlay">
   <div class="modal">
-    <div class="modalHead">
-      <h3>Edit Item</h3>
+    <div class="cardHead">
+      <h3>Edit Item Details</h3>
       <div class="row">
-        <button class="btn" id="closeModal">Close</button>
+        <button class="btn" id="closeModal">Cancel</button>
         <button class="btn good" id="saveModal">Save</button>
-        <button class="btn bad" id="deleteModal">Delete</button>
+        <button class="btn bad" id="deleteModal">Del</button>
       </div>
     </div>
     <div class="modalBody">
       <div class="formGrid">
-        <div class="field full"><label>ID</label><input id="m_id" readonly style="opacity:0.6"></div>
+        <div class="field full"><label>ID</label><input id="m_id" readonly style="opacity:0.5"></div>
         <div class="field full"><label>Title</label><input id="m_title"></div>
         <div class="field"><label>SKU</label><input id="m_sku"></div>
         <div class="field"><label>Category</label><input id="m_category"></div>
         <div class="field"><label>Condition</label><input id="m_condition"></div>
         <div class="field"><label>Price</label><input id="m_price"></div>
-        <div class="field full"><label>Description</label><textarea id="m_description"></textarea></div>
-        <div class="field full"><label>Images</label><textarea id="m_images"></textarea></div>
+        <div class="field full"><label>Description</label><textarea id="m_description" style="height:80px"></textarea></div>
+        <div class="field full"><label>All Images (Comma separated)</label><textarea id="m_images" style="height:60px"></textarea></div>
         <div class="field full"><label>Buy URL</label><input id="m_buy_url"></div>
         <div class="field full"><label>Bid URL</label><input id="m_bid_url"></div>
       </div>
@@ -338,11 +269,9 @@
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbyLMf07vAWn1qdtL_FMVvCRf6GytYvXAtbzTLgqZRHurZisb7Qba4gYtsTwkhL-8vJu/exec";
 
-// Element references
 const els = {
   q: document.getElementById('q'),
   cat: document.getElementById('cat'),
-  showAssets: document.getElementById('showAssets'),
   refresh: document.getElementById('refresh'),
   countPill: document.getElementById('countPill'),
   updatedPill: document.getElementById('updatedPill'),
@@ -378,166 +307,101 @@ const els = {
   }
 };
 
-/* --- THEME --- */
+/* THEME */
 const toggleTheme = () => {
-  const target = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', target);
-  localStorage.setItem('tekpak-theme', target);
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('tekpak-theme', t);
 };
 document.documentElement.setAttribute('data-theme', localStorage.getItem('tekpak-theme') || 'light');
 els.themeToggle.addEventListener('click', toggleTheme);
 
-/* --- DATA HANDLING --- */
+/* DATA */
 let ALL = [];
-let EDITING = null;
+const money = v => isFinite(Number(v)) ? Number(v).toLocaleString(undefined,{style:'currency',currency:'USD'}) : '—';
+const clean = s => (s||'').toString().toLowerCase().trim();
 
-const txt = v => (v ?? '').toString().toLowerCase().trim();
-const money = v => {
-  const n = Number(v);
-  return isFinite(n) ? n.toLocaleString(undefined,{style:'currency',currency:'USD'}) : '—';
-};
-
-function normalize(raw){
-  return {
-    id: raw.id ?? raw.ID ?? raw.rowId ?? '',
-    title: raw.title ?? raw.name ?? raw.item ?? '',
-    sku: raw.sku ?? raw.SKU ?? '',
-    category: raw.category ?? raw.Category ?? '',
-    condition: raw.condition ?? raw.Condition ?? '',
-    price: raw.price ?? raw.Price ?? '',
-    description: raw.description ?? raw.Description ?? '',
-    images: raw.images ?? raw.Images ?? raw.image ?? '',
-    buy_url: raw.buy_url ?? raw.BuyURL ?? '',
-    bid_url: raw.bid_url ?? raw.BidURL ?? '',
-  };
-}
-
-async function apiGet(params){
-  const url = API_URL + (API_URL.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
-  const res = await fetch(url);
+async function api(p) { 
+  const res = await fetch(API_URL + (API_URL.includes('?') ? '&' : '?') + new URLSearchParams(p));
   return res.json();
 }
 
-async function apiPost(body){
-  const res = await fetch(API_URL, {
-    method:'POST',
-    headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
-    body: new URLSearchParams(body).toString()
-  });
-  return res.json();
-}
-
-async function load(){
+async function load() {
   els.refresh.disabled = true;
-  els.refresh.textContent = "...";
   try {
-    const json = await apiGet({ action:'list' });
-    ALL = (Array.isArray(json) ? json : (json.data || [])).map(normalize);
-    populateCategories();
-    applyFilters();
-    els.updatedPill.textContent = "Last: " + new Date().toLocaleTimeString();
+    const json = await api({ action:'list' });
+    ALL = (Array.isArray(json) ? json : (json.data || [])).map(r => ({
+      id: r.id || r.ID || r.rowId || '',
+      title: r.title || r.item || r.name || '',
+      sku: r.sku || r.SKU || '',
+      category: r.category || r.Category || '',
+      condition: r.condition || '',
+      price: r.price || '',
+      description: r.description || '',
+      images: r.images || r.image || '',
+      buy_url: r.buy_url || '',
+      bid_url: r.bid_url || ''
+    }));
+    populate(); apply();
+    els.updatedPill.textContent = new Date().toLocaleTimeString();
   } catch(e) { console.error(e); }
-  finally { els.refresh.disabled = false; els.refresh.textContent = "Refresh"; }
+  finally { els.refresh.disabled = false; }
 }
 
-function populateCategories(){
+function populate() {
   const cats = [...new Set(ALL.map(x=>x.category).filter(Boolean))].sort();
-  els.cat.innerHTML = `<option value="">All Categories</option>` + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  els.cat.innerHTML = `<option value="">All Categories</option>` + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
-function applyFilters(){
-  const q = txt(els.q.value);
+function apply() {
+  const q = clean(els.q.value);
   const cat = els.cat.value;
-  const showAssets = els.showAssets.checked;
-
   const filtered = ALL.filter(i => {
-    if(!showAssets && txt(i.description).includes('asset')) return false;
-    const matchQ = !q || [i.title, i.sku, i.category, i.description].some(s => txt(s).includes(q));
+    const matchQ = !q || [i.title, i.sku, i.category].some(s => clean(s).includes(q));
     const matchC = !cat || i.category === cat;
     return matchQ && matchC;
   });
-
-  els.countPill.textContent = `${filtered.length} Items`;
-  render(filtered);
-}
-
-function render(list){
-  els.tbody.innerHTML = list.map(i => `
+  els.countPill.textContent = filtered.length;
+  els.tbody.innerHTML = filtered.map(i => `
     <tr>
-      <td><b>${escapeHtml(i.title)}</b></td>
-      <td class="sku">${escapeHtml(i.sku)}</td>
-      <td>${escapeHtml(i.category)}</td>
-      <td><span class="mini">${escapeHtml(i.condition)}</span></td>
-      <td class="nowrap">${money(i.price)}</td>
-      <td style="color:var(--muted)">${escapeHtml(i.description.substring(0,60))}...</td>
-      <td><span class="mini">${(i.images||'').split(',').filter(Boolean).length}</span></td>
-      <td class="nowrap">
-        ${i.buy_url ? `<a class="link" href="${escapeAttr(i.buy_url)}" target="_blank">Buy</a>` : ''}
-        ${i.bid_url ? ` <a class="link" href="${escapeAttr(i.bid_url)}" target="_blank">Bid</a>` : ''}
-      </td>
-      <td><button class="btn" style="padding:4px 8px" onclick="openEdit('${escapeAttr(i.id)}')">Edit</button></td>
-    </tr>
-  `).join('');
+      <td><b>${i.title}</b></td>
+      <td>${i.sku}</td>
+      <td>${i.category}</td>
+      <td>${money(i.price)}</td>
+      <td style="opacity:0.7; font-size:11px">${i.description.substring(0,40)}...</td>
+      <td><button class="btn" style="padding:4px 8px" onclick="openEdit('${i.id}')">Edit</button></td>
+    </tr>`).join('');
 }
 
-async function addItem(){
-  const imgs = els.f.img.map(x=>x.value.trim()).filter(Boolean);
-  const payload = {
-    action: 'add',
-    title: els.f.title.value.trim(),
-    sku: els.f.sku.value.trim(),
-    category: els.f.category.value.trim(),
-    condition: els.f.condition.value.trim(),
-    price: els.f.price.value.trim(),
-    description: els.f.description.value.trim(),
-    images: imgs.join(','),
-    buy_url: els.f.buy_url.value.trim(),
-    bid_url: els.f.bid_url.value.trim()
-  };
+async function addItem() {
+  const payload = { action:'add', ...Object.fromEntries(Object.entries(els.f).filter(([k])=>k!=='img').map(([k,v])=>[k,v.value.trim()])) };
+  payload.images = els.f.img.map(x=>x.value.trim()).filter(Boolean).join(',');
   if(!payload.title) return alert("Title required");
   els.addBtn.disabled = true;
-  await apiPost(payload);
-  load();
-  els.addBtn.disabled = false;
+  await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams(payload) });
+  load(); els.addBtn.disabled = false;
 }
 
 window.openEdit = id => {
   const i = ALL.find(x => String(x.id) === String(id));
   if(!i) return;
-  EDITING = i;
-  els.m.id.value = i.id;
-  els.m.title.value = i.title;
-  els.m.sku.value = i.sku;
-  els.m.category.value = i.category;
-  els.m.condition.value = i.condition;
-  els.m.price.value = i.price;
-  els.m.description.value = i.description;
-  els.m.images.value = i.images;
-  els.m.buy_url.value = i.buy_url;
-  els.m.bid_url.value = i.bid_url;
+  Object.keys(els.m).forEach(k => els.m[k].value = i[k]);
   els.modalOverlay.style.display = 'flex';
 };
 
-function closeModal(){ els.modalOverlay.style.display = 'none'; }
-async function saveEdit(){
-  await apiPost({ action:'update', ...Object.fromEntries(Object.entries(els.m).map(([k,v])=>[k,v.value])) });
-  closeModal(); load();
-}
-async function deleteItem(){
-  if(confirm("Delete?")) { await apiPost({ action:'delete', id:els.m.id.value }); closeModal(); load(); }
-}
+els.closeModal.onclick = () => els.modalOverlay.style.display = 'none';
+els.saveModal.onclick = async () => {
+  await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams({action:'update', ...Object.fromEntries(Object.entries(els.m).map(([k,v])=>[k,v.value]))}) });
+  els.modalOverlay.style.display = 'none'; load();
+};
+els.deleteModal.onclick = async () => {
+  if(confirm("Delete item?")) { await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams({action:'delete', id:els.m.id.value}) }); els.modalOverlay.style.display = 'none'; load(); }
+};
 
-function escapeHtml(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
-function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
-
-els.q.addEventListener('input', applyFilters);
-els.cat.addEventListener('change', applyFilters);
-els.showAssets.addEventListener('change', applyFilters);
-els.refresh.addEventListener('click', load);
-els.addBtn.addEventListener('click', addItem);
-els.closeModal.addEventListener('click', closeModal);
-els.saveModal.addEventListener('click', saveEdit);
-els.deleteModal.addEventListener('click', deleteItem);
+els.q.oninput = apply;
+els.cat.onchange = apply;
+els.refresh.onclick = load;
+els.addBtn.onclick = addItem;
 
 load();
 </script>
