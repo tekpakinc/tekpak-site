@@ -98,7 +98,7 @@
     }
     thead th{
       position:sticky;
-      top:0;                 /* ✅ FIX: was 74px; inside a scroll container it must be 0 */
+      top:0;
       background:#fff;
       z-index:3;
       border-bottom:2px solid var(--steel);
@@ -107,8 +107,6 @@
       color:var(--muted);
       font-weight:600;
       white-space:nowrap;
-
-      /* optional: makes the sticky header look intentional */
       box-shadow: 0 6px 14px rgba(0,0,0,.06);
     }
     tbody td{
@@ -134,7 +132,6 @@
       word-break:break-all;
     }
 
-    /* Modal */
     .modalOverlay{
       position:fixed;inset:0;
       background:rgba(0,0,0,.55);
@@ -184,7 +181,6 @@
 </header>
 
 <div class="grid">
-  <!-- ADD PANEL -->
   <section class="card">
     <div class="cardHead">
       <h2>Add item</h2>
@@ -247,7 +243,6 @@
     </div>
   </section>
 
-  <!-- LIST PANEL -->
   <section class="card">
     <div class="cardHead">
       <h2>Inventory</h2>
@@ -278,7 +273,6 @@
   </section>
 </div>
 
-<!-- EDIT MODAL -->
 <div class="modalOverlay" id="modalOverlay">
   <div class="modal">
     <div class="modalHead">
@@ -292,9 +286,9 @@
     <div class="modalBody">
       <div class="formGrid">
         <div class="field full">
-          <label>Row ID (readonly)</label>
+          <label>ID / Row (readonly)</label>
           <input id="m_id" readonly style="font-family:var(--mono)" />
-          <div class="hint">This should be a stable ID from your Apps Script (recommended), or a sheet row number if you built it that way.</div>
+          <div class="hint">If your API doesn't provide a stable <b>id</b>, this will fall back to the sheet row number.</div>
         </div>
 
         <div class="field full">
@@ -354,11 +348,15 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyLMf07vAWn1qdtL_FMVvCRf6GytYvXAtbzTLgqZRHurZisb7Qba4gYtsTwkhL-8vJu/exec";
 
 /*
-  Expected API (recommended):
+  This UI expects your Apps Script to support:
   - GET  ?action=list                 -> { data:[...] } or [...]
   - POST action=add   + item fields   -> { ok:true }
-  - POST action=update + id + fields  -> { ok:true }
-  - POST action=delete + id           -> { ok:true }
+  - POST action=update + (id or row)  -> { ok:true }
+  - POST action=delete + (id or row)  -> { ok:true }
+
+  FIX INCLUDED:
+  - Resolve Google's redirect endpoint on first load
+  - POST to the resolved endpoint so bodies don't get dropped
 */
 
 const els = {
@@ -411,6 +409,9 @@ const els = {
 let ALL = [];
 let EDITING = null;
 
+// Resolved endpoint (after Google's redirect). This is the big fix.
+let RESOLVED_ENDPOINT_BASE = null;
+
 const txt = v => (v ?? '').toString().toLowerCase().trim();
 const money = v => {
   const n = Number(v);
@@ -418,7 +419,6 @@ const money = v => {
 };
 
 function normalize(raw){
-  // Try to be forgiving about field names coming from the sheet.
   return {
     id: raw.id ?? raw.ID ?? raw.rowId ?? raw.row_id ?? raw.RowID ?? raw.row ?? raw.Row ?? '',
     title: raw.title ?? raw.name ?? raw.item ?? raw.Item ?? '',
@@ -431,11 +431,12 @@ function normalize(raw){
     images: raw.images ?? raw.Images ?? '',
     buy_url: raw.buy_url ?? raw.BuyURL ?? raw.checkout ?? '',
     bid_url: raw.bid_url ?? raw.BidURL ?? raw.ebay ?? '',
+    // optional row hints if your API returns them:
+    row: raw.row ?? raw.Row ?? raw.__row ?? ''
   };
 }
 
 function extractImages(item){
-  // Prefer "images" (comma-separated); fall back to single "image".
   let list = [];
   const images = (item.images ?? '').toString().trim();
   const image = (item.image ?? '').toString().trim();
@@ -447,19 +448,55 @@ function extractImages(item){
   return list.slice(0,6);
 }
 
+function baseUrlNoQuery(url){
+  const i = url.indexOf('?');
+  return i === -1 ? url : url.slice(0, i);
+}
+
 async function apiGet(params){
   const url = API_URL + (API_URL.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
-  const res = await fetch(url, { method:'GET' });
-  return res.json();
+  const res = await fetch(url, { method:'GET', cache:'no-store', mode:'cors', redirect:'follow' });
+
+  // Capture the final URL after redirects (script.googleusercontent.com...)
+  if(res && res.url){
+    RESOLVED_ENDPOINT_BASE = baseUrlNoQuery(res.url);
+  }
+
+  const text = await res.text();
+  try{
+    return JSON.parse(text);
+  } catch(e){
+    throw new Error(
+      "API did not return JSON.\n\n" +
+      "Status: " + res.status + " " + res.statusText + "\n" +
+      "Final URL: " + (res.url || "(unknown)") + "\n\n" +
+      "First 250 chars:\n" + text.slice(0,250)
+    );
+  }
 }
 
 async function apiPost(body){
-  const res = await fetch(API_URL, {
+  const postUrl = RESOLVED_ENDPOINT_BASE || API_URL;
+
+  const res = await fetch(postUrl, {
     method:'POST',
+    mode:'cors',
+    redirect:'follow',
     headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
     body: new URLSearchParams(body).toString()
   });
-  return res.json();
+
+  const text = await res.text();
+  try{
+    return JSON.parse(text);
+  } catch(e){
+    throw new Error(
+      "POST did not return JSON.\n\n" +
+      "Status: " + res.status + " " + res.statusText + "\n" +
+      "POST URL: " + postUrl + "\n\n" +
+      "First 250 chars:\n" + text.slice(0,250)
+    );
+  }
 }
 
 async function load(){
@@ -468,15 +505,36 @@ async function load(){
   try{
     const json = await apiGet({ action:'list' });
     const rows = Array.isArray(json) ? json : (json.data || []);
-    ALL = rows.map(normalize);
+
+    ALL = rows.map((r, idx)=>{
+      const n = normalize(r);
+      // Determine sheet row fallback if API doesn't provide id
+      const fallbackRow = Number(n.row) || (idx + 2); // row 1 = headers
+      n.__row = fallbackRow;
+
+      // If no id exists, use row as an edit key (better than empty string)
+      if(!String(n.id || '').trim()){
+        n.id = String(fallbackRow);
+        n.__idIsRowFallback = true;
+      } else {
+        n.__idIsRowFallback = false;
+      }
+      return n;
+    });
 
     populateCategories();
     applyFilters();
-
     els.updatedPill.textContent = "Last updated: " + new Date().toLocaleString();
   } catch(err){
     console.error(err);
-    alert("Could not load inventory. Check Console for details.\n\nCommon causes:\n- API doesn't support ?action=list\n- CORS / permissions\n- Returned HTML instead of JSON");
+    alert(
+      "Could not load inventory.\n\n" +
+      err.message +
+      "\n\nCommon causes:\n" +
+      "- The web app isn't deployed as 'Anyone' access\n" +
+      "- Returned HTML instead of JSON (auth screen / error)\n" +
+      "- API doesn't implement action=list\n"
+    );
   } finally {
     els.refresh.disabled = false;
     els.refresh.textContent = "Refresh";
@@ -489,7 +547,6 @@ function populateCategories(){
 }
 
 function shouldHideAsset(item){
-  // Admin default: hide assets unless checkbox enabled.
   return txt(item.description).includes('asset');
 }
 
@@ -513,7 +570,6 @@ function applyFilters(){
   });
 
   els.countPill.textContent = `${filtered.length} items`;
-
   render(filtered);
 }
 
@@ -521,13 +577,17 @@ function render(list){
   els.tbody.innerHTML = list.map(i=>{
     const imgs = extractImages(i);
     const imgCount = imgs.length;
+
     const buy = i.buy_url ? `<a class="link" href="${escapeAttr(i.buy_url)}" target="_blank">Buy</a>` : `<span class="mini">—</span>`;
     const bid = i.bid_url ? `<a class="link" href="${escapeAttr(i.bid_url)}" target="_blank">Bid</a>` : `<span class="mini">—</span>`;
+
+    const idBadge = i.__idIsRowFallback ? `<span class="mini">row#${escapeHtml(i.id)}</span>` : ``;
 
     return `
       <tr>
         <td>
           <div style="font-weight:600">${escapeHtml(i.title || 'Unnamed Item')}</div>
+          <div style="margin-top:6px">${idBadge}</div>
         </td>
         <td class="sku">${escapeHtml(i.sku || '')}</td>
         <td>${escapeHtml(i.category || '')}</td>
@@ -597,7 +657,7 @@ async function addItem(){
 window.openEdit = function(id){
   const item = ALL.find(x => String(x.id) === String(id));
   if(!item){
-    alert("Could not find item by id: " + id);
+    alert("Could not find item by id/row: " + id);
     return;
   }
   EDITING = item;
@@ -609,9 +669,7 @@ window.openEdit = function(id){
   els.m.condition.value = item.condition || '';
   els.m.price.value = item.price || '';
   els.m.description.value = item.description || '';
-  // Keep images as comma-separated; if only "image" exists, promote it.
-  const imgs = extractImages(item).join(', ');
-  els.m.images.value = imgs;
+  els.m.images.value = extractImages(item).join(', ');
   els.m.buy_url.value = item.buy_url || '';
   els.m.bid_url.value = item.bid_url || '';
 
@@ -625,10 +683,14 @@ function closeModal(){
 
 async function saveEdit(){
   if(!EDITING) return;
+
   const id = els.m.id.value;
 
   const payload = {
     id,
+    // include row as a fallback reference
+    row: EDITING.__row,
+
     title: els.m.title.value.trim(),
     sku: els.m.sku.value.trim(),
     category: els.m.category.value.trim(),
@@ -660,14 +722,19 @@ async function saveEdit(){
 
 async function deleteItem(){
   if(!EDITING) return;
-  const id = els.m.id.value;
+
   const ok = confirm("Delete this item?\n\nThis cannot be undone.");
   if(!ok) return;
+
+  const payload = {
+    id: els.m.id.value,
+    row: EDITING.__row
+  };
 
   els.deleteModal.disabled = true;
   els.deleteModal.textContent = "Deleting…";
   try{
-    const res = await apiPost({ action:'delete', id });
+    const res = await apiPost({ action:'delete', ...payload });
     if(!res || res.ok === false){
       throw new Error(res?.error || "Delete failed.");
     }
