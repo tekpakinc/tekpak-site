@@ -97,7 +97,8 @@
       font-size:13px;
     }
     thead th{
-      position:sticky;top:74px;
+      position:sticky;
+      top:0;                 /* ✅ FIX: was 74px; inside a scroll container it must be 0 */
       background:#fff;
       z-index:3;
       border-bottom:2px solid var(--steel);
@@ -106,6 +107,9 @@
       color:var(--muted);
       font-weight:600;
       white-space:nowrap;
+
+      /* optional: makes the sticky header look intentional */
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
     }
     tbody td{
       border-bottom:1px solid var(--steel);
