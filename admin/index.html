@@ -52,13 +52,20 @@
     min-width: 260px;
   }
 
+  /* ✅ LOGO BOX (now shows excellence.png) */
   .logo{
     width:34px; height:34px; border-radius:12px;
     border:1px solid rgba(255,255,255,.14);
-    background:
-      radial-gradient(circle at 30% 30%, rgba(255,255,255,.16), transparent 45%),
-      linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+    background:rgba(0,0,0,.20);
     box-shadow:0 12px 28px rgba(0,0,0,.35);
+    overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
   }
 
   .title{
@@ -202,17 +209,6 @@
 
   .mini{ font-family:var(--mono); font-size:12px; color:rgba(232,243,255,.88); }
 
-  .tag{
-    display:inline-flex; gap:6px; align-items:center;
-    border:1px solid var(--border);
-    padding:4px 8px;
-    border-radius:999px;
-    font-size:12px;
-    background:rgba(0,0,0,.18);
-    margin-right:6px;
-    white-space:nowrap;
-  }
-
   .thumbs{ display:flex; gap:8px; flex-wrap:wrap; }
   .thumb{
     width:44px; height:44px; border-radius:12px;
@@ -288,7 +284,8 @@
 <header>
   <div class="topbar">
     <div class="brand">
-      <div class="logo"></div>
+      <!-- ✅ Replaced square with your logo image -->
+      <div class="logo"><img src="excellence.png" alt="Tek-Pak Logo"></div>
       <div>
         <div class="title">Tek-Pak Inventory Admin</div>
         <div class="subtitle">GitHub Pages → Apps Script API</div>
@@ -682,7 +679,6 @@ function render(){
     </tr>`;
   }).join("");
 
-  // Edit buttons
   tb.querySelectorAll("[data-edit]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const id = btn.getAttribute("data-edit");
@@ -691,7 +687,6 @@ function render(){
     });
   });
 
-  // Image lightbox
   tb.querySelectorAll(".thumb").forEach(t=>{
     t.addEventListener("click", ()=>{
       const url = t.getAttribute("data-img");
@@ -699,7 +694,6 @@ function render(){
     });
   });
 
-  // Open link buttons
   tb.querySelectorAll("[data-open]").forEach(b=>{
     b.addEventListener("click", ()=>{
       const url = b.getAttribute("data-open");
@@ -790,7 +784,6 @@ async function saveEditor(){
     return;
   }
 
-  // build item payload using exact sheet headers
   const payload = {
     "item id": $("e_id").value.trim(),
     "location": $("e_location").value.trim(),
@@ -817,7 +810,6 @@ async function saveEditor(){
     const res = await api("upsertItem", { actor:"tekpak-admin", item: payload });
     const saved = res.data;
 
-    // merge into local list by item id
     const id = saved["item id"];
     const idx = items.findIndex(x => (x["item id"]||"") === id);
     if(idx >= 0) items[idx] = saved;
@@ -851,7 +843,6 @@ async function loadDropdowns(){
   const res = await api("getDropdowns", {});
   dropdowns = res.data || {};
 
-  // Lists keys: location, status, category, manufacturer, condition
   optList($("fStatus"), dropdowns.status || [], true);
   optList($("fCategory"), dropdowns.category || [], true);
   optList($("fLocation"), dropdowns.location || [], true);
@@ -863,13 +854,6 @@ async function loadDropdowns(){
   optList($("e_location"), dropdowns.location || [], false, "Select");
   optList($("e_manufacturer"), dropdowns.manufacturer || [], false, "Select");
   optList($("e_condition"), dropdowns.condition || [], false, "Select");
-
-  // Try to set defaults if blank
-  if(!$("e_status").value && (dropdowns.status||[]).length) $("e_status").value = dropdowns.status[0];
-  if(!$("e_category").value && (dropdowns.category||[]).length) $("e_category").value = dropdowns.category[0];
-  if(!$("e_location").value && (dropdowns.location||[]).length) $("e_location").value = dropdowns.location[0];
-  if(!$("e_manufacturer").value && (dropdowns.manufacturer||[]).length) $("e_manufacturer").value = dropdowns.manufacturer[0];
-  if(!$("e_condition").value && (dropdowns.condition||[]).length) $("e_condition").value = dropdowns.condition[0];
 }
 
 async function connect(){
@@ -881,7 +865,6 @@ async function connect(){
   localStorage.setItem(LS_KEY, apiKey);
 
   try{
-    // quick ping to see if endpoint alive
     const r = await fetch(API_URL + "?action=ping");
     const j = await r.json();
     if(!j.ok) throw new Error(j.error || "Ping failed");
@@ -956,13 +939,23 @@ $("btnOpenPaypal").addEventListener("click", ()=>{
   $(id).addEventListener("input", updatePreviewButtons_);
 });
 
+/* Export JSON */
+$("btnExport").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(items, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "tekpak-inventory-export.json";
+  a.click();
+  setTimeout(()=> URL.revokeObjectURL(url), 1000);
+});
+
 /* Boot */
 (function boot(){
   const saved = localStorage.getItem(LS_KEY) || "";
   $("apiKey").value = saved;
   apiKey = saved.trim();
 
-  // Show endpoint alive even before key
   fetch(API_URL + "?action=ping")
     .then(r=>r.json())
     .then(j=> setApiStatus(!!j.ok, j.ok ? "OK" : "FAIL"))
