@@ -1,1 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tek-Pak Surplus Store</title>
+<style>
+  :root{
+    --bg:#070A10;
+    --panel:#0E1623;
+    --panel2:#0B1220;
+    --text:#EAF3FF;
+    --muted:#9DB2C8;
+    --border:rgba(255,255,255,.10);
 
+    /* Tek-Pak-ish vibe: medium blue + yellow accents */
+    --blue:#2E7BEA;
+    --yellow:#FFD43B;
+
+    --shadow:0 22px 65px rgba(0,0,0,.55);
+    --r:18px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--text);
+    background:
+      radial-gradient(1100px 650px at 15% 0%, rgba(46,123,234,.22), transparent 55%),
+      radial-gradient(900px 560px at 88% 10%, rgba(255,212,59,.12), transparent 55%),
+      linear-gradient(180deg, #05070C, var(--bg));
+  }
+
+  header{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter: blur(10px);
+    background:rgba(6,10,16,.78);
+    border-bottom:1px solid var(--border);
+  }
+
+  .top{
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+
+  .brand{
+    display:flex; align-items:center; gap:12px;
+    min-width: 260px;
+  }
+
+  .mark{
+    width:38px; height:38px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), transparent 45%),
+      linear-gradient(180deg, rgba(46,123,234,.45), rgba(255,212,59,.12));
+    box-shadow:0 12px 28px rgba(0,0,0,.35);
+  }
+
+  .title{ font-weight:950; letter-spacing:.2px; line-height:1.05; }
+  .sub{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+  .controls{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  input, select{
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:rgba(0,0,0,.22);
+    color:var(--text);
+    outline:none;
+    min-width: 210px;
+  }
+
+  .btn{
+    cursor:pointer;
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+    color:var(--text);
+    font-weight:900;
+    letter-spacing:.1px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+    transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+    user-select:none;
+  }
+  .btn:hover{ transform:translateY(-1px); border-color:rgba(46,123,234,.55); box-shadow:0 14px 40px rgba(0,0,0,.35); }
+  .btn:active{ transform:translateY(0) scale(.99); }
+
+  .wrap{
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 14px;
+  }
+
+  .metaRow{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    margin: 12px 0 6px;
+  }
+
+  .pill{
+    font-family:var(--mono);
+    font-size:12px;
+    color:rgba(234,243,255,.9);
+    border:1px solid var(--border);
+    padding:6px 10px;
+    border-radius:999px;
+    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 1200px){ .grid{ grid-template-columns: repeat(3, 1fr);} }
+  @media (max-width: 900px){ .grid{ grid-template-columns: repeat(2, 1fr);} }
+  @media (max-width: 600px){ .grid{ grid-template-columns: 1fr;} }
+
+  .card{
+    border-radius: var(--r);
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    min-height: 420px;
+  }
+
+  .img{
+    position:relative;
+    background: rgba(0,0,0,.28);
+    height: 210px;
+    overflow:hidden;
+    cursor:pointer;
+  }
+  .img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transform:scale(1.02);
+    transition: transform .18s ease;
+  }
+  .card:hover .img img{ transform:scale(1.06); }
+
+  .badgeRow{
+    position:absolute;
+    left:10px; bottom:10px;
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .badge{
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.16);
+    background: rgba(0,0,0,.35);
+    backdrop-filter: blur(8px);
+    white-space:nowrap;
+  }
+  .badge.blue{ border-color: rgba(46,123,234,.55); }
+  .badge.yellow{ border-color: rgba(255,212,59,.55); }
+
+  .body{
+    padding: 12px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    flex:1;
+  }
+
+  .name{ font-weight:950; letter-spacing:.15px; }
+  .desc{ color:var(--muted); font-size:12px; line-height:1.4; }
+
+  .priceRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:auto;
+  }
+  .price{
+    font-weight:950;
+    font-size:18px;
+    letter-spacing:.2px;
+  }
+  .price small{
+    display:block;
+    font-weight:700;
+    color:var(--muted);
+    font-size:11px;
+    margin-top:2px;
+  }
+
+  .btnRow{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  .buy{
+    border-color: rgba(46,123,234,.55);
+  }
+  .buy.ebay{
+    border-color: rgba(255,212,59,.55);
+  }
+
+  .empty{
+    padding: 18px;
+    border: 1px dashed rgba(255,255,255,.18);
+    border-radius: var(--r);
+    color: var(--muted);
+    background: rgba(0,0,0,.18);
+  }
+
+  /* Lightbox */
+  .lb{
+    position:fixed; inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background: rgba(0,0,0,.78);
+    z-index: 200;
+    padding: 18px;
+  }
+  .lb img{
+    max-width: min(1200px, 96vw);
+    max-height: 92vh;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.18);
+    box-shadow: var(--shadow);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <div class="brand">
+      <div class="mark"></div>
+      <div>
+        <div class="title">Tek-Pak Surplus Store</div>
+        <div class="sub">Live listings pulled from inventory • eBay + PayPal supported</div>
+      </div>
+      <div class="pill" id="statusPill">Loading…</div>
+    </div>
+
+    <div class="controls">
+      <input id="q" placeholder="Search items…" />
+      <select id="cat"><option value="">All Categories</option></select>
+      <select id="mfg"><option value="">All Manufacturers</option></select>
+      <button class="btn" id="btnRefresh">Refresh</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="metaRow">
+    <div class="pill" id="countPill">0 listed</div>
+    <div class="pill" id="syncPill">Last sync: —</div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+
+  <div style="height:14px"></div>
+  <div class="empty" id="empty" style="display:none;">
+    No listed items match your filters. (Try clearing search/category/manufacturer.)
+  </div>
+</div>
+
+<div class="lb" id="lb"><img id="lbImg" alt="preview"></div>
+
+<script>
+  // Your Apps Script web app URL:
+  const API_URL = "https://script.google.com/macros/s/AKfycbzPpX_OfEOBsvMoJhQyKYKgQ9jW7GnbEMXZChfafAC-PP10EXEDMAm0YBKaAhK6Mto/exec";
+
+  const $ = (id)=>document.getElementById(id);
+
+  let all = [];
+
+  function money(v){
+    const n = Number(String(v||"0").replace(/[^0-9.\-]/g,"") || 0);
+    if(!isFinite(n) || n <= 0) return "";
+    return n.toLocaleString(undefined, {style:"currency", currency:"USD"});
+  }
+
+  function esc(s){
+    return String(s||"")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;");
+  }
+
+  function imgs(it){
+    return [it.img1, it.img2, it.img3, it.img4, it.img5].filter(Boolean);
+  }
+
+  function openLb(url){
+    $("lbImg").src = url;
+    $("lb").style.display = "flex";
+  }
+  $("lb").addEventListener("click", ()=> $("lb").style.display="none");
+
+  function buildFilters(){
+    const cats = Array.from(new Set(all.map(x=>x.category).filter(Boolean))).sort();
+    const mfgs = Array.from(new Set(all.map(x=>x.manufacturer).filter(Boolean))).sort();
+
+    $("cat").innerHTML = `<option value="">All Categories</option>` + cats.map(c=>`<option>${esc(c)}</option>`).join("");
+    $("mfg").innerHTML = `<option value="">All Manufacturers</option>` + mfgs.map(m=>`<option>${esc(m)}</option>`).join("");
+  }
+
+  function render(){
+    const q = $("q").value.trim().toLowerCase();
+    const cat = $("cat").value;
+    const mfg = $("mfg").value;
+
+    const filtered = all.filter(it=>{
+      if(cat && it.category !== cat) return false;
+      if(mfg && it.manufacturer !== mfg) return false;
+      if(q){
+        const hay = (it.title+" "+it.manufacturer+" "+it.model+" "+it.category+" "+it.condition+" "+it.notes).toLowerCase();
+        if(!hay.includes(q)) return false;
+      }
+      return true;
+    });
+
+    $("countPill").textContent = `${filtered.length} listed`;
+
+    const grid = $("grid");
+    const empty = $("empty");
+    if(!filtered.length){
+      grid.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    grid.innerHTML = filtered.map(it=>{
+      const title = it.title || "(untitled)";
+      const mmodel = ((it.manufacturer||"") + " " + (it.model||"")).trim();
+      const price = money(it["sold price"]);
+      const hero = imgs(it)[0] || "";
+      const ebay = (it["ebay item url"]||"").trim();
+      const pp = (it["paypal button url"]||"").trim();
+
+      const buttons = [
+        ebay ? `<button class="btn buy ebay" data-open="${esc(ebay)}">Bid/Buy on eBay</button>` : "",
+        pp ? `<button class="btn buy" data-open="${esc(pp)}">Buy Now</button>` : "",
+        (!ebay && !pp) ? `<span class="desc">No buy link yet — contact Tek-Pak.</span>` : ""
+      ].join("");
+
+      return `
+        <div class="card">
+          <div class="img" ${hero ? `data-img="${esc(hero)}"` : ""}>
+            ${hero ? `<img src="${esc(hero)}" alt="">` : `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:rgba(234,243,255,.65)">No Image</div>`}
+            <div class="badgeRow">
+              ${it.category ? `<span class="badge blue">${esc(it.category)}</span>` : ""}
+              ${it.condition ? `<span class="badge yellow">${esc(it.condition)}</span>` : ""}
+            </div>
+          </div>
+
+          <div class="body">
+            <div class="name">${esc(title)}</div>
+            <div class="desc">${esc(mmodel || "")}</div>
+            <div class="desc">${esc((it.notes||"").slice(0,110))}${(it.notes||"").length>110?"…":""}</div>
+
+            <div class="priceRow">
+              <div class="price">
+                ${price ? esc(price) : "Contact"}
+                <small>${price ? "Price" : "Pricing on request"}</small>
+              </div>
+              <div class="btnRow">
+                ${buttons}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // Wire image click
+    grid.querySelectorAll(".img[data-img]").forEach(el=>{
+      el.addEventListener("click", ()=> openLb(el.getAttribute("data-img")));
+    });
+
+    // Wire buttons
+    grid.querySelectorAll("[data-open]").forEach(b=>{
+      b.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        window.open(b.getAttribute("data-open"), "_blank", "noopener");
+      });
+    });
+  }
+
+  async function load(){
+    $("statusPill").textContent = "Loading…";
+    try{
+      const url = API_URL + "?action=publicList";
+      const res = await fetch(url, { method:"GET" });
+      const data = await res.json();
+      if(!data.ok) throw new Error(data.error || "API error");
+
+      // normalize keys to simpler dot access but keep original too
+      all = (data.data || []).map(x=>({
+        ...x,
+        title: x["title"] || "",
+        category: x["category"] || "",
+        manufacturer: x["manufacturer"] || "",
+        model: x["model"] || "",
+        condition: x["condition"] || "",
+        notes: x["notes"] || "",
+        img1: x["img1"] || "",
+        img2: x["img2"] || "",
+        img3: x["img3"] || "",
+        img4: x["img4"] || "",
+        img5: x["img5"] || ""
+      }));
+
+      buildFilters();
+      render();
+
+      $("statusPill").textContent = "Live";
+      $("syncPill").textContent = "Last sync: " + new Date().toLocaleString();
+    }catch(err){
+      $("statusPill").textContent = "Offline";
+      $("grid").innerHTML = "";
+      $("empty").style.display = "block";
+      $("empty").textContent = "Couldn’t load inventory. " + err.message;
+    }
+  }
+
+  $("btnRefresh").addEventListener("click", load);
+  $("q").addEventListener("input", render);
+  $("cat").addEventListener("change", render);
+  $("mfg").addEventListener("change", render);
+
+  // boot
+  load();
+</script>
+
+</body>
+</html>
