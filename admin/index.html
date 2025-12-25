@@ -1,1 +1,975 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tek-Pak Inventory Admin</title>
+<style>
+  :root{
+    --bg0:#05070b;
+    --bg1:#070b12;
+    --panel:#0e1621;
+    --panel2:#101c2a;
+    --text:#e8f3ff;
+    --muted:#93a9be;
+    --border:rgba(255,255,255,.10);
+    --accent:#3aa0ff;
+    --good:#3dff8d;
+    --warn:#ffd166;
+    --bad:#ff4d6d;
+    --shadow:0 22px 60px rgba(0,0,0,.55);
+    --radius:18px;
+    --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans:system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  }
 
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    color:var(--text);
+    font-family:var(--sans);
+    background:
+      radial-gradient(1100px 800px at 18% 0%, rgba(58,160,255,.20), transparent 55%),
+      radial-gradient(900px 650px at 82% 12%, rgba(61,255,141,.12), transparent 55%),
+      linear-gradient(180deg, var(--bg0), var(--bg1) 35%, var(--bg0));
+  }
+
+  header{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter: blur(10px);
+    background:rgba(7,11,16,.76);
+    border-bottom:1px solid var(--border);
+  }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; padding:12px 14px;
+    max-width: 1650px; margin:0 auto;
+  }
+
+  .brand{
+    display:flex; align-items:center; gap:12px;
+    min-width: 260px;
+  }
+
+  .logo{
+    width:34px; height:34px; border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.16), transparent 45%),
+      linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+    box-shadow:0 12px 28px rgba(0,0,0,.35);
+  }
+
+  .title{
+    font-weight:900;
+    letter-spacing:.2px;
+    line-height:1.05;
+  }
+
+  .subtitle{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+
+  .pill{
+    font-family:var(--mono);
+    font-size:12px;
+    color:rgba(232,243,255,.88);
+    border:1px solid var(--border);
+    padding:6px 10px;
+    border-radius:999px;
+    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+  }
+
+  .actions{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+
+  button, .btn{
+    cursor:pointer;
+    border:1px solid var(--border);
+    color:var(--text);
+    background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+    padding:10px 12px;
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    font-weight:800;
+    letter-spacing:.1px;
+    user-select:none;
+  }
+  button:hover{ transform: translateY(-1px); border-color:rgba(58,160,255,.45); box-shadow:0 14px 40px rgba(0,0,0,.35); }
+  button:active{ transform: translateY(0px) scale(.99); }
+  .btn.primary{ border-color:rgba(58,160,255,.55); }
+  .btn.good{ border-color:rgba(61,255,141,.45); }
+  .btn.bad{ border-color:rgba(255,77,109,.45); }
+  .btn.ghost{ background:rgba(0,0,0,.15); box-shadow:none; }
+
+  input, textarea, select{
+    width:100%;
+    padding:10px 10px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    color:var(--text);
+    background:rgba(0,0,0,.22);
+    outline:none;
+  }
+  textarea{ min-height:92px; resize:vertical; }
+
+  label{
+    display:block;
+    font-size:12px;
+    color:rgba(232,243,255,.86);
+    margin:10px 0 6px;
+  }
+
+  main{
+    display:grid;
+    grid-template-columns: 380px 1fr;
+    gap:14px;
+    padding:14px;
+    max-width: 1650px;
+    margin:0 auto;
+  }
+
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+
+  .card h3{
+    margin:0;
+    padding:14px 14px 10px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+    letter-spacing:.2px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .body{ padding:14px; }
+
+  .muted{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.45;
+  }
+
+  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+  .grid3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+  .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+  .tableWrap{
+    max-height: calc(100vh - 170px);
+    overflow:auto;
+    border-top:1px solid var(--border);
+  }
+
+  table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    font-size:13px;
+  }
+
+  thead th{
+    position:sticky; top:0; z-index:10;
+    background:rgba(10,16,24,.92);
+    backdrop-filter: blur(8px);
+    border-bottom:1px solid var(--border);
+    padding:10px 10px;
+    text-align:left;
+    font-size:12px;
+    color:rgba(232,243,255,.92);
+    white-space:nowrap;
+  }
+
+  tbody td{
+    border-bottom:1px solid rgba(255,255,255,.06);
+    padding:10px 10px;
+    vertical-align:top;
+    color:rgba(232,243,255,.92);
+  }
+
+  tbody tr:hover td{ background:rgba(58,160,255,.06); }
+
+  .mini{ font-family:var(--mono); font-size:12px; color:rgba(232,243,255,.88); }
+
+  .tag{
+    display:inline-flex; gap:6px; align-items:center;
+    border:1px solid var(--border);
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:12px;
+    background:rgba(0,0,0,.18);
+    margin-right:6px;
+    white-space:nowrap;
+  }
+
+  .thumbs{ display:flex; gap:8px; flex-wrap:wrap; }
+  .thumb{
+    width:44px; height:44px; border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.25);
+    overflow:hidden;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  .toast{
+    position:fixed; bottom:16px; right:16px;
+    background:rgba(10,16,24,.92);
+    border:1px solid var(--border);
+    padding:12px 14px;
+    border-radius:16px;
+    box-shadow: var(--shadow);
+    max-width: 420px;
+    display:none;
+    z-index:80;
+  }
+
+  .modal{
+    position:fixed; inset:0;
+    display:none; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.6);
+    z-index:90;
+    padding:16px;
+  }
+
+  .modal .panel{
+    width:min(1100px, 100%);
+    max-height: 92vh;
+    overflow:auto;
+    border-radius:22px;
+    border:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+    box-shadow: var(--shadow);
+  }
+
+  .modal .panel header{
+    position:sticky; top:0;
+    background:rgba(10,16,24,.92);
+    border-bottom:1px solid var(--border);
+    border-top-left-radius:22px;
+    border-top-right-radius:22px;
+  }
+
+  .modal .panel .content{ padding:14px; }
+
+  .lightbox{
+    position:fixed; inset:0;
+    display:none;
+    align-items:center; justify-content:center;
+    background:rgba(0,0,0,.78);
+    z-index:120;
+    padding:18px;
+  }
+  .lightbox img{
+    max-width: min(1200px, 96vw);
+    max-height: 92vh;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.18);
+    box-shadow: var(--shadow);
+  }
+
+  .kbd{ font-family:var(--mono); font-size:12px; padding:2px 6px; border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,.18); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div class="title">Tek-Pak Inventory Admin</div>
+        <div class="subtitle">GitHub Pages → Apps Script API</div>
+      </div>
+      <div class="pill mini" id="apiStatus">API: —</div>
+    </div>
+
+    <div class="actions" style="flex:1; justify-content:flex-end;">
+      <div style="min-width:280px; max-width:420px;">
+        <input id="apiKey" placeholder="API key (stored locally on this device)" />
+      </div>
+      <button class="btn primary" id="btnConnect">Connect</button>
+      <button class="btn" id="btnRefresh">Refresh</button>
+      <button class="btn good" id="btnNew">+ New Item</button>
+      <button class="btn" id="btnExport">Export JSON</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Filters -->
+  <section class="card">
+    <h3>
+      Filters
+      <span class="muted" id="countLabel">0 items</span>
+    </h3>
+    <div class="body">
+      <label>Search</label>
+      <input id="q" placeholder="Search title, serial, model, notes…" />
+
+      <div class="grid2">
+        <div>
+          <label>Status</label>
+          <select id="fStatus"><option value="">Any</option></select>
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="fCategory"><option value="">Any</option></select>
+        </div>
+      </div>
+
+      <label>Location</label>
+      <select id="fLocation"><option value="">Any</option></select>
+
+      <div class="grid2">
+        <div>
+          <label>Manufacturer</label>
+          <select id="fManufacturer"><option value="">Any</option></select>
+        </div>
+        <div>
+          <label>Condition</label>
+          <select id="fCondition"><option value="">Any</option></select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="btnApply">Apply</button>
+        <button class="btn" id="btnClear">Clear</button>
+      </div>
+
+      <div style="height:12px;"></div>
+      <div class="muted">
+        Tips:
+        <div>• <span class="kbd">Ctrl</span> + <span class="kbd">K</span> focuses search</div>
+        <div>• Put eBay listing URL + PayPal button URL per item for storefront buttons</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Table -->
+  <section class="card">
+    <h3>
+      Inventory
+      <span class="muted" id="lastSync">Last sync: —</span>
+    </h3>
+
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:110px;">Actions</th>
+            <th>Title</th>
+            <th style="width:120px;">Purchased</th>
+            <th style="width:120px;">Sold</th>
+            <th style="width:120px;">Status</th>
+            <th style="width:150px;">Category</th>
+            <th style="width:170px;">Location</th>
+            <th style="width:220px;">Make/Model</th>
+            <th style="width:190px;">Serial</th>
+            <th style="width:220px;">Images</th>
+            <th style="width:210px;">Buy Links</th>
+            <th style="width:220px;">Notes</th>
+            <th style="width:180px;">Item ID</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="13" class="muted" style="padding:14px;">Connect to API to load inventory…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Editor Modal -->
+<div class="modal" id="modal">
+  <div class="panel">
+    <header>
+      <div class="topbar">
+        <div class="brand">
+          <div class="title" id="modalTitle">Edit Item</div>
+          <div class="pill mini" id="modalId">—</div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="btnClose">Close</button>
+          <button class="btn good" id="btnSave">Save</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="grid2">
+        <div>
+          <label>Title</label>
+          <input id="e_title" placeholder="e.g., Lenovo ThinkPad X1 Carbon" />
+        </div>
+        <div class="grid2">
+          <div>
+            <label>Purchased Price</label>
+            <input id="e_purchased" placeholder="0.00" inputmode="decimal"/>
+          </div>
+          <div>
+            <label>Sold Price</label>
+            <input id="e_sold" placeholder="0.00" inputmode="decimal"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div>
+          <label>Status</label>
+          <select id="e_status"></select>
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="e_category"></select>
+        </div>
+        <div>
+          <label>Location</label>
+          <select id="e_location"></select>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div>
+          <label>Manufacturer</label>
+          <select id="e_manufacturer"></select>
+        </div>
+        <div>
+          <label>Model</label>
+          <input id="e_model" placeholder="Model name/number" />
+        </div>
+        <div>
+          <label>Serial</label>
+          <input id="e_serial" placeholder="Serial / Service Tag" />
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label>Condition</label>
+          <select id="e_condition"></select>
+        </div>
+        <div>
+          <label>Item ID</label>
+          <input id="e_id" placeholder="Auto on save if blank" />
+          <div class="muted">Leave blank for auto-generated ID.</div>
+        </div>
+      </div>
+
+      <label>Notes</label>
+      <textarea id="e_notes" placeholder="Specs, issues, included accessories, etc."></textarea>
+
+      <label>Images (up to 5 URLs)</label>
+      <div class="grid3">
+        <input id="e_img1" placeholder="img1 URL" />
+        <input id="e_img2" placeholder="img2 URL" />
+        <input id="e_img3" placeholder="img3 URL" />
+        <input id="e_img4" placeholder="img4 URL" />
+        <input id="e_img5" placeholder="img5 URL" />
+      </div>
+
+      <div style="height:8px;"></div>
+      <div class="row">
+        <button class="btn" id="btnPreviewImg">Preview Images</button>
+        <button class="btn primary" id="btnOpenEbay">Open eBay</button>
+        <button class="btn primary" id="btnOpenPaypal">Open PayPal</button>
+      </div>
+
+      <div class="grid2" style="margin-top:10px;">
+        <div>
+          <label>eBay Item URL</label>
+          <input id="e_ebay" placeholder="https://www.ebay.com/itm/..." />
+        </div>
+        <div>
+          <label>PayPal Button URL</label>
+          <input id="e_paypal" placeholder="https://www.paypal.com/cgi-bin/webscr?cmd=..." />
+        </div>
+      </div>
+
+      <div style="height:10px;"></div>
+      <div class="muted" id="saveHint">Saved to Google Sheet via Apps Script API.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" alt="preview" />
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================
+   CONFIG
+========================= */
+const API_URL = "https://script.google.com/macros/s/AKfycbzPpX_OfEOBsvMoJhQyKYKgQ9jW7GnbEMXZChfafAC-PP10EXEDMAm0YBKaAhK6Mto/exec";
+
+/* ========================= */
+const $ = (id)=>document.getElementById(id);
+
+const LS_KEY = "tekpak_admin_api_key_v1";
+
+let apiKey = "";
+let dropdowns = {};
+let items = [];
+let editing = null;
+
+function toast(msg, good=true){
+  const t = $("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  t.style.borderColor = good ? "rgba(61,255,141,.45)" : "rgba(255,77,109,.45)";
+  setTimeout(()=> t.style.display="none", 2800);
+}
+
+function setApiStatus(ok, msg){
+  const el = $("apiStatus");
+  el.textContent = ok ? "API: OK" : ("API: " + msg);
+  el.style.borderColor = ok ? "rgba(61,255,141,.45)" : "rgba(255,77,109,.45)";
+}
+
+async function api(action, payload={}){
+  const body = JSON.stringify({ action, key: apiKey, ...payload });
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    mode: "cors",
+    headers: { "Content-Type":"text/plain;charset=utf-8" },
+    body
+  });
+
+  const text = await res.text();
+  let data;
+  try{ data = JSON.parse(text); }
+  catch(e){ throw new Error("Bad JSON from server: " + text.slice(0,200)); }
+
+  if(!data.ok) throw new Error(data.error || "API error");
+  return data;
+}
+
+function escapeHtml(s){
+  return String(s||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+function formatMoney(v){
+  const n = Number(String(v||"0").replace(/[^0-9.\-]/g,"") || 0);
+  return n.toLocaleString(undefined, {style:"currency", currency:"USD"});
+}
+
+function optList(select, values, includeBlank=false, blankLabel="Any"){
+  select.innerHTML = "";
+  if(includeBlank){
+    const o = document.createElement("option");
+    o.value=""; o.textContent=blankLabel;
+    select.appendChild(o);
+  }
+  (values||[]).forEach(v=>{
+    const o = document.createElement("option");
+    o.value=v; o.textContent=v;
+    select.appendChild(o);
+  });
+}
+
+function getImgs(item){
+  return [item["img1"], item["img2"], item["img3"], item["img4"], item["img5"]].filter(Boolean);
+}
+
+function thumbsFor(item){
+  const urls = getImgs(item);
+  if(!urls.length) return `<span class="muted">—</span>`;
+  return `<div class="thumbs">
+    ${urls.slice(0,5).map(u=>`
+      <div class="thumb" data-img="${escapeHtml(u)}" title="Click to preview">
+        <img src="${escapeHtml(u)}" alt="">
+      </div>`).join("")}
+  </div>`;
+}
+
+function buyLinksFor(item){
+  const ebay = (item["ebay item url"]||"").trim();
+  const pp = (item["paypal button url"]||"").trim();
+
+  let out = "";
+  if(ebay) out += `<button class="btn primary ghost" data-open="${escapeHtml(ebay)}">eBay</button> `;
+  if(pp) out += `<button class="btn primary ghost" data-open="${escapeHtml(pp)}">PayPal</button>`;
+  return out || `<span class="muted">—</span>`;
+}
+
+function render(){
+  const tb = $("tbody");
+
+  const q = $("q").value.trim().toLowerCase();
+  const status = $("fStatus").value;
+  const category = $("fCategory").value;
+  const location = $("fLocation").value;
+  const manufacturer = $("fManufacturer").value;
+  const condition = $("fCondition").value;
+
+  const filtered = items.filter(it=>{
+    if(status && it["status"]!==status) return false;
+    if(category && it["category"]!==category) return false;
+    if(location && it["location"]!==location) return false;
+    if(manufacturer && it["manufacturer"]!==manufacturer) return false;
+    if(condition && it["condition"]!==condition) return false;
+    if(q){
+      const hay = (
+        (it["title"]||"") + " " +
+        (it["notes"]||"") + " " +
+        (it["serial"]||"") + " " +
+        (it["model"]||"") + " " +
+        (it["manufacturer"]||"") + " " +
+        (it["item id"]||"")
+      ).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  $("countLabel").textContent = `${filtered.length} items`;
+
+  if(!apiKey){
+    tb.innerHTML = `<tr><td colspan="13" class="muted" style="padding:14px;">
+      Paste your API key up top and click <b>Connect</b>.
+    </td></tr>`;
+    return;
+  }
+
+  if(!filtered.length){
+    tb.innerHTML = `<tr><td colspan="13" class="muted" style="padding:14px;">No items match your filters.</td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = filtered.map(it=>{
+    const title = it["title"] || "(untitled)";
+    const notes = it["notes"] || "";
+    const mm = ((it["manufacturer"]||"") + " " + (it["model"]||"")).trim();
+    return `<tr>
+      <td>
+        <button class="btn" data-edit="${escapeHtml(it["item id"]||"")}">Edit</button>
+      </td>
+      <td>
+        <div style="font-weight:900">${escapeHtml(title)}</div>
+        <div class="muted">${escapeHtml(notes.slice(0,120))}${notes.length>120?"…":""}</div>
+      </td>
+      <td>${formatMoney(it["purchased price"])}</td>
+      <td>${formatMoney(it["sold price"])}</td>
+      <td>${escapeHtml(it["status"]||"")}</td>
+      <td>${escapeHtml(it["category"]||"")}</td>
+      <td>${escapeHtml(it["location"]||"")}</td>
+      <td>${escapeHtml(mm||"")}</td>
+      <td class="mini">${escapeHtml(it["serial"]||"")}</td>
+      <td>${thumbsFor(it)}</td>
+      <td>${buyLinksFor(it)}</td>
+      <td class="muted">${escapeHtml((notes||"").slice(0,90))}${(notes||"").length>90?"…":""}</td>
+      <td class="mini">${escapeHtml(it["item id"]||"")}</td>
+    </tr>`;
+  }).join("");
+
+  // Edit buttons
+  tb.querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-edit");
+      const found = items.find(x => (x["item id"]||"") === id);
+      openEditor(found);
+    });
+  });
+
+  // Image lightbox
+  tb.querySelectorAll(".thumb").forEach(t=>{
+    t.addEventListener("click", ()=>{
+      const url = t.getAttribute("data-img");
+      openLightbox(url);
+    });
+  });
+
+  // Open link buttons
+  tb.querySelectorAll("[data-open]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const url = b.getAttribute("data-open");
+      window.open(url, "_blank", "noopener");
+    });
+  });
+}
+
+function openLightbox(url){
+  $("lightboxImg").src = url;
+  $("lightbox").style.display = "flex";
+}
+$("lightbox").addEventListener("click", ()=> $("lightbox").style.display="none");
+
+function openEditor(item){
+  editing = item ? {...item} : {
+    "item id": "",
+    "location": "",
+    "title": "",
+    "purchased price": "0",
+    "sold price": "0",
+    "status": "",
+    "category": "",
+    "manufacturer": "",
+    "model": "",
+    "serial": "",
+    "condition": "",
+    "img1": "", "img2": "", "img3": "", "img4": "", "img5": "",
+    "ebay item url": "",
+    "paypal button url": "",
+    "notes": ""
+  };
+
+  $("modalTitle").textContent = item ? "Edit Item" : "New Item";
+  $("modalId").textContent = editing["item id"] ? editing["item id"] : "new";
+
+  $("e_title").value = editing["title"] || "";
+  $("e_purchased").value = editing["purchased price"] || "0";
+  $("e_sold").value = editing["sold price"] || "0";
+
+  $("e_status").value = editing["status"] || "";
+  $("e_category").value = editing["category"] || "";
+  $("e_location").value = editing["location"] || "";
+
+  $("e_manufacturer").value = editing["manufacturer"] || "";
+  $("e_model").value = editing["model"] || "";
+  $("e_serial").value = editing["serial"] || "";
+  $("e_condition").value = editing["condition"] || "";
+
+  $("e_id").value = editing["item id"] || "";
+  $("e_notes").value = editing["notes"] || "";
+
+  $("e_img1").value = editing["img1"] || "";
+  $("e_img2").value = editing["img2"] || "";
+  $("e_img3").value = editing["img3"] || "";
+  $("e_img4").value = editing["img4"] || "";
+  $("e_img5").value = editing["img5"] || "";
+
+  $("e_ebay").value = editing["ebay item url"] || "";
+  $("e_paypal").value = editing["paypal button url"] || "";
+
+  $("modal").style.display = "flex";
+  updatePreviewButtons_();
+}
+
+function closeEditor(){
+  $("modal").style.display = "none";
+  editing = null;
+}
+
+function numClean(s){
+  return String(s||"0").replace(/[^0-9.\-]/g,"") || "0";
+}
+
+function updatePreviewButtons_(){
+  const ebay = $("e_ebay").value.trim();
+  const pp = $("e_paypal").value.trim();
+  $("btnOpenEbay").disabled = !ebay;
+  $("btnOpenPaypal").disabled = !pp;
+}
+
+async function saveEditor(){
+  if(!editing) return;
+
+  const title = $("e_title").value.trim();
+  if(!title){
+    toast("Title is required.", false);
+    return;
+  }
+
+  // build item payload using exact sheet headers
+  const payload = {
+    "item id": $("e_id").value.trim(),
+    "location": $("e_location").value.trim(),
+    "title": title,
+    "purchased price": numClean($("e_purchased").value),
+    "sold price": numClean($("e_sold").value),
+    "status": $("e_status").value.trim(),
+    "category": $("e_category").value.trim(),
+    "manufacturer": $("e_manufacturer").value.trim(),
+    "model": $("e_model").value.trim(),
+    "serial": $("e_serial").value.trim(),
+    "condition": $("e_condition").value.trim(),
+    "img1": $("e_img1").value.trim(),
+    "img2": $("e_img2").value.trim(),
+    "img3": $("e_img3").value.trim(),
+    "img4": $("e_img4").value.trim(),
+    "img5": $("e_img5").value.trim(),
+    "ebay item url": $("e_ebay").value.trim(),
+    "paypal button url": $("e_paypal").value.trim(),
+    "notes": $("e_notes").value.trim()
+  };
+
+  try{
+    const res = await api("upsertItem", { actor:"tekpak-admin", item: payload });
+    const saved = res.data;
+
+    // merge into local list by item id
+    const id = saved["item id"];
+    const idx = items.findIndex(x => (x["item id"]||"") === id);
+    if(idx >= 0) items[idx] = saved;
+    else items.unshift(saved);
+
+    toast("Saved ✓");
+    closeEditor();
+    render();
+  }catch(err){
+    toast(err.message, false);
+  }
+}
+
+async function refresh(){
+  if(!apiKey){
+    render();
+    return;
+  }
+  try{
+    const res = await api("listItems", {});
+    items = res.data || [];
+    $("lastSync").textContent = "Last sync: " + new Date().toLocaleString();
+    render();
+  }catch(err){
+    toast(err.message, false);
+  }
+}
+
+async function loadDropdowns(){
+  if(!apiKey) return;
+  const res = await api("getDropdowns", {});
+  dropdowns = res.data || {};
+
+  // Lists keys: location, status, category, manufacturer, condition
+  optList($("fStatus"), dropdowns.status || [], true);
+  optList($("fCategory"), dropdowns.category || [], true);
+  optList($("fLocation"), dropdowns.location || [], true);
+  optList($("fManufacturer"), dropdowns.manufacturer || [], true);
+  optList($("fCondition"), dropdowns.condition || [], true);
+
+  optList($("e_status"), dropdowns.status || [], false, "Select");
+  optList($("e_category"), dropdowns.category || [], false, "Select");
+  optList($("e_location"), dropdowns.location || [], false, "Select");
+  optList($("e_manufacturer"), dropdowns.manufacturer || [], false, "Select");
+  optList($("e_condition"), dropdowns.condition || [], false, "Select");
+
+  // Try to set defaults if blank
+  if(!$("e_status").value && (dropdowns.status||[]).length) $("e_status").value = dropdowns.status[0];
+  if(!$("e_category").value && (dropdowns.category||[]).length) $("e_category").value = dropdowns.category[0];
+  if(!$("e_location").value && (dropdowns.location||[]).length) $("e_location").value = dropdowns.location[0];
+  if(!$("e_manufacturer").value && (dropdowns.manufacturer||[]).length) $("e_manufacturer").value = dropdowns.manufacturer[0];
+  if(!$("e_condition").value && (dropdowns.condition||[]).length) $("e_condition").value = dropdowns.condition[0];
+}
+
+async function connect(){
+  apiKey = $("apiKey").value.trim();
+  if(!apiKey){
+    toast("Paste API key first.", false);
+    return;
+  }
+  localStorage.setItem(LS_KEY, apiKey);
+
+  try{
+    // quick ping to see if endpoint alive
+    const r = await fetch(API_URL + "?action=ping");
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error || "Ping failed");
+    setApiStatus(true, "OK");
+
+    await loadDropdowns();
+    await refresh();
+    toast("Connected ✓");
+  }catch(err){
+    setApiStatus(false, "FAIL");
+    toast(err.message, false);
+  }
+}
+
+/* Wire UI */
+$("btnConnect").addEventListener("click", connect);
+$("btnRefresh").addEventListener("click", refresh);
+$("btnNew").addEventListener("click", ()=> openEditor(null));
+$("btnClose").addEventListener("click", closeEditor);
+$("btnSave").addEventListener("click", saveEditor);
+
+$("btnApply").addEventListener("click", render);
+$("btnClear").addEventListener("click", ()=>{
+  $("q").value = "";
+  $("fStatus").value = "";
+  $("fCategory").value = "";
+  $("fLocation").value = "";
+  $("fManufacturer").value = "";
+  $("fCondition").value = "";
+  render();
+});
+
+$("q").addEventListener("input", render);
+
+document.addEventListener("keydown", (e)=>{
+  if(e.ctrlKey && e.key.toLowerCase() === "k"){
+    e.preventDefault();
+    $("q").focus();
+  }
+  if(e.key === "Escape"){
+    if($("lightbox").style.display === "flex") $("lightbox").style.display = "none";
+    if($("modal").style.display === "flex") closeEditor();
+  }
+});
+
+$("modal").addEventListener("click", (e)=>{
+  if(e.target === $("modal")) closeEditor();
+});
+
+$("btnPreviewImg").addEventListener("click", ()=>{
+  const urls = [
+    $("e_img1").value.trim(),
+    $("e_img2").value.trim(),
+    $("e_img3").value.trim(),
+    $("e_img4").value.trim(),
+    $("e_img5").value.trim()
+  ].filter(Boolean);
+  if(!urls.length){ toast("No image URLs yet.", false); return; }
+  openLightbox(urls[0]);
+});
+
+$("btnOpenEbay").addEventListener("click", ()=>{
+  const u = $("e_ebay").value.trim();
+  if(u) window.open(u, "_blank", "noopener");
+});
+$("btnOpenPaypal").addEventListener("click", ()=>{
+  const u = $("e_paypal").value.trim();
+  if(u) window.open(u, "_blank", "noopener");
+});
+
+["e_ebay","e_paypal"].forEach(id=>{
+  $(id).addEventListener("input", updatePreviewButtons_);
+});
+
+/* Boot */
+(function boot(){
+  const saved = localStorage.getItem(LS_KEY) || "";
+  $("apiKey").value = saved;
+  apiKey = saved.trim();
+
+  // Show endpoint alive even before key
+  fetch(API_URL + "?action=ping")
+    .then(r=>r.json())
+    .then(j=> setApiStatus(!!j.ok, j.ok ? "OK" : "FAIL"))
+    .catch(()=> setApiStatus(false, "FAIL"));
+
+  render();
+})();
+</script>
+</body>
+</html>
