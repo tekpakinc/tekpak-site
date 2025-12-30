@@ -1,1 +1,927 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Tek-Pak Inc — IT Services • Surplus Tech • E-Waste Recycling</title>
+
+  <!-- ==========================================================
+    TEK-PAK LANDING PAGE (Standalone / Single File)
+    - Tek-Pak focused palette: charcoal/steel/white + lime accents
+    - No external libraries
+    - Smooth animations + glossy industrial vibe
+  =========================================================== -->
+
+  <style>
+    :root{
+      /* ===== Tek-Pak Palette ===== */
+      --lime:#a7ff2a;                 /* polo/lime accent */
+      --lime2:#74ff3a;                /* secondary lime */
+      --white:#f4f7ff;
+      --muted:rgba(244,247,255,.72);
+
+      --black:#05070a;
+      --charcoal:#0b0f14;
+      --steel:#111824;
+      --steel2:#0f141d;
+
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.09);
+      --border:rgba(255,255,255,.12);
+
+      --shadow: 0 22px 70px rgba(0,0,0,.60);
+      --shadow2: 0 14px 34px rgba(0,0,0,.48);
+
+      --radius:18px;
+      --radius2:26px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --ease: cubic-bezier(.2,.9,.2,1);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--white);
+      background:
+        radial-gradient(1100px 700px at 12% 10%, rgba(167,255,42,.14), transparent 60%),
+        radial-gradient(900px 650px at 90% 18%, rgba(255,255,255,.08), transparent 58%),
+        radial-gradient(1200px 700px at 55% 98%, rgba(167,255,42,.08), transparent 62%),
+        linear-gradient(180deg, var(--black), var(--steel));
+      overflow-x:hidden;
+    }
+
+    a{color:inherit; text-decoration:none}
+    .container{width:min(1180px, calc(100% - 40px)); margin:0 auto}
+
+    /* ===== Subtle moving “energy” overlay ===== */
+    .grain{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.16;
+      mix-blend-mode:overlay;
+      background:
+        radial-gradient(1200px 900px at 30% 20%, rgba(255,255,255,.07), transparent 60%),
+        radial-gradient(900px 700px at 70% 70%, rgba(255,255,255,.05), transparent 60%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.028), rgba(255,255,255,.028) 1px, transparent 1px, transparent 3px);
+      filter: blur(.2px);
+      animation: drift 12s linear infinite;
+    }
+    @keyframes drift{
+      0%{transform:translate3d(0,0,0)}
+      50%{transform:translate3d(-12px,8px,0)}
+      100%{transform:translate3d(0,0,0)}
+    }
+
+    /* ===== Top nav ===== */
+    header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(5,7,10,.84), rgba(5,7,10,.55));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 0;
+      gap:14px;
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      min-width: 250px;
+    }
+
+    /* ===== REAL LOGO (embedded) ===== */
+    .logoWrap{
+      width:52px; height:52px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.12), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: 0 14px 30px rgba(0,0,0,.55);
+      display:grid; place-items:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .logoWrap:before{
+      content:"";
+      position:absolute; inset:-40%;
+      background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.16), transparent 62%);
+      transform: rotate(18deg) translateX(-30%);
+      animation: shine 6.2s var(--ease) infinite;
+      opacity:.7;
+      pointer-events:none;
+    }
+    @keyframes shine{
+      0%,70%{transform: rotate(18deg) translateX(-70%); opacity:0}
+      84%{opacity:.75}
+      100%{transform: rotate(18deg) translateX(70%); opacity:0}
+    }
+    .logoImg{
+      width:44px; height:44px;
+      object-fit:contain;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.55));
+    }
+
+    .brand h1{
+      font-size:14px; margin:0; letter-spacing:.8px; text-transform:uppercase;
+      color: rgba(244,247,255,.95);
+      line-height:1.1;
+    }
+    .brand p{
+      margin:4px 0 0;
+      font-size:12px; color: rgba(244,247,255,.65);
+      font-family: var(--mono);
+    }
+
+    .navlinks{
+      display:flex; gap:18px; align-items:center;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .navlinks a{
+      font-size:13px;
+      color: rgba(244,247,255,.78);
+      padding:8px 10px;
+      border-radius:12px;
+      transition: .25s var(--ease);
+    }
+    .navlinks a:hover{
+      background: rgba(255,255,255,.06);
+      color: rgba(244,247,255,.95);
+      transform: translateY(-1px);
+    }
+
+    .navcta{display:flex; gap:10px; align-items:center; justify-content:flex-end; min-width:250px}
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      font-size:12px;
+      color: rgba(244,247,255,.78);
+    }
+    .dot{
+      width:9px; height:9px; border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(167,255,42,.85));
+      box-shadow: 0 0 0 4px rgba(167,255,42,.10);
+    }
+
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      box-shadow: 0 14px 34px rgba(0,0,0,.30);
+      color: rgba(244,247,255,.92);
+      font-size:13px;
+      transition:.25s var(--ease);
+      user-select:none;
+    }
+    .btn:hover{transform: translateY(-2px); border-color: rgba(255,255,255,.22)}
+
+    /* Lime primary button */
+    .btn.primary{
+      border:1px solid rgba(167,255,42,.40);
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.38), transparent 60%),
+        linear-gradient(135deg, rgba(167,255,42,.95), rgba(116,255,58,.88));
+      color:#061009;
+      font-weight:900;
+      box-shadow: 0 18px 55px rgba(167,255,42,.18);
+    }
+    .btn.primary:hover{transform: translateY(-2px) scale(1.01)}
+
+    /* ===== Hero ===== */
+    .hero{padding: 44px 0 26px;}
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:22px;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){
+      .heroGrid{grid-template-columns:1fr;}
+      .navcta{min-width:unset}
+      .brand{min-width:unset}
+    }
+
+    .card{
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .card .inner{padding:24px}
+    .card:before{
+      content:"";
+      position:absolute; inset:-1px;
+      background:
+        radial-gradient(700px 260px at 20% 10%, rgba(167,255,42,.16), transparent 62%),
+        radial-gradient(700px 260px at 80% 0%, rgba(255,255,255,.10), transparent 60%),
+        radial-gradient(700px 260px at 70% 90%, rgba(167,255,42,.08), transparent 65%);
+      pointer-events:none;
+    }
+
+    .hero h2{
+      margin:0 0 10px;
+      font-size: clamp(28px, 3.6vw, 44px);
+      line-height:1.05;
+      letter-spacing:-.6px;
+      position:relative;
+    }
+    .hero h2 .grad{
+      background: linear-gradient(90deg, rgba(167,255,42,.98), rgba(244,247,255,.92), rgba(167,255,42,.82));
+      -webkit-background-clip:text; background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .hero p{
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      position:relative;
+    }
+    .heroActions{
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center;
+      margin-top: 16px;
+      position:relative;
+    }
+    .statsRow{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      margin-top: 18px;
+      position:relative;
+    }
+    @media (max-width:520px){ .statsRow{grid-template-columns:1fr} }
+    .stat{
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      padding:12px 12px;
+      box-shadow: var(--shadow2);
+    }
+    .stat strong{display:block; font-size:14px}
+    .stat span{display:block; margin-top:4px; font-size:12px; color: rgba(244,247,255,.68)}
+
+    .tagRow{
+      display:flex; flex-wrap:wrap; gap:10px;
+      margin-top:12px;
+      position:relative;
+    }
+
+    /* ===== “Ops panel” right hero card ===== */
+    .panelHead{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 16px 18px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    .panelTitle{display:flex; flex-direction:column; gap:2px}
+    .panelTitle b{font-size:13px; letter-spacing:.7px; text-transform:uppercase}
+    .panelTitle small{font-size:12px; color: rgba(244,247,255,.60); font-family: var(--mono)}
+    .lights{display:flex; gap:8px}
+    .light{width:10px; height:10px; border-radius:999px; background: rgba(255,255,255,.18)}
+    .light.green{background: rgba(167,255,42,.75); box-shadow: 0 0 0 4px rgba(167,255,42,.12)}
+    .light.white{background: rgba(244,247,255,.75); box-shadow: 0 0 0 4px rgba(244,247,255,.10)}
+    .light.dim{background: rgba(255,255,255,.28)}
+
+    .panelBody{padding:16px 18px 18px}
+    .miniGrid{display:grid; grid-template-columns: 1fr; gap:12px}
+    .mini{
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(12px 12px at 18% 30%, rgba(255,255,255,.22), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      padding:14px 14px;
+      box-shadow: var(--shadow2);
+      position:relative;
+      overflow:hidden;
+    }
+    .mini:after{
+      content:"";
+      position:absolute; inset:-50%;
+      background: linear-gradient(115deg, transparent 45%, rgba(255,255,255,.12), transparent 62%);
+      transform: rotate(18deg) translateX(-35%);
+      opacity:.55;
+      animation: shine 6.8s var(--ease) infinite;
+      pointer-events:none;
+    }
+    .mini h3{margin:0 0 6px; font-size:14px}
+    .mini p{margin:0; color: rgba(244,247,255,.68); font-size:12.5px; line-height:1.5}
+    .mini .kbd{
+      display:inline-block;
+      font-family: var(--mono);
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.24);
+      color: rgba(244,247,255,.84);
+      margin-top:10px;
+    }
+
+    /* ===== Sections ===== */
+    section{padding: 26px 0}
+    .sectionHead{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:14px;
+      margin-bottom: 14px;
+    }
+    .sectionHead h2{
+      margin:0;
+      font-size: 20px;
+      letter-spacing:.2px;
+    }
+    .sectionHead p{
+      margin:0;
+      color: rgba(244,247,255,.68);
+      font-size: 13px;
+      max-width: 520px;
+      line-height:1.55;
+    }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 980px){ .grid3{grid-template-columns: 1fr} }
+
+    .tile{
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(18px 18px at 20% 25%, rgba(255,255,255,.16), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow: var(--shadow2);
+      padding:16px;
+      position:relative;
+      overflow:hidden;
+      transform: translateY(8px);
+      opacity:0;
+    }
+    .tile.reveal{transform: translateY(0); opacity:1; transition: .7s var(--ease)}
+    .icon{
+      width:42px; height:42px; border-radius:14px;
+      display:grid; place-items:center;
+      background:
+        radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.32), transparent 60%),
+        linear-gradient(135deg, rgba(167,255,42,.92), rgba(255,255,255,.22));
+      color:#061009;
+      box-shadow: 0 12px 26px rgba(0,0,0,.35);
+      font-weight:900;
+      letter-spacing:.6px;
+    }
+    .tile h3{margin:12px 0 6px; font-size:15px}
+    .tile p{margin:0; color: rgba(244,247,255,.68); font-size:13px; line-height:1.55}
+    .tile ul{
+      margin:10px 0 0;
+      padding-left: 18px;
+      color: rgba(244,247,255,.72);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    /* ===== Split banner ===== */
+    .split{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
+    @media (max-width: 980px){ .split{grid-template-columns:1fr} }
+
+    .banner{
+      border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(900px 240px at 25% 0%, rgba(167,255,42,.14), transparent 62%),
+        radial-gradient(900px 240px at 85% 10%, rgba(255,255,255,.10), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      position:relative;
+      overflow:hidden;
+    }
+    .banner h3{margin:0; font-size:16px}
+    .banner p{margin:0; color: rgba(244,247,255,.68); font-size:13px; line-height:1.6}
+    .banner .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      border-radius: 999px;
+      padding:7px 10px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      font-size:12px;
+      color: rgba(244,247,255,.86);
+    }
+    .badge i{
+      width:10px; height:10px; border-radius:999px;
+      background: rgba(167,255,42,.85);
+      box-shadow: 0 0 0 4px rgba(167,255,42,.10);
+    }
+    .badge i.white{background: rgba(244,247,255,.75); box-shadow: 0 0 0 4px rgba(244,247,255,.10)}
+    .badge i.dim{background: rgba(255,255,255,.35); box-shadow: 0 0 0 4px rgba(255,255,255,.08)}
+
+    /* ===== CTA / Footer ===== */
+    .cta{
+      padding: 18px;
+      border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(900px 280px at 30% 0%, rgba(167,255,42,.12), transparent 60%),
+        radial-gradient(900px 280px at 70% 0%, rgba(255,255,255,.10), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .cta h3{margin:0; font-size:16px}
+    .cta p{margin:4px 0 0; color: rgba(244,247,255,.68); font-size:13px; line-height:1.55}
+
+    footer{
+      padding: 24px 0 38px;
+      color: rgba(244,247,255,.62);
+      font-size:12px;
+    }
+    .footRow{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
+      border-top:1px solid rgba(255,255,255,.08);
+      padding-top: 16px;
+    }
+
+    .sr{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden}
+  </style>
+</head>
+
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ==========================================================
+    // EDIT THESE: quick settings
+  =========================================================== -->
+  <script>
+    window.TEKPAK = {
+      businessName: "Tek-Pak Inc",
+      phoneDisplay: "(336) 555-0123",
+      phoneTel: "+13365550123",
+      email: "info@tekpakinc.net",
+
+      // Main links (edit to your real destinations)
+      urlGetSupport: "#contact",
+      urlScheduleConsult: "#contact",
+      urlShopSurplus: "https://tekpakinc.store/",
+      urlEWaste: "https://ncelectronicrecycling.com/",
+      urlRapidResponse: "#rapid",
+
+      serviceArea: "Serving NC + beyond"
+    };
+  </script>
+
+  <header>
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="#top" aria-label="Tek-Pak Home">
+          <div class="logoWrap" aria-hidden="true">
+            <img class="logoImg" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUEAAABICAYAAABodkdNAAAQAElEQVR4AexdCXgcxZV+fUz3nBrdso0v6XhJd3k2t6Wc0Wq7m9t5tq3bN...REPLACED_FOR_BREVITY..."/>
+          </div>
+          <div>
+            <h1>TEK-PAK INC</h1>
+            <p>IT Services • Surplus Tech • E-Waste</p>
+          </div>
+        </a>
+
+        <nav class="navlinks" aria-label="Primary navigation">
+          <a href="#it">IT Services</a>
+          <a href="#surplus">Surplus Sales</a>
+          <a href="#ewaste">E-Waste</a>
+          <a href="#rapid">Rapid Response</a>
+          <a href="#contact">Contact</a>
+        </nav>
+
+        <div class="navcta">
+          <span class="pill" title="Availability">
+            <span class="dot"></span>
+            <span id="areaText"></span>
+          </span>
+          <a class="btn primary" id="supportBtn" href="#contact">Get Support</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <div class="container hero">
+      <div class="heroGrid">
+        <div class="card">
+          <div class="inner">
+            <span class="pill"><span class="dot"></span> Real-world IT + surplus tech that saves you money</span>
+
+            <h2>
+              One team for <span class="grad">IT support</span>, <span class="grad">secure networks</span>, and <span class="grad">surplus tech</span>.
+            </h2>
+
+            <p>
+              Tek-Pak keeps your business running: managed IT, helpdesk, cybersecurity, backups, networking, and on-site support.
+              We also move reliable surplus equipment and handle responsible e-waste recycling.
+            </p>
+
+            <div class="heroActions">
+              <a class="btn primary" id="consultBtn" href="#contact">Schedule a Consult</a>
+              <a class="btn" id="shopBtn" href="#" rel="noopener">Shop Surplus</a>
+              <a class="btn" id="recycleBtn" href="#" rel="noopener">E-Waste Drop-Off</a>
+            </div>
+
+            <div class="statsRow">
+              <div class="stat">
+                <strong>Managed IT</strong>
+                <span>Monitoring • Updates • Helpdesk • On-site</span>
+              </div>
+              <div class="stat">
+                <strong>Security First</strong>
+                <span>Backups • MFA • Endpoint protection • Policies</span>
+              </div>
+              <div class="stat">
+                <strong>Surplus + Recycling</strong>
+                <span>Save money • Reduce waste • Keep tech moving</span>
+              </div>
+            </div>
+
+            <div class="tagRow">
+              <span class="badge"><i></i> Small Business IT</span>
+              <span class="badge"><i class="white"></i> Cybersecurity</span>
+              <span class="badge"><i></i> Rapid Response</span>
+              <span class="badge"><i class="dim"></i> Asset Processing</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="card" aria-label="Quick overview panel">
+          <div class="panelHead">
+            <div class="panelTitle">
+              <b>Operations Panel</b>
+              <small id="opsSub">Status: online</small>
+            </div>
+            <div class="lights" aria-hidden="true">
+              <div class="light green"></div>
+              <div class="light white"></div>
+              <div class="light dim"></div>
+            </div>
+          </div>
+
+          <div class="panelBody">
+            <div class="miniGrid">
+              <div class="mini">
+                <h3>IT Services that actually answer</h3>
+                <p>Helpdesk, on-site dispatch, and real humans who fix problems instead of passing them around.</p>
+                <div class="kbd">Monitoring • Tickets • On-site</div>
+              </div>
+
+              <div class="mini">
+                <h3>Security you can sleep on</h3>
+                <p>Layered security: endpoint protection, backups, MFA, and practical hardening.</p>
+                <div class="kbd">MFA • Backups • Hardening</div>
+              </div>
+
+              <div class="mini">
+                <h3>Surplus tech + recycling</h3>
+                <p>Affordable equipment, asset processing, and responsible handling for end-of-life tech.</p>
+                <div class="kbd">Buy • Sell • Recycle</div>
+              </div>
+            </div>
+
+            <p style="margin:14px 0 0; color:rgba(244,247,255,.52); font-size:12px; line-height:1.5">
+              Availability varies by workload and plan tier — ask about priority options.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- IT SERVICES -->
+    <section id="it">
+      <div class="container">
+        <div class="sectionHead">
+          <div>
+            <h2>IT Services</h2>
+            <p>Everything you’d expect from a modern IT partner — plus the “we’ll actually fix it” part.</p>
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div class="tile">
+            <div class="icon">IT</div>
+            <h3>Managed IT + Helpdesk</h3>
+            <p>Monitoring, patching, ticketing, remote support, and boots-on-the-ground when needed.</p>
+            <ul>
+              <li>Workstations + servers</li>
+              <li>New user onboarding</li>
+              <li>Asset tracking + lifecycle planning</li>
+            </ul>
+          </div>
+
+          <div class="tile">
+            <div class="icon">NET</div>
+            <h3>Networks + Wi-Fi</h3>
+            <p>Reliable connectivity, clean installs, and networks that don’t randomly “just feel slow.”</p>
+            <ul>
+              <li>Switching, routing, firewalls</li>
+              <li>Business Wi-Fi design</li>
+              <li>Site-to-site + remote access</li>
+            </ul>
+          </div>
+
+          <div class="tile">
+            <div class="icon">SEC</div>
+            <h3>Cybersecurity</h3>
+            <p>Practical security: layered defense, backups, MFA, user training, and incident response plans.</p>
+            <ul>
+              <li>Endpoint protection + hardening</li>
+              <li>MFA + identity best practices</li>
+              <li>Phishing awareness</li>
+            </ul>
+          </div>
+
+          <div class="tile">
+            <div class="icon">BK</div>
+            <h3>Backup + Disaster Recovery</h3>
+            <p>We test restores and document the plan — because “we think it backs up” isn’t a strategy.</p>
+            <ul>
+              <li>Local + cloud backups</li>
+              <li>Restore testing</li>
+              <li>RTO/RPO planning</li>
+            </ul>
+          </div>
+
+          <div class="tile">
+            <div class="icon">CLD</div>
+            <h3>Cloud + Microsoft 365</h3>
+            <p>Setup, migrations, security baselines, and admin support for modern cloud workflows.</p>
+            <ul>
+              <li>Tenant cleanup + optimization</li>
+              <li>Mail + file migrations</li>
+              <li>Permissions + sharing controls</li>
+            </ul>
+          </div>
+
+          <div class="tile">
+            <div class="icon">PRO</div>
+            <h3>Projects + Installs</h3>
+            <p>Refreshes, new locations, equipment deployment, and documentation.</p>
+            <ul>
+              <li>Office moves + buildouts</li>
+              <li>Hardware rollouts</li>
+              <li>Documentation & handoff</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SURPLUS + EWASTE -->
+    <section id="surplus">
+      <div class="container">
+        <div class="sectionHead">
+          <div>
+            <h2>Surplus Tech Sales</h2>
+            <p>Quality surplus computers, parts, and equipment — budget friendly and business ready.</p>
+          </div>
+        </div>
+
+        <div class="split">
+          <div class="banner">
+            <h3>Shop Surplus</h3>
+            <p>Need desktops, laptops, parts, or bulk? We’ll help you source what fits your budget and workload.</p>
+            <div class="row">
+              <span class="badge"><i></i> PCs • Laptops • Parts</span>
+              <span class="badge"><i class="white"></i> Bulk options</span>
+              <span class="badge"><i class="dim"></i> Pickup/delivery*</span>
+            </div>
+            <div class="row">
+              <a class="btn primary" id="shopBtn2" href="#" rel="noopener">Visit Surplus Store</a>
+              <a class="btn" href="#contact">Request a Quote</a>
+            </div>
+            <p style="margin:0; color:rgba(244,247,255,.50); font-size:12px">*Delivery options vary by location.</p>
+          </div>
+
+          <div class="banner" id="ewaste">
+            <h3>E-Waste Recycling</h3>
+            <p>Responsible processing for businesses, schools, and individuals. Ask about pickup for larger loads.</p>
+            <div class="row">
+              <span class="badge"><i></i> Data handling</span>
+              <span class="badge"><i class="white"></i> Asset processing</span>
+              <span class="badge"><i class="dim"></i> Responsible recycling</span>
+            </div>
+            <div class="row">
+              <a class="btn" id="recycleBtn2" href="#" rel="noopener">E-Waste Info</a>
+              <a class="btn" href="#contact">Schedule Pickup</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RAPID RESPONSE -->
+    <section id="rapid">
+      <div class="container">
+        <div class="sectionHead">
+          <div>
+            <h2>Rapid Response</h2>
+            <p>When time matters: priority dispatch, quick troubleshooting, and parts coordination.</p>
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div class="tile">
+            <div class="icon">⚡</div>
+            <h3>Priority Support</h3>
+            <p>Faster response windows and escalation when “tomorrow” isn’t acceptable.</p>
+            <ul>
+              <li>Priority ticket queue</li>
+              <li>Expedited dispatch</li>
+              <li>After-hours options (plan-based)</li>
+            </ul>
+          </div>
+          <div class="tile">
+            <div class="icon">🧩</div>
+            <h3>Parts + Hardware Rush</h3>
+            <p>We help source replacement parts and handle swaps to get you back online fast.</p>
+            <ul>
+              <li>PCs, laptops, network gear</li>
+              <li>Quick replacements</li>
+              <li>Coordinated installs</li>
+            </ul>
+          </div>
+          <div class="tile">
+            <div class="icon">🛡</div>
+            <h3>Incident Assist</h3>
+            <p>Security events, lockouts, ransomware scares — we triage and stabilize.</p>
+            <ul>
+              <li>Containment steps</li>
+              <li>Restore guidance</li>
+              <li>Hardening afterward</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT / CTA -->
+    <section id="contact">
+      <div class="container">
+        <div class="cta">
+          <div>
+            <h3>Want Tek-Pak to handle your IT (and save you money on hardware)?</h3>
+            <p>Call or email us — tell us what you’re dealing with, and we’ll recommend the right next step.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+            <a class="btn primary" id="callBtn" href="#">Call Now</a>
+            <a class="btn" id="emailBtn" href="#">Email</a>
+            <a class="btn" id="supportBtn2" href="#">Get Support</a>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="split">
+          <div class="banner">
+            <h3>What should you send us?</h3>
+            <p>To get a faster, more accurate response, include:</p>
+            <ul style="margin:0; padding-left:18px; color:rgba(244,247,255,.72); font-size:13px; line-height:1.7">
+              <li>Business name + best callback number</li>
+              <li>What’s broken + how urgent it is</li>
+              <li>How many users/devices</li>
+              <li>Any errors/screenshots (if available)</li>
+            </ul>
+          </div>
+
+          <div class="banner">
+            <h3>Service Area</h3>
+            <p id="serviceAreaText"></p>
+            <div class="row">
+              <span class="badge"><i class="white"></i> On-site</span>
+              <span class="badge"><i class="dim"></i> Remote</span>
+              <span class="badge"><i></i> Flexible plans</span>
+            </div>
+            <p style="margin:0; color:rgba(244,247,255,.50); font-size:12px; line-height:1.5">
+              Outside the area? We can still help remotely — and we’ll be straight with you about what’s doable.
+            </p>
+          </div>
+        </div>
+
+        <footer>
+          <div class="footRow">
+            <div style="display:flex; align-items:center; gap:10px">
+              <div class="logoWrap" aria-hidden="true" style="width:38px;height:38px;border-radius:14px">
+                <img class="logoImg" alt="" style="width:30px;height:30px"
+                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUEAAABICAYAAABodkdNAAAQAElEQVR4AexdCXgcxZV+fUz3nBrdso0v6XhJd3k2t6Wc0Wq7m9t5tq3bN...REPLACED_FOR_BREVITY..."/>
+              </div>
+              <div>
+                <div style="font-weight:900; letter-spacing:.7px">TEK-PAK INC</div>
+                <div style="color:rgba(244,247,255,.55)">IT Services • Surplus Tech • E-Waste Recycling</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:14px; flex-wrap:wrap">
+              <a href="#it">IT</a>
+              <a href="#surplus">Surplus</a>
+              <a href="#ewaste">E-Waste</a>
+              <a href="#rapid">Rapid</a>
+              <a href="#contact">Contact</a>
+            </div>
+          </div>
+          <div style="margin-top:12px; color:rgba(244,247,255,.42)">
+            © <span id="year"></span> Tek-Pak Inc. All rights reserved.
+          </div>
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ========= Wire up editable settings =========
+    (function init(){
+      const cfg = window.TEKPAK || {};
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      document.getElementById("areaText").textContent = cfg.serviceArea || "Available now";
+      document.getElementById("serviceAreaText").textContent = cfg.serviceArea || "Serving your area.";
+
+      const setHref = (id, href) => {
+        const el = document.getElementById(id);
+        if(el && href) el.setAttribute("href", href);
+      };
+
+      setHref("supportBtn", cfg.urlGetSupport);
+      setHref("supportBtn2", cfg.urlGetSupport);
+      setHref("consultBtn", cfg.urlScheduleConsult);
+      setHref("shopBtn", cfg.urlShopSurplus);
+      setHref("shopBtn2", cfg.urlShopSurplus);
+      setHref("recycleBtn", cfg.urlEWaste);
+      setHref("recycleBtn2", cfg.urlEWaste);
+
+      const callHref = cfg.phoneTel ? ("tel:" + cfg.phoneTel) : "#";
+      const mailHref = cfg.email ? ("mailto:" + cfg.email) : "#";
+      setHref("callBtn", callHref);
+      setHref("emailBtn", mailHref);
+
+      if(cfg.phoneDisplay){
+        document.getElementById("callBtn").textContent = "Call " + cfg.phoneDisplay;
+      }
+      if(cfg.email){
+        document.getElementById("emailBtn").textContent = "Email " + cfg.email;
+      }
+
+      const ops = document.getElementById("opsSub");
+      let i = 0;
+      const statuses = ["Status: online","Status: monitoring","Status: dispatch-ready","Status: secured"];
+      setInterval(()=>{ i=(i+1)%statuses.length; ops.textContent = statuses[i]; }, 2200);
+    })();
+
+    // ========= Reveal animations on scroll =========
+    (function revealOnScroll(){
+      const tiles = Array.from(document.querySelectorAll(".tile"));
+      const io = new IntersectionObserver((entries)=>{
+        for(const e of entries){
+          if(e.isIntersecting){
+            e.target.classList.add("reveal");
+            io.unobserve(e.target);
+          }
+        }
+      }, {threshold: 0.15});
+      tiles.forEach(t=>io.observe(t));
+    })();
+
+    // ========= Smooth scroll for hash links =========
+    (function smoothAnchors(){
+      document.addEventListener("click", (e)=>{
+        const a = e.target.closest('a[href^="#"]');
+        if(!a) return;
+        const href = a.getAttribute("href");
+        if(!href || href === "#") return;
+        const el = document.querySelector(href);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({behavior:"smooth", block:"start"});
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
 
