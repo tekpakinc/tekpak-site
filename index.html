@@ -3,33 +3,39 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="color-scheme" content="dark light" />
+  <meta name="color-scheme" content="dark" />
   <title>Tek-Pak Inc — IT Services • Surplus Tech • E-Waste Recycling</title>
 
   <!-- ==========================================================
     TEK-PAK LANDING PAGE (Standalone / Single File)
-    - Covers IT Services + Surplus + E-Waste
+    - Tek-Pak focused palette: charcoal/steel/white + lime accents
     - No external libraries
     - Smooth animations + glossy industrial vibe
   =========================================================== -->
 
   <style>
     :root{
-      /* ===== Brand tokens (edit as you like) ===== */
-      --tek-yellow:#f5c000;     /* corporate yellow */
-      --tek-blue:#1f66d1;       /* medium-ish blue */
-      --tek-lime:#a7ff2a;       /* polo vibe accent */
-      --bg0:#06080c;
-      --bg1:#0b1220;
+      /* ===== Tek-Pak Palette ===== */
+      --lime:#a7ff2a;                 /* polo/lime accent */
+      --lime2:#74ff3a;                /* secondary lime */
+      --white:#f4f7ff;
+      --muted:rgba(244,247,255,.72);
+
+      --black:#05070a;
+      --charcoal:#0b0f14;
+      --steel:#111824;
+      --steel2:#0f141d;
+
       --panel:rgba(255,255,255,.06);
       --panel2:rgba(255,255,255,.09);
       --border:rgba(255,255,255,.12);
-      --text:#eaf1ff;
-      --muted:rgba(234,241,255,.70);
-      --shadow: 0 22px 70px rgba(0,0,0,.55);
-      --shadow2: 0 14px 34px rgba(0,0,0,.45);
+
+      --shadow: 0 22px 70px rgba(0,0,0,.60);
+      --shadow2: 0 14px 34px rgba(0,0,0,.48);
+
       --radius:18px;
       --radius2:26px;
+
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
       --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
       --ease: cubic-bezier(.2,.9,.2,1);
@@ -40,12 +46,12 @@
     body{
       margin:0;
       font-family:var(--sans);
-      color:var(--text);
+      color:var(--white);
       background:
-        radial-gradient(1100px 700px at 10% 12%, rgba(31,102,209,.28), transparent 60%),
-        radial-gradient(900px 650px at 90% 20%, rgba(245,192,0,.22), transparent 55%),
-        radial-gradient(1200px 700px at 60% 95%, rgba(167,255,42,.14), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
+        radial-gradient(1100px 700px at 12% 10%, rgba(167,255,42,.14), transparent 60%),
+        radial-gradient(900px 650px at 90% 18%, rgba(255,255,255,.08), transparent 58%),
+        radial-gradient(1200px 700px at 55% 98%, rgba(167,255,42,.08), transparent 62%),
+        linear-gradient(180deg, var(--black), var(--steel));
       overflow-x:hidden;
     }
 
@@ -56,12 +62,12 @@
     .grain{
       position:fixed; inset:0;
       pointer-events:none;
-      opacity:.18;
+      opacity:.16;
       mix-blend-mode:overlay;
       background:
-        radial-gradient(1200px 900px at 30% 20%, rgba(255,255,255,.08), transparent 60%),
-        radial-gradient(900px 700px at 70% 70%, rgba(255,255,255,.06), transparent 60%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,.03), rgba(255,255,255,.03) 1px, transparent 1px, transparent 3px);
+        radial-gradient(1200px 900px at 30% 20%, rgba(255,255,255,.07), transparent 60%),
+        radial-gradient(900px 700px at 70% 70%, rgba(255,255,255,.05), transparent 60%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.028), rgba(255,255,255,.028) 1px, transparent 1px, transparent 3px);
       filter: blur(.2px);
       animation: drift 12s linear infinite;
     }
@@ -75,7 +81,7 @@
     header{
       position:sticky; top:0; z-index:50;
       backdrop-filter: blur(14px);
-      background: linear-gradient(180deg, rgba(6,8,12,.78), rgba(6,8,12,.45));
+      background: linear-gradient(180deg, rgba(5,7,10,.84), rgba(5,7,10,.55));
       border-bottom: 1px solid rgba(255,255,255,.08);
     }
     .nav{
@@ -83,42 +89,56 @@
       padding:14px 0;
       gap:14px;
     }
+
     .brand{
       display:flex; align-items:center; gap:12px;
-      min-width: 220px;
+      min-width: 250px;
     }
-    .logo{
-      width:42px; height:42px; border-radius:14px;
+
+    /* ===== REAL LOGO (embedded) ===== */
+    .logoWrap{
+      width:52px; height:52px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
       background:
-        radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.55), transparent 60%),
-        linear-gradient(135deg, rgba(245,192,0,.95), rgba(31,102,209,.95));
-      box-shadow: 0 10px 22px rgba(0,0,0,.45);
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.12), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: 0 14px 30px rgba(0,0,0,.55);
+      display:grid; place-items:center;
       position:relative;
       overflow:hidden;
     }
-    .logo:after{
+    .logoWrap:before{
       content:"";
       position:absolute; inset:-40%;
-      background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.35), transparent 60%);
+      background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.16), transparent 62%);
       transform: rotate(18deg) translateX(-30%);
-      animation: shine 4.6s var(--ease) infinite;
-      opacity:.9;
+      animation: shine 6.2s var(--ease) infinite;
+      opacity:.7;
+      pointer-events:none;
     }
     @keyframes shine{
-      0%,65%{transform: rotate(18deg) translateX(-65%); opacity:.0}
-      80%{opacity:.9}
-      100%{transform: rotate(18deg) translateX(70%); opacity:.0}
+      0%,70%{transform: rotate(18deg) translateX(-70%); opacity:0}
+      84%{opacity:.75}
+      100%{transform: rotate(18deg) translateX(70%); opacity:0}
     }
+    .logoImg{
+      width:44px; height:44px;
+      object-fit:contain;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.55));
+    }
+
     .brand h1{
-      font-size:14px; margin:0; letter-spacing:.7px; text-transform:uppercase;
-      color: rgba(234,241,255,.92);
+      font-size:14px; margin:0; letter-spacing:.8px; text-transform:uppercase;
+      color: rgba(244,247,255,.95);
       line-height:1.1;
     }
     .brand p{
       margin:4px 0 0;
-      font-size:12px; color: var(--muted);
+      font-size:12px; color: rgba(244,247,255,.65);
       font-family: var(--mono);
     }
+
     .navlinks{
       display:flex; gap:18px; align-items:center;
       flex-wrap:wrap;
@@ -126,40 +146,19 @@
     }
     .navlinks a{
       font-size:13px;
-      color: rgba(234,241,255,.80);
+      color: rgba(244,247,255,.78);
       padding:8px 10px;
       border-radius:12px;
       transition: .25s var(--ease);
     }
     .navlinks a:hover{
       background: rgba(255,255,255,.06);
-      color: rgba(234,241,255,.95);
+      color: rgba(244,247,255,.95);
       transform: translateY(-1px);
     }
-    .navcta{display:flex; gap:10px; align-items:center; justify-content:flex-end; min-width:220px}
-    .btn{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:10px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-      box-shadow: 0 14px 34px rgba(0,0,0,.30);
-      color: rgba(234,241,255,.92);
-      font-size:13px;
-      transition:.25s var(--ease);
-      user-select:none;
-    }
-    .btn:hover{transform: translateY(-2px); border-color: rgba(255,255,255,.22)}
-    .btn.primary{
-      border:1px solid rgba(245,192,0,.35);
-      background:
-        radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.40), transparent 60%),
-        linear-gradient(135deg, rgba(245,192,0,.95), rgba(31,102,209,.95));
-      color:#061018;
-      font-weight:800;
-      box-shadow: 0 18px 55px rgba(31,102,209,.22), 0 18px 55px rgba(245,192,0,.18);
-    }
-    .btn.primary:hover{transform: translateY(-2px) scale(1.01)}
+
+    .navcta{display:flex; gap:10px; align-items:center; justify-content:flex-end; min-width:250px}
+
     .pill{
       display:inline-flex; align-items:center; gap:8px;
       padding:7px 10px;
@@ -167,18 +166,42 @@
       border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.05);
       font-size:12px;
-      color: rgba(234,241,255,.80);
+      color: rgba(244,247,255,.78);
     }
     .dot{
       width:9px; height:9px; border-radius:999px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(167,255,42,.75));
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(167,255,42,.85));
       box-shadow: 0 0 0 4px rgba(167,255,42,.10);
     }
 
-    /* ===== Hero ===== */
-    .hero{
-      padding: 44px 0 26px;
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      box-shadow: 0 14px 34px rgba(0,0,0,.30);
+      color: rgba(244,247,255,.92);
+      font-size:13px;
+      transition:.25s var(--ease);
+      user-select:none;
     }
+    .btn:hover{transform: translateY(-2px); border-color: rgba(255,255,255,.22)}
+
+    /* Lime primary button */
+    .btn.primary{
+      border:1px solid rgba(167,255,42,.40);
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.38), transparent 60%),
+        linear-gradient(135deg, rgba(167,255,42,.95), rgba(116,255,58,.88));
+      color:#061009;
+      font-weight:900;
+      box-shadow: 0 18px 55px rgba(167,255,42,.18);
+    }
+    .btn.primary:hover{transform: translateY(-2px) scale(1.01)}
+
+    /* ===== Hero ===== */
+    .hero{padding: 44px 0 26px;}
     .heroGrid{
       display:grid;
       grid-template-columns: 1.15fr .85fr;
@@ -186,7 +209,7 @@
       align-items:stretch;
     }
     @media (max-width: 980px){
-      .heroGrid{grid-template-columns:1fr; }
+      .heroGrid{grid-template-columns:1fr;}
       .navcta{min-width:unset}
       .brand{min-width:unset}
     }
@@ -204,11 +227,12 @@
       content:"";
       position:absolute; inset:-1px;
       background:
-        radial-gradient(700px 260px at 20% 10%, rgba(245,192,0,.16), transparent 60%),
-        radial-gradient(700px 260px at 80% 0%, rgba(31,102,209,.18), transparent 60%),
-        radial-gradient(700px 260px at 70% 90%, rgba(167,255,42,.10), transparent 65%);
+        radial-gradient(700px 260px at 20% 10%, rgba(167,255,42,.16), transparent 62%),
+        radial-gradient(700px 260px at 80% 0%, rgba(255,255,255,.10), transparent 60%),
+        radial-gradient(700px 260px at 70% 90%, rgba(167,255,42,.08), transparent 65%);
       pointer-events:none;
     }
+
     .hero h2{
       margin:0 0 10px;
       font-size: clamp(28px, 3.6vw, 44px);
@@ -217,7 +241,7 @@
       position:relative;
     }
     .hero h2 .grad{
-      background: linear-gradient(90deg, rgba(245,192,0,.98), rgba(234,241,255,.92), rgba(31,102,209,.95));
+      background: linear-gradient(90deg, rgba(167,255,42,.98), rgba(244,247,255,.92), rgba(167,255,42,.82));
       -webkit-background-clip:text; background-clip:text;
       -webkit-text-fill-color:transparent;
     }
@@ -240,9 +264,7 @@
       margin-top: 18px;
       position:relative;
     }
-    @media (max-width:520px){
-      .statsRow{grid-template-columns:1fr}
-    }
+    @media (max-width:520px){ .statsRow{grid-template-columns:1fr} }
     .stat{
       border-radius: 16px;
       border:1px solid rgba(255,255,255,.12);
@@ -251,42 +273,37 @@
       box-shadow: var(--shadow2);
     }
     .stat strong{display:block; font-size:14px}
-    .stat span{display:block; margin-top:4px; font-size:12px; color: var(--muted)}
+    .stat span{display:block; margin-top:4px; font-size:12px; color: rgba(244,247,255,.68)}
+
     .tagRow{
       display:flex; flex-wrap:wrap; gap:10px;
       margin-top:12px;
       position:relative;
     }
 
-    /* ===== “Control panel” right hero card ===== */
+    /* ===== “Ops panel” right hero card ===== */
     .panelHead{
       display:flex; align-items:center; justify-content:space-between;
       padding: 16px 18px 10px;
       border-bottom: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.14);
+      background: rgba(0,0,0,.18);
     }
-    .panelTitle{
-      display:flex; flex-direction:column; gap:2px;
-    }
+    .panelTitle{display:flex; flex-direction:column; gap:2px}
     .panelTitle b{font-size:13px; letter-spacing:.7px; text-transform:uppercase}
-    .panelTitle small{font-size:12px; color: var(--muted); font-family: var(--mono)}
+    .panelTitle small{font-size:12px; color: rgba(244,247,255,.60); font-family: var(--mono)}
     .lights{display:flex; gap:8px}
     .light{width:10px; height:10px; border-radius:999px; background: rgba(255,255,255,.18)}
-    .light.green{background: rgba(167,255,42,.70); box-shadow: 0 0 0 4px rgba(167,255,42,.12)}
-    .light.yellow{background: rgba(245,192,0,.75); box-shadow: 0 0 0 4px rgba(245,192,0,.10)}
-    .light.blue{background: rgba(31,102,209,.70); box-shadow: 0 0 0 4px rgba(31,102,209,.10)}
+    .light.green{background: rgba(167,255,42,.75); box-shadow: 0 0 0 4px rgba(167,255,42,.12)}
+    .light.white{background: rgba(244,247,255,.75); box-shadow: 0 0 0 4px rgba(244,247,255,.10)}
+    .light.dim{background: rgba(255,255,255,.28)}
 
     .panelBody{padding:16px 18px 18px}
-    .miniGrid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-    }
+    .miniGrid{display:grid; grid-template-columns: 1fr; gap:12px}
     .mini{
       border-radius: 16px;
       border:1px solid rgba(255,255,255,.12);
       background:
-        radial-gradient(12px 12px at 18% 30%, rgba(255,255,255,.25), transparent 60%),
+        radial-gradient(12px 12px at 18% 30%, rgba(255,255,255,.22), transparent 60%),
         linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       padding:14px 14px;
       box-shadow: var(--shadow2);
@@ -298,12 +315,12 @@
       position:absolute; inset:-50%;
       background: linear-gradient(115deg, transparent 45%, rgba(255,255,255,.12), transparent 62%);
       transform: rotate(18deg) translateX(-35%);
-      opacity:.6;
-      animation: shine 6.4s var(--ease) infinite;
+      opacity:.55;
+      animation: shine 6.8s var(--ease) infinite;
       pointer-events:none;
     }
     .mini h3{margin:0 0 6px; font-size:14px}
-    .mini p{margin:0; color: var(--muted); font-size:12.5px; line-height:1.5}
+    .mini p{margin:0; color: rgba(244,247,255,.68); font-size:12.5px; line-height:1.5}
     .mini .kbd{
       display:inline-block;
       font-family: var(--mono);
@@ -311,8 +328,8 @@
       padding:4px 8px;
       border-radius:10px;
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.20);
-      color: rgba(234,241,255,.84);
+      background: rgba(0,0,0,.24);
+      color: rgba(244,247,255,.84);
       margin-top:10px;
     }
 
@@ -329,7 +346,7 @@
     }
     .sectionHead p{
       margin:0;
-      color: var(--muted);
+      color: rgba(244,247,255,.68);
       font-size: 13px;
       max-width: 520px;
       line-height:1.55;
@@ -340,15 +357,13 @@
       grid-template-columns: repeat(3, 1fr);
       gap:12px;
     }
-    @media (max-width: 980px){
-      .grid3{grid-template-columns: 1fr}
-    }
+    @media (max-width: 980px){ .grid3{grid-template-columns: 1fr} }
 
     .tile{
       border-radius: var(--radius);
       border:1px solid rgba(255,255,255,.12);
       background:
-        radial-gradient(18px 18px at 20% 25%, rgba(255,255,255,.18), transparent 60%),
+        radial-gradient(18px 18px at 20% 25%, rgba(255,255,255,.16), transparent 60%),
         linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       box-shadow: var(--shadow2);
       padding:16px;
@@ -362,36 +377,33 @@
       width:42px; height:42px; border-radius:14px;
       display:grid; place-items:center;
       background:
-        radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.35), transparent 60%),
-        linear-gradient(135deg, rgba(31,102,209,.85), rgba(245,192,0,.75));
-      color:#07121f;
+        radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.32), transparent 60%),
+        linear-gradient(135deg, rgba(167,255,42,.92), rgba(255,255,255,.22));
+      color:#061009;
       box-shadow: 0 12px 26px rgba(0,0,0,.35);
       font-weight:900;
       letter-spacing:.6px;
     }
     .tile h3{margin:12px 0 6px; font-size:15px}
-    .tile p{margin:0; color: var(--muted); font-size:13px; line-height:1.55}
+    .tile p{margin:0; color: rgba(244,247,255,.68); font-size:13px; line-height:1.55}
     .tile ul{
       margin:10px 0 0;
       padding-left: 18px;
-      color: rgba(234,241,255,.75);
+      color: rgba(244,247,255,.72);
       font-size: 12.5px;
       line-height: 1.6;
     }
 
     /* ===== Split banner ===== */
-    .split{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
+    .split{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
     @media (max-width: 980px){ .split{grid-template-columns:1fr} }
+
     .banner{
       border-radius: var(--radius2);
       border:1px solid rgba(255,255,255,.12);
       background:
-        radial-gradient(900px 240px at 20% 0%, rgba(245,192,0,.14), transparent 60%),
-        radial-gradient(900px 240px at 90% 10%, rgba(31,102,209,.18), transparent 60%),
+        radial-gradient(900px 240px at 25% 0%, rgba(167,255,42,.14), transparent 62%),
+        radial-gradient(900px 240px at 85% 10%, rgba(255,255,255,.10), transparent 60%),
         linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       box-shadow: var(--shadow);
       padding:18px;
@@ -402,24 +414,25 @@
       overflow:hidden;
     }
     .banner h3{margin:0; font-size:16px}
-    .banner p{margin:0; color: var(--muted); font-size:13px; line-height:1.6}
+    .banner p{margin:0; color: rgba(244,247,255,.68); font-size:13px; line-height:1.6}
     .banner .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+
     .badge{
       display:inline-flex; align-items:center; gap:8px;
       border-radius: 999px;
       padding:7px 10px;
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.14);
+      background: rgba(0,0,0,.18);
       font-size:12px;
-      color: rgba(234,241,255,.86);
+      color: rgba(244,247,255,.86);
     }
     .badge i{
       width:10px; height:10px; border-radius:999px;
-      background: rgba(245,192,0,.85);
-      box-shadow: 0 0 0 4px rgba(245,192,0,.10);
+      background: rgba(167,255,42,.85);
+      box-shadow: 0 0 0 4px rgba(167,255,42,.10);
     }
-    .badge i.blue{background: rgba(31,102,209,.85); box-shadow: 0 0 0 4px rgba(31,102,209,.10)}
-    .badge i.lime{background: rgba(167,255,42,.85); box-shadow: 0 0 0 4px rgba(167,255,42,.10)}
+    .badge i.white{background: rgba(244,247,255,.75); box-shadow: 0 0 0 4px rgba(244,247,255,.10)}
+    .badge i.dim{background: rgba(255,255,255,.35); box-shadow: 0 0 0 4px rgba(255,255,255,.08)}
 
     /* ===== CTA / Footer ===== */
     .cta{
@@ -428,7 +441,7 @@
       border:1px solid rgba(255,255,255,.12);
       background:
         radial-gradient(900px 280px at 30% 0%, rgba(167,255,42,.12), transparent 60%),
-        radial-gradient(900px 280px at 70% 0%, rgba(245,192,0,.16), transparent 60%),
+        radial-gradient(900px 280px at 70% 0%, rgba(255,255,255,.10), transparent 60%),
         linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       box-shadow: var(--shadow);
       display:flex;
@@ -438,10 +451,11 @@
       flex-wrap:wrap;
     }
     .cta h3{margin:0; font-size:16px}
-    .cta p{margin:4px 0 0; color: var(--muted); font-size:13px; line-height:1.55}
+    .cta p{margin:4px 0 0; color: rgba(244,247,255,.68); font-size:13px; line-height:1.55}
+
     footer{
       padding: 24px 0 38px;
-      color: rgba(234,241,255,.64);
+      color: rgba(244,247,255,.62);
       font-size:12px;
     }
     .footRow{
@@ -451,7 +465,6 @@
       padding-top: 16px;
     }
 
-    /* ===== Accessibility helpers ===== */
     .sr{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden}
   </style>
 </head>
@@ -476,8 +489,7 @@
       urlEWaste: "https://ncelectronicrecycling.com/",
       urlRapidResponse: "#rapid",
 
-      // Optional: service area text
-      serviceArea: "Serving North Carolina + beyond",
+      serviceArea: "Serving NC + beyond"
     };
   </script>
 
@@ -485,7 +497,9 @@
     <div class="container">
       <div class="nav">
         <a class="brand" href="#top" aria-label="Tek-Pak Home">
-          <div class="logo" aria-hidden="true"></div>
+          <div class="logoWrap" aria-hidden="true">
+            <img class="logoImg" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUEAAABICAYAAABodkdNAAAQAElEQVR4AexdCXgcxZV+fUz3nBrdso0v6XhJd3k2t6Wc0Wq7m9t5tq3bN...REPLACED_FOR_BREVITY..."/>
+          </div>
           <div>
             <h1>TEK-PAK INC</h1>
             <p>IT Services • Surplus Tech • E-Waste</p>
@@ -517,7 +531,7 @@
       <div class="heroGrid">
         <div class="card">
           <div class="inner">
-            <span class="pill"><span class="dot"></span> Fast, friendly, real-world IT — plus tech that saves you money</span>
+            <span class="pill"><span class="dot"></span> Real-world IT + surplus tech that saves you money</span>
 
             <h2>
               One team for <span class="grad">IT support</span>, <span class="grad">secure networks</span>, and <span class="grad">surplus tech</span>.
@@ -540,8 +554,8 @@
                 <span>Monitoring • Updates • Helpdesk • On-site</span>
               </div>
               <div class="stat">
-                <strong>Secure + Compliant</strong>
-                <span>Backups • MFA • Endpoint security • Policies</span>
+                <strong>Security First</strong>
+                <span>Backups • MFA • Endpoint protection • Policies</span>
               </div>
               <div class="stat">
                 <strong>Surplus + Recycling</strong>
@@ -550,10 +564,10 @@
             </div>
 
             <div class="tagRow">
-              <span class="badge"><i class="blue"></i> Small Business IT</span>
-              <span class="badge"><i></i> Cybersecurity</span>
-              <span class="badge"><i class="lime"></i> Rapid Response</span>
-              <span class="badge"><i class="blue"></i> E-Waste Processing</span>
+              <span class="badge"><i></i> Small Business IT</span>
+              <span class="badge"><i class="white"></i> Cybersecurity</span>
+              <span class="badge"><i></i> Rapid Response</span>
+              <span class="badge"><i class="dim"></i> Asset Processing</span>
             </div>
           </div>
         </div>
@@ -566,8 +580,8 @@
             </div>
             <div class="lights" aria-hidden="true">
               <div class="light green"></div>
-              <div class="light yellow"></div>
-              <div class="light blue"></div>
+              <div class="light white"></div>
+              <div class="light dim"></div>
             </div>
           </div>
 
@@ -575,25 +589,25 @@
             <div class="miniGrid">
               <div class="mini">
                 <h3>IT Services that actually answer</h3>
-                <p>Helpdesk, on-site dispatch, and real humans who don’t read you a script like a bedtime story.</p>
-                <div class="kbd">Typical: same-day response*</div>
+                <p>Helpdesk, on-site dispatch, and real humans who fix problems instead of passing them around.</p>
+                <div class="kbd">Monitoring • Tickets • On-site</div>
               </div>
 
               <div class="mini">
                 <h3>Security you can sleep on</h3>
-                <p>Endpoint protection, backups, MFA, policies, and practical hardening — not just “install antivirus and pray.”</p>
-                <div class="kbd">MFA • Backups • Monitoring</div>
+                <p>Layered security: endpoint protection, backups, MFA, and practical hardening.</p>
+                <div class="kbd">MFA • Backups • Hardening</div>
               </div>
 
               <div class="mini">
                 <h3>Surplus tech + recycling</h3>
-                <p>Affordable equipment, asset processing, and responsible e-waste handling for businesses & schools.</p>
+                <p>Affordable equipment, asset processing, and responsible handling for end-of-life tech.</p>
                 <div class="kbd">Buy • Sell • Recycle</div>
               </div>
             </div>
 
-            <p style="margin:14px 0 0; color:rgba(234,241,255,.55); font-size:12px; line-height:1.5">
-              *Availability varies by workload and plan tier. Ask about priority service options.
+            <p style="margin:14px 0 0; color:rgba(244,247,255,.52); font-size:12px; line-height:1.5">
+              Availability varies by workload and plan tier — ask about priority options.
             </p>
           </div>
         </aside>
@@ -627,7 +641,7 @@
             <h3>Networks + Wi-Fi</h3>
             <p>Reliable connectivity, clean installs, and networks that don’t randomly “just feel slow.”</p>
             <ul>
-              <li>Switching, routing, firewall setup</li>
+              <li>Switching, routing, firewalls</li>
               <li>Business Wi-Fi design</li>
               <li>Site-to-site + remote access</li>
             </ul>
@@ -647,7 +661,7 @@
           <div class="tile">
             <div class="icon">BK</div>
             <h3>Backup + Disaster Recovery</h3>
-            <p>Because “we think it backs up” is not a strategy. We test restores and document the plan.</p>
+            <p>We test restores and document the plan — because “we think it backs up” isn’t a strategy.</p>
             <ul>
               <li>Local + cloud backups</li>
               <li>Restore testing</li>
@@ -669,7 +683,7 @@
           <div class="tile">
             <div class="icon">PRO</div>
             <h3>Projects + Installs</h3>
-            <p>Refreshes, new locations, cabling coordination, equipment deployment, and documentation.</p>
+            <p>Refreshes, new locations, equipment deployment, and documentation.</p>
             <ul>
               <li>Office moves + buildouts</li>
               <li>Hardware rollouts</li>
@@ -693,32 +707,31 @@
         <div class="split">
           <div class="banner">
             <h3>Shop Surplus</h3>
-            <p>Need desktops, laptops, parts, or bulk? We can help you source what fits your budget and workload.</p>
+            <p>Need desktops, laptops, parts, or bulk? We’ll help you source what fits your budget and workload.</p>
             <div class="row">
-              <span class="badge"><i class="blue"></i> PCs • Laptops • Parts</span>
-              <span class="badge"><i></i> Bulk options</span>
-              <span class="badge"><i class="lime"></i> Business pickup/delivery*</span>
+              <span class="badge"><i></i> PCs • Laptops • Parts</span>
+              <span class="badge"><i class="white"></i> Bulk options</span>
+              <span class="badge"><i class="dim"></i> Pickup/delivery*</span>
             </div>
             <div class="row">
               <a class="btn primary" id="shopBtn2" href="#" rel="noopener">Visit Surplus Store</a>
               <a class="btn" href="#contact">Request a Quote</a>
             </div>
-            <p style="margin:0; color:rgba(234,241,255,.55); font-size:12px">*Delivery options vary by location.</p>
+            <p style="margin:0; color:rgba(244,247,255,.50); font-size:12px">*Delivery options vary by location.</p>
           </div>
 
           <div class="banner" id="ewaste">
             <h3>E-Waste Recycling</h3>
             <p>Responsible processing for businesses, schools, and individuals. Ask about pickup for larger loads.</p>
             <div class="row">
-              <span class="badge"><i class="lime"></i> Data handling</span>
-              <span class="badge"><i class="blue"></i> Asset processing</span>
-              <span class="badge"><i></i> Responsible recycling</span>
+              <span class="badge"><i></i> Data handling</span>
+              <span class="badge"><i class="white"></i> Asset processing</span>
+              <span class="badge"><i class="dim"></i> Responsible recycling</span>
             </div>
             <div class="row">
-              <a class="btn primary" id="recycleBtn2" href="#" rel="noopener">E-Waste Info</a>
+              <a class="btn" id="recycleBtn2" href="#" rel="noopener">E-Waste Info</a>
               <a class="btn" href="#contact">Schedule Pickup</a>
             </div>
-            <p style="margin:0; color:rgba(234,241,255,.55); font-size:12px">Have a tricky item? Ask — we’ll tell you straight.</p>
           </div>
         </div>
       </div>
@@ -758,7 +771,7 @@
           <div class="tile">
             <div class="icon">🛡</div>
             <h3>Incident Assist</h3>
-            <p>Security events, account lockouts, ransomware scares — we’ll triage and stabilize.</p>
+            <p>Security events, lockouts, ransomware scares — we triage and stabilize.</p>
             <ul>
               <li>Containment steps</li>
               <li>Restore guidance</li>
@@ -775,9 +788,7 @@
         <div class="cta">
           <div>
             <h3>Want Tek-Pak to handle your IT (and save you money on hardware)?</h3>
-            <p>
-              Call or email us — tell us what you’re dealing with, and we’ll recommend the right next step.
-            </p>
+            <p>Call or email us — tell us what you’re dealing with, and we’ll recommend the right next step.</p>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
             <a class="btn primary" id="callBtn" href="#">Call Now</a>
@@ -792,7 +803,7 @@
           <div class="banner">
             <h3>What should you send us?</h3>
             <p>To get a faster, more accurate response, include:</p>
-            <ul style="margin:0; padding-left:18px; color:rgba(234,241,255,.75); font-size:13px; line-height:1.7">
+            <ul style="margin:0; padding-left:18px; color:rgba(244,247,255,.72); font-size:13px; line-height:1.7">
               <li>Business name + best callback number</li>
               <li>What’s broken + how urgent it is</li>
               <li>How many users/devices</li>
@@ -804,12 +815,12 @@
             <h3>Service Area</h3>
             <p id="serviceAreaText"></p>
             <div class="row">
-              <span class="badge"><i class="blue"></i> On-site</span>
-              <span class="badge"><i></i> Remote</span>
-              <span class="badge"><i class="lime"></i> Flexible plans</span>
+              <span class="badge"><i class="white"></i> On-site</span>
+              <span class="badge"><i class="dim"></i> Remote</span>
+              <span class="badge"><i></i> Flexible plans</span>
             </div>
-            <p style="margin:0; color:rgba(234,241,255,.55); font-size:12px; line-height:1.5">
-              If you’re outside the area, we can still help remotely — and we’ll be honest about what’s doable.
+            <p style="margin:0; color:rgba(244,247,255,.50); font-size:12px; line-height:1.5">
+              Outside the area? We can still help remotely — and we’ll be straight with you about what’s doable.
             </p>
           </div>
         </div>
@@ -817,10 +828,13 @@
         <footer>
           <div class="footRow">
             <div style="display:flex; align-items:center; gap:10px">
-              <div class="logo" aria-hidden="true" style="width:34px;height:34px;border-radius:12px"></div>
+              <div class="logoWrap" aria-hidden="true" style="width:38px;height:38px;border-radius:14px">
+                <img class="logoImg" alt="" style="width:30px;height:30px"
+                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUEAAABICAYAAABodkdNAAAQAElEQVR4AexdCXgcxZV+fUz3nBrdso0v6XhJd3k2t6Wc0Wq7m9t5tq3bN...REPLACED_FOR_BREVITY..."/>
+              </div>
               <div>
-                <div style="font-weight:800; letter-spacing:.6px">TEK-PAK INC</div>
-                <div style="color:rgba(234,241,255,.55)">IT Services • Surplus Tech • E-Waste Recycling</div>
+                <div style="font-weight:900; letter-spacing:.7px">TEK-PAK INC</div>
+                <div style="color:rgba(244,247,255,.55)">IT Services • Surplus Tech • E-Waste Recycling</div>
               </div>
             </div>
             <div style="display:flex; gap:14px; flex-wrap:wrap">
@@ -831,7 +845,7 @@
               <a href="#contact">Contact</a>
             </div>
           </div>
-          <div style="margin-top:12px; color:rgba(234,241,255,.45)">
+          <div style="margin-top:12px; color:rgba(244,247,255,.42)">
             © <span id="year"></span> Tek-Pak Inc. All rights reserved.
           </div>
         </footer>
@@ -843,8 +857,7 @@
     // ========= Wire up editable settings =========
     (function init(){
       const cfg = window.TEKPAK || {};
-      const year = new Date().getFullYear();
-      document.getElementById("year").textContent = year;
+      document.getElementById("year").textContent = new Date().getFullYear();
 
       document.getElementById("areaText").textContent = cfg.serviceArea || "Available now";
       document.getElementById("serviceAreaText").textContent = cfg.serviceArea || "Serving your area.";
@@ -867,7 +880,6 @@
       setHref("callBtn", callHref);
       setHref("emailBtn", mailHref);
 
-      // Also change the button labels a bit if info exists
       if(cfg.phoneDisplay){
         document.getElementById("callBtn").textContent = "Call " + cfg.phoneDisplay;
       }
@@ -875,15 +887,9 @@
         document.getElementById("emailBtn").textContent = "Email " + cfg.email;
       }
 
-      // Fun little “ops status” pulse
       const ops = document.getElementById("opsSub");
       let i = 0;
-      const statuses = [
-        "Status: online",
-        "Status: monitoring",
-        "Status: dispatch-ready",
-        "Status: secure"
-      ];
+      const statuses = ["Status: online","Status: monitoring","Status: dispatch-ready","Status: secured"];
       setInterval(()=>{ i=(i+1)%statuses.length; ops.textContent = statuses[i]; }, 2200);
     })();
 
