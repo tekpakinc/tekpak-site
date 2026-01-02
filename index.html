@@ -3,42 +3,34 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <title>Tek-Pak Inc — IT Services • Surplus Tech • E-Waste Recycling</title>
-
-  <!-- ==========================================================
-    TEK-PAK LANDING PAGE (Standalone / Single File)
-    - Tek-Pak focused palette: charcoal/steel/white + lime accents
-    - No external libraries
-    - Smooth animations + glossy industrial vibe
-  =========================================================== -->
-
+  <meta name="color-scheme" content="dark light" />
+  <title>Tek-Pak Surplus Store</title>
   <style>
     :root{
-      /* ===== Tek-Pak Palette ===== */
-      --lime:#a7ff2a;                 /* polo/lime accent */
-      --lime2:#74ff3a;                /* secondary lime */
-      --white:#f4f7ff;
-      --muted:rgba(244,247,255,.72);
+      --bg:#0b0f13;
+      --panel:#101822;
+      --panel2:#0e141d;
+      --border:rgba(255,255,255,.10);
+      --text:#e9f2ff;
+      --muted:rgba(233,242,255,.65);
 
-      --black:#05070a;
-      --charcoal:#0b0f14;
-      --steel:#111824;
-      --steel2:#0f141d;
+      --lime:#7CFF3A;
+      --blue:#2b6cb0;
+      --yellow:#f5c000;
 
-      --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.09);
-      --border:rgba(255,255,255,.12);
-
-      --shadow: 0 22px 70px rgba(0,0,0,.60);
-      --shadow2: 0 14px 34px rgba(0,0,0,.48);
+      --shadow:0 18px 45px rgba(0,0,0,.55);
+      --shadow2:0 12px 28px rgba(0,0,0,.45);
 
       --radius:18px;
-      --radius2:26px;
+      --radius2:24px;
 
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      --ease: cubic-bezier(.2,.9,.2,1);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+
+      --glass: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+      --gloss: radial-gradient(900px 420px at 12% 0%, rgba(124,255,58,.18), transparent 55%),
+               radial-gradient(800px 420px at 92% 8%, rgba(43,108,176,.20), transparent 60%),
+               radial-gradient(900px 520px at 55% 105%, rgba(245,192,0,.10), transparent 65%);
     }
 
     *{box-sizing:border-box}
@@ -46,882 +38,1070 @@
     body{
       margin:0;
       font-family:var(--sans);
-      color:var(--white);
+      color:var(--text);
       background:
-        radial-gradient(1100px 700px at 12% 10%, rgba(167,255,42,.14), transparent 60%),
-        radial-gradient(900px 650px at 90% 18%, rgba(255,255,255,.08), transparent 58%),
-        radial-gradient(1200px 700px at 55% 98%, rgba(167,255,42,.08), transparent 62%),
-        linear-gradient(180deg, var(--black), var(--steel));
+        var(--gloss),
+        radial-gradient(1200px 800px at 30% -10%, rgba(124,255,58,.10), transparent 60%),
+        radial-gradient(900px 700px at 90% 10%, rgba(43,108,176,.12), transparent 60%),
+        radial-gradient(1100px 900px at 50% 120%, rgba(0,0,0,.65), transparent 60%),
+        var(--bg);
       overflow-x:hidden;
     }
 
-    a{color:inherit; text-decoration:none}
-    .container{width:min(1180px, calc(100% - 40px)); margin:0 auto}
+    a{color:inherit}
+    .wrap{max-width:1200px;margin:0 auto;padding:18px}
 
-    /* ===== Subtle moving “energy” overlay ===== */
-    .grain{
-      position:fixed; inset:0;
-      pointer-events:none;
-      opacity:.16;
-      mix-blend-mode:overlay;
-      background:
-        radial-gradient(1200px 900px at 30% 20%, rgba(255,255,255,.07), transparent 60%),
-        radial-gradient(900px 700px at 70% 70%, rgba(255,255,255,.05), transparent 60%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,.028), rgba(255,255,255,.028) 1px, transparent 1px, transparent 3px);
-      filter: blur(.2px);
-      animation: drift 12s linear infinite;
-    }
-    @keyframes drift{
-      0%{transform:translate3d(0,0,0)}
-      50%{transform:translate3d(-12px,8px,0)}
-      100%{transform:translate3d(0,0,0)}
-    }
-
-    /* ===== Top nav ===== */
-    header{
-      position:sticky; top:0; z-index:50;
+    /* Top Bar */
+    .topbar{
+      position:sticky; top:0; z-index:30;
       backdrop-filter: blur(14px);
-      background: linear-gradient(180deg, rgba(5,7,10,.84), rgba(5,7,10,.55));
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(11,15,19,.72);
+      border-bottom:1px solid var(--border);
     }
-    .nav{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 0;
-      gap:14px;
+    .topbar .wrap{
+      display:flex; gap:14px; align-items:center; justify-content:space-between;
+      padding:14px 18px;
     }
-
     .brand{
-      display:flex; align-items:center; gap:12px;
-      min-width: 250px;
+      display:flex; align-items:center; gap:12px; min-width:240px;
     }
-
-    /* ===== REAL LOGO (embedded) ===== */
-    .logoWrap{
-      width:52px; height:52px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
+    .logo{
+      width:42px; height:42px; border-radius:14px;
       background:
-        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.12), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      box-shadow: 0 14px 30px rgba(0,0,0,.55);
+        radial-gradient(18px 18px at 30% 25%, rgba(255,255,255,.55), transparent 55%),
+        linear-gradient(145deg, rgba(124,255,58,.28), rgba(43,108,176,.24)),
+        rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 12px 28px rgba(0,0,0,.45);
       display:grid; place-items:center;
-      position:relative;
-      overflow:hidden;
+      font-weight:900;
+      letter-spacing:.5px;
     }
-    .logoWrap:before{
-      content:"";
-      position:absolute; inset:-40%;
-      background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.16), transparent 62%);
-      transform: rotate(18deg) translateX(-30%);
-      animation: shine 6.2s var(--ease) infinite;
-      opacity:.7;
-      pointer-events:none;
-    }
-    @keyframes shine{
-      0%,70%{transform: rotate(18deg) translateX(-70%); opacity:0}
-      84%{opacity:.75}
-      100%{transform: rotate(18deg) translateX(70%); opacity:0}
-    }
-    .logoImg{
-      width:44px; height:44px;
-      object-fit:contain;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,.55));
-    }
-
     .brand h1{
-      font-size:14px; margin:0; letter-spacing:.8px; text-transform:uppercase;
-      color: rgba(244,247,255,.95);
+      margin:0;
+      font-size:14px;
       line-height:1.1;
+      letter-spacing:.4px;
     }
-    .brand p{
-      margin:4px 0 0;
-      font-size:12px; color: rgba(244,247,255,.65);
-      font-family: var(--mono);
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:3px;
     }
-
-    .navlinks{
-      display:flex; gap:18px; align-items:center;
-      flex-wrap:wrap;
-      justify-content:center;
-    }
-    .navlinks a{
-      font-size:13px;
-      color: rgba(244,247,255,.78);
-      padding:8px 10px;
-      border-radius:12px;
-      transition: .25s var(--ease);
-    }
-    .navlinks a:hover{
-      background: rgba(255,255,255,.06);
-      color: rgba(244,247,255,.95);
-      transform: translateY(-1px);
-    }
-
-    .navcta{display:flex; gap:10px; align-items:center; justify-content:flex-end; min-width:250px}
 
     .pill{
       display:inline-flex; align-items:center; gap:8px;
-      padding:7px 10px;
+      padding:9px 12px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.05);
+      box-shadow: 0 10px 22px rgba(0,0,0,.28);
+      color:var(--muted);
       font-size:12px;
-      color: rgba(244,247,255,.78);
+      white-space:nowrap;
     }
     .dot{
-      width:9px; height:9px; border-radius:999px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(167,255,42,.85));
-      box-shadow: 0 0 0 4px rgba(167,255,42,.10);
+      width:8px;height:8px;border-radius:99px;
+      background: rgba(255,255,255,.25);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.05);
     }
+    .dot.ok{background: var(--lime); box-shadow:0 0 0 4px rgba(124,255,58,.12)}
+    .dot.bad{background: #ff5a5a; box-shadow:0 0 0 4px rgba(255,90,90,.12)}
 
-    .btn{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:10px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-      box-shadow: 0 14px 34px rgba(0,0,0,.30);
-      color: rgba(244,247,255,.92);
-      font-size:13px;
-      transition:.25s var(--ease);
-      user-select:none;
-    }
-    .btn:hover{transform: translateY(-2px); border-color: rgba(255,255,255,.22)}
-
-    /* Lime primary button */
-    .btn.primary{
-      border:1px solid rgba(167,255,42,.40);
-      background:
-        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.38), transparent 60%),
-        linear-gradient(135deg, rgba(167,255,42,.95), rgba(116,255,58,.88));
-      color:#061009;
-      font-weight:900;
-      box-shadow: 0 18px 55px rgba(167,255,42,.18);
-    }
-    .btn.primary:hover{transform: translateY(-2px) scale(1.01)}
-
-    /* ===== Hero ===== */
-    .hero{padding: 44px 0 26px;}
-    .heroGrid{
+    /* Controls */
+    .controls{
+      margin:18px 0 14px;
       display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap:22px;
-      align-items:stretch;
+      grid-template-columns: 1.4fr .8fr .8fr .8fr .7fr;
+      gap:10px;
     }
     @media (max-width: 980px){
-      .heroGrid{grid-template-columns:1fr;}
-      .navcta{min-width:unset}
+      .controls{grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px){
+      .controls{grid-template-columns: 1fr; }
       .brand{min-width:unset}
     }
 
-    .card{
-      border:1px solid rgba(255,255,255,.12);
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      border-radius: var(--radius2);
-      box-shadow: var(--shadow);
-      position:relative;
-      overflow:hidden;
-    }
-    .card .inner{padding:24px}
-    .card:before{
-      content:"";
-      position:absolute; inset:-1px;
-      background:
-        radial-gradient(700px 260px at 20% 10%, rgba(167,255,42,.16), transparent 62%),
-        radial-gradient(700px 260px at 80% 0%, rgba(255,255,255,.10), transparent 60%),
-        radial-gradient(700px 260px at 70% 90%, rgba(167,255,42,.08), transparent 65%);
-      pointer-events:none;
-    }
-
-    .hero h2{
-      margin:0 0 10px;
-      font-size: clamp(28px, 3.6vw, 44px);
-      line-height:1.05;
-      letter-spacing:-.6px;
-      position:relative;
-    }
-    .hero h2 .grad{
-      background: linear-gradient(90deg, rgba(167,255,42,.98), rgba(244,247,255,.92), rgba(167,255,42,.82));
-      -webkit-background-clip:text; background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
-    .hero p{
-      margin: 0 0 16px;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.6;
-      position:relative;
-    }
-    .heroActions{
-      display:flex; gap:12px; flex-wrap:wrap; align-items:center;
-      margin-top: 16px;
-      position:relative;
-    }
-    .statsRow{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:10px;
-      margin-top: 18px;
-      position:relative;
-    }
-    @media (max-width:520px){ .statsRow{grid-template-columns:1fr} }
-    .stat{
-      border-radius: 16px;
+    .field{
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.05);
-      padding:12px 12px;
       box-shadow: var(--shadow2);
-    }
-    .stat strong{display:block; font-size:14px}
-    .stat span{display:block; margin-top:4px; font-size:12px; color: rgba(244,247,255,.68)}
-
-    .tagRow{
-      display:flex; flex-wrap:wrap; gap:10px;
-      margin-top:12px;
-      position:relative;
-    }
-
-    /* ===== “Ops panel” right hero card ===== */
-    .panelHead{
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 16px 18px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-    }
-    .panelTitle{display:flex; flex-direction:column; gap:2px}
-    .panelTitle b{font-size:13px; letter-spacing:.7px; text-transform:uppercase}
-    .panelTitle small{font-size:12px; color: rgba(244,247,255,.60); font-family: var(--mono)}
-    .lights{display:flex; gap:8px}
-    .light{width:10px; height:10px; border-radius:999px; background: rgba(255,255,255,.18)}
-    .light.green{background: rgba(167,255,42,.75); box-shadow: 0 0 0 4px rgba(167,255,42,.12)}
-    .light.white{background: rgba(244,247,255,.75); box-shadow: 0 0 0 4px rgba(244,247,255,.10)}
-    .light.dim{background: rgba(255,255,255,.28)}
-
-    .panelBody{padding:16px 18px 18px}
-    .miniGrid{display:grid; grid-template-columns: 1fr; gap:12px}
-    .mini{
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:
-        radial-gradient(12px 12px at 18% 30%, rgba(255,255,255,.22), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      padding:14px 14px;
-      box-shadow: var(--shadow2);
+      padding:10px 12px;
+      display:flex; gap:10px; align-items:center;
       position:relative;
       overflow:hidden;
     }
-    .mini:after{
+    .field::before{
       content:"";
-      position:absolute; inset:-50%;
-      background: linear-gradient(115deg, transparent 45%, rgba(255,255,255,.12), transparent 62%);
-      transform: rotate(18deg) translateX(-35%);
-      opacity:.55;
-      animation: shine 6.8s var(--ease) infinite;
+      position:absolute; inset:-2px;
+      background: linear-gradient(90deg, rgba(124,255,58,.18), rgba(43,108,176,.14), rgba(245,192,0,.10));
+      opacity:.25;
+      filter: blur(18px);
       pointer-events:none;
     }
-    .mini h3{margin:0 0 6px; font-size:14px}
-    .mini p{margin:0; color: rgba(244,247,255,.68); font-size:12.5px; line-height:1.5}
-    .mini .kbd{
-      display:inline-block;
-      font-family: var(--mono);
-      font-size:11px;
-      padding:4px 8px;
-      border-radius:10px;
+    .field > *{position:relative; z-index:1}
+
+    .field input, .field select{
+      width:100%;
+      background: transparent;
+      border:0;
+      outline:none;
+      color: var(--text);
+      font-size:14px;
+      appearance:none;
+    }
+    .field select{cursor:pointer}
+    .field small{color:var(--muted); font-family:var(--mono); font-size:12px}
+
+    .btn{
+      cursor:pointer;
+      user-select:none;
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.24);
-      color: rgba(244,247,255,.84);
-      margin-top:10px;
-    }
-
-    /* ===== Sections ===== */
-    section{padding: 26px 0}
-    .sectionHead{
-      display:flex; align-items:flex-end; justify-content:space-between; gap:14px;
-      margin-bottom: 14px;
-    }
-    .sectionHead h2{
-      margin:0;
-      font-size: 20px;
-      letter-spacing:.2px;
-    }
-    .sectionHead p{
-      margin:0;
-      color: rgba(244,247,255,.68);
-      font-size: 13px;
-      max-width: 520px;
-      line-height:1.55;
-    }
-
-    .grid3{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:12px;
-    }
-    @media (max-width: 980px){ .grid3{grid-template-columns: 1fr} }
-
-    .tile{
-      border-radius: var(--radius);
-      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px;
+      padding:10px 12px;
       background:
-        radial-gradient(18px 18px at 20% 25%, rgba(255,255,255,.16), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+        radial-gradient(18px 18px at 25% 20%, rgba(255,255,255,.55), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
       box-shadow: var(--shadow2);
-      padding:16px;
-      position:relative;
-      overflow:hidden;
-      transform: translateY(8px);
-      opacity:0;
+      color: var(--text);
+      font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+      gap:8px;
+      transition: transform .12s ease, filter .12s ease;
     }
-    .tile.reveal{transform: translateY(0); opacity:1; transition: .7s var(--ease)}
-    .icon{
-      width:42px; height:42px; border-radius:14px;
-      display:grid; place-items:center;
-      background:
-        radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.32), transparent 60%),
-        linear-gradient(135deg, rgba(167,255,42,.92), rgba(255,255,255,.22));
-      color:#061009;
-      box-shadow: 0 12px 26px rgba(0,0,0,.35);
-      font-weight:900;
-      letter-spacing:.6px;
-    }
-    .tile h3{margin:12px 0 6px; font-size:15px}
-    .tile p{margin:0; color: rgba(244,247,255,.68); font-size:13px; line-height:1.55}
-    .tile ul{
-      margin:10px 0 0;
-      padding-left: 18px;
-      color: rgba(244,247,255,.72);
-      font-size: 12.5px;
-      line-height: 1.6;
-    }
+    .btn:hover{transform: translateY(-1px); filter: brightness(1.07)}
+    .btn:active{transform: translateY(0px); filter: brightness(.98)}
 
-    /* ===== Split banner ===== */
-    .split{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
-    @media (max-width: 980px){ .split{grid-template-columns:1fr} }
-
-    .banner{
-      border-radius: var(--radius2);
-      border:1px solid rgba(255,255,255,.12);
-      background:
-        radial-gradient(900px 240px at 25% 0%, rgba(167,255,42,.14), transparent 62%),
-        radial-gradient(900px 240px at 85% 10%, rgba(255,255,255,.10), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      box-shadow: var(--shadow);
-      padding:18px;
-      display:flex;
-      flex-direction:column;
+    .toggle{
+      display:flex; align-items:center; justify-content:space-between;
       gap:12px;
-      position:relative;
-      overflow:hidden;
     }
-    .banner h3{margin:0; font-size:16px}
-    .banner p{margin:0; color: rgba(244,247,255,.68); font-size:13px; line-height:1.6}
-    .banner .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
-
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
-      border-radius: 999px;
-      padding:7px 10px;
+    .switch{
+      width:46px; height:26px; border-radius:999px;
+      background: rgba(255,255,255,.10);
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      font-size:12px;
-      color: rgba(244,247,255,.86);
+      position:relative;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+      flex: 0 0 auto;
+      cursor:pointer;
     }
-    .badge i{
-      width:10px; height:10px; border-radius:999px;
-      background: rgba(167,255,42,.85);
-      box-shadow: 0 0 0 4px rgba(167,255,42,.10);
-    }
-    .badge i.white{background: rgba(244,247,255,.75); box-shadow: 0 0 0 4px rgba(244,247,255,.10)}
-    .badge i.dim{background: rgba(255,255,255,.35); box-shadow: 0 0 0 4px rgba(255,255,255,.08)}
-
-    /* ===== CTA / Footer ===== */
-    .cta{
-      padding: 18px;
-      border-radius: var(--radius2);
-      border:1px solid rgba(255,255,255,.12);
+    .knob{
+      position:absolute; top:3px; left:3px;
+      width:20px; height:20px; border-radius:999px;
       background:
-        radial-gradient(900px 280px at 30% 0%, rgba(167,255,42,.12), transparent 60%),
-        radial-gradient(900px 280px at 70% 0%, rgba(255,255,255,.10), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      box-shadow: var(--shadow);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
+        radial-gradient(10px 10px at 30% 25%, rgba(255,255,255,.55), transparent 60%),
+        rgba(255,255,255,.22);
+      border:1px solid rgba(255,255,255,.14);
+      transition: left .18s ease, background .18s ease;
+      box-shadow: 0 10px 18px rgba(0,0,0,.35);
+    }
+    .switch.on{
+      background: rgba(124,255,58,.14);
+      border-color: rgba(124,255,58,.22);
+    }
+    .switch.on .knob{left:23px; background: rgba(124,255,58,.35);}
+
+    /* Grid */
+    .meta{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      margin:10px 0 14px;
       flex-wrap:wrap;
     }
-    .cta h3{margin:0; font-size:16px}
-    .cta p{margin:4px 0 0; color: rgba(244,247,255,.68); font-size:13px; line-height:1.55}
+    .meta .count{color:var(--muted); font-size:13px}
+    .meta .hint{color:var(--muted); font-size:12px}
+    .meta .hint code{font-family:var(--mono); color:rgba(233,242,255,.9);}
 
-    footer{
-      padding: 24px 0 38px;
-      color: rgba(244,247,255,.62);
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:14px;
+      padding-bottom:40px;
+    }
+    @media (max-width: 1100px){ .grid{grid-template-columns: repeat(3, 1fr);} }
+    @media (max-width: 820px){ .grid{grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 520px){ .grid{grid-template-columns: 1fr;} }
+
+    .card{
+      border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      min-height: 320px;
+      transform: translateZ(0);
+      transition: transform .14s ease, filter .14s ease;
+    }
+    .card:hover{transform: translateY(-2px); filter: brightness(1.03)}
+    .img{
+      height:170px;
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+      position:relative;
+      overflow:hidden;
+    }
+    .img img{
+      width:100%; height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .img .badge{
+      position:absolute; top:10px; left:10px;
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.12);
+      color:rgba(255,255,255,.92);
       font-size:12px;
+      backdrop-filter: blur(8px);
     }
-    .footRow{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; flex-wrap:wrap;
-      border-top:1px solid rgba(255,255,255,.08);
-      padding-top: 16px;
+    .img .badge.lime{border-color: rgba(124,255,58,.25); background: rgba(124,255,58,.12)}
+    .img .badge.blue{border-color: rgba(43,108,176,.25); background: rgba(43,108,176,.12)}
+    .img .badge.yellow{border-color: rgba(245,192,0,.25); background: rgba(245,192,0,.12)}
+
+    .body{
+      padding:12px 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:1;
+    }
+    .title{
+      font-weight:900;
+      letter-spacing:.2px;
+      font-size:14px;
+      margin:0;
+      line-height:1.2;
+    }
+    .desc{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+      display:-webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      min-height: 48px;
+    }
+    .row{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      margin-top:auto;
+      padding-top:6px;
+    }
+    .price{
+      font-weight:900;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    .stock{
+      font-size:12px; color:var(--muted);
+      font-family: var(--mono);
+    }
+    .actions{
+      padding:12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      border-top:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    .btn2{
+      cursor:pointer;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      padding:10px 12px;
+      background: rgba(255,255,255,.05);
+      color:var(--text);
+      font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+      gap:8px;
+      transition: transform .12s ease, filter .12s ease;
+      user-select:none;
+    }
+    .btn2:hover{transform: translateY(-1px); filter:brightness(1.06)}
+    .btn2.primary{
+      border-color: rgba(124,255,58,.26);
+      background: linear-gradient(180deg, rgba(124,255,58,.22), rgba(255,255,255,.04));
+    }
+    .btn2.disabled{
+      opacity:.55; cursor:not-allowed;
+      filter:saturate(.7);
     }
 
-    .sr{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden}
+    /* Modal */
+    .modal{
+      position:fixed; inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:80;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      padding:18px;
+    }
+    .modal.show{display:flex}
+    .sheet{
+      width:min(980px, 100%);
+      border-radius: 26px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(14,20,29,.92);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .sheetHead{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .sheetHead .left{display:flex; flex-direction:column; gap:4px}
+    .sheetHead h2{margin:0; font-size:15px; letter-spacing:.2px}
+    .sheetHead .tiny{color:var(--muted); font-size:12px; font-family:var(--mono)}
+    .close{
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:900;
+      user-select:none;
+    }
+
+    .sheetBody{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:0;
+    }
+    @media (max-width: 860px){
+      .sheetBody{grid-template-columns: 1fr}
+    }
+    .gallery{
+      padding:14px;
+      border-right:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    @media (max-width: 860px){
+      .gallery{border-right:0; border-bottom:1px solid rgba(255,255,255,.10)}
+    }
+    .hero{
+      width:100%;
+      height:360px;
+      border-radius: 20px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .hero img{width:100%; height:100%; object-fit:cover; display:block}
+    .thumbs{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap:8px;
+    }
+    .thumb{
+      height:58px;
+      border-radius: 14px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      cursor:pointer;
+      opacity:.92;
+      transition: transform .1s ease, opacity .1s ease;
+    }
+    .thumb:hover{transform: translateY(-1px); opacity:1}
+    .thumb img{width:100%; height:100%; object-fit:cover; display:block}
+
+    .details{
+      padding:14px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .kv .box{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      padding:10px 12px;
+    }
+    .kv .k{font-size:11px; color:var(--muted); font-family:var(--mono)}
+    .kv .v{font-size:13px; margin-top:2px; font-weight:800}
+    .long{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      padding:12px;
+      color: rgba(233,242,255,.85);
+      font-size:13px;
+      line-height:1.45;
+      white-space:pre-wrap;
+      max-height: 220px;
+      overflow:auto;
+    }
+    .buyRow{
+      margin-top:auto;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 520px){
+      .buyRow{grid-template-columns:1fr}
+    }
+    .note{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+    }
+
+    /* Skeleton / Toast */
+    .toast{
+      position:fixed;
+      right:16px; bottom:16px;
+      z-index:120;
+      display:none;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      padding:12px 14px;
+      box-shadow: var(--shadow2);
+      color:rgba(255,255,255,.92);
+      font-size:13px;
+      max-width: 340px;
+    }
+    .toast.show{display:block}
   </style>
 </head>
-
 <body>
-  <div class="grain" aria-hidden="true"></div>
 
-  <!-- ==========================================================
-    // EDIT THESE: quick settings
-  =========================================================== -->
-  <script>
-    window.TEKPAK = {
-      businessName: "Tek-Pak Inc",
-      phoneDisplay: "(336) 555-0123",
-      phoneTel: "+13365550123",
-      email: "info@tekpakinc.net",
+  <div class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo" title="Tek-Pak">TP</div>
+        <div>
+          <h1>Tek-Pak Surplus Store</h1>
+          <div class="sub">Live inventory pulled from your spreadsheet</div>
+        </div>
+      </div>
 
-      // Main links (edit to your real destinations)
-      urlGetSupport: "#contact",
-      urlScheduleConsult: "#contact",
-      urlShopSurplus: "https://tekpakinc.store/",
-      urlEWaste: "https://ncelectronicrecycling.com/",
-      urlRapidResponse: "#rapid",
+      <div class="pill" id="apiStatus">
+        <span class="dot" id="apiDot"></span>
+        <span id="apiText">Connecting…</span>
+      </div>
+    </div>
+  </div>
 
-      serviceArea: "Serving NC + beyond"
-    };
-  </script>
+  <div class="wrap">
+    <div class="controls">
+      <div class="field" title="Search by name, SKU, description, etc.">
+        <small>Search</small>
+        <input id="q" placeholder="Try: dell, i7, ThinkPad, monitor, etc…" autocomplete="off" />
+      </div>
 
-  <header>
-    <div class="container">
-      <div class="nav">
-        <a class="brand" href="#top" aria-label="Tek-Pak Home">
-          <div class="logoWrap" aria-hidden="true">
-            <img class="logoImg" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUEAAABICAYAAABodkdNAAAQAElEQVR4AexdCXgcxZV+fUz3nBrdso0v6XhJd3k2t6Wc0Wq7m9t5tq3bN...REPLACED_FOR_BREVITY..."/>
+      <div class="field">
+        <small>Category</small>
+        <select id="cat"><option value="">All</option></select>
+      </div>
+
+      <div class="field">
+        <small>Manufacturer</small>
+        <select id="mfg"><option value="">All</option></select>
+      </div>
+
+      <div class="field">
+        <small>Condition</small>
+        <select id="cond"><option value="">All</option></select>
+      </div>
+
+      <div class="field toggle" title="Hide anything that isn't Listed/Live">
+        <div>
+          <small>Listed only</small>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Hide Hold / Draft</div>
+        </div>
+        <div class="switch on" id="listedSwitch" role="switch" aria-checked="true">
+          <div class="knob"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <small>Sort</small>
+        <select id="sort">
+          <option value="new">Newest (best guess)</option>
+          <option value="priceAsc">Price: low → high</option>
+          <option value="priceDesc">Price: high → low</option>
+          <option value="nameAsc">Name: A → Z</option>
+        </select>
+      </div>
+
+      <div class="btn" id="refreshBtn">⟲ Refresh</div>
+    </div>
+
+    <div class="meta">
+      <div class="count" id="count">Loading inventory…</div>
+      <div class="hint">Tip: put your PayPal link in a column like <code>paypal</code> or <code>buyLink</code> for instant “Buy Now”.</div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheetHead">
+        <div class="left">
+          <h2 id="mTitle">Item</h2>
+          <div class="tiny" id="mSub">—</div>
+        </div>
+        <div class="close" id="closeBtn">✕ Close</div>
+      </div>
+      <div class="sheetBody">
+        <div class="gallery">
+          <div class="hero"><img id="mHero" alt="" /></div>
+          <div class="thumbs" id="thumbs"></div>
+        </div>
+        <div class="details">
+          <div class="kv">
+            <div class="box"><div class="k">Price</div><div class="v" id="mPrice">$—</div></div>
+            <div class="box"><div class="k">Stock</div><div class="v" id="mStock">—</div></div>
+            <div class="box"><div class="k">Category</div><div class="v" id="mCat">—</div></div>
+            <div class="box"><div class="k">Condition</div><div class="v" id="mCond">—</div></div>
           </div>
-          <div>
-            <h1>TEK-PAK INC</h1>
-            <p>IT Services • Surplus Tech • E-Waste</p>
+
+          <div class="long" id="mDesc">—</div>
+
+          <div class="buyRow">
+            <div class="btn2" id="copyBtn">📋 Copy details</div>
+            <a class="btn2 primary" id="buyBtn" href="#" target="_blank" rel="noopener">💳 Buy Now</a>
           </div>
-        </a>
-
-        <nav class="navlinks" aria-label="Primary navigation">
-          <a href="#it">IT Services</a>
-          <a href="#surplus">Surplus Sales</a>
-          <a href="#ewaste">E-Waste</a>
-          <a href="#rapid">Rapid Response</a>
-          <a href="#contact">Contact</a>
-        </nav>
-
-        <div class="navcta">
-          <span class="pill" title="Availability">
-            <span class="dot"></span>
-            <span id="areaText"></span>
-          </span>
-          <a class="btn primary" id="supportBtn" href="#contact">Get Support</a>
+          <div class="note" id="mNote"></div>
         </div>
       </div>
     </div>
-  </header>
+  </div>
 
-  <main id="top">
-    <!-- HERO -->
-    <div class="container hero">
-      <div class="heroGrid">
-        <div class="card">
-          <div class="inner">
-            <span class="pill"><span class="dot"></span> Real-world IT + surplus tech that saves you money</span>
+  <div class="toast" id="toast"></div>
 
-            <h2>
-              One team for <span class="grad">IT support</span>, <span class="grad">secure networks</span>, and <span class="grad">surplus tech</span>.
-            </h2>
+<script>
+/* =========================================================
+  TEK-PAK STOREFRONT (GitHub Pages)
+  - Pulls inventory JSON from your Apps Script web app
+  - Flexible column mapping
+========================================================= */
 
-            <p>
-              Tek-Pak keeps your business running: managed IT, helpdesk, cybersecurity, backups, networking, and on-site support.
-              We also move reliable surplus equipment and handle responsible e-waste recycling.
-            </p>
+/* 1) SET THIS */
+const API_BASE = "https://script.google.com/macros/s/AKfycbyLMf07vAWn1qdtL_FMVvCRf6GytYvXAtbzTLgqZRHurZisb7Qba4gYtsTwkhL-8vJu/exec";
 
-            <div class="heroActions">
-              <a class="btn primary" id="consultBtn" href="#contact">Schedule a Consult</a>
-              <a class="btn" id="shopBtn" href="#" rel="noopener">Shop Surplus</a>
-              <a class="btn" id="recycleBtn" href="#" rel="noopener">E-Waste Drop-Off</a>
-            </div>
+/* 2) If your API uses a specific action for storefront, set it here.
+   We'll try these in order until one works:
+   - ?action=public
+   - ?action=list
+   - (no action)
+*/
+const ACTION_CANDIDATES = ["public", "list", ""];
 
-            <div class="statsRow">
-              <div class="stat">
-                <strong>Managed IT</strong>
-                <span>Monitoring • Updates • Helpdesk • On-site</span>
-              </div>
-              <div class="stat">
-                <strong>Security First</strong>
-                <span>Backups • MFA • Endpoint protection • Policies</span>
-              </div>
-              <div class="stat">
-                <strong>Surplus + Recycling</strong>
-                <span>Save money • Reduce waste • Keep tech moving</span>
-              </div>
-            </div>
+/* 3) Hide items if ANY field contains this keyword (helps keep internal “assets” off the store) */
+const HIDE_IF_CONTAINS = ["asset"];
 
-            <div class="tagRow">
-              <span class="badge"><i></i> Small Business IT</span>
-              <span class="badge"><i class="white"></i> Cybersecurity</span>
-              <span class="badge"><i></i> Rapid Response</span>
-              <span class="badge"><i class="dim"></i> Asset Processing</span>
-            </div>
-          </div>
+/* =========================
+   DOM
+========================= */
+const el = (id)=>document.getElementById(id);
+const grid = el("grid");
+const countEl = el("count");
+const apiText = el("apiText");
+const apiDot  = el("apiDot");
+
+const qEl = el("q");
+const catEl = el("cat");
+const mfgEl = el("mfg");
+const condEl = el("cond");
+const sortEl = el("sort");
+const refreshBtn = el("refreshBtn");
+
+const listedSwitch = el("listedSwitch");
+
+/* Modal */
+const modal = el("modal");
+const closeBtn = el("closeBtn");
+const mTitle = el("mTitle");
+const mSub = el("mSub");
+const mHero = el("mHero");
+const thumbs = el("thumbs");
+const mPrice = el("mPrice");
+const mStock = el("mStock");
+const mCat = el("mCat");
+const mCond = el("mCond");
+const mDesc = el("mDesc");
+const buyBtn = el("buyBtn");
+const copyBtn = el("copyBtn");
+const mNote = el("mNote");
+
+const toast = el("toast");
+
+/* =========================
+   State
+========================= */
+let raw = [];      // normalized items
+let view = [];     // filtered/sorted items
+let listedOnly = true;
+
+const money = new Intl.NumberFormat(undefined, { style:"currency", currency:"USD" });
+
+/* =========================
+   Helpers
+========================= */
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>toast.classList.remove("show"), 2200);
+}
+
+function safeStr(v){
+  if(v === null || v === undefined) return "";
+  return String(v).trim();
+}
+function lower(v){ return safeStr(v).toLowerCase(); }
+
+function pick(obj, keys){
+  // finds first matching key (case-insensitive)
+  const map = new Map(Object.keys(obj).map(k=>[k.toLowerCase(), k]));
+  for(const k of keys){
+    const hit = map.get(k.toLowerCase());
+    if(hit) return obj[hit];
+  }
+  return undefined;
+}
+
+function parsePrice(v){
+  const s = safeStr(v).replace(/[^0-9.]/g,"");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseQty(v){
+  const n = Number(String(v).replace(/[^0-9.-]/g,""));
+  return Number.isFinite(n) ? n : null;
+}
+
+function firstNonEmpty(arr){
+  for(const v of arr){
+    const s = safeStr(v);
+    if(s) return s;
+  }
+  return "";
+}
+
+function splitImages(v){
+  // accept:
+  // - comma-separated list
+  // - newline list
+  // - single url
+  const s = safeStr(v);
+  if(!s) return [];
+  const parts = s
+    .split(/[\n,]/g)
+    .map(x=>x.trim())
+    .filter(Boolean);
+  // de-dupe
+  return [...new Set(parts)];
+}
+
+function looksHidden(item){
+  const blob = JSON.stringify(item).toLowerCase();
+  return HIDE_IF_CONTAINS.some(k => blob.includes(k));
+}
+
+function normalizeRow(row){
+  // Try to map your sheet columns into standard fields
+  const name = firstNonEmpty([
+    pick(row, ["name","title","item","product","listing","item name","product name","inventory item"]),
+    row.Name, row.Title
+  ]);
+
+  const sku = firstNonEmpty([
+    pick(row, ["sku","id","itemid","item id","asset tag","assettag","serial","serial number","tag"]),
+  ]);
+
+  const desc = firstNonEmpty([
+    pick(row, ["description","desc","details","notes","note"]),
+  ]);
+
+  const category = firstNonEmpty([
+    pick(row, ["category","type","cat"]),
+  ]);
+
+  const manufacturer = firstNonEmpty([
+    pick(row, ["manufacturer","brand","make","mfg"]),
+  ]);
+
+  const condition = firstNonEmpty([
+    pick(row, ["condition","grade","state"]),
+  ]);
+
+  const status = firstNonEmpty([
+    pick(row, ["status","listing status","state"]),
+  ]);
+
+  const location = firstNonEmpty([
+    pick(row, ["location","bin","shelf","where","warehouse location"]),
+  ]);
+
+  const priceNum = parsePrice(firstNonEmpty([
+    pick(row, ["price","cost","sale price","list price","amount"]),
+  ]));
+
+  const qtyNum = parseQty(firstNonEmpty([
+    pick(row, ["qty","quantity","stock","on hand","onhand","inventory","count"]),
+  ]));
+
+  const paypal = firstNonEmpty([
+    pick(row, ["paypal","paypal link","buy","buy link","buylink","purchase","checkout","url","link"]),
+  ]);
+
+  // images can be: Images (csv), Image, Image 1..6, Photo 1..6, etc
+  const imagesCsv = pick(row, ["images","image urls","photos","photo urls"]);
+  const img1 = pick(row, ["image","img","image 1","img 1","photo 1","pic 1","picture 1"]);
+  const img2 = pick(row, ["image 2","img 2","photo 2","pic 2","picture 2"]);
+  const img3 = pick(row, ["image 3","img 3","photo 3","pic 3","picture 3"]);
+  const img4 = pick(row, ["image 4","img 4","photo 4","pic 4","picture 4"]);
+  const img5 = pick(row, ["image 5","img 5","photo 5","pic 5","picture 5"]);
+  const img6 = pick(row, ["image 6","img 6","photo 6","pic 6","picture 6"]);
+
+  const images = [
+    ...splitImages(imagesCsv),
+    ...splitImages(img1),
+    ...splitImages(img2),
+    ...splitImages(img3),
+    ...splitImages(img4),
+    ...splitImages(img5),
+    ...splitImages(img6),
+  ].filter(Boolean);
+
+  // best-guess created/updated date for "newest"
+  const dateGuess = firstNonEmpty([
+    pick(row, ["created","created at","date","date added","timestamp","updated","updated at"]),
+  ]);
+
+  return {
+    _raw: row,
+    name: name || "(Unnamed item)",
+    sku,
+    desc,
+    category,
+    manufacturer,
+    condition,
+    status,
+    location,
+    price: priceNum,
+    qty: qtyNum,
+    paypal,
+    images,
+    dateGuess
+  };
+}
+
+function isListed(item){
+  // show if status contains "listed", "live", "active", or status is blank (some sheets don't have status)
+  const s = lower(item.status);
+  if(!s) return true;
+  if(s.includes("hold")) return false;
+  return (s.includes("listed") || s.includes("live") || s.includes("active") || s.includes("yes"));
+}
+
+function searchBlob(item){
+  return [
+    item.name, item.sku, item.desc, item.category, item.manufacturer, item.condition, item.status, item.location
+  ].map(safeStr).join(" ").toLowerCase();
+}
+
+function sortItems(arr){
+  const mode = sortEl.value;
+  const copy = [...arr];
+
+  if(mode === "priceAsc"){
+    copy.sort((a,b)=>(a.price ?? 1e18) - (b.price ?? 1e18));
+  } else if(mode === "priceDesc"){
+    copy.sort((a,b)=>(b.price ?? -1) - (a.price ?? -1));
+  } else if(mode === "nameAsc"){
+    copy.sort((a,b)=>a.name.localeCompare(b.name));
+  } else {
+    // "newest" best guess:
+    // try dateGuess parse; fallback to original order (already returned order)
+    copy.sort((a,b)=>{
+      const da = Date.parse(a.dateGuess || "");
+      const db = Date.parse(b.dateGuess || "");
+      if(Number.isFinite(db) && Number.isFinite(da)) return db-da;
+      if(Number.isFinite(db)) return 1;
+      if(Number.isFinite(da)) return -1;
+      return 0;
+    });
+  }
+  return copy;
+}
+
+function buildSelectOptions(items){
+  const uniq = (vals)=>[...new Set(vals.filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const cats = uniq(items.map(x=>x.category));
+  const mfgs = uniq(items.map(x=>x.manufacturer));
+  const conds = uniq(items.map(x=>x.condition));
+
+  const fill = (select, list)=>{
+    const keep = select.value;
+    select.innerHTML = `<option value="">All</option>` + list.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
+    select.value = keep;
+  };
+
+  fill(catEl, cats);
+  fill(mfgEl, mfgs);
+  fill(condEl, conds);
+}
+
+function escapeHtml(s){
+  return safeStr(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function cardTemplate(item){
+  const img = item.images[0] || "";
+  const priceText = item.price != null ? money.format(item.price) : "Call / Message";
+  const qtyText = item.qty != null ? `QTY: ${item.qty}` : (item.status ? `Status: ${item.status}` : "—");
+
+  const badge = item.category || item.manufacturer || "Surplus";
+  const badgeClass = item.category ? "lime" : (item.manufacturer ? "blue" : "yellow");
+
+  const canBuy = !!safeStr(item.paypal);
+
+  return `
+    <div class="card">
+      <div class="img">
+        ${img ? `<img loading="lazy" src="${escapeHtml(img)}" alt="${escapeHtml(item.name)}">` : ``}
+        <div class="badge ${badgeClass}">${escapeHtml(badge)}</div>
+      </div>
+      <div class="body">
+        <h3 class="title">${escapeHtml(item.name)}</h3>
+        <p class="desc">${escapeHtml(item.desc || "No description yet. (If you add a Description column in your sheet, it will show here.)")}</p>
+        <div class="row">
+          <div class="price">${escapeHtml(priceText)}</div>
+          <div class="stock">${escapeHtml(qtyText)}</div>
         </div>
-
-        <aside class="card" aria-label="Quick overview panel">
-          <div class="panelHead">
-            <div class="panelTitle">
-              <b>Operations Panel</b>
-              <small id="opsSub">Status: online</small>
-            </div>
-            <div class="lights" aria-hidden="true">
-              <div class="light green"></div>
-              <div class="light white"></div>
-              <div class="light dim"></div>
-            </div>
-          </div>
-
-          <div class="panelBody">
-            <div class="miniGrid">
-              <div class="mini">
-                <h3>IT Services that actually answer</h3>
-                <p>Helpdesk, on-site dispatch, and real humans who fix problems instead of passing them around.</p>
-                <div class="kbd">Monitoring • Tickets • On-site</div>
-              </div>
-
-              <div class="mini">
-                <h3>Security you can sleep on</h3>
-                <p>Layered security: endpoint protection, backups, MFA, and practical hardening.</p>
-                <div class="kbd">MFA • Backups • Hardening</div>
-              </div>
-
-              <div class="mini">
-                <h3>Surplus tech + recycling</h3>
-                <p>Affordable equipment, asset processing, and responsible handling for end-of-life tech.</p>
-                <div class="kbd">Buy • Sell • Recycle</div>
-              </div>
-            </div>
-
-            <p style="margin:14px 0 0; color:rgba(244,247,255,.52); font-size:12px; line-height:1.5">
-              Availability varies by workload and plan tier — ask about priority options.
-            </p>
-          </div>
-        </aside>
+      </div>
+      <div class="actions">
+        <div class="btn2" data-act="view">👀 View</div>
+        <div class="btn2 primary ${canBuy ? "" : "disabled"}" data-act="buy">${canBuy ? "💳 Buy Now" : "💬 Inquire"}</div>
       </div>
     </div>
+  `;
+}
 
-    <!-- IT SERVICES -->
-    <section id="it">
-      <div class="container">
-        <div class="sectionHead">
-          <div>
-            <h2>IT Services</h2>
-            <p>Everything you’d expect from a modern IT partner — plus the “we’ll actually fix it” part.</p>
-          </div>
-        </div>
+function render(){
+  const q = lower(qEl.value);
+  const cat = safeStr(catEl.value);
+  const mfg = safeStr(mfgEl.value);
+  const cond = safeStr(condEl.value);
 
-        <div class="grid3">
-          <div class="tile">
-            <div class="icon">IT</div>
-            <h3>Managed IT + Helpdesk</h3>
-            <p>Monitoring, patching, ticketing, remote support, and boots-on-the-ground when needed.</p>
-            <ul>
-              <li>Workstations + servers</li>
-              <li>New user onboarding</li>
-              <li>Asset tracking + lifecycle planning</li>
-            </ul>
-          </div>
+  view = raw
+    .filter(item => !looksHidden(item))
+    .filter(item => !listedOnly || isListed(item))
+    .filter(item => !cat || item.category === cat)
+    .filter(item => !mfg || item.manufacturer === mfg)
+    .filter(item => !cond || item.condition === cond)
+    .filter(item => !q || searchBlob(item).includes(q));
 
-          <div class="tile">
-            <div class="icon">NET</div>
-            <h3>Networks + Wi-Fi</h3>
-            <p>Reliable connectivity, clean installs, and networks that don’t randomly “just feel slow.”</p>
-            <ul>
-              <li>Switching, routing, firewalls</li>
-              <li>Business Wi-Fi design</li>
-              <li>Site-to-site + remote access</li>
-            </ul>
-          </div>
+  view = sortItems(view);
 
-          <div class="tile">
-            <div class="icon">SEC</div>
-            <h3>Cybersecurity</h3>
-            <p>Practical security: layered defense, backups, MFA, user training, and incident response plans.</p>
-            <ul>
-              <li>Endpoint protection + hardening</li>
-              <li>MFA + identity best practices</li>
-              <li>Phishing awareness</li>
-            </ul>
-          </div>
+  countEl.textContent = `${view.length} item(s) shown${listedOnly ? " (Listed only)" : ""}`;
 
-          <div class="tile">
-            <div class="icon">BK</div>
-            <h3>Backup + Disaster Recovery</h3>
-            <p>We test restores and document the plan — because “we think it backs up” isn’t a strategy.</p>
-            <ul>
-              <li>Local + cloud backups</li>
-              <li>Restore testing</li>
-              <li>RTO/RPO planning</li>
-            </ul>
-          </div>
+  grid.innerHTML = view.map(cardTemplate).join("");
 
-          <div class="tile">
-            <div class="icon">CLD</div>
-            <h3>Cloud + Microsoft 365</h3>
-            <p>Setup, migrations, security baselines, and admin support for modern cloud workflows.</p>
-            <ul>
-              <li>Tenant cleanup + optimization</li>
-              <li>Mail + file migrations</li>
-              <li>Permissions + sharing controls</li>
-            </ul>
-          </div>
-
-          <div class="tile">
-            <div class="icon">PRO</div>
-            <h3>Projects + Installs</h3>
-            <p>Refreshes, new locations, equipment deployment, and documentation.</p>
-            <ul>
-              <li>Office moves + buildouts</li>
-              <li>Hardware rollouts</li>
-              <li>Documentation & handoff</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SURPLUS + EWASTE -->
-    <section id="surplus">
-      <div class="container">
-        <div class="sectionHead">
-          <div>
-            <h2>Surplus Tech Sales</h2>
-            <p>Quality surplus computers, parts, and equipment — budget friendly and business ready.</p>
-          </div>
-        </div>
-
-        <div class="split">
-          <div class="banner">
-            <h3>Shop Surplus</h3>
-            <p>Need desktops, laptops, parts, or bulk? We’ll help you source what fits your budget and workload.</p>
-            <div class="row">
-              <span class="badge"><i></i> PCs • Laptops • Parts</span>
-              <span class="badge"><i class="white"></i> Bulk options</span>
-              <span class="badge"><i class="dim"></i> Pickup/delivery*</span>
-            </div>
-            <div class="row">
-              <a class="btn primary" id="shopBtn2" href="#" rel="noopener">Visit Surplus Store</a>
-              <a class="btn" href="#contact">Request a Quote</a>
-            </div>
-            <p style="margin:0; color:rgba(244,247,255,.50); font-size:12px">*Delivery options vary by location.</p>
-          </div>
-
-          <div class="banner" id="ewaste">
-            <h3>E-Waste Recycling</h3>
-            <p>Responsible processing for businesses, schools, and individuals. Ask about pickup for larger loads.</p>
-            <div class="row">
-              <span class="badge"><i></i> Data handling</span>
-              <span class="badge"><i class="white"></i> Asset processing</span>
-              <span class="badge"><i class="dim"></i> Responsible recycling</span>
-            </div>
-            <div class="row">
-              <a class="btn" id="recycleBtn2" href="#" rel="noopener">E-Waste Info</a>
-              <a class="btn" href="#contact">Schedule Pickup</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RAPID RESPONSE -->
-    <section id="rapid">
-      <div class="container">
-        <div class="sectionHead">
-          <div>
-            <h2>Rapid Response</h2>
-            <p>When time matters: priority dispatch, quick troubleshooting, and parts coordination.</p>
-          </div>
-        </div>
-
-        <div class="grid3">
-          <div class="tile">
-            <div class="icon">⚡</div>
-            <h3>Priority Support</h3>
-            <p>Faster response windows and escalation when “tomorrow” isn’t acceptable.</p>
-            <ul>
-              <li>Priority ticket queue</li>
-              <li>Expedited dispatch</li>
-              <li>After-hours options (plan-based)</li>
-            </ul>
-          </div>
-          <div class="tile">
-            <div class="icon">🧩</div>
-            <h3>Parts + Hardware Rush</h3>
-            <p>We help source replacement parts and handle swaps to get you back online fast.</p>
-            <ul>
-              <li>PCs, laptops, network gear</li>
-              <li>Quick replacements</li>
-              <li>Coordinated installs</li>
-            </ul>
-          </div>
-          <div class="tile">
-            <div class="icon">🛡</div>
-            <h3>Incident Assist</h3>
-            <p>Security events, lockouts, ransomware scares — we triage and stabilize.</p>
-            <ul>
-              <li>Containment steps</li>
-              <li>Restore guidance</li>
-              <li>Hardening afterward</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CONTACT / CTA -->
-    <section id="contact">
-      <div class="container">
-        <div class="cta">
-          <div>
-            <h3>Want Tek-Pak to handle your IT (and save you money on hardware)?</h3>
-            <p>Call or email us — tell us what you’re dealing with, and we’ll recommend the right next step.</p>
-          </div>
-          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
-            <a class="btn primary" id="callBtn" href="#">Call Now</a>
-            <a class="btn" id="emailBtn" href="#">Email</a>
-            <a class="btn" id="supportBtn2" href="#">Get Support</a>
-          </div>
-        </div>
-
-        <div style="height:12px"></div>
-
-        <div class="split">
-          <div class="banner">
-            <h3>What should you send us?</h3>
-            <p>To get a faster, more accurate response, include:</p>
-            <ul style="margin:0; padding-left:18px; color:rgba(244,247,255,.72); font-size:13px; line-height:1.7">
-              <li>Business name + best callback number</li>
-              <li>What’s broken + how urgent it is</li>
-              <li>How many users/devices</li>
-              <li>Any errors/screenshots (if available)</li>
-            </ul>
-          </div>
-
-          <div class="banner">
-            <h3>Service Area</h3>
-            <p id="serviceAreaText"></p>
-            <div class="row">
-              <span class="badge"><i class="white"></i> On-site</span>
-              <span class="badge"><i class="dim"></i> Remote</span>
-              <span class="badge"><i></i> Flexible plans</span>
-            </div>
-            <p style="margin:0; color:rgba(244,247,255,.50); font-size:12px; line-height:1.5">
-              Outside the area? We can still help remotely — and we’ll be straight with you about what’s doable.
-            </p>
-          </div>
-        </div>
-
-        <footer>
-          <div class="footRow">
-            <div style="display:flex; align-items:center; gap:10px">
-              <div class="logoWrap" aria-hidden="true" style="width:38px;height:38px;border-radius:14px">
-                <img class="logoImg" alt="" style="width:30px;height:30px"
-                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUEAAABICAYAAABodkdNAAAQAElEQVR4AexdCXgcxZV+fUz3nBrdso0v6XhJd3k2t6Wc0Wq7m9t5tq3bN...REPLACED_FOR_BREVITY..."/>
-              </div>
-              <div>
-                <div style="font-weight:900; letter-spacing:.7px">TEK-PAK INC</div>
-                <div style="color:rgba(244,247,255,.55)">IT Services • Surplus Tech • E-Waste Recycling</div>
-              </div>
-            </div>
-            <div style="display:flex; gap:14px; flex-wrap:wrap">
-              <a href="#it">IT</a>
-              <a href="#surplus">Surplus</a>
-              <a href="#ewaste">E-Waste</a>
-              <a href="#rapid">Rapid</a>
-              <a href="#contact">Contact</a>
-            </div>
-          </div>
-          <div style="margin-top:12px; color:rgba(244,247,255,.42)">
-            © <span id="year"></span> Tek-Pak Inc. All rights reserved.
-          </div>
-        </footer>
-      </div>
-    </section>
-  </main>
-
-  <script>
-    // ========= Wire up editable settings =========
-    (function init(){
-      const cfg = window.TEKPAK || {};
-      document.getElementById("year").textContent = new Date().getFullYear();
-
-      document.getElementById("areaText").textContent = cfg.serviceArea || "Available now";
-      document.getElementById("serviceAreaText").textContent = cfg.serviceArea || "Serving your area.";
-
-      const setHref = (id, href) => {
-        const el = document.getElementById(id);
-        if(el && href) el.setAttribute("href", href);
-      };
-
-      setHref("supportBtn", cfg.urlGetSupport);
-      setHref("supportBtn2", cfg.urlGetSupport);
-      setHref("consultBtn", cfg.urlScheduleConsult);
-      setHref("shopBtn", cfg.urlShopSurplus);
-      setHref("shopBtn2", cfg.urlShopSurplus);
-      setHref("recycleBtn", cfg.urlEWaste);
-      setHref("recycleBtn2", cfg.urlEWaste);
-
-      const callHref = cfg.phoneTel ? ("tel:" + cfg.phoneTel) : "#";
-      const mailHref = cfg.email ? ("mailto:" + cfg.email) : "#";
-      setHref("callBtn", callHref);
-      setHref("emailBtn", mailHref);
-
-      if(cfg.phoneDisplay){
-        document.getElementById("callBtn").textContent = "Call " + cfg.phoneDisplay;
+  // Bind actions
+  [...grid.querySelectorAll(".card")].forEach((card, idx)=>{
+    card.querySelector('[data-act="view"]').addEventListener("click", ()=>openModal(view[idx]));
+    card.querySelector('[data-act="buy"]').addEventListener("click", ()=>{
+      const item = view[idx];
+      if(safeStr(item.paypal)){
+        window.open(item.paypal, "_blank", "noopener");
+      } else {
+        openModal(item);
+        showToast("No buy link found. Add a PayPal link column to enable Buy Now.");
       }
-      if(cfg.email){
-        document.getElementById("emailBtn").textContent = "Email " + cfg.email;
+    });
+  });
+}
+
+function openModal(item){
+  mTitle.textContent = item.name || "Item";
+  const bits = [];
+  if(item.sku) bits.push(`SKU: ${item.sku}`);
+  if(item.manufacturer) bits.push(item.manufacturer);
+  if(item.location) bits.push(`Loc: ${item.location}`);
+  mSub.textContent = bits.join(" • ") || "—";
+
+  const imgs = item.images.length ? item.images : [""];
+  mHero.src = imgs[0] || "";
+  mHero.alt = item.name || "";
+
+  thumbs.innerHTML = imgs.slice(0,6).map((u,i)=>`
+    <div class="thumb" data-i="${i}">
+      ${u ? `<img src="${escapeHtml(u)}" alt="">` : ``}
+    </div>
+  `).join("");
+
+  [...thumbs.querySelectorAll(".thumb")].forEach(t=>{
+    t.addEventListener("click", ()=>{
+      const i = Number(t.dataset.i);
+      mHero.src = imgs[i] || imgs[0] || "";
+    });
+  });
+
+  mPrice.textContent = item.price != null ? money.format(item.price) : "—";
+  mStock.textContent = item.qty != null ? String(item.qty) : (item.status || "—");
+  mCat.textContent = item.category || "—";
+  mCond.textContent = item.condition || "—";
+  mDesc.textContent = item.desc || "No description provided yet.";
+
+  const buy = safeStr(item.paypal);
+  buyBtn.href = buy || "#";
+  buyBtn.classList.toggle("disabled", !buy);
+  buyBtn.textContent = buy ? "💳 Buy Now" : "💬 No Buy Link";
+
+  mNote.textContent = buy
+    ? "Opens your PayPal checkout link in a new tab."
+    : "To enable Buy Now, add a column like PayPal / Buy Link in your sheet.";
+
+  copyBtn.onclick = async ()=>{
+    const text =
+`Tek-Pak Surplus Item
+Name: ${item.name || ""}
+SKU: ${item.sku || ""}
+Price: ${item.price != null ? money.format(item.price) : ""}
+Category: ${item.category || ""}
+Manufacturer: ${item.manufacturer || ""}
+Condition: ${item.condition || ""}
+Status: ${item.status || ""}
+Location: ${item.location || ""}
+
+Details:
+${item.desc || ""}
+
+Buy:
+${item.paypal || ""}`.trim();
+
+    try{
+      await navigator.clipboard.writeText(text);
+      showToast("Copied item details 📋");
+    }catch{
+      showToast("Couldn’t copy (browser blocked).");
+    }
+  };
+
+  modal.classList.add("show");
+}
+function closeModal(){
+  modal.classList.remove("show");
+}
+closeBtn.addEventListener("click", closeModal);
+modal.addEventListener("click", (e)=>{ if(e.target === modal) closeModal(); });
+window.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeModal(); });
+
+/* =========================
+   API Fetch
+========================= */
+function setApiStatus(ok, msg){
+  apiDot.className = "dot " + (ok ? "ok" : "bad");
+  apiText.textContent = msg;
+}
+
+async function fetchAny(){
+  // Try candidates in order
+  const tries = [];
+  for(const act of ACTION_CANDIDATES){
+    const url = act ? `${API_BASE}?action=${encodeURIComponent(act)}&t=${Date.now()}` : `${API_BASE}?t=${Date.now()}`;
+    tries.push(url);
+  }
+
+  let lastErr = null;
+
+  for(const url of tries){
+    try{
+      setApiStatus(true, "Loading inventory…");
+      const res = await fetch(url, { cache:"no-store" });
+      const text = await res.text();
+
+      // Attempt to parse JSON
+      let data;
+      try { data = JSON.parse(text); }
+      catch { throw new Error("Response was not JSON (check your Apps Script doGet)."); }
+
+      // Accept multiple shapes:
+      // - {ok:true, items:[...]}
+      // - {ok:true, data:[...]}   (some versions)
+      // - [...]
+      let rows = [];
+      if(Array.isArray(data)) rows = data;
+      else if(Array.isArray(data.items)) rows = data.items;
+      else if(Array.isArray(data.data)) rows = data.data;
+      else if(data.ok && Array.isArray(data.rows)) rows = data.rows;
+
+      if(!rows.length) {
+        // might still be ok but empty
+        raw = [];
+        buildSelectOptions(raw);
+        render();
+        setApiStatus(true, "Connected (0 items)");
+        return;
       }
 
-      const ops = document.getElementById("opsSub");
-      let i = 0;
-      const statuses = ["Status: online","Status: monitoring","Status: dispatch-ready","Status: secured"];
-      setInterval(()=>{ i=(i+1)%statuses.length; ops.textContent = statuses[i]; }, 2200);
-    })();
+      raw = rows.map(normalizeRow);
+      buildSelectOptions(raw);
+      render();
+      setApiStatus(true, `Connected (${raw.length} items)`);
+      return;
 
-    // ========= Reveal animations on scroll =========
-    (function revealOnScroll(){
-      const tiles = Array.from(document.querySelectorAll(".tile"));
-      const io = new IntersectionObserver((entries)=>{
-        for(const e of entries){
-          if(e.isIntersecting){
-            e.target.classList.add("reveal");
-            io.unobserve(e.target);
-          }
-        }
-      }, {threshold: 0.15});
-      tiles.forEach(t=>io.observe(t));
-    })();
+    }catch(err){
+      lastErr = err;
+      // try next candidate
+    }
+  }
 
-    // ========= Smooth scroll for hash links =========
-    (function smoothAnchors(){
-      document.addEventListener("click", (e)=>{
-        const a = e.target.closest('a[href^="#"]');
-        if(!a) return;
-        const href = a.getAttribute("href");
-        if(!href || href === "#") return;
-        const el = document.querySelector(href);
-        if(el){
-          e.preventDefault();
-          el.scrollIntoView({behavior:"smooth", block:"start"});
-        }
-      });
-    })();
-  </script>
+  setApiStatus(false, "API error");
+  countEl.textContent = "Could not load inventory (fetch failed).";
+  grid.innerHTML = "";
+  console.error(lastErr);
+
+  showToast("Fetch failed. If this is CORS, we’ll fix it in your Apps Script response.");
+}
+
+/* =========================
+   Events
+========================= */
+[qEl, catEl, mfgEl, condEl, sortEl].forEach(x=>x.addEventListener("input", render));
+refreshBtn.addEventListener("click", fetchAny);
+
+listedSwitch.addEventListener("click", ()=>{
+  listedOnly = !listedOnly;
+  listedSwitch.classList.toggle("on", listedOnly);
+  listedSwitch.setAttribute("aria-checked", String(listedOnly));
+  render();
+});
+
+/* Boot */
+fetchAny();
+</script>
 </body>
 </html>
-
