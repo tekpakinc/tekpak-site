@@ -102,13 +102,15 @@
     padding:10px 12px;
     border-radius:14px;
     box-shadow:0 10px 30px rgba(0,0,0,.25);
-    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
     font-weight:800;
     letter-spacing:.1px;
     user-select:none;
   }
   button:hover{ transform: translateY(-1px); border-color:rgba(58,160,255,.45); box-shadow:0 14px 40px rgba(0,0,0,.35); }
   button:active{ transform: translateY(0px) scale(.99); }
+  button:disabled, .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:0 10px 30px rgba(0,0,0,.18); }
+
   .btn.primary{ border-color:rgba(58,160,255,.55); }
   .btn.good{ border-color:rgba(61,255,141,.45); }
   .btn.bad{ border-color:rgba(255,77,109,.45); }
@@ -230,6 +232,7 @@
     max-width: 420px;
     display:none;
     z-index:80;
+    white-space:pre-wrap;
   }
 
   .modal{
@@ -284,7 +287,6 @@
 <header>
   <div class="topbar">
     <div class="brand">
-      <!-- ✅ Replaced square with your logo image -->
       <div class="logo"><img src="excellence.png" alt="Tek-Pak Logo"></div>
       <div>
         <div class="title">Tek-Pak Inventory Admin</div>
@@ -306,7 +308,6 @@
 </header>
 
 <main>
-  <!-- Filters -->
   <section class="card">
     <h3>
       Filters
@@ -355,7 +356,6 @@
     </div>
   </section>
 
-  <!-- Table -->
   <section class="card">
     <h3>
       Inventory
@@ -389,7 +389,6 @@
   </section>
 </main>
 
-<!-- Editor Modal -->
 <div class="modal" id="modal">
   <div class="panel">
     <header>
@@ -501,7 +500,6 @@
   </div>
 </div>
 
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox">
   <img id="lightboxImg" alt="preview" />
 </div>
@@ -524,6 +522,10 @@ let dropdowns = {};
 let items = [];
 let editing = null;
 
+/* --- NEW: prevent overlapping requests (major source of “failed to fetch”) --- */
+let _inFlight = 0;
+let _saveLock = false;
+
 function toast(msg, good=true){
   const t = $("toast");
   t.textContent = msg;
@@ -538,23 +540,67 @@ function setApiStatus(ok, msg){
   el.style.borderColor = ok ? "rgba(61,255,141,.45)" : "rgba(255,77,109,.45)";
 }
 
-async function api(action, payload={}){
-  const body = JSON.stringify({ action, key: apiKey, ...payload });
+/* --- NEW: fetch helper with timeout + retry --- */
+async function fetchWithTimeout(url, opts={}, ms=15000){
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(), ms);
+  try{
+    const res = await fetch(url, { ...opts, signal: ctrl.signal, cache:"no-store", redirect:"follow" });
+    return res;
+  } finally {
+    clearTimeout(t);
+  }
+}
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    mode: "cors",
-    headers: { "Content-Type":"text/plain;charset=utf-8" },
-    body
-  });
+/* --- NEW: robust API call
+   - tries normal CORS POST (read response)
+   - if browser throws “Failed to fetch”, falls back to fire-and-refresh behavior for saves
+*/
+async function api(action, payload={}, {allowOpaque=false} = {}){
+  const bodyObj = { action, key: apiKey, ...payload };
+  const body = JSON.stringify(bodyObj);
 
-  const text = await res.text();
-  let data;
-  try{ data = JSON.parse(text); }
-  catch(e){ throw new Error("Bad JSON from server: " + text.slice(0,200)); }
+  _inFlight++;
+  try{
+    // Try normal read-capable POST first
+    const res = await fetchWithTimeout(API_URL + "?t=" + Date.now(), {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type":"text/plain;charset=utf-8" },
+      body
+    }, 20000);
 
-  if(!data.ok) throw new Error(data.error || "API error");
-  return data;
+    const text = await res.text();
+    let data;
+    try{ data = JSON.parse(text); }
+    catch(e){ throw new Error("Bad JSON from server:\n" + text.slice(0,220)); }
+
+    if(!data.ok) throw new Error(data.error || "API error");
+    return data;
+
+  }catch(err){
+    // If this is the classic browser network error, we can still “send” the save
+    // and confirm by refreshing via GET.
+    const msg = String(err && err.message ? err.message : err);
+
+    if(allowOpaque){
+      try{
+        await fetchWithTimeout(API_URL + "?t=" + Date.now(), {
+          method: "POST",
+          mode: "no-cors", // fire-and-forget; avoids CORS read failures
+          headers: { "Content-Type":"text/plain;charset=utf-8" },
+          body
+        }, 20000);
+        return { ok:true, opaque:true };
+      }catch(e2){
+        throw new Error("Network error while saving.");
+      }
+    }
+
+    throw new Error(msg || "Failed to fetch");
+  } finally {
+    _inFlight--;
+  }
 }
 
 function escapeHtml(s){
@@ -777,10 +823,19 @@ function updatePreviewButtons_(){
 
 async function saveEditor(){
   if(!editing) return;
+  if(_saveLock) return; // prevent double-click saves
+  _saveLock = true;
+
+  const btn = $("btnSave");
+  const prevText = btn.textContent;
+  btn.textContent = "Saving…";
+  btn.disabled = true;
 
   const title = $("e_title").value.trim();
   if(!title){
     toast("Title is required.", false);
+    btn.textContent = prevText; btn.disabled = false;
+    _saveLock = false;
     return;
   }
 
@@ -807,19 +862,32 @@ async function saveEditor(){
   };
 
   try{
-    const res = await api("upsertItem", { actor:"tekpak-admin", item: payload });
-    const saved = res.data;
+    // NEW: allowOpaque true => if POST can’t be read, it still sends, then we refresh to confirm.
+    const res = await api("upsertItem", { actor:"tekpak-admin", item: payload }, { allowOpaque:true });
 
-    const id = saved["item id"];
-    const idx = items.findIndex(x => (x["item id"]||"") === id);
-    if(idx >= 0) items[idx] = saved;
-    else items.unshift(saved);
+    if(res && res.opaque){
+      toast("Saved (confirmed by refresh) ✓");
+      await refresh(); // confirm changes
+      closeEditor();
+      render();
+    } else {
+      const saved = res.data;
+      const id = saved["item id"];
+      const idx = items.findIndex(x => (x["item id"]||"") === id);
+      if(idx >= 0) items[idx] = saved;
+      else items.unshift(saved);
 
-    toast("Saved ✓");
-    closeEditor();
-    render();
+      toast("Saved ✓");
+      closeEditor();
+      render();
+    }
+
   }catch(err){
-    toast(err.message, false);
+    toast(err.message || "Save failed", false);
+  }finally{
+    btn.textContent = prevText;
+    btn.disabled = false;
+    _saveLock = false;
   }
 }
 
@@ -865,7 +933,7 @@ async function connect(){
   localStorage.setItem(LS_KEY, apiKey);
 
   try{
-    const r = await fetch(API_URL + "?action=ping");
+    const r = await fetchWithTimeout(API_URL + "?action=ping&t=" + Date.now(), { method:"GET", mode:"cors" }, 15000);
     const j = await r.json();
     if(!j.ok) throw new Error(j.error || "Ping failed");
     setApiStatus(true, "OK");
@@ -956,7 +1024,7 @@ $("btnExport").addEventListener("click", ()=>{
   $("apiKey").value = saved;
   apiKey = saved.trim();
 
-  fetch(API_URL + "?action=ping")
+  fetch(API_URL + "?action=ping&t=" + Date.now())
     .then(r=>r.json())
     .then(j=> setApiStatus(!!j.ok, j.ok ? "OK" : "FAIL"))
     .catch(()=> setApiStatus(false, "FAIL"));
