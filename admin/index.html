@@ -1,520 +1,11 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Tek-Pak Inventory Admin</title>
-<style>
-  :root{
-    --bg0:#05070b;
-    --bg1:#070b12;
-    --panel:#0e1621;
-    --panel2:#101c2a;
-    --text:#e8f3ff;
-    --muted:#93a9be;
-    --border:rgba(255,255,255,.10);
-    --accent:#3aa0ff;
-    --good:#3dff8d;
-    --warn:#ffd166;
-    --bad:#ff4d6d;
-    --shadow:0 22px 60px rgba(0,0,0,.55);
-    --radius:18px;
-    --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --sans:system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  }
-
-  *{ box-sizing:border-box; }
-  body{
-    margin:0;
-    color:var(--text);
-    font-family:var(--sans);
-    background:
-      radial-gradient(1100px 800px at 18% 0%, rgba(58,160,255,.20), transparent 55%),
-      radial-gradient(900px 650px at 82% 12%, rgba(61,255,141,.12), transparent 55%),
-      linear-gradient(180deg, var(--bg0), var(--bg1) 35%, var(--bg0));
-  }
-
-  header{
-    position:sticky; top:0; z-index:50;
-    backdrop-filter: blur(10px);
-    background:rgba(7,11,16,.76);
-    border-bottom:1px solid var(--border);
-  }
-
-  .topbar{
-    display:flex; align-items:center; justify-content:space-between;
-    gap:12px; padding:12px 14px;
-    max-width: 1650px; margin:0 auto;
-  }
-
-  .brand{
-    display:flex; align-items:center; gap:12px;
-    min-width: 260px;
-  }
-
-  /* ✅ LOGO BOX (now shows excellence.png) */
-  .logo{
-    width:34px; height:34px; border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background:rgba(0,0,0,.20);
-    box-shadow:0 12px 28px rgba(0,0,0,.35);
-    overflow:hidden;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .logo img{
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    display:block;
-  }
-
-  .title{
-    font-weight:900;
-    letter-spacing:.2px;
-    line-height:1.05;
-  }
-
-  .subtitle{
-    font-size:12px;
-    color:var(--muted);
-    margin-top:2px;
-  }
-
-  .pill{
-    font-family:var(--mono);
-    font-size:12px;
-    color:rgba(232,243,255,.88);
-    border:1px solid var(--border);
-    padding:6px 10px;
-    border-radius:999px;
-    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-  }
-
-  .actions{
-    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  }
-
-  button, .btn{
-    cursor:pointer;
-    border:1px solid var(--border);
-    color:var(--text);
-    background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-    padding:10px 12px;
-    border-radius:14px;
-    box-shadow:0 10px 30px rgba(0,0,0,.25);
-    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
-    font-weight:800;
-    letter-spacing:.1px;
-    user-select:none;
-  }
-  button:hover{ transform: translateY(-1px); border-color:rgba(58,160,255,.45); box-shadow:0 14px 40px rgba(0,0,0,.35); }
-  button:active{ transform: translateY(0px) scale(.99); }
-  button:disabled, .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:0 10px 30px rgba(0,0,0,.18); }
-
-  .btn.primary{ border-color:rgba(58,160,255,.55); }
-  .btn.good{ border-color:rgba(61,255,141,.45); }
-  .btn.bad{ border-color:rgba(255,77,109,.45); }
-  .btn.ghost{ background:rgba(0,0,0,.15); box-shadow:none; }
-
-  input, textarea, select{
-    width:100%;
-    padding:10px 10px;
-    border-radius:14px;
-    border:1px solid var(--border);
-    color:var(--text);
-    background:rgba(0,0,0,.22);
-    outline:none;
-  }
-  textarea{ min-height:92px; resize:vertical; }
-
-  label{
-    display:block;
-    font-size:12px;
-    color:rgba(232,243,255,.86);
-    margin:10px 0 6px;
-  }
-
-  main{
-    display:grid;
-    grid-template-columns: 380px 1fr;
-    gap:14px;
-    padding:14px;
-    max-width: 1650px;
-    margin:0 auto;
-  }
-
-  .card{
-    background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    box-shadow: var(--shadow);
-    overflow:hidden;
-  }
-
-  .card h3{
-    margin:0;
-    padding:14px 14px 10px;
-    border-bottom:1px solid var(--border);
-    font-size:14px;
-    letter-spacing:.2px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-  }
-
-  .body{ padding:14px; }
-
-  .muted{
-    color:var(--muted);
-    font-size:12px;
-    line-height:1.45;
-  }
-
-  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-  .grid3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
-  .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-
-  .tableWrap{
-    max-height: calc(100vh - 170px);
-    overflow:auto;
-    border-top:1px solid var(--border);
-  }
-
-  table{
-    width:100%;
-    border-collapse:separate;
-    border-spacing:0;
-    font-size:13px;
-  }
-
-  thead th{
-    position:sticky; top:0; z-index:10;
-    background:rgba(10,16,24,.92);
-    backdrop-filter: blur(8px);
-    border-bottom:1px solid var(--border);
-    padding:10px 10px;
-    text-align:left;
-    font-size:12px;
-    color:rgba(232,243,255,.92);
-    white-space:nowrap;
-  }
-
-  tbody td{
-    border-bottom:1px solid rgba(255,255,255,.06);
-    padding:10px 10px;
-    vertical-align:top;
-    color:rgba(232,243,255,.92);
-  }
-
-  tbody tr:hover td{ background:rgba(58,160,255,.06); }
-
-  .mini{ font-family:var(--mono); font-size:12px; color:rgba(232,243,255,.88); }
-
-  .thumbs{ display:flex; gap:8px; flex-wrap:wrap; }
-  .thumb{
-    width:44px; height:44px; border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background:rgba(0,0,0,.25);
-    overflow:hidden;
-    cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
-
-  .toast{
-    position:fixed; bottom:16px; right:16px;
-    background:rgba(10,16,24,.92);
-    border:1px solid var(--border);
-    padding:12px 14px;
-    border-radius:16px;
-    box-shadow: var(--shadow);
-    max-width: 420px;
-    display:none;
-    z-index:80;
-    white-space:pre-wrap;
-  }
-
-  .modal{
-    position:fixed; inset:0;
-    display:none; align-items:center; justify-content:center;
-    background:rgba(0,0,0,.6);
-    z-index:90;
-    padding:16px;
-  }
-
-  .modal .panel{
-    width:min(1100px, 100%);
-    max-height: 92vh;
-    overflow:auto;
-    border-radius:22px;
-    border:1px solid var(--border);
-    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-    box-shadow: var(--shadow);
-  }
-
-  .modal .panel header{
-    position:sticky; top:0;
-    background:rgba(10,16,24,.92);
-    border-bottom:1px solid var(--border);
-    border-top-left-radius:22px;
-    border-top-right-radius:22px;
-  }
-
-  .modal .panel .content{ padding:14px; }
-
-  .lightbox{
-    position:fixed; inset:0;
-    display:none;
-    align-items:center; justify-content:center;
-    background:rgba(0,0,0,.78);
-    z-index:120;
-    padding:18px;
-  }
-  .lightbox img{
-    max-width: min(1200px, 96vw);
-    max-height: 92vh;
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,.18);
-    box-shadow: var(--shadow);
-  }
-
-  .kbd{ font-family:var(--mono); font-size:12px; padding:2px 6px; border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,.18); }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo"><img src="excellence.png" alt="Tek-Pak Logo"></div>
-      <div>
-        <div class="title">Tek-Pak Inventory Admin</div>
-        <div class="subtitle">GitHub Pages → Apps Script API</div>
-      </div>
-      <div class="pill mini" id="apiStatus">API: —</div>
-    </div>
-
-    <div class="actions" style="flex:1; justify-content:flex-end;">
-      <div style="min-width:280px; max-width:420px;">
-        <input id="apiKey" placeholder="API key (stored locally on this device)" />
-      </div>
-      <button class="btn primary" id="btnConnect">Connect</button>
-      <button class="btn" id="btnRefresh">Refresh</button>
-      <button class="btn good" id="btnNew">+ New Item</button>
-      <button class="btn" id="btnExport">Export JSON</button>
-    </div>
-  </div>
-</header>
-
-<main>
-  <section class="card">
-    <h3>
-      Filters
-      <span class="muted" id="countLabel">0 items</span>
-    </h3>
-    <div class="body">
-      <label>Search</label>
-      <input id="q" placeholder="Search title, serial, model, notes…" />
-
-      <div class="grid2">
-        <div>
-          <label>Status</label>
-          <select id="fStatus"><option value="">Any</option></select>
-        </div>
-        <div>
-          <label>Category</label>
-          <select id="fCategory"><option value="">Any</option></select>
-        </div>
-      </div>
-
-      <label>Location</label>
-      <select id="fLocation"><option value="">Any</option></select>
-
-      <div class="grid2">
-        <div>
-          <label>Manufacturer</label>
-          <select id="fManufacturer"><option value="">Any</option></select>
-        </div>
-        <div>
-          <label>Condition</label>
-          <select id="fCondition"><option value="">Any</option></select>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:12px;">
-        <button class="btn" id="btnApply">Apply</button>
-        <button class="btn" id="btnClear">Clear</button>
-      </div>
-
-      <div style="height:12px;"></div>
-      <div class="muted">
-        Tips:
-        <div>• <span class="kbd">Ctrl</span> + <span class="kbd">K</span> focuses search</div>
-        <div>• Put eBay listing URL + PayPal button URL per item for storefront buttons</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="card">
-    <h3>
-      Inventory
-      <span class="muted" id="lastSync">Last sync: —</span>
-    </h3>
-
-    <div class="tableWrap">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:110px;">Actions</th>
-            <th>Title</th>
-            <th style="width:120px;">Purchased</th>
-            <th style="width:120px;">Sold</th>
-            <th style="width:120px;">Status</th>
-            <th style="width:150px;">Category</th>
-            <th style="width:170px;">Location</th>
-            <th style="width:220px;">Make/Model</th>
-            <th style="width:190px;">Serial</th>
-            <th style="width:220px;">Images</th>
-            <th style="width:210px;">Buy Links</th>
-            <th style="width:220px;">Notes</th>
-            <th style="width:180px;">Item ID</th>
-          </tr>
-        </thead>
-        <tbody id="tbody">
-          <tr><td colspan="13" class="muted" style="padding:14px;">Connect to API to load inventory…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-</main>
-
-<div class="modal" id="modal">
-  <div class="panel">
-    <header>
-      <div class="topbar">
-        <div class="brand">
-          <div class="title" id="modalTitle">Edit Item</div>
-          <div class="pill mini" id="modalId">—</div>
-        </div>
-        <div class="actions">
-          <button class="btn" id="btnClose">Close</button>
-          <button class="btn good" id="btnSave">Save</button>
-        </div>
-      </div>
-    </header>
-
-    <div class="content">
-      <div class="grid2">
-        <div>
-          <label>Title</label>
-          <input id="e_title" placeholder="e.g., Lenovo ThinkPad X1 Carbon" />
-        </div>
-        <div class="grid2">
-          <div>
-            <label>Purchased Price</label>
-            <input id="e_purchased" placeholder="0.00" inputmode="decimal"/>
-          </div>
-          <div>
-            <label>Sold Price</label>
-            <input id="e_sold" placeholder="0.00" inputmode="decimal"/>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid3">
-        <div>
-          <label>Status</label>
-          <select id="e_status"></select>
-        </div>
-        <div>
-          <label>Category</label>
-          <select id="e_category"></select>
-        </div>
-        <div>
-          <label>Location</label>
-          <select id="e_location"></select>
-        </div>
-      </div>
-
-      <div class="grid3">
-        <div>
-          <label>Manufacturer</label>
-          <select id="e_manufacturer"></select>
-        </div>
-        <div>
-          <label>Model</label>
-          <input id="e_model" placeholder="Model name/number" />
-        </div>
-        <div>
-          <label>Serial</label>
-          <input id="e_serial" placeholder="Serial / Service Tag" />
-        </div>
-      </div>
-
-      <div class="grid2">
-        <div>
-          <label>Condition</label>
-          <select id="e_condition"></select>
-        </div>
-        <div>
-          <label>Item ID</label>
-          <input id="e_id" placeholder="Auto on save if blank" />
-          <div class="muted">Leave blank for auto-generated ID.</div>
-        </div>
-      </div>
-
-      <label>Notes</label>
-      <textarea id="e_notes" placeholder="Specs, issues, included accessories, etc."></textarea>
-
-      <label>Images (up to 5 URLs)</label>
-      <div class="grid3">
-        <input id="e_img1" placeholder="img1 URL" />
-        <input id="e_img2" placeholder="img2 URL" />
-        <input id="e_img3" placeholder="img3 URL" />
-        <input id="e_img4" placeholder="img4 URL" />
-        <input id="e_img5" placeholder="img5 URL" />
-      </div>
-
-      <div style="height:8px;"></div>
-      <div class="row">
-        <button class="btn" id="btnPreviewImg">Preview Images</button>
-        <button class="btn primary" id="btnOpenEbay">Open eBay</button>
-        <button class="btn primary" id="btnOpenPaypal">Open PayPal</button>
-      </div>
-
-      <div class="grid2" style="margin-top:10px;">
-        <div>
-          <label>eBay Item URL</label>
-          <input id="e_ebay" placeholder="https://www.ebay.com/itm/..." />
-        </div>
-        <div>
-          <label>PayPal Button URL</label>
-          <input id="e_paypal" placeholder="https://www.paypal.com/cgi-bin/webscr?cmd=..." />
-        </div>
-      </div>
-
-      <div style="height:10px;"></div>
-      <div class="muted" id="saveHint">Saved to Google Sheet via Apps Script API.</div>
-    </div>
-  </div>
-</div>
-
-<div class="lightbox" id="lightbox">
-  <img id="lightboxImg" alt="preview" />
-</div>
-
-<div class="toast" id="toast"></div>
-
 <script>
 /* =========================
    CONFIG
 ========================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbzPpX_OfEOBsvMoJhQyKYKgQ9jW7GnbEMXZChfafAC-PP10EXEDMAm0YBKaAhK6Mto/exec";
+const API_URL = "PASTE_YOUR_NEW_WEB_APP_URL_HERE";
 
 /* ========================= */
 const $ = (id)=>document.getElementById(id);
-
 const LS_KEY = "tekpak_admin_api_key_v1";
 
 let apiKey = "";
@@ -522,7 +13,6 @@ let dropdowns = {};
 let items = [];
 let editing = null;
 
-/* --- NEW: prevent overlapping requests (major source of “failed to fetch”) --- */
 let _inFlight = 0;
 let _saveLock = false;
 
@@ -540,7 +30,6 @@ function setApiStatus(ok, msg){
   el.style.borderColor = ok ? "rgba(61,255,141,.45)" : "rgba(255,77,109,.45)";
 }
 
-/* --- NEW: fetch helper with timeout + retry --- */
 async function fetchWithTimeout(url, opts={}, ms=15000){
   const ctrl = new AbortController();
   const t = setTimeout(()=>ctrl.abort(), ms);
@@ -552,17 +41,12 @@ async function fetchWithTimeout(url, opts={}, ms=15000){
   }
 }
 
-/* --- NEW: robust API call
-   - tries normal CORS POST (read response)
-   - if browser throws “Failed to fetch”, falls back to fire-and-refresh behavior for saves
-*/
 async function api(action, payload={}, {allowOpaque=false} = {}){
   const bodyObj = { action, key: apiKey, ...payload };
   const body = JSON.stringify(bodyObj);
 
   _inFlight++;
   try{
-    // Try normal read-capable POST first
     const res = await fetchWithTimeout(API_URL + "?t=" + Date.now(), {
       method: "POST",
       mode: "cors",
@@ -579,22 +63,17 @@ async function api(action, payload={}, {allowOpaque=false} = {}){
     return data;
 
   }catch(err){
-    // If this is the classic browser network error, we can still “send” the save
-    // and confirm by refreshing via GET.
     const msg = String(err && err.message ? err.message : err);
 
     if(allowOpaque){
-      try{
-        await fetchWithTimeout(API_URL + "?t=" + Date.now(), {
-          method: "POST",
-          mode: "no-cors", // fire-and-forget; avoids CORS read failures
-          headers: { "Content-Type":"text/plain;charset=utf-8" },
-          body
-        }, 20000);
-        return { ok:true, opaque:true };
-      }catch(e2){
-        throw new Error("Network error while saving.");
-      }
+      // fire-and-forget then refresh
+      await fetchWithTimeout(API_URL + "?t=" + Date.now(), {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type":"text/plain;charset=utf-8" },
+        body
+      }, 20000);
+      return { ok:true, opaque:true };
     }
 
     throw new Error(msg || "Failed to fetch");
@@ -628,6 +107,19 @@ function optList(select, values, includeBlank=false, blankLabel="Any"){
     o.value=v; o.textContent=v;
     select.appendChild(o);
   });
+}
+
+/* ✅ NEW: if current value isn't in dropdown options, inject it so edits don't blank out */
+function setSelectValueSafe(select, value){
+  const v = String(value || "").trim();
+  if(!v){ select.value = ""; return; }
+  const exists = Array.from(select.options).some(o => o.value === v);
+  if(!exists){
+    const o = document.createElement("option");
+    o.value = v; o.textContent = v + " (existing)";
+    select.appendChild(o);
+  }
+  select.value = v;
 }
 
 function getImgs(item){
@@ -755,7 +247,10 @@ function openLightbox(url){
 $("lightbox").addEventListener("click", ()=> $("lightbox").style.display="none");
 
 function openEditor(item){
-  editing = item ? {...item} : {
+  // ✅ NEW: store original id for reliable updates (even if user changes Item ID)
+  const origId = item ? (item["item id"] || "") : "";
+
+  editing = item ? {...item, _origId: origId} : {
     "item id": "",
     "location": "",
     "title": "",
@@ -770,7 +265,8 @@ function openEditor(item){
     "img1": "", "img2": "", "img3": "", "img4": "", "img5": "",
     "ebay item url": "",
     "paypal button url": "",
-    "notes": ""
+    "notes": "",
+    _origId: ""
   };
 
   $("modalTitle").textContent = item ? "Edit Item" : "New Item";
@@ -780,14 +276,15 @@ function openEditor(item){
   $("e_purchased").value = editing["purchased price"] || "0";
   $("e_sold").value = editing["sold price"] || "0";
 
-  $("e_status").value = editing["status"] || "";
-  $("e_category").value = editing["category"] || "";
-  $("e_location").value = editing["location"] || "";
+  // ✅ Safe select setting (won't blank if value isn't in dropdown list)
+  setSelectValueSafe($("e_status"), editing["status"] || "");
+  setSelectValueSafe($("e_category"), editing["category"] || "");
+  setSelectValueSafe($("e_location"), editing["location"] || "");
+  setSelectValueSafe($("e_manufacturer"), editing["manufacturer"] || "");
+  setSelectValueSafe($("e_condition"), editing["condition"] || "");
 
-  $("e_manufacturer").value = editing["manufacturer"] || "";
   $("e_model").value = editing["model"] || "";
   $("e_serial").value = editing["serial"] || "";
-  $("e_condition").value = editing["condition"] || "";
 
   $("e_id").value = editing["item id"] || "";
   $("e_notes").value = editing["notes"] || "";
@@ -823,7 +320,7 @@ function updatePreviewButtons_(){
 
 async function saveEditor(){
   if(!editing) return;
-  if(_saveLock) return; // prevent double-click saves
+  if(_saveLock) return;
   _saveLock = true;
 
   const btn = $("btnSave");
@@ -862,12 +359,16 @@ async function saveEditor(){
   };
 
   try{
-    // NEW: allowOpaque true => if POST can’t be read, it still sends, then we refresh to confirm.
-    const res = await api("upsertItem", { actor:"tekpak-admin", item: payload }, { allowOpaque:true });
+    // ✅ NEW: match_id ensures update hits the original row even if Item ID changed
+    const res = await api("upsertItem", {
+      actor:"tekpak-admin",
+      match_id: editing._origId || "",
+      item: payload
+    }, { allowOpaque:true });
 
     if(res && res.opaque){
       toast("Saved (confirmed by refresh) ✓");
-      await refresh(); // confirm changes
+      await refresh();
       closeEditor();
       render();
     } else {
@@ -892,10 +393,7 @@ async function saveEditor(){
 }
 
 async function refresh(){
-  if(!apiKey){
-    render();
-    return;
-  }
+  if(!apiKey){ render(); return; }
   try{
     const res = await api("listItems", {});
     items = res.data || [];
@@ -1032,5 +530,3 @@ $("btnExport").addEventListener("click", ()=>{
   render();
 })();
 </script>
-</body>
-</html>
