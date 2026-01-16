@@ -212,7 +212,7 @@
     padding:12px 14px;
     border-radius:16px;
     box-shadow: var(--shadow);
-    max-width: 520px;
+    max-width: 560px;
     display:none;
     z-index:80;
     white-space:pre-wrap;
@@ -281,7 +281,7 @@
       </div>
       <div>
         <div class="title">Tek-Pak Inventory Admin</div>
-        <div class="subtitle">Light theme • Google Sheets → Apps Script API</div>
+        <div class="subtitle">Light theme • GitHub Pages-safe (JSONP reads)</div>
       </div>
       <div class="pill mini" id="apiStatus">API: —</div>
     </div>
@@ -340,8 +340,11 @@
       <div class="muted">
         Tips:
         <div>• <span class="kbd">Ctrl</span> + <span class="kbd">K</span> focuses search</div>
-        <div>• Store per-item <b>eBay</b> + <b>PayPal</b> URLs for storefront buttons</div>
+        <div>• If Connect fails, it’s usually a bad key or wrong sheet name.</div>
       </div>
+
+      <div style="height:10px;"></div>
+      <div class="muted mini" id="debugBox"></div>
     </div>
   </section>
 
@@ -486,7 +489,7 @@
       </div>
 
       <div style="height:10px;"></div>
-      <div class="muted" id="saveHint">Saved to Google Sheet via Apps Script API.</div>
+      <div class="muted" id="saveHint">Saved to Google Sheet via Apps Script API (POST is no-cors, confirmed by refresh).</div>
     </div>
   </div>
 </div>
@@ -499,13 +502,13 @@
 
 <script>
 /* =========================
-   CONFIG — ONLY CHANGE THIS
+   CONFIG (READY TO GO)
 ========================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbw9bkmZWjX88V0KI6cn437t0DP-n6eLP5TLe1i_djAKMbkqfoROdsu4VbOT8p5l2dt_/exec"; // must be /exec
+const API_URL = "https://script.google.com/macros/s/AKfycbw9bkmZWjX88V0KI6cn437t0DP-n6eLP5TLe1i_djAKMbkqfoROdsu4VbOT8p5l2dt_/exec";
 
 /* ========================= */
 const $ = (id)=>document.getElementById(id);
-const LS_KEY = "tekpak_admin_api_key_light_v2";
+const LS_KEY = "tekpak_admin_api_key_light_jsonp_v1";
 
 let apiKey = "";
 let dropdowns = {};
@@ -529,78 +532,65 @@ function setApiStatus(ok, msg){
   el.textContent = ok ? "API: OK" : ("API: " + msg);
   el.style.borderColor = ok ? "rgba(22,163,74,.30)" : "rgba(220,38,38,.30)";
 }
+function debug(msg){
+  $("debugBox").textContent = msg ? String(msg) : "";
+}
 
 /* -------------------------
-   Network helpers
+   JSONP (CORS bypass)
 ------------------------- */
-async function fetchWithTimeout(url, opts={}, ms=20000){
-  const ctrl = new AbortController();
-  const t = setTimeout(()=>ctrl.abort(), ms);
-  try{
-    return await fetch(url, { ...opts, signal: ctrl.signal, cache:"no-store", redirect:"follow" });
-  } finally {
-    clearTimeout(t);
-  }
+function jsonp(action, params = {}){
+  return new Promise((resolve, reject)=>{
+    const cb = "cb_" + Math.random().toString(36).slice(2);
+    const q = new URLSearchParams({
+      action,
+      key: apiKey || "",
+      callback: cb,
+      t: Date.now(),
+      ...params
+    });
+
+    const s = document.createElement("script");
+    const timeout = setTimeout(()=>{
+      cleanup();
+      reject(new Error("JSONP timeout"));
+    }, 15000);
+
+    function cleanup(){
+      clearTimeout(timeout);
+      try{ delete window[cb]; }catch(_){}
+      if(s && s.parentNode) s.parentNode.removeChild(s);
+    }
+
+    window[cb] = (data)=>{
+      cleanup();
+      resolve(data);
+    };
+
+    s.onerror = ()=>{
+      cleanup();
+      reject(new Error("JSONP network error"));
+    };
+
+    s.src = API_URL + "?" + q.toString();
+    document.body.appendChild(s);
+  });
 }
 
-/**
- * API strategy:
- * - ALWAYS include action + key in query string (works with e.parameter)
- * - ALSO include action + key in POST body (works if server parses JSON body)
- * This makes you compatible with basically any of the common Apps Script API patterns.
- */
-function buildQS(action){
-  return `action=${encodeURIComponent(action)}&key=${encodeURIComponent(apiKey||"")}&t=${Date.now()}`;
-}
-
-async function api(action, payload={}, {allowOpaque=false} = {}){
-  const url = API_URL + "?" + buildQS(action);
-
-  // include action+key in body too, for scripts that read JSON body
-  const bodyObj = { action, key: apiKey, ...payload };
+/* -------------------------
+   Saving (POST no-cors)
+------------------------- */
+async function postNoCors(action, payload){
+  const qs = new URLSearchParams({ action, key: apiKey || "", t: Date.now() });
+  const bodyObj = { action, key: apiKey, ...(payload||{}) };
   const body = JSON.stringify(bodyObj);
 
-  try{
-    const res = await fetchWithTimeout(url, {
-      method:"POST",
-      mode:"cors",
-      headers:{ "Content-Type":"text/plain;charset=utf-8" },
-      body
-    }, 25000);
-
-    const text = await res.text();
-    let data;
-    try{ data = JSON.parse(text); }
-    catch(e){ throw new Error("Bad JSON from server:\n" + text.slice(0,300)); }
-
-    if(!data.ok) throw new Error(data.error || "API error");
-    return data;
-
-  }catch(err){
-    const msg = String(err && err.message ? err.message : err);
-    if(!allowOpaque) throw new Error(msg || "Failed to fetch");
-
-    // fallback fire-and-refresh path
-    await fetchWithTimeout(url, {
-      method:"POST",
-      mode:"no-cors",
-      headers:{ "Content-Type":"text/plain;charset=utf-8" },
-      body
-    }, 25000);
-
-    return { ok:true, opaque:true };
-  }
-}
-
-async function ping(){
-  const url = API_URL + "?" + buildQS("ping");
-  const r = await fetchWithTimeout(url, { method:"GET", mode:"cors" }, 15000);
-  const text = await r.text();
-  let j;
-  try{ j = JSON.parse(text); }
-  catch(e){ throw new Error("Bad JSON from ping:\n" + text.slice(0,300)); }
-  if(!j.ok) throw new Error(j.error || "Ping failed");
-  return j;
+  await fetch(API_URL + "?" + qs.toString(), {
+    method:"POST",
+    mode:"no-cors",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body
+  });
 }
 
 /* -------------------------
@@ -622,7 +612,7 @@ function numClean(s){
 }
 
 /* -------------------------
-   Dropdowns
+   Dropdowns + Lists
 ------------------------- */
 function optList(select, values, includeBlank=false, blankLabel="Any"){
   select.innerHTML = "";
@@ -649,8 +639,35 @@ function setSelectValueSafe(select, value){
   select.value = v;
 }
 
+async function loadDropdowns(){
+  const res = await jsonp("getDropdowns");
+  if(!res.ok) throw new Error(res.error || "getDropdowns failed");
+  dropdowns = res.data || {};
+
+  optList($("fStatus"), dropdowns.status || [], true);
+  optList($("fCategory"), dropdowns.category || [], true);
+  optList($("fLocation"), dropdowns.location || [], true);
+  optList($("fManufacturer"), dropdowns.manufacturer || [], true);
+  optList($("fCondition"), dropdowns.condition || [], true);
+
+  optList($("e_status"), dropdowns.status || [], false);
+  optList($("e_category"), dropdowns.category || [], false);
+  optList($("e_location"), dropdowns.location || [], false);
+  optList($("e_manufacturer"), dropdowns.manufacturer || [], false);
+  optList($("e_condition"), dropdowns.condition || [], false);
+}
+
+async function refresh(){
+  if(!apiKey){ render(); return; }
+  const res = await jsonp("listItems");
+  if(!res.ok) throw new Error(res.error || "listItems failed");
+  items = res.data || [];
+  $("lastSync").textContent = "Last sync: " + new Date().toLocaleString();
+  render();
+}
+
 /* -------------------------
-   Rendering
+   Render table
 ------------------------- */
 function getImgs(item){
   return [item["img1"], item["img2"], item["img3"], item["img4"], item["img5"]].filter(Boolean);
@@ -879,26 +896,13 @@ async function saveEditor(){
   };
 
   try{
-    const res = await api("upsertItem", {
-      match_id: editing._origId || "",
-      item: payload
-    }, { allowOpaque:true });
-
-    if(res && res.opaque){
-      toast("Saved ✓ (confirmed by refresh)");
-      await refresh();
-      closeEditor();
-      render();
-    } else {
-      const saved = res.data || payload;
-      const id = saved["item id"] || payload["item id"];
-      const idx = items.findIndex(x => (x["item id"]||"") === id);
-      if(idx >= 0) items[idx] = saved;
-      else items.unshift(saved);
-      toast("Saved ✓");
-      closeEditor();
-      render();
-    }
+    // Save (opaque from GitHub Pages), then confirm by refresh via JSONP
+    await postNoCors("upsertItem", { match_id: editing._origId || "", item: payload });
+    toast("Saved ✓ (confirming…)");
+    await refresh();
+    toast("Saved ✓");
+    closeEditor();
+    render();
   }catch(err){
     toast(err.message || "Save failed", false);
   }finally{
@@ -909,38 +913,8 @@ async function saveEditor(){
 }
 
 /* -------------------------
-   Data loading
+   Connect
 ------------------------- */
-async function loadDropdowns(){
-  if(!apiKey) return;
-  const res = await api("getDropdowns", {});
-  dropdowns = res.data || {};
-
-  optList($("fStatus"), dropdowns.status || [], true);
-  optList($("fCategory"), dropdowns.category || [], true);
-  optList($("fLocation"), dropdowns.location || [], true);
-  optList($("fManufacturer"), dropdowns.manufacturer || [], true);
-  optList($("fCondition"), dropdowns.condition || [], true);
-
-  optList($("e_status"), dropdowns.status || [], false);
-  optList($("e_category"), dropdowns.category || [], false);
-  optList($("e_location"), dropdowns.location || [], false);
-  optList($("e_manufacturer"), dropdowns.manufacturer || [], false);
-  optList($("e_condition"), dropdowns.condition || [], false);
-}
-
-async function refresh(){
-  if(!apiKey){ render(); return; }
-  try{
-    const res = await api("listItems", {});
-    items = res.data || [];
-    $("lastSync").textContent = "Last sync: " + new Date().toLocaleString();
-    render();
-  }catch(err){
-    toast(err.message || "Refresh failed", false);
-  }
-}
-
 async function connect(){
   apiKey = $("apiKey").value.trim();
   if(!apiKey){
@@ -950,14 +924,22 @@ async function connect(){
   localStorage.setItem(LS_KEY, apiKey);
 
   try{
-    const j = await ping();
-    setApiStatus(true, j.version ? ("OK • " + j.version) : "OK");
+    debug("Pinging…");
+    const p = await jsonp("ping");
+    if(!p.ok) throw new Error(p.error || "Ping failed");
+    setApiStatus(true, p.version ? ("OK • " + p.version) : "OK");
 
+    debug("Loading dropdowns…");
     await loadDropdowns();
+
+    debug("Loading items…");
     await refresh();
+
+    debug("");
     toast("Connected ✓");
   }catch(err){
     setApiStatus(false, "FAIL");
+    debug("Connect error: " + (err.message || err));
     toast(err.message || "Connect failed", false);
   }
 }
@@ -966,7 +948,7 @@ async function connect(){
    Wire UI
 ------------------------- */
 $("btnConnect").addEventListener("click", connect);
-$("btnRefresh").addEventListener("click", refresh);
+$("btnRefresh").addEventListener("click", ()=> refresh().catch(e=>toast(e.message,false)));
 $("btnNew").addEventListener("click", ()=> openEditor(null));
 $("btnClose").addEventListener("click", closeEditor);
 $("btnSave").addEventListener("click", saveEditor);
@@ -981,7 +963,6 @@ $("btnClear").addEventListener("click", ()=>{
   $("fCondition").value = "";
   render();
 });
-
 $("q").addEventListener("input", render);
 
 document.addEventListener("keydown", (e)=>{
@@ -994,7 +975,6 @@ document.addEventListener("keydown", (e)=>{
     if($("modal").style.display === "flex") closeEditor();
   }
 });
-
 $("modal").addEventListener("click", (e)=>{
   if(e.target === $("modal")) closeEditor();
 });
@@ -1010,7 +990,6 @@ $("btnPreviewImg").addEventListener("click", ()=>{
   if(!urls.length){ toast("No image URLs yet.", false); return; }
   openLightbox(urls[0]);
 });
-
 $("btnOpenEbay").addEventListener("click", ()=>{
   const u = $("e_ebay").value.trim();
   if(u) window.open(u, "_blank", "noopener");
@@ -1019,7 +998,6 @@ $("btnOpenPaypal").addEventListener("click", ()=>{
   const u = $("e_paypal").value.trim();
   if(u) window.open(u, "_blank", "noopener");
 });
-
 ["e_ebay","e_paypal"].forEach(id=>{
   $(id).addEventListener("input", updatePreviewButtons_);
 });
@@ -1041,15 +1019,13 @@ $("btnExport").addEventListener("click", ()=>{
   $("apiKey").value = saved;
   apiKey = saved.trim();
 
-  // status indicator (does not block UI)
-  if(API_URL && !API_URL.includes("PASTE_YOUR")){
-    ping().then(j=>{
-      setApiStatus(true, j.version ? ("OK • " + j.version) : "OK");
-    }).catch(()=>{
-      setApiStatus(false, "FAIL");
-    });
+  if(apiKey){
+    // Show status quickly; user still clicks Connect
+    jsonp("ping").then(p=>{
+      setApiStatus(!!p.ok, p.ok ? ("OK • " + (p.version||"")) : "FAIL");
+    }).catch(()=> setApiStatus(false,"FAIL"));
   } else {
-    setApiStatus(false, "SET URL");
+    setApiStatus(false, "KEY?");
   }
 
   render();
