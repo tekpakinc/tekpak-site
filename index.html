@@ -1,1 +1,154 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Tek-Pak YardOS</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <img id="logo" alt="Tek-Pak" />
+        <span class="badge">YARDOS v0.1</span>
+      </div>
+      <nav class="nav">
+        <a class="active" href="./index.html">Dashboard</a>
+        <a href="./inventory.html">Inventory</a>
+        <a href="./ebay.html">eBay Tools</a>
+        <a href="./store.html">Store</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid cols-3">
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>API Status</h2>
+            <div class="sub" id="apiSub">Checking…</div>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="kpi">
+            <div>
+              <div class="label">Server</div>
+              <div class="value" id="apiOk">—</div>
+            </div>
+            <div class="pill good" id="apiPill" style="display:none;">ONLINE</div>
+          </div>
+          <hr class="sep">
+          <div class="small" id="apiMeta"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>Retail Inventory</h2>
+            <div class="sub">Counts from Inventory_Retail</div>
+          </div>
+        </div>
+        <div class="bd" id="retailKPIs">
+          <div class="kpi"><div><div class="label">Total Items</div><div class="value" id="retTotal">—</div></div></div>
+          <div style="height:10px"></div>
+          <div class="kpi"><div><div class="label">Sellable (AVAILABLE + LISTED)</div><div class="value" id="retSell">—</div></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>Parts Yard</h2>
+            <div class="sub">Counts from Inventory_Parts</div>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="kpi"><div><div class="label">Total Items</div><div class="value" id="parTotal">—</div></div></div>
+          <div style="height:10px"></div>
+          <div class="kpi"><div><div class="label">Sellable (AVAILABLE + LISTED)</div><div class="value" id="parSell">—</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>Quick Actions</h2>
+            <div class="sub">Fast moves like a real yard counter</div>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="controls">
+            <a class="btn primary" href="./inventory.html">Open Inventory</a>
+            <a class="btn" href="./ebay.html">Generate eBay HTML</a>
+            <a class="btn" href="./store.html">Open Store View</a>
+          </div>
+          <hr class="sep">
+          <div class="small">
+            Tip: Keep Status consistent (AVAILABLE / LISTED / SOLD / PARTS_ONLY / SCRAP).  
+            We’ll enforce this later with Dropdowns + validation.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>System Notes</h2>
+            <div class="sub">What’s in v0.1</div>
+          </div>
+        </div>
+        <div class="bd">
+          <ul class="small" style="margin:0; padding-left:18px;">
+            <li>Inventory viewer (Retail + Parts)</li>
+            <li>Store view (sellable items)</li>
+            <li>eBay HTML generation + copy tool</li>
+            <li>Next: Upsert editor, role gating, label printing, timeclock, links hub</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script src="./app.js"></script>
+<script>
+(async function init(){
+  try{
+    const ping = await apiGet({ action:"ping" });
+    qs("#apiSub").textContent = "Connected";
+    qs("#apiOk").textContent = "OK";
+    qs("#apiPill").style.display = "inline-flex";
+    qs("#apiMeta").textContent = `Version: ${ping.version} • Server time: ${ping.serverTime}`;
+
+    // logo from your Settings would be nicer later; for now use the same as generator
+    qs("#logo").src = "https://raw.githubusercontent.com/tekpakinc/tekpak-site/b8d52da6ac61c4f06d12cd8b9253cb6103b8dad9/tekpak-logo.png";
+
+    const retail = await apiGet({ action:"listInventory", tab:"Inventory_Retail" });
+    const parts  = await apiGet({ action:"listInventory", tab:"Inventory_Parts" });
+
+    const retTotal = retail.items.length;
+    const retSell  = retail.items.filter(it => isSellableStatus(it.Status)).length;
+    const parTotal = parts.items.length;
+    const parSell  = parts.items.filter(it => isSellableStatus(it.Status)).length;
+
+    qs("#retTotal").textContent = retTotal;
+    qs("#retSell").textContent  = retSell;
+    qs("#parTotal").textContent = parTotal;
+    qs("#parSell").textContent  = parSell;
+
+  }catch(err){
+    qs("#apiSub").textContent = "Offline / error";
+    qs("#apiOk").textContent = "NO";
+    toast(err.message, "bad");
+  }
+})();
+</script>
+</body>
+</html>
