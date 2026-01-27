@@ -1,1 +1,144 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>YardOS — Inventory</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <img id="logo" alt="Tek-Pak" />
+        <span class="badge">Inventory</span>
+      </div>
+      <nav class="nav">
+        <a href="./index.html">Dashboard</a>
+        <a class="active" href="./inventory.html">Inventory</a>
+        <a href="./ebay.html">eBay Tools</a>
+        <a href="./store.html">Store</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <div class="hd">
+        <div>
+          <h2>Inventory Browser</h2>
+          <div class="sub">Retail + Parts, salvage-yard style</div>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="controls">
+          <select class="select" id="tabSel">
+            <option value="Inventory_Retail">Inventory_Retail</option>
+            <option value="Inventory_Parts">Inventory_Parts</option>
+          </select>
+
+          <input class="input" id="q" placeholder="Search SKU / title / serial / notes…" />
+
+          <select class="select" id="statusSel">
+            <option value="">All statuses</option>
+            <option>AVAILABLE</option>
+            <option>LISTED</option>
+            <option>SOLD</option>
+            <option>HOLD</option>
+            <option>PARTS_ONLY</option>
+            <option>SCRAP</option>
+            <option>INTAKE</option>
+            <option>TRIAGE</option>
+          </select>
+
+          <button class="btn primary" id="btnLoad">Load</button>
+          <button class="btn" id="btnExport">Copy JSON</button>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="small" id="meta">No data loaded.</div>
+
+        <div style="height:12px"></div>
+
+        <div style="max-height: 64vh; overflow:auto; border-radius:14px;">
+          <table class="table" id="tbl">
+            <thead id="thead"></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+
+        <div style="height:12px"></div>
+        <div class="small">
+          v0.1 is read-first. Next version adds in-table edits, quick status flips, and “move bay” tools.
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script src="./app.js"></script>
+<script>
+qs("#logo").src = "https://raw.githubusercontent.com/tekpakinc/tekpak-site/b8d52da6ac61c4f06d12cd8b9253cb6103b8dad9/tekpak-logo.png";
+
+let lastData = null;
+
+function renderTable(headers, items){
+  const showCols = [
+    "_row","TP_SKU","Title","Category","Brand","Model","Serial_Number",
+    "Condition_Grade","Status","Yard_Location","Qty","List_Price","eBay_ItemID"
+  ].filter(c => headers.includes(c) || c === "_row");
+
+  // header
+  qs("#thead").innerHTML = `<tr>${showCols.map(h => `<th>${escHtml(h)}</th>`).join("")}</tr>`;
+
+  // body
+  qs("#tbody").innerHTML = items.map(it => {
+    return `<tr>
+      ${showCols.map(h => {
+        const v = (h === "_row") ? it._row : (it[h] ?? "");
+        let cell = escHtml(v);
+        if (h === "Status"){
+          const st = String(v||"").toUpperCase();
+          const cls = isSellableStatus(st) ? "good" : (st === "SCRAP" || st==="SOLD" ? "bad" : "warn");
+          cell = `<span class="pill ${cls}">${escHtml(st || "—")}</span>`;
+        }
+        if (h === "TP_SKU") cell = `<span class="mono">${cell}</span>`;
+        return `<td class="${h==='TP_SKU'||h==='Serial_Number'?'mono':''}">${cell}</td>`;
+      }).join("")}
+    </tr>`;
+  }).join("");
+
+  qs("#meta").textContent = `Loaded ${items.length} item(s). Showing columns: ${showCols.join(", ")}`;
+}
+
+async function load(){
+  const tab = qs("#tabSel").value;
+  const q = qs("#q").value.trim();
+  const status = qs("#statusSel").value.trim();
+
+  try{
+    const data = await apiGet({ action:"listInventory", tab, q, status });
+    lastData = data;
+    renderTable(data.headers, data.items);
+    toast("Inventory loaded.");
+  }catch(err){
+    toast(err.message, "bad");
+  }
+}
+
+qs("#btnLoad").addEventListener("click", load);
+qs("#q").addEventListener("keydown", (e)=>{ if(e.key==="Enter") load(); });
+
+qs("#btnExport").addEventListener("click", async ()=>{
+  if (!lastData) return toast("Load inventory first.", "bad");
+  const txt = prettyJson(lastData.items);
+  await navigator.clipboard.writeText(txt);
+  toast("Copied items JSON to clipboard.");
+});
+
+// auto-load retail
+load();
+</script>
+</body>
+</html>
