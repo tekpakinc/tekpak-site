@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,7 +11,7 @@
     <div class="wrap">
       <div class="brand">
         <img id="logo" alt="Tek-Pak" />
-        <span class="badge">Inventory</span>
+        <span class="badge">Inventory v1</span>
       </div>
       <nav class="nav">
         <a href="./index.html">Dashboard</a>
@@ -27,10 +26,17 @@
     <div class="card">
       <div class="hd">
         <div>
-          <h2>Inventory Browser</h2>
-          <div class="sub">Retail + Parts, salvage-yard style</div>
+          <h2>Inventory Manager</h2>
+          <div class="sub">Click a row to open the item card. Admin PIN required to edit.</div>
+        </div>
+        <div class="controls">
+          <button class="btn" id="btnAdmin">
+            Admin: <span id="adminState">LOCKED</span>
+          </button>
+          <button class="btn bad" id="btnLock">Lock</button>
         </div>
       </div>
+
       <div class="bd">
         <div class="controls">
           <select class="select" id="tabSel">
@@ -53,16 +59,15 @@
           </select>
 
           <button class="btn primary" id="btnLoad">Load</button>
-          <button class="btn" id="btnExport">Copy JSON</button>
+          <button class="btn good" id="btnAdd">Add Item</button>
         </div>
 
         <div style="height:12px"></div>
-
-        <div class="small" id="meta">No data loaded.</div>
+        <div class="small" id="meta">Loading…</div>
 
         <div style="height:12px"></div>
 
-        <div style="max-height: 64vh; overflow:auto; border-radius:14px;">
+        <div class="tableWrap">
           <table class="table" id="tbl">
             <thead id="thead"></thead>
             <tbody id="tbody"></tbody>
@@ -71,74 +76,363 @@
 
         <div style="height:12px"></div>
         <div class="small">
-          v0.1 is read-first. Next version adds in-table edits, quick status flips, and “move bay” tools.
+          Tip: “LISTED” counts as available everywhere. Status buttons live in the item card.
         </div>
       </div>
     </div>
   </main>
 
+  <!-- Drawer -->
+  <div class="drawerBack" id="drawerBack">
+    <div class="drawer" role="dialog" aria-modal="true">
+      <div class="dhd">
+        <div>
+          <h3 id="dTitle">Item</h3>
+          <div class="small" id="dSub"></div>
+        </div>
+        <div class="controls">
+          <button class="btn" id="btnClose">Close</button>
+        </div>
+      </div>
+      <div class="dbd">
+        <div class="controls" style="margin-bottom:10px;">
+          <button class="btn" id="btnRefreshRow">Refresh</button>
+          <button class="btn primary" id="btnSave">Save</button>
+        </div>
+
+        <div class="controls" style="margin-bottom:10px;">
+          <button class="btn good" data-status="AVAILABLE">AVAILABLE</button>
+          <button class="btn good" data-status="LISTED">LISTED</button>
+          <button class="btn" data-status="HOLD">HOLD</button>
+          <button class="btn bad" data-status="SOLD">SOLD</button>
+          <button class="btn bad" data-status="SCRAP">SCRAP</button>
+          <button class="btn" data-status="PARTS_ONLY">PARTS_ONLY</button>
+        </div>
+
+        <div class="row2">
+          <div>
+            <div class="small">TP_SKU</div>
+            <input class="input mono" id="f_sku" disabled />
+          </div>
+          <div>
+            <div class="small">Status</div>
+            <input class="input" id="f_status" />
+          </div>
+
+          <div>
+            <div class="small">Title</div>
+            <input class="input" id="f_title" />
+          </div>
+          <div>
+            <div class="small">Yard_Location</div>
+            <input class="input mono" id="f_loc" placeholder="ROW-A / BAY-03 / SHELF-2 / BIN-04" />
+          </div>
+
+          <div>
+            <div class="small">Category</div>
+            <input class="input" id="f_cat" />
+          </div>
+          <div>
+            <div class="small">Brand</div>
+            <input class="input" id="f_brand" />
+          </div>
+
+          <div>
+            <div class="small">Model</div>
+            <input class="input" id="f_model" />
+          </div>
+          <div>
+            <div class="small">Serial_Number</div>
+            <input class="input mono" id="f_sn" />
+          </div>
+
+          <div>
+            <div class="small">Qty</div>
+            <input class="input" id="f_qty" />
+          </div>
+          <div>
+            <div class="small">List_Price</div>
+            <input class="input" id="f_price" />
+          </div>
+        </div>
+
+        <hr class="sep">
+
+        <div>
+          <div class="small">Known_Issues</div>
+          <textarea class="input" id="f_issues" style="width:100%; min-height:90px;"></textarea>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div>
+          <div class="small">Included</div>
+          <textarea class="input" id="f_included" style="width:100%; min-height:90px;"></textarea>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div>
+          <div class="small">Notes_Internal</div>
+          <textarea class="input" id="f_notes" style="width:100%; min-height:90px;"></textarea>
+        </div>
+
+        <hr class="sep">
+
+        <div class="controls">
+          <button class="btn" id="btnGenHtml">Generate eBay HTML</button>
+          <button class="btn" id="btnCopyHtml">Copy eBay HTML</button>
+        </div>
+        <div style="height:10px"></div>
+        <textarea class="input mono" id="f_html" style="width:100%; min-height:180px;" placeholder="eBay_HTML…"></textarea>
+
+        <div style="height:14px"></div>
+        <div class="small">Edits are logged into your `Audit_Log` sheet.</div>
+      </div>
+    </div>
+  </div>
+
 <script src="./app.js"></script>
 <script>
-qs("#logo").src = "https://raw.githubusercontent.com/tekpakinc/tekpak-site/b8d52da6ac61c4f06d12cd8b9253cb6103b8dad9/tekpak-logo.png";
+let CONFIG = { companyName:"Tek-Pak Inc.", logoUrl:"" };
+let HEADERS = [];
+let ITEMS = [];
+let ACTIVE = { tab:"Inventory_Retail", row:0, item:null };
 
-let lastData = null;
+function adminUiRefresh(){
+  qs("#adminState").textContent = adminIsUnlocked() ? "UNLOCKED" : "LOCKED";
+}
+
+function statusPill(status){
+  const st = String(status||"").toUpperCase();
+  const cls = isSellableStatus(st) ? "good" : (st==="SCRAP"||st==="SOLD" ? "bad" : "warn");
+  return `<span class="pill ${cls}">${escHtml(st || "—")}</span>`;
+}
 
 function renderTable(headers, items){
   const showCols = [
     "_row","TP_SKU","Title","Category","Brand","Model","Serial_Number",
     "Condition_Grade","Status","Yard_Location","Qty","List_Price","eBay_ItemID"
-  ].filter(c => headers.includes(c) || c === "_row");
+  ];
 
-  // header
   qs("#thead").innerHTML = `<tr>${showCols.map(h => `<th>${escHtml(h)}</th>`).join("")}</tr>`;
-
-  // body
   qs("#tbody").innerHTML = items.map(it => {
-    return `<tr>
+    return `<tr data-row="${it._row}">
       ${showCols.map(h => {
         const v = (h === "_row") ? it._row : (it[h] ?? "");
-        let cell = escHtml(v);
-        if (h === "Status"){
-          const st = String(v||"").toUpperCase();
-          const cls = isSellableStatus(st) ? "good" : (st === "SCRAP" || st==="SOLD" ? "bad" : "warn");
-          cell = `<span class="pill ${cls}">${escHtml(st || "—")}</span>`;
-        }
-        if (h === "TP_SKU") cell = `<span class="mono">${cell}</span>`;
-        return `<td class="${h==='TP_SKU'||h==='Serial_Number'?'mono':''}">${cell}</td>`;
+        if (h === "Status") return `<td>${statusPill(v)}</td>`;
+        if (h === "TP_SKU" || h === "Serial_Number" || h === "Yard_Location") return `<td class="mono">${escHtml(v)}</td>`;
+        return `<td>${escHtml(v)}</td>`;
       }).join("")}
     </tr>`;
   }).join("");
 
-  qs("#meta").textContent = `Loaded ${items.length} item(s). Showing columns: ${showCols.join(", ")}`;
+  qs("#meta").textContent = `Loaded ${items.length} item(s) from ${ACTIVE.tab}. Click a row for the item card.`;
 }
 
-async function load(){
-  const tab = qs("#tabSel").value;
+async function loadInventory(){
+  ACTIVE.tab = qs("#tabSel").value;
   const q = qs("#q").value.trim();
   const status = qs("#statusSel").value.trim();
 
   try{
-    const data = await apiGet({ action:"listInventory", tab, q, status });
-    lastData = data;
-    renderTable(data.headers, data.items);
+    const data = await apiGet({ action:"listInventory", tab: ACTIVE.tab, q, status });
+    HEADERS = data.headers || [];
+    ITEMS = data.items || [];
+    renderTable(HEADERS, ITEMS);
     toast("Inventory loaded.");
   }catch(err){
     toast(err.message, "bad");
   }
 }
 
-qs("#btnLoad").addEventListener("click", load);
-qs("#q").addEventListener("keydown", (e)=>{ if(e.key==="Enter") load(); });
+function openDrawer(){
+  qs("#drawerBack").classList.add("show");
+}
+function closeDrawer(){
+  qs("#drawerBack").classList.remove("show");
+  ACTIVE.row = 0;
+  ACTIVE.item = null;
+}
 
-qs("#btnExport").addEventListener("click", async ()=>{
-  if (!lastData) return toast("Load inventory first.", "bad");
-  const txt = prettyJson(lastData.items);
-  await navigator.clipboard.writeText(txt);
-  toast("Copied items JSON to clipboard.");
+async function loadRow(tab, row){
+  // uses getRow endpoint from your rebuilt Code.gs
+  const res = await apiGet({ action:"getRow", tab, row });
+  return res.item;
+}
+
+function fillDrawer(item){
+  ACTIVE.item = item;
+
+  qs("#dTitle").textContent = item.Title || "Item";
+  qs("#dSub").textContent = `Row ${item._row} • ${item.TP_SKU || "N/A"} • ${CONFIG.companyName}`;
+
+  qs("#f_sku").value = item.TP_SKU || "";
+  qs("#f_status").value = item.Status || "";
+  qs("#f_title").value = item.Title || "";
+  qs("#f_loc").value = item.Yard_Location || "";
+  qs("#f_cat").value = item.Category || "";
+  qs("#f_brand").value = item.Brand || "";
+  qs("#f_model").value = item.Model || "";
+  qs("#f_sn").value = item.Serial_Number || "";
+  qs("#f_qty").value = item.Qty ?? "";
+  qs("#f_price").value = item.List_Price ?? "";
+  qs("#f_issues").value = item.Known_Issues || "";
+  qs("#f_included").value = item.Included || "";
+  qs("#f_notes").value = item.Notes_Internal || "";
+  qs("#f_html").value = item.eBay_HTML || "";
+}
+
+function collectDrawerPayload(){
+  return {
+    _row: ACTIVE.row,
+    TP_SKU: qs("#f_sku").value.trim(),
+    Status: qs("#f_status").value.trim(),
+    Title: qs("#f_title").value.trim(),
+    Yard_Location: qs("#f_loc").value.trim(),
+    Category: qs("#f_cat").value.trim(),
+    Brand: qs("#f_brand").value.trim(),
+    Model: qs("#f_model").value.trim(),
+    Serial_Number: qs("#f_sn").value.trim(),
+    Qty: qs("#f_qty").value,
+    List_Price: qs("#f_price").value,
+    Known_Issues: qs("#f_issues").value,
+    Included: qs("#f_included").value,
+    Notes_Internal: qs("#f_notes").value,
+    eBay_HTML: qs("#f_html").value
+  };
+}
+
+async function saveItem(){
+  if (!requireAdmin()) return;
+  const payload = collectDrawerPayload();
+
+  try{
+    // JSONP GET upsert: payload must be JSON string
+    const res = await apiGet({
+      action:"upsertInventory",
+      tab: ACTIVE.tab,
+      user: "yardos-web",
+      payload: JSON.stringify(payload)
+    });
+    toast(`Saved ${res.TP_SKU || ""}.`);
+    await loadInventory();
+    // reload row to refresh drawer
+    const fresh = await loadRow(ACTIVE.tab, ACTIVE.row);
+    fillDrawer(fresh);
+  }catch(err){
+    toast(err.message, "bad");
+  }
+}
+
+async function generateHtml(){
+  if (!ACTIVE.row) return;
+  if (!requireAdmin()) return;
+  try{
+    const res = await apiGet({ action:"generateEbayHtml", tab: ACTIVE.tab, row: ACTIVE.row, user:"yardos-web" });
+    toast(`Generated eBay HTML (${res.bytes} bytes).`);
+    const fresh = await loadRow(ACTIVE.tab, ACTIVE.row);
+    fillDrawer(fresh);
+  }catch(err){
+    toast(err.message, "bad");
+  }
+}
+
+async function addItemWizard(){
+  if (!requireAdmin()) return;
+
+  const title = prompt("Title for new item?");
+  if (!title) return;
+
+  const payload = {
+    Title: title,
+    Status: "INTAKE",
+    Yard_Location: "ROW-A / BAY-03 / SHELF-2 / BIN-04",
+    Qty: 1,
+  };
+
+  try{
+    const res = await apiGet({
+      action:"upsertInventory",
+      tab: ACTIVE.tab,
+      user: "yardos-web",
+      payload: JSON.stringify(payload)
+    });
+    toast(`Created ${res.TP_SKU}.`);
+    await loadInventory();
+    // open the created row by finding it via SKU
+    const found = await apiGet({ action:"findBySku", tab: ACTIVE.tab, sku: res.TP_SKU });
+    if (found.found){
+      ACTIVE.row = found.row;
+      const item = found.item;
+      fillDrawer(item);
+      openDrawer();
+    }
+  }catch(err){
+    toast(err.message, "bad");
+  }
+}
+
+// events
+qs("#btnLoad").addEventListener("click", loadInventory);
+qs("#q").addEventListener("keydown", (e)=>{ if(e.key==="Enter") loadInventory(); });
+
+qs("#btnAdmin").addEventListener("click", ()=>{ adminUnlock(); adminUiRefresh(); });
+qs("#btnLock").addEventListener("click", ()=>{ adminLock(); adminUiRefresh(); });
+
+qs("#tbody").addEventListener("click", async (e)=>{
+  const tr = e.target.closest("tr");
+  if (!tr) return;
+  const row = Number(tr.getAttribute("data-row") || "0");
+  if (!row) return;
+
+  try{
+    ACTIVE.row = row;
+    const item = await loadRow(ACTIVE.tab, row);
+    fillDrawer(item);
+    openDrawer();
+  }catch(err){
+    toast(err.message, "bad");
+  }
 });
 
-// auto-load retail
-load();
+qs("#btnClose").addEventListener("click", closeDrawer);
+qs("#drawerBack").addEventListener("click", (e)=>{ if(e.target.id==="drawerBack") closeDrawer(); });
+
+qs("#btnRefreshRow").addEventListener("click", async ()=>{
+  if (!ACTIVE.row) return;
+  try{
+    const item = await loadRow(ACTIVE.tab, ACTIVE.row);
+    fillDrawer(item);
+    toast("Refreshed.");
+  }catch(err){ toast(err.message,"bad"); }
+});
+
+qs("#btnSave").addEventListener("click", saveItem);
+qs("#btnGenHtml").addEventListener("click", generateHtml);
+
+qs("#btnCopyHtml").addEventListener("click", async ()=>{
+  const txt = qs("#f_html").value.trim();
+  if (!txt) return toast("No HTML to copy.", "bad");
+  await navigator.clipboard.writeText(txt);
+  toast("Copied eBay HTML.");
+});
+
+qsa("button[data-status]").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    qs("#f_status").value = btn.getAttribute("data-status");
+  });
+});
+
+qs("#btnAdd").addEventListener("click", addItemWizard);
+
+// init
+(async function init(){
+  CONFIG = await loadConfig();
+  setLogo(qs("#logo"), CONFIG.logoUrl);
+  adminUiRefresh();
+  await loadInventory();
+})();
 </script>
 </body>
 </html>
