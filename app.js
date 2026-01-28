@@ -1,8 +1,13 @@
+// YardOS v1 (DROP 1) — JSONP-first (CORS-proof) + Admin gate
 
-// YardOS v0.1 — shared helpers
 const YARDOS = {
   API_BASE: "https://script.google.com/macros/s/AKfycbwRXMtWXFH35aPQbjnfeA3gvQXnaSgtTZ4tgMiI5Psc6fAFmwj9-WdYG4L04qf0Rj5J/exec",
-  API_KEY: "", // optional: set if you added API_KEY in Settings tab
+  API_KEY: "",
+
+  // Admin PIN is a UI lock (not bank-vault security).
+  // For real protection, set Settings!API_KEY and also set YARDOS.API_KEY above.
+  ADMIN_PIN: "1234", // <-- change this to your desired PIN
+  ADMIN_SESSION_MIN: 120, // how long admin stays unlocked
 };
 
 function qs(sel, el=document){ return el.querySelector(sel); }
@@ -15,36 +20,43 @@ function buildUrl(params = {}) {
     u.searchParams.set(k, String(v));
   });
   if (YARDOS.API_KEY) u.searchParams.set("key", YARDOS.API_KEY);
-  // JSONP not needed for modern fetch since GAS returns CORS-friendly responses for webapp
   return u.toString();
 }
 
-async function apiGet(params) {
-  const url = buildUrl(params);
-  const res = await fetch(url, { method: "GET" });
-  const txt = await res.text();
-  let data;
-  try { data = JSON.parse(txt); }
-  catch(e) { throw new Error(`API parse error. Response: ${txt.slice(0,300)}`); }
-  if (!data.ok) throw new Error(data.error || "API error");
-  return data;
-}
+// ---------- JSONP (GET) ----------
+function apiGet(params){
+  return new Promise((resolve, reject) => {
+    const cbName = "yardos_cb_" + Math.random().toString(36).slice(2);
+    const url = buildUrl({ ...params, callback: cbName });
 
-async function apiPost(action, payload, extraParams={}) {
-  // POST to GAS often works, but sometimes CORS can be picky depending on deployment.
-  // We'll use GET with payload as a fallback if needed later.
-  const url = buildUrl({ action, ...extraParams });
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type":"application/json" },
-    body: JSON.stringify(payload),
+    const script = document.createElement("script");
+    script.src = url;
+    script.async = true;
+
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error("API timeout (JSONP)."));
+    }, 12000);
+
+    function cleanup(){
+      clearTimeout(timeout);
+      delete window[cbName];
+      script.remove();
+    }
+
+    window[cbName] = (data) => {
+      cleanup();
+      if (!data || data.ok !== true) reject(new Error((data && data.error) ? data.error : "API error"));
+      else resolve(data);
+    };
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("API load error (JSONP)."));
+    };
+
+    document.head.appendChild(script);
   });
-  const txt = await res.text();
-  let data;
-  try { data = JSON.parse(txt); }
-  catch(e) { throw new Error(`API parse error. Response: ${txt.slice(0,300)}`); }
-  if (!data.ok) throw new Error(data.error || "API error");
-  return data;
 }
 
 function toast(msg, kind="ok"){
@@ -66,10 +78,52 @@ function escHtml(s){
 
 function isSellableStatus(status){
   const s = String(status||"").toUpperCase();
-  // Your rule: LISTED = available
-  return ["AVAILABLE","LISTED"].includes(s);
+  return ["AVAILABLE","LISTED"].includes(s); // your rule
 }
 
-function prettyJson(obj){
-  return JSON.stringify(obj, null, 2);
+// ---------- Admin Gate ----------
+const ADMIN_KEY = "yardos_admin_until";
+
+function adminIsUnlocked(){
+  const until = Number(localStorage.getItem(ADMIN_KEY) || "0");
+  return Date.now() < until;
+}
+
+function adminUnlock(){
+  const pin = prompt("Admin PIN:");
+  if (pin === null) return false;
+  if (String(pin).trim() !== String(YARDOS.ADMIN_PIN)) {
+    toast("Wrong PIN.", "bad");
+    return false;
+  }
+  const until = Date.now() + (YARDOS.ADMIN_SESSION_MIN * 60 * 1000);
+  localStorage.setItem(ADMIN_KEY, String(until));
+  toast("Admin unlocked.");
+  return true;
+}
+
+function adminLock(){
+  localStorage.removeItem(ADMIN_KEY);
+  toast("Admin locked.");
+}
+
+function requireAdmin(){
+  if (adminIsUnlocked()) return true;
+  return adminUnlock();
+}
+
+// ---------- Config (logo / company name) ----------
+async function loadConfig(){
+  try{
+    const cfg = await apiGet({ action:"getConfig" });
+    return cfg;
+  }catch(e){
+    return { companyName:"Tek-Pak Inc.", logoUrl:"" };
+  }
+}
+
+function setLogo(imgEl, logoUrl){
+  if (!imgEl) return;
+  if (logoUrl) imgEl.src = logoUrl;
+  else imgEl.style.display = "none";
 }
