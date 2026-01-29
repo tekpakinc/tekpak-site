@@ -1,1 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>YardFlow Command Center — PROCESSING</title>
+<style>
+  /* Same styling as intake (kept identical for consistent “system feel”) */
+  :root{--bg:#070b14;--panel:#0f1727;--panel2:#0b1220;--text:#eaf1ff;--muted:#9fb3d1;--line:rgba(255,255,255,.10);--accent:#3aa0ff;--good:#3dff8d;--warn:#ffd166;--bad:#ff4d6d;--r:18px;--r2:22px;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,Roboto,Arial;--shadow:0 22px 60px rgba(0,0,0,.45)}
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--text);font-family:var(--sans);background:radial-gradient(900px 600px at 15% -10%, rgba(58,160,255,.20), transparent 60%),radial-gradient(900px 600px at 95% 10%, rgba(255,209,102,.10), transparent 55%),var(--bg)}
+  header{position:sticky;top:0;z-index:10;padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg, rgba(15,23,39,.92), rgba(7,11,20,.70));backdrop-filter:blur(10px);display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:38px;height:38px;border-radius:14px;background:linear-gradient(135deg, rgba(255,209,102,.90), rgba(58,160,255,.55));box-shadow:0 14px 40px rgba(0,0,0,.45)}
+  .title{font-weight:900}
+  .sub{color:var(--muted);font-size:12px;line-height:1.2}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+  .chip{font-size:12px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);text-decoration:none;font-weight:800}
+  .chip.active{border-color:rgba(255,209,102,.65);box-shadow:0 0 0 2px rgba(255,209,102,.12) inset}
+  .wrap{display:grid;grid-template-columns:360px 1fr;gap:14px;padding:14px;max-width:1500px;margin:0 auto}
+  @media (max-width:1040px){.wrap{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow);overflow:hidden}
+  .card h3{margin:0;padding:12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
+  .body{padding:12px}
+  .gridKpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media (max-width:1040px){.gridKpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi{border:1px solid var(--line);border-radius:18px;padding:10px;background:rgba(0,0,0,.20)}
+  .kpi .label{color:var(--muted);font-size:11px}
+  .kpi .value{font-weight:950;font-size:18px;margin-top:4px}
+  .kpi .mini{color:var(--muted);font-size:11px;margin-top:2px}
+  .lab{font-size:12px;color:var(--muted);margin:10px 0 6px}
+  input,select,textarea{width:100%;padding:10px 10px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--text);outline:none}
+  textarea{min-height:96px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .btns{display:flex;gap:10px;flex-wrap:wrap}
+  button{border:none;border-radius:14px;padding:10px 12px;cursor:pointer;background:rgba(255,255,255,.06);color:var(--text);font-weight:900;border:1px solid var(--line)}
+  button.primary{background:linear-gradient(135deg, rgba(58,160,255,.95), rgba(58,160,255,.55));border-color:rgba(58,160,255,.55)}
+  button.good{background:linear-gradient(135deg, rgba(61,255,141,.85), rgba(61,255,141,.35));border-color:rgba(61,255,141,.55);color:#06210f}
+  button.warn{background:linear-gradient(135deg, rgba(255,209,102,.9), rgba(255,209,102,.35));border-color:rgba(255,209,102,.55);color:#241600}
+  .list{display:flex;flex-direction:column;gap:8px;max-height:62vh;overflow:auto;padding-right:6px}
+  .item{padding:10px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer}
+  .item .top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .tp{font-family:var(--mono);font-weight:950;font-size:12px}
+  .pill{font-size:11px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .meta{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.25}
+  .divider{height:1px;background:var(--line);margin:12px 0}
+  .hint{color:var(--muted);font-size:12px;line-height:1.35}
+  .rightHead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .statusLine{color:var(--muted);font-size:12px}
+  .toast{position:fixed;left:14px;bottom:14px;background:rgba(0,0,0,.65);border:1px solid var(--line);padding:10px 12px;border-radius:14px;display:none}
+  .affix{display:flex;align-items:center;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(0,0,0,.25)}
+  .affix input{border:none;border-radius:0;background:transparent}
+  .affix span{padding:0 10px;color:var(--muted);font-size:12px;border-left:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo"></div>
+    <div>
+      <div class="title">YardFlow Command Center</div>
+      <div class="sub"><b>PROCESSING</b> • Diag + Spec Capture • UI-only mock</div>
+    </div>
+  </div>
 
+  <div class="nav">
+    <a class="chip" href="./intake.html">Intake</a>
+    <a class="chip active" href="./processing.html">Processing</a>
+    <a class="chip" href="./staging.html">Staging</a>
+    <a class="chip" href="./logistics.html">Logistics</a>
+    <button class="primary" onclick="newItem()">+ New TP</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h3>PROCESSING Queue <span class="pill" id="queueCount">0</span></h3>
+    <div class="body">
+      <div class="lab">Search</div>
+      <input id="q" placeholder="TP, CPU, series…" oninput="renderList()" />
+
+      <div class="row">
+        <div>
+          <div class="lab">Filter: Condition</div>
+          <select id="filtCondition" onchange="renderList()"></select>
+        </div>
+        <div>
+          <div class="lab">Sort</div>
+          <select id="sortBy" onchange="renderList()">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="tp">TP#</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="list" id="list"></div>
+
+      <div class="divider"></div>
+      <div class="hint"><b>Shortcuts:</b> <span style="font-family:var(--mono)">Enter</span> save • <span style="font-family:var(--mono)">Ctrl</span>+<span style="font-family:var(--mono)">←</span> back • <span style="font-family:var(--mono)">Ctrl</span>+<span style="font-family:var(--mono)">→</span> next</div>
+    </div>
+  </div>
+
+  <div style="display:grid; gap:14px">
+    <div class="card">
+      <h3>Today’s Snapshot</h3>
+      <div class="body">
+        <div class="gridKpi">
+          <div class="kpi"><div class="label">In Processing</div><div class="value" id="kpiQueue">0</div><div class="mini">items waiting</div></div>
+          <div class="kpi"><div class="label">Missing CPU</div><div class="value" id="kpiCPU">0</div><div class="mini">quick fix</div></div>
+          <div class="kpi"><div class="label">Missing RAM/SSD</div><div class="value" id="kpiMem">0</div><div class="mini">GB fields</div></div>
+          <div class="kpi"><div class="label">Most Common</div><div class="value" id="kpiCommon">—</div><div class="mini">condition</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><div class="rightHead"><span>Processing Form</span><span class="statusLine" id="statusLine">—</span></div></h3>
+      <div class="body" id="detail"><div class="hint">Select an item from the queue.</div></div>
+    </div>
+
+    <div class="card">
+      <h3>PROCESSING Checklist</h3>
+      <div class="body">
+        <div class="hint">
+          Capture specs like you’re writing the future listing:
+          <br>• Screen size, CPU, RAM, Storage
+          <br>• GPU/Series if relevant
+          <br>• Features + connectivity + condition
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = "yardflow_commandcenter_db_v1";
+const STAGE = "PROCESSING";
+const NEXT_STAGE = "STAGING";
+const PREV_STAGE = "INTAKE";
+
+const DROPDOWNS = {
+  Connectivity: ["Wi-Fi","Wi-Fi + BT","Ethernet","LTE/5G","Other"],
+  Condition: ["A","B","C","Parts/Repair"]
+};
+
+let db = [];
+let currentTP = null;
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  setTimeout(()=> t.style.display="none", 1600);
+}
+function loadDB(){ db = JSON.parse(localStorage.getItem(KEY) || "[]"); }
+function saveDB(){ localStorage.setItem(KEY, JSON.stringify(db)); }
+function escapeHtml(s){ return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
+function escapeAttr(s){ return escapeHtml(s).replaceAll("'","&#39;");}
+function uniq(list){ return [...new Set(list.filter(Boolean))]; }
+
+function affix(id, value, placeholder, suffix){
+  return `<div class="affix"><input id="${id}" value="${escapeAttr(value||"")}" placeholder="${escapeAttr(placeholder)}"/><span>${escapeHtml(suffix)}</span></div>`;
+}
+function selectHTML(list, selected){
+  return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
+}
+
+function setFilterOptions(){
+  const sel = document.getElementById("filtCondition");
+  const values = uniq(db.filter(x=>x.Stage===STAGE).map(x=>x.Condition));
+  sel.innerHTML = `<option value="">All</option>` + values.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
+}
+
+function renderKPIs(){
+  const queue = db.filter(x=>x.Stage===STAGE);
+  document.getElementById("kpiQueue").textContent = queue.length;
+
+  const missingCPU = queue.filter(x => !(x.CPU||"").trim()).length;
+  document.getElementById("kpiCPU").textContent = missingCPU;
+
+  const missingMem = queue.filter(x => !(x.MemoryGB||"").trim() || !(x.StorageGB||"").trim()).length;
+  document.getElementById("kpiMem").textContent = missingMem;
+
+  const conds = queue.map(x=>x.Condition).filter(Boolean);
+  if (!conds.length) document.getElementById("kpiCommon").textContent = "—";
+  else {
+    const counts = conds.reduce((m,c)=>(m[c]=(m[c]||0)+1,m),{});
+    const top = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+    document.getElementById("kpiCommon").textContent = top;
+  }
+}
+
+function renderList(){
+  const q = (document.getElementById("q").value || "").toLowerCase();
+  const cond = document.getElementById("filtCondition").value || "";
+  const sortBy = document.getElementById("sortBy").value;
+
+  let list = db.filter(x=>x.Stage===STAGE);
+  if (cond) list = list.filter(x => (x.Condition||"") === cond);
+  if (q){
+    list = list.filter(x=>{
+      const hay = [x.TP,x.CPU,x.Series,x.GPU,x.ScreenSizeIn,x.MemoryGB,x.StorageGB].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  if (sortBy==="newest") list.sort((a,b)=>(b.CreatedAt||0)-(a.CreatedAt||0));
+  if (sortBy==="oldest") list.sort((a,b)=>(a.CreatedAt||0)-(b.CreatedAt||0));
+  if (sortBy==="tp") list.sort((a,b)=>(a.TP||"").localeCompare(b.TP||""));
+
+  document.getElementById("queueCount").textContent = list.length;
+
+  const el = document.getElementById("list");
+  el.innerHTML = "";
+
+  if (!list.length){
+    el.innerHTML = `<div class="hint">No items in ${STAGE}.</div>`;
+    setFilterOptions(); renderKPIs();
+    return;
+  }
+
+  list.forEach(it=>{
+    const d = document.createElement("div");
+    d.className = "item";
+    d.onclick = ()=> openItem(it.TP);
+    const needs = (!it.CPU || !it.MemoryGB || !it.StorageGB) ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs specs</span>` : "";
+    d.innerHTML = `
+      <div class="top">
+        <div class="tp">${escapeHtml(it.TP)}</div>
+        <div class="pill">${escapeHtml(it.Condition || "—")}</div>
+      </div>
+      <div class="meta">
+        CPU: <b>${escapeHtml(it.CPU || "—")}</b>${needs}<br>
+        ${it.ScreenSizeIn?`${escapeHtml(it.ScreenSizeIn)}in`:""} ${it.MemoryGB?`• ${escapeHtml(it.MemoryGB)}GB`:""} ${it.StorageGB?`• ${escapeHtml(it.StorageGB)}GB`:""}
+      </div>
+    `;
+    el.appendChild(d);
+  });
+
+  setFilterOptions();
+  renderKPIs();
+}
+
+function openItem(tp){
+  currentTP = tp;
+  const it = db.find(x=>x.TP===tp);
+  if (!it) return;
+
+  document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
+
+  document.getElementById("detail").innerHTML = `
+    <div class="row">
+      <div>
+        <div class="lab">Screen Size</div>
+        ${affix("f_ScreenSizeIn", it.ScreenSizeIn, "e.g., 15.6", "in")}
+      </div>
+      <div>
+        <div class="lab">CPU</div>
+        <input id="f_CPU" value="${escapeAttr(it.CPU||"")}" placeholder="e.g., i7-8650U" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Storage</div>
+        ${affix("f_StorageGB", it.StorageGB, "e.g., 256", "GB")}
+      </div>
+      <div>
+        <div class="lab">Memory</div>
+        ${affix("f_MemoryGB", it.MemoryGB, "e.g., 16", "GB")}
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">GPU</div>
+        <input id="f_GPU" value="${escapeAttr(it.GPU||"")}" placeholder="e.g., Intel UHD / RTX 3050" />
+      </div>
+      <div>
+        <div class="lab">Series</div>
+        <input id="f_Series" value="${escapeAttr(it.Series||"")}" placeholder="e.g., ThinkPad T / Latitude" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Connectivity</div>
+        <select id="f_Connectivity">${selectHTML(DROPDOWNS.Connectivity, it.Connectivity)}</select>
+      </div>
+      <div>
+        <div class="lab">Condition</div>
+        <select id="f_Condition">${selectHTML(DROPDOWNS.Condition, it.Condition)}</select>
+      </div>
+    </div>
+
+    <div class="lab">Features</div>
+    <textarea id="f_Features" placeholder="touchscreen, backlit keyboard, fingerprint…">${escapeHtml(it.Features||"")}</textarea>
+
+    <div class="divider"></div>
+    <div class="btns">
+      <button class="good" onclick="save()">Save</button>
+      <button class="warn" onclick="movePrev()">← Back</button>
+      <button class="primary" onclick="moveNext()">Next → ${NEXT_STAGE}</button>
+    </div>
+
+    <div class="hint" style="margin-top:10px">This station edits only: <b>ScreenSizeIn, CPU, StorageGB, Features, GPU, Series, MemoryGB, Connectivity, Condition</b>.</div>
+  `;
+}
+
+function save(){
+  if (!currentTP) return;
+  const it = db.find(x=>x.TP===currentTP);
+  if (!it) return;
+
+  it.ScreenSizeIn = document.getElementById("f_ScreenSizeIn").value.trim();
+  it.CPU = document.getElementById("f_CPU").value.trim();
+  it.StorageGB = document.getElementById("f_StorageGB").value.trim();
+  it.Features = document.getElementById("f_Features").value;
+  it.GPU = document.getElementById("f_GPU").value.trim();
+  it.Series = document.getElementById("f_Series").value.trim();
+  it.MemoryGB = document.getElementById("f_MemoryGB").value.trim();
+  it.Connectivity = document.getElementById("f_Connectivity").value;
+  it.Condition = document.getElementById("f_Condition").value;
+
+  it.UpdatedAt = Date.now();
+  saveDB();
+  renderList();
+  toast("Saved");
+}
+
+function moveNext(){
+  if (!currentTP) return;
+  save();
+  const it = db.find(x=>x.TP===currentTP);
+  it.Stage = NEXT_STAGE;
+  it.UpdatedAt = Date.now();
+  saveDB();
+  currentTP = null;
+  document.getElementById("detail").innerHTML = `<div class="hint">Moved to <b>${NEXT_STAGE}</b> (mock).</div>`;
+  document.getElementById("statusLine").textContent = "—";
+  renderList();
+  toast("Forwarded");
+}
+
+function movePrev(){
+  if (!currentTP) return;
+  save();
+  const it = db.find(x=>x.TP===currentTP);
+  it.Stage = PREV_STAGE;
+  it.UpdatedAt = Date.now();
+  saveDB();
+  currentTP = null;
+  document.getElementById("detail").innerHTML = `<div class="hint">Moved back to <b>${PREV_STAGE}</b> (mock).</div>`;
+  document.getElementById("statusLine").textContent = "—";
+  renderList();
+  toast("Backed");
+}
+
+function todayKey(){
+  const d = new Date();
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function newItem(){
+  const tkey = todayKey();
+  const todays = db.filter(x => (x.TP||"").includes(`TP-${tkey}-`));
+  const nextN = String(todays.length + 1).padStart(4,"0");
+  const tp = `TP-${tkey}-${nextN}`;
+
+  db.unshift({TP:tp, Stage:STAGE, CreatedAt:Date.now(), UpdatedAt:Date.now()});
+  saveDB();
+  renderList();
+  openItem(tp);
+  toast("New TP created");
+}
+
+document.addEventListener("keydown", (e)=>{
+  if (e.ctrlKey && (e.key==="f" || e.key==="F")){ e.preventDefault(); document.getElementById("q").focus(); }
+  if (e.key==="Enter" && currentTP && document.activeElement && document.activeElement.tagName!=="TEXTAREA"){ e.preventDefault(); save(); }
+  if (e.ctrlKey && e.key==="ArrowRight"){ e.preventDefault(); if(currentTP) moveNext(); }
+  if (e.ctrlKey && e.key==="ArrowLeft"){ e.preventDefault(); if(currentTP) movePrev(); }
+});
+
+loadDB();
+renderList();
+</script>
+</body>
+</html>
