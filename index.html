@@ -1,1 +1,277 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Tek-Pak Store</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">
+      <img id="logo" alt="Tek-Pak" />
+      <span class="badge">Surplus Store</span>
+    </div>
+
+    <nav class="nav">
+      <a class="active" href="./index.html">Shop</a>
+      <a href="./portal.html">Employee Portal</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div class="grid cols-2">
+    <div class="card">
+      <div class="hd">
+        <div>
+          <h2>Browse Inventory</h2>
+          <div class="sub">If it’s listed here, it’s available. (AVAILABLE + LISTED only)</div>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="controls">
+          <input class="input" id="q" placeholder="Search (SKU, title, brand, model…)" />
+          <select class="select" id="cat">
+            <option value="">All categories</option>
+          </select>
+          <button class="btn primary" id="btnLoad">Search</button>
+        </div>
+
+        <div style="height:12px"></div>
+        <div class="small" id="meta">Loading…</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hd">
+        <div>
+          <h2>Quick Notes</h2>
+          <div class="sub">Public-facing info only</div>
+        </div>
+      </div>
+      <div class="bd">
+        <ul class="small" style="margin:0; padding-left:18px;">
+          <li>Read the full item description and photos before purchase.</li>
+          <li>Items may have known issues; those will be listed clearly.</li>
+          <li>Questions? Message through the platform listing.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:14px"></div>
+
+  <div class="card">
+    <div class="hd">
+      <div>
+        <h2>Items</h2>
+        <div class="sub">Click an item card for details</div>
+      </div>
+    </div>
+    <div class="bd">
+      <div class="grid cols-3" id="grid"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Public item modal -->
+<div class="drawerBack" id="drawerBack">
+  <div class="drawer" role="dialog" aria-modal="true">
+    <div class="dhd">
+      <div>
+        <h3 id="dTitle">Item</h3>
+        <div class="small" id="dSub"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="btnClose">Close</button>
+      </div>
+    </div>
+    <div class="dbd">
+      <div class="small"><strong>SKU:</strong> <span class="mono" id="dSku"></span></div>
+      <div style="height:10px"></div>
+
+      <div class="small"><strong>Specs:</strong> <span id="dSpecs"></span></div>
+      <div style="height:10px"></div>
+
+      <div class="small"><strong>Condition:</strong> <span id="dCond"></span></div>
+      <div style="height:10px"></div>
+
+      <div class="small"><strong>Included:</strong></div>
+      <div class="small" id="dIncluded" style="white-space:pre-wrap;"></div>
+      <div style="height:10px"></div>
+
+      <div class="small"><strong>Known issues (if any):</strong></div>
+      <div class="small" id="dIssues" style="white-space:pre-wrap;"></div>
+
+      <hr class="sep">
+
+      <div class="controls">
+        <a class="btn primary" id="btnEbay" target="_blank" rel="noopener">View Listing</a>
+        <button class="btn" id="btnCopySku">Copy SKU</button>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="small">
+        Want internal info (bin location, internal notes, etc.)? Use the Employee Portal.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./app.js"></script>
+<script>
+let CONFIG = { companyName:"Tek-Pak Inc.", logoUrl:"" };
+let ITEMS = [];
+let DROPDOWNS = {};
+
+function openDrawer(){ qs("#drawerBack").classList.add("show"); }
+function closeDrawer(){ qs("#drawerBack").classList.remove("show"); }
+
+function publicFilter(items){
+  return items.filter(it => {
+    const st = String(it.Status||"").toUpperCase();
+    return (st === "AVAILABLE" || st === "LISTED");
+  });
+}
+
+function cardHtml(it){
+  const title = it.Title || "Item";
+  const sku = it.TP_SKU || "";
+  const brand = it.Brand || "";
+  const model = it.Model || "";
+  const price = it.List_Price || it.Price || ""; // optional if you use it
+  const status = String(it.Status||"").toUpperCase();
+
+  const specs = [brand, model].filter(Boolean).join(" • ") || "See details";
+
+  const pill = (status === "AVAILABLE" || status === "LISTED")
+    ? `<span class="pill good">${status}</span>`
+    : `<span class="pill warn">${status||"—"}</span>`;
+
+  return `
+    <div class="card" data-sku="${escHtml(sku)}">
+      <div class="hd">
+        <div>
+          <h2>${escHtml(title)}</h2>
+          <div class="sub">${escHtml(specs)}</div>
+        </div>
+        <div>${pill}</div>
+      </div>
+      <div class="bd">
+        <div class="small mono">${escHtml(sku)}</div>
+        ${price ? `<div style="height:8px"></div><div class="small"><strong>Price:</strong> ${escHtml(price)}</div>` : ``}
+        <div style="height:10px"></div>
+        <div class="controls">
+          <button class="btn primary" data-open="${escHtml(sku)}">View</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderGrid(){
+  qs("#grid").innerHTML = ITEMS.map(cardHtml).join("");
+  qs("#meta").textContent = `Showing ${ITEMS.length} item(s).`;
+}
+
+function fillCategoryDropdown(items){
+  const cats = new Set(items.map(x => String(x.Category||"").trim()).filter(Boolean));
+  const sel = qs("#cat");
+  const keep = sel.value;
+  sel.innerHTML = `<option value="">All categories</option>` + Array.from(cats).sort()
+    .map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join("");
+  sel.value = keep;
+}
+
+function pickItemBySku(sku){
+  return ITEMS.find(x => String(x.TP_SKU||"") === String(sku));
+}
+
+function ebayUrlFor(it){
+  const itemId = String(it.eBay_ItemID || it.Ebay_ItemID || it.ebay_itemid || "").trim();
+  if (itemId) return `https://www.ebay.com/itm/${encodeURIComponent(itemId)}`;
+  // fallback: if you later store direct URL
+  const direct = String(it.eBay_URL || it.Ebay_URL || "").trim();
+  return direct || "https://www.ebay.com/";
+}
+
+function showItem(it){
+  qs("#dTitle").textContent = it.Title || "Item";
+  qs("#dSub").textContent = CONFIG.companyName;
+
+  qs("#dSku").textContent = it.TP_SKU || "";
+  qs("#dSpecs").textContent = [it.Brand, it.Model, it.Part_Number].filter(Boolean).join(" • ") || "See listing";
+  qs("#dCond").textContent = it.Condition_Grade || it.Condition || "See listing";
+
+  qs("#dIncluded").textContent = it.Included || "See listing/photos.";
+  qs("#dIssues").textContent = it.Known_Issues || "None listed beyond photos/description.";
+
+  const url = ebayUrlFor(it);
+  qs("#btnEbay").href = url;
+
+  openDrawer();
+}
+
+async function loadStore(){
+  const q = qs("#q").value.trim();
+  const cat = qs("#cat").value.trim();
+
+  try{
+    const res = await apiGet({ action:"listInventory", tab:"Inventory_Retail", q });
+    let items = publicFilter(res.items || []);
+
+    if (cat) items = items.filter(x => String(x.Category||"") === cat);
+
+    // IMPORTANT: strip internal-only fields (just in case)
+    ITEMS = items.map(it => {
+      const clean = { ...it };
+      delete clean.Notes_Internal;
+      delete clean.Yard_Location;
+      delete clean.Cost;
+      delete clean.Internal_Notes;
+      delete clean.Password;
+      return clean;
+    });
+
+    fillCategoryDropdown(ITEMS);
+    renderGrid();
+    toast("Loaded store items.");
+  }catch(err){
+    toast(err.message, "bad");
+    qs("#meta").textContent = "Error loading store.";
+  }
+}
+
+// events
+qs("#btnLoad").addEventListener("click", loadStore);
+qs("#q").addEventListener("keydown", (e)=>{ if(e.key==="Enter") loadStore(); });
+
+qs("#grid").addEventListener("click", (e)=>{
+  const btn = e.target.closest("button[data-open]");
+  if (!btn) return;
+  const sku = btn.getAttribute("data-open");
+  const it = pickItemBySku(sku);
+  if (it) showItem(it);
+});
+
+qs("#btnClose").addEventListener("click", closeDrawer);
+qs("#drawerBack").addEventListener("click", (e)=>{ if(e.target.id==="drawerBack") closeDrawer(); });
+
+qs("#btnCopySku").addEventListener("click", async ()=>{
+  const sku = qs("#dSku").textContent.trim();
+  await navigator.clipboard.writeText(sku);
+  toast("Copied SKU.");
+});
+
+// init
+(async function init(){
+  CONFIG = await loadConfig();
+  setLogo(qs("#logo"), CONFIG.logoUrl);
+  await loadStore();
+})();
+</script>
+</body>
+</html>
