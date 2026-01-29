@@ -163,6 +163,7 @@
     <a class="chipNav" href="./processing.html">Processing</a>
     <a class="chipNav active" href="./staging.html">Staging</a>
     <a class="chipNav" href="./logistics.html">Logistics</a>
+    <button class="miniBtn" onclick="openTpSettings()">TP Settings</button>
     <button class="primary" onclick="newItem()">+ New TP</button>
   </div>
 </header>
@@ -255,6 +256,80 @@ const DROPDOWNS = {
    OR override in generator with a hosted URL */
 const DEFAULT_LOGO_URL = "assets/tekpak-logo.png";
 
+/* ========= TP# SETTINGS (Random 9-char default + optional customization) ========= */
+const TP_SETTINGS_KEY = "yardflow_tp_settings_v1";
+const DEFAULT_TP_SETTINGS = {
+  prefix: "",                 // you said format doesn't matter: default is just random 9
+  includeDate: false,         // off by default
+  sep: "-",                   // only matters if prefix/date is enabled
+  randLen: 9,                 // ✅ random 9-digit/letter
+  charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+  case: "upper"               // upper | lower
+};
+
+function loadTpSettings(){
+  try{
+    return { ...DEFAULT_TP_SETTINGS, ...(JSON.parse(localStorage.getItem(TP_SETTINGS_KEY) || "{}")) };
+  }catch{
+    return { ...DEFAULT_TP_SETTINGS };
+  }
+}
+function saveTpSettings(s){
+  localStorage.setItem(TP_SETTINGS_KEY, JSON.stringify(s));
+}
+function formatDateYYYYMMDD(d=new Date()){
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+}
+function randomBlock(len, charset){
+  len = Math.max(3, Number(len)||9);
+  charset = String(charset || DEFAULT_TP_SETTINGS.charset);
+  // Prefer crypto randomness; fallback to Math.random if needed
+  try{
+    const out = [];
+    const arr = new Uint32Array(len);
+    crypto.getRandomValues(arr);
+    for (let i=0;i<len;i++) out.push(charset[arr[i] % charset.length]);
+    return out.join("");
+  }catch{
+    let out = "";
+    for (let i=0;i<len;i++){
+      out += charset[Math.floor(Math.random()*charset.length)];
+    }
+    return out;
+  }
+}
+function tpExists(tp){ return db.some(x => x.TP === tp); }
+
+function generateTP(customOverrides = {}){
+  const s = { ...loadTpSettings(), ...customOverrides };
+  const parts = [];
+  const prefix = String(s.prefix || "").trim();
+  if (prefix) parts.push(prefix);
+  if (s.includeDate) parts.push(formatDateYYYYMMDD());
+
+  let block = randomBlock(s.randLen, s.charset);
+  block = (s.case === "lower") ? block.toLowerCase() : block.toUpperCase();
+  parts.push(block);
+
+  const sep = (s.sep ?? "-");
+  return parts.join(sep);
+}
+function generateUniqueTP(maxTries = 80){
+  for (let i=0;i<maxTries;i++){
+    const tp = generateTP();
+    if (!tpExists(tp)) return tp;
+  }
+  // ultra-rare fallback
+  return generateTP({ randLen: (loadTpSettings().randLen || 9) + 2 }) + "-" + Date.now().toString(36).toUpperCase();
+}
+
+function normalizeTP(tp){
+  return String(tp || "")
+    .trim()
+    .replace(/\s+/g, "")
+    .toUpperCase();
+}
+
 /* Your exact buyer agreement (formatted for eBay HTML output) */
 const ASIS_AGREEMENT_TEXT = `
 TEK-PAK INC. AS-IS PURCHASE AGREEMENT & RETURN POLICY
@@ -338,15 +413,9 @@ function loadDB(){
 function saveDB(){ localStorage.setItem(KEY, JSON.stringify(db)); }
 function savePhotos(){ localStorage.setItem(PHOTO_KEY, JSON.stringify(photosDB)); }
 
-function todayKey(){
-  const d = new Date();
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
-}
+/* NEW ITEM: randomized TP# */
 function newItem(){
-  const tkey = todayKey();
-  const todays = db.filter(x => (x.TP||"").includes(`TP-${tkey}-`));
-  const nextN = String(todays.length + 1).padStart(4,"0");
-  const tp = `TP-${tkey}-${nextN}`;
+  const tp = generateUniqueTP();
   db.unshift({
     TP: tp,
     Stage: STAGE,
@@ -516,6 +585,56 @@ function clearAllPhotos(){
   renderKPIs();
 }
 
+/* ---------- TP Manual Override + Regenerate ---------- */
+function copyTP(){
+  if (!currentTP) return;
+  navigator.clipboard.writeText(currentTP);
+  toast("TP# copied");
+}
+
+function applyTPChange(){
+  if (!currentTP) return;
+  const it = db.find(x => x.TP === currentTP);
+  if (!it) return;
+
+  const input = document.getElementById("f_TP");
+  const desired = normalizeTP(input?.value);
+
+  if (!desired) { input.value = currentTP; return toast("TP# can't be blank"); }
+  if (desired === currentTP) return toast("TP# unchanged");
+
+  const taken = db.some(x => x.TP === desired);
+  if (taken){
+    input.value = currentTP;
+    return toast("That TP# already exists");
+  }
+
+  // Move photos mapping so photos follow the item
+  if (photosDB[currentTP]){
+    photosDB[desired] = photosDB[currentTP];
+    delete photosDB[currentTP];
+    savePhotos();
+  }
+
+  it.TP = desired;
+  it.UpdatedAt = Date.now();
+  saveDB();
+
+  currentTP = desired;
+  renderList();
+  renderKPIs();
+  openItem(desired);
+  toast("TP# updated");
+}
+
+function regenerateTP(){
+  if (!currentTP) return;
+  const input = document.getElementById("f_TP");
+  const newTP = generateUniqueTP();
+  if (input) input.value = newTP;
+  applyTPChange();
+}
+
 /* ---------- eBay HTML Generator ---------- */
 function normalizeMulti(s){
   return String(s||"").split(",").map(x=>x.trim()).filter(Boolean);
@@ -584,7 +703,6 @@ function buildConditionNarrative(it){
 }
 
 function formatAgreementForHtml(text){
-  // Convert lines/bullets into HTML-safe formatting.
   const lines = String(text||"").split("\n").map(l=>l.trim()).filter(l=>l.length);
   const out = [];
   for (const line of lines){
@@ -596,19 +714,11 @@ function formatAgreementForHtml(text){
       out.push(`<div style="margin-top:4px;">${escapeHtml(line)}</div>`);
     }
   }
-  // Wrap bullet lines in a list
   let html = out.join("");
-  // naive wrap: ensure any <li> blocks are within <ul>
-  // We'll replace sequences of <li>...</li> with <ul>...</ul>
   html = html.replace(/((?:<li>.*?<\/li>)+)/gs, '<ul style="margin:6px 0 10px; padding-left:18px;">$1</ul>');
   return html;
 }
 
-/*
-  eBay-safe HTML (inline styles, minimal fancy).
-  Note: eBay may still enforce its own buyer protection / return rules in some cases,
-  but this is your listing language + agreement presentation.
-*/
 function buildEbayHTML(it, imageUrls, logoUrl){
   const title = safeLine(it.Title) || [it.Brand,it.Model,it.CPU,it.MemoryGB?it.MemoryGB+"GB":"",it.StorageGB?it.StorageGB+"GB":""] .filter(Boolean).join(" ").trim() || it.TP || "Item";
   const desc = safeLine(it.Description);
@@ -713,10 +823,17 @@ function openItem(tp){
   document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
 
   document.getElementById("detail").innerHTML = `
-    <div class="tpCallout">
-      <div style="color:var(--muted); font-size:12px;">TP Item Number</div>
-      <div class="big" id="tpBig">${escapeHtml(it.TP)}</div>
-      <button class="miniBtn" onclick="copyTP()">Copy TP#</button>
+    <div class="tpCallout" style="align-items:flex-start;">
+      <div style="width:100%;">
+        <div style="color:var(--muted); font-size:12px; margin-bottom:6px;">TP Item Number (manual override allowed)</div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%;">
+          <input id="f_TP" value="${escapeAttr(it.TP)}" style="flex:1; min-width:220px; font-family:var(--mono); font-weight:950;" />
+          <button class="miniBtn" onclick="copyTP()">Copy</button>
+          <button class="miniBtn warn" onclick="regenerateTP()">Regenerate</button>
+          <button class="miniBtn good" onclick="applyTPChange()">Apply TP#</button>
+        </div>
+        <div class="hint" style="margin-top:6px;">Default TP = random 9 alphanumeric. Must be unique (local).</div>
+      </div>
     </div>
 
     <div class="row">
@@ -799,12 +916,6 @@ function openItem(tp){
   renderKPIs();
 }
 
-function copyTP(){
-  if (!currentTP) return;
-  navigator.clipboard.writeText(currentTP);
-  toast("TP# copied");
-}
-
 function save(){
   if (!currentTP) return;
   const it = db.find(x=>x.TP===currentTP);
@@ -813,7 +924,7 @@ function save(){
   it.SaleType = document.getElementById("f_SaleType").value || it.SaleType;
   it.ReturnsAccepted = !!document.getElementById("f_ReturnsAccepted").checked;
 
-  // Guardrail: auto-disable returns when As-Is/Surplus (you can override by changing SaleType)
+  // Guardrail: auto-disable returns when As-Is/Surplus
   if (it.SaleType === "As-Is" || it.SaleType === "Surplus"){
     it.ReturnsAccepted = false;
   }
@@ -925,6 +1036,7 @@ function renderGenerator(it){
       <div style="color:#666; font-size:12px;">This HTML will include TP#</div>
       <div class="big">${escapeHtml(tp)}</div>
       <button class="miniBtn" onclick="copyTP()">Copy TP#</button>
+      <button class="miniBtn" onclick="openTpSettings()">TP Settings</button>
     </div>
 
     <div class="hint" style="margin-top:10px;">
@@ -1011,6 +1123,95 @@ function downloadHtml(){
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+/* ========= TP SETTINGS UI (simple + saved per PC) ========= */
+function openTpSettings(){
+  const s = loadTpSettings();
+  const preview = generateTP(s);
+
+  document.getElementById("generator").innerHTML = `
+    <div class="tpCallout" style="justify-content:space-between; width:100%;">
+      <div>
+        <div style="color:#666; font-size:12px;">TP Settings (saved to this PC)</div>
+        <div class="big" style="margin-top:4px;">${escapeHtml(preview)}</div>
+      </div>
+      <button class="miniBtn" onclick="${currentTP ? "openItem(currentTP)" : "renderList()"}">Back</button>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Prefix (optional)</div>
+        <input id="tp_prefix" value="${escapeAttr(s.prefix)}" placeholder="TP"/>
+      </div>
+      <div>
+        <div class="lab">Separator</div>
+        <input id="tp_sep" value="${escapeAttr(s.sep)}" placeholder="-"/>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Random Length</div>
+        <input id="tp_len" type="number" min="3" max="20" value="${Number(s.randLen)||9}"/>
+      </div>
+      <div>
+        <div class="lab">Case</div>
+        <select id="tp_case">
+          <option value="upper" ${s.case==="upper"?"selected":""}>UPPER</option>
+          <option value="lower" ${s.case==="lower"?"selected":""}>lower</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="lab">Include Date (YYYYMMDD)</div>
+    <div class="checkRow">
+      <label><input type="checkbox" id="tp_date" ${s.includeDate ? "checked":""}> Include date stamp</label>
+    </div>
+
+    <div class="lab">Character Set (advanced)</div>
+    <input id="tp_charset" value="${escapeAttr(s.charset)}"/>
+
+    <div class="divider"></div>
+    <div class="btns">
+      <button class="good miniBtn" onclick="saveTpSettingsFromUI()">Save</button>
+      <button class="primary miniBtn" onclick="previewTpSettings()">Preview</button>
+      <button class="miniBtn warn" onclick="resetTpSettings()">Reset</button>
+    </div>
+
+    <div class="lab">Preview</div>
+    <input id="tp_preview" readonly value="${escapeAttr(preview)}"/>
+
+    <div class="hint" style="margin-top:10px;">
+      Heads-up: this uniqueness check is local-only until we connect the shared sheet/API.
+    </div>
+  `;
+}
+
+function readTpSettingsFromUI(){
+  return {
+    prefix: String(document.getElementById("tp_prefix")?.value || "").trim(),
+    sep: String(document.getElementById("tp_sep")?.value ?? "-"),
+    randLen: Number(document.getElementById("tp_len")?.value || 9),
+    case: String(document.getElementById("tp_case")?.value || "upper"),
+    includeDate: !!document.getElementById("tp_date")?.checked,
+    charset: String(document.getElementById("tp_charset")?.value || DEFAULT_TP_SETTINGS.charset).trim()
+  };
+}
+function previewTpSettings(){
+  const s = readTpSettingsFromUI();
+  document.getElementById("tp_preview").value = generateTP(s);
+}
+function saveTpSettingsFromUI(){
+  const s = readTpSettingsFromUI();
+  saveTpSettings(s);
+  document.getElementById("tp_preview").value = generateTP(s);
+  toast("TP settings saved");
+}
+function resetTpSettings(){
+  saveTpSettings(DEFAULT_TP_SETTINGS);
+  toast("TP settings reset");
+  openTpSettings();
 }
 
 /* Keyboard shortcuts */
