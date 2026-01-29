@@ -5,102 +5,190 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>YardOS — Inventory</title>
   <link rel="stylesheet" href="./styles.css"/>
+  <style>
+    /* Modal editor */
+    .modalBack{
+      position:fixed; inset:0;
+      background: rgba(10,20,40,.30);
+      display:none;
+      z-index: 9999;
+    }
+    .modalBack.show{ display:block; }
+
+    .modal{
+      position:absolute;
+      left:50%; top:50%;
+      transform: translate(-50%,-50%);
+      width: min(1100px, 96vw);
+      height: min(86vh, 920px);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .modal .mhd{
+      padding: 14px 14px 12px;
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+      background: rgba(255,255,255,.86);
+      backdrop-filter: blur(10px);
+    }
+    .modal .mhd h3{ margin:0; font-size:15px; }
+    .modal .mhd .sub{ margin-top:4px; font-size:12px; color:var(--muted); }
+    .modal .mbd{
+      padding: 14px;
+      overflow:auto;
+      flex:1;
+    }
+    .tabs{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-bottom: 12px;
+    }
+    .tabBtn{
+      padding:8px 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.75);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 900;
+      cursor:pointer;
+    }
+    .tabBtn.active{
+      background: rgba(11,79,179,.12);
+      border-color: rgba(11,79,179,.25);
+    }
+    .section{ display:none; }
+    .section.show{ display:block; }
+
+    .fieldGrid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (max-width: 980px){ .fieldGrid{ grid-template-columns: 1fr; } }
+    .field{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background: rgba(255,255,255,.88);
+      padding:10px;
+    }
+    .field .lbl{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+      font-weight:900;
+    }
+    .field input, .field textarea, .field select{
+      width:100%;
+    }
+    .field textarea{ min-height: 96px; }
+    .monoIn{ font-family: var(--mono); }
+    .stickyBar{
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255,255,255,.90);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px;
+      margin-bottom: 12px;
+      backdrop-filter: blur(8px);
+    }
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="wrap">
-      <div class="brand">
-        <img id="logo" alt="Tek-Pak" />
-        <span class="badge">Inventory v1</span>
-      </div>
-      <nav class="nav">
-        <a href="./index.html">Dashboard</a>
-        <a class="active" href="./inventory.html">Inventory</a>
-        <a href="./ebay.html">eBay Tools</a>
-        <a href="./store.html">Store</a>
-      </nav>
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">
+      <img id="logo" alt="Tek-Pak" />
+      <span class="badge">Inventory</span>
     </div>
-  </header>
+    <nav class="nav">
+      <a href="./index.html">Shop</a>
+      <a class="active" href="./inventory.html">Inventory</a>
+      <a href="./portal.html">Employee Portal</a>
+    </nav>
+  </div>
+</header>
 
-  <main class="container">
-    <div class="card">
-      <div class="hd">
-        <div>
-          <h2>Inventory Manager</h2>
-          <div class="sub">Click a row to open the item card. Admin PIN required to edit.</div>
-        </div>
-        <div class="controls">
-          <button class="btn" id="btnAdmin">
-            Admin: <span id="adminState">LOCKED</span>
-          </button>
-          <button class="btn bad" id="btnLock">Lock</button>
-        </div>
+<main class="container">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <h2>Inventory Manager</h2>
+        <div class="sub">Click a row to open the full editor window.</div>
       </div>
-
-      <div class="bd">
-        <div class="controls">
-          <select class="select" id="tabSel">
-            <option value="Inventory_Retail">Inventory_Retail</option>
-            <option value="Inventory_Parts">Inventory_Parts</option>
-          </select>
-
-          <input class="input" id="q" placeholder="Search SKU / title / serial / notes…" />
-
-          <select class="select" id="statusSel">
-            <option value="">All statuses</option>
-            <option>AVAILABLE</option>
-            <option>LISTED</option>
-            <option>SOLD</option>
-            <option>HOLD</option>
-            <option>PARTS_ONLY</option>
-            <option>SCRAP</option>
-            <option>INTAKE</option>
-            <option>TRIAGE</option>
-          </select>
-
-          <button class="btn primary" id="btnLoad">Load</button>
-          <button class="btn good" id="btnAdd">Add Item</button>
-        </div>
-
-        <div style="height:12px"></div>
-        <div class="small" id="meta">Loading…</div>
-
-        <div style="height:12px"></div>
-
-        <div class="tableWrap">
-          <table class="table" id="tbl">
-            <thead id="thead"></thead>
-            <tbody id="tbody"></tbody>
-          </table>
-        </div>
-
-        <div style="height:12px"></div>
-        <div class="small">
-          Tip: “LISTED” counts as available everywhere. Status buttons live in the item card.
-        </div>
+      <div class="controls">
+        <button class="btn" id="btnAdmin">Admin: <span id="adminState">LOCKED</span></button>
+        <button class="btn bad" id="btnLock">Lock</button>
       </div>
     </div>
-  </main>
 
-  <!-- Drawer -->
-  <div class="drawerBack" id="drawerBack">
-    <div class="drawer" role="dialog" aria-modal="true">
-      <div class="dhd">
-        <div>
-          <h3 id="dTitle">Item</h3>
-          <div class="small" id="dSub"></div>
-        </div>
-        <div class="controls">
-          <button class="btn" id="btnClose">Close</button>
-        </div>
+    <div class="bd">
+      <div class="controls">
+        <select class="select" id="tabSel">
+          <option value="Inventory_Retail">Inventory_Retail</option>
+          <option value="Inventory_Parts">Inventory_Parts</option>
+        </select>
+
+        <input class="input" id="q" placeholder="Search SKU / title / serial / notes…" />
+
+        <select class="select" id="statusSel">
+          <option value="">All statuses</option>
+          <option>AVAILABLE</option>
+          <option>LISTED</option>
+          <option>SOLD</option>
+          <option>HOLD</option>
+          <option>PARTS_ONLY</option>
+          <option>SCRAP</option>
+          <option>INTAKE</option>
+          <option>TRIAGE</option>
+        </select>
+
+        <button class="btn primary" id="btnLoad">Load</button>
+        <button class="btn good" id="btnAdd">Add Item</button>
       </div>
-      <div class="dbd">
-        <div class="controls" style="margin-bottom:10px;">
-          <button class="btn" id="btnRefreshRow">Refresh</button>
+
+      <div style="height:12px"></div>
+      <div class="small" id="meta">Loading…</div>
+
+      <div style="height:12px"></div>
+      <div class="tableWrap">
+        <table class="table" id="tbl">
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modalBack" id="modalBack">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhd">
+      <div>
+        <h3 id="mTitle">Edit Item</h3>
+        <div class="sub" id="mSub"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="btnClose">Close</button>
+      </div>
+    </div>
+
+    <div class="mbd">
+      <div class="stickyBar">
+        <div class="controls">
+          <button class="btn" id="btnRefresh">Refresh</button>
           <button class="btn primary" id="btnSave">Save</button>
+          <button class="btn" id="btnGenHtml">Generate eBay HTML</button>
+          <button class="btn" id="btnCopyHtml">Copy eBay HTML</button>
         </div>
-
-        <div class="controls" style="margin-bottom:10px;">
+        <div style="height:8px"></div>
+        <div class="controls">
           <button class="btn good" data-status="AVAILABLE">AVAILABLE</button>
           <button class="btn good" data-status="LISTED">LISTED</button>
           <button class="btn" data-status="HOLD">HOLD</button>
@@ -108,89 +196,26 @@
           <button class="btn bad" data-status="SCRAP">SCRAP</button>
           <button class="btn" data-status="PARTS_ONLY">PARTS_ONLY</button>
         </div>
-
-        <div class="row2">
-          <div>
-            <div class="small">TP_SKU</div>
-            <input class="input mono" id="f_sku" disabled />
-          </div>
-          <div>
-            <div class="small">Status</div>
-            <input class="input" id="f_status" />
-          </div>
-
-          <div>
-            <div class="small">Title</div>
-            <input class="input" id="f_title" />
-          </div>
-          <div>
-            <div class="small">Yard_Location</div>
-            <input class="input mono" id="f_loc" placeholder="ROW-A / BAY-03 / SHELF-2 / BIN-04" />
-          </div>
-
-          <div>
-            <div class="small">Category</div>
-            <input class="input" id="f_cat" />
-          </div>
-          <div>
-            <div class="small">Brand</div>
-            <input class="input" id="f_brand" />
-          </div>
-
-          <div>
-            <div class="small">Model</div>
-            <input class="input" id="f_model" />
-          </div>
-          <div>
-            <div class="small">Serial_Number</div>
-            <input class="input mono" id="f_sn" />
-          </div>
-
-          <div>
-            <div class="small">Qty</div>
-            <input class="input" id="f_qty" />
-          </div>
-          <div>
-            <div class="small">List_Price</div>
-            <input class="input" id="f_price" />
-          </div>
-        </div>
-
-        <hr class="sep">
-
-        <div>
-          <div class="small">Known_Issues</div>
-          <textarea class="input" id="f_issues" style="width:100%; min-height:90px;"></textarea>
-        </div>
-
-        <div style="height:10px"></div>
-
-        <div>
-          <div class="small">Included</div>
-          <textarea class="input" id="f_included" style="width:100%; min-height:90px;"></textarea>
-        </div>
-
-        <div style="height:10px"></div>
-
-        <div>
-          <div class="small">Notes_Internal</div>
-          <textarea class="input" id="f_notes" style="width:100%; min-height:90px;"></textarea>
-        </div>
-
-        <hr class="sep">
-
-        <div class="controls">
-          <button class="btn" id="btnGenHtml">Generate eBay HTML</button>
-          <button class="btn" id="btnCopyHtml">Copy eBay HTML</button>
-        </div>
-        <div style="height:10px"></div>
-        <textarea class="input mono" id="f_html" style="width:100%; min-height:180px;" placeholder="eBay_HTML…"></textarea>
-
-        <div style="height:14px"></div>
-        <div class="small">Edits are logged into your `Audit_Log` sheet.</div>
+        <div style="height:8px"></div>
+        <div class="small">Admin PIN required for Save / Generate / Status edits.</div>
       </div>
+
+      <div class="tabs">
+        <button class="tabBtn active" data-tab="ess">Essentials</button>
+        <button class="tabBtn" data-tab="cond">Condition / Issues</button>
+        <button class="tabBtn" data-tab="pricing">Pricing / eBay</button>
+        <button class="tabBtn" data-tab="logistics">Logistics</button>
+        <button class="tabBtn" data-tab="all">All Fields</button>
+      </div>
+
+      <div class="section show" id="sec-ess"></div>
+      <div class="section" id="sec-cond"></div>
+      <div class="section" id="sec-pricing"></div>
+      <div class="section" id="sec-logistics"></div>
+      <div class="section" id="sec-all"></div>
     </div>
   </div>
+</div>
 
 <script src="./app.js"></script>
 <script>
@@ -198,6 +223,8 @@ let CONFIG = { companyName:"Tek-Pak Inc.", logoUrl:"" };
 let HEADERS = [];
 let ITEMS = [];
 let ACTIVE = { tab:"Inventory_Retail", row:0, item:null };
+
+const FIELD_UI = {}; // header -> input element
 
 function adminUiRefresh(){
   qs("#adminState").textContent = adminIsUnlocked() ? "UNLOCKED" : "LOCKED";
@@ -210,24 +237,25 @@ function statusPill(status){
 }
 
 function renderTable(headers, items){
-  const showCols = [
-    "_row","TP_SKU","Title","Category","Brand","Model","Serial_Number",
-    "Condition_Grade","Status","Yard_Location","Qty","List_Price","eBay_ItemID"
-  ];
-
+  const showCols = ["_row","TP_SKU","Title","Category","Brand","Model","Status","Yard_Location","Qty","List_Price","eBay_ItemID"];
   qs("#thead").innerHTML = `<tr>${showCols.map(h => `<th>${escHtml(h)}</th>`).join("")}</tr>`;
-  qs("#tbody").innerHTML = items.map(it => {
-    return `<tr data-row="${it._row}">
+  qs("#tbody").innerHTML = items.map(it => `
+    <tr data-row="${it._row}">
       ${showCols.map(h => {
         const v = (h === "_row") ? it._row : (it[h] ?? "");
         if (h === "Status") return `<td>${statusPill(v)}</td>`;
-        if (h === "TP_SKU" || h === "Serial_Number" || h === "Yard_Location") return `<td class="mono">${escHtml(v)}</td>`;
+        if (h === "TP_SKU" || h === "Yard_Location") return `<td class="mono">${escHtml(v)}</td>`;
         return `<td>${escHtml(v)}</td>`;
       }).join("")}
-    </tr>`;
-  }).join("");
+    </tr>
+  `).join("");
 
-  qs("#meta").textContent = `Loaded ${items.length} item(s) from ${ACTIVE.tab}. Click a row for the item card.`;
+  qs("#meta").textContent = `Loaded ${items.length} item(s) from ${ACTIVE.tab}. Click a row to edit.`;
+}
+
+async function apiRow(tab, row){
+  const res = await apiGet({ action:"getRow", tab, row });
+  return res.item;
 }
 
 async function loadInventory(){
@@ -246,69 +274,92 @@ async function loadInventory(){
   }
 }
 
-function openDrawer(){
-  qs("#drawerBack").classList.add("show");
+function openModal(){
+  qs("#modalBack").classList.add("show");
 }
-function closeDrawer(){
-  qs("#drawerBack").classList.remove("show");
+function closeModal(){
+  qs("#modalBack").classList.remove("show");
   ACTIVE.row = 0;
   ACTIVE.item = null;
 }
 
-async function loadRow(tab, row){
-  // uses getRow endpoint from your rebuilt Code.gs
-  const res = await apiGet({ action:"getRow", tab, row });
-  return res.item;
+function fieldBox(label, inputHtml){
+  return `
+    <div class="field">
+      <div class="lbl">${escHtml(label)}</div>
+      ${inputHtml}
+    </div>
+  `;
 }
 
-function fillDrawer(item){
-  ACTIVE.item = item;
+function makeInputForHeader(h, value){
+  const key = String(h||"").trim();
+  const v = value ?? "";
 
-  qs("#dTitle").textContent = item.Title || "Item";
-  qs("#dSub").textContent = `Row ${item._row} • ${item.TP_SKU || "N/A"} • ${CONFIG.companyName}`;
+  const isLong = /Notes|Known_Issues|Included|Description|eBay_HTML/i.test(key);
+  const isMono = /SKU|Serial|IMEI|IP|MAC|ItemID|Location|Part_Number/i.test(key);
 
-  qs("#f_sku").value = item.TP_SKU || "";
-  qs("#f_status").value = item.Status || "";
-  qs("#f_title").value = item.Title || "";
-  qs("#f_loc").value = item.Yard_Location || "";
-  qs("#f_cat").value = item.Category || "";
-  qs("#f_brand").value = item.Brand || "";
-  qs("#f_model").value = item.Model || "";
-  qs("#f_sn").value = item.Serial_Number || "";
-  qs("#f_qty").value = item.Qty ?? "";
-  qs("#f_price").value = item.List_Price ?? "";
-  qs("#f_issues").value = item.Known_Issues || "";
-  qs("#f_included").value = item.Included || "";
-  qs("#f_notes").value = item.Notes_Internal || "";
-  qs("#f_html").value = item.eBay_HTML || "";
+  if (isLong){
+    return `<textarea class="input ${isMono ? "mono monoIn" : ""}" data-field="${escHtml(key)}">${escHtml(v)}</textarea>`;
+  }
+  return `<input class="input ${isMono ? "mono monoIn" : ""}" data-field="${escHtml(key)}" value="${escHtml(v)}" />`;
 }
 
-function collectDrawerPayload(){
-  return {
-    _row: ACTIVE.row,
-    TP_SKU: qs("#f_sku").value.trim(),
-    Status: qs("#f_status").value.trim(),
-    Title: qs("#f_title").value.trim(),
-    Yard_Location: qs("#f_loc").value.trim(),
-    Category: qs("#f_cat").value.trim(),
-    Brand: qs("#f_brand").value.trim(),
-    Model: qs("#f_model").value.trim(),
-    Serial_Number: qs("#f_sn").value.trim(),
-    Qty: qs("#f_qty").value,
-    List_Price: qs("#f_price").value,
-    Known_Issues: qs("#f_issues").value,
-    Included: qs("#f_included").value,
-    Notes_Internal: qs("#f_notes").value,
-    eBay_HTML: qs("#f_html").value
-  };
+function buildEditor(item){
+  // Clear maps
+  Object.keys(FIELD_UI).forEach(k => delete FIELD_UI[k]);
+
+  qs("#mTitle").textContent = item.Title || "Edit Item";
+  qs("#mSub").textContent = `Row ${item._row} • ${item.TP_SKU || "N/A"} • ${CONFIG.companyName}`;
+
+  const get = (k)=> item[k] ?? "";
+
+  const essentials = ["TP_SKU","Status","Title","Category","Brand","Model","Part_Number","Serial_Number","Qty","Yard_Location"];
+  const condition = ["Condition_Grade","Testing_Status","Cosmetic_Notes","Known_Issues","Included"];
+  const pricing = ["List_Price","eBay_Listing_Title","eBay_ItemID","eBay_HTML"];
+  const logistics = ["Shipping_Profile","Returns_Profile","Weight","Dimensions","Power_Adapter","Accessories","Intake_Date"];
+
+  function sectionMarkup(list){
+    return `<div class="fieldGrid">` + list
+      .filter(h => HEADERS.includes(h))
+      .map(h => fieldBox(h, makeInputForHeader(h, get(h))))
+      .join("") + `</div>`;
+  }
+
+  qs("#sec-ess").innerHTML = sectionMarkup(essentials);
+  qs("#sec-cond").innerHTML = sectionMarkup(condition);
+  qs("#sec-pricing").innerHTML = sectionMarkup(pricing);
+  qs("#sec-logistics").innerHTML = sectionMarkup(logistics);
+
+  // All fields (everything from header row)
+  qs("#sec-all").innerHTML = `<div class="fieldGrid">` + HEADERS
+    .filter(h => h && h !== "_row")
+    .map(h => fieldBox(h, makeInputForHeader(h, get(h))))
+    .join("") + `</div>`;
+
+  // Map inputs
+  qsa("[data-field]").forEach(el => {
+    const f = el.getAttribute("data-field");
+    FIELD_UI[f] = el;
+  });
+}
+
+function collectPayload(){
+  const payload = { _row: ACTIVE.row };
+  HEADERS.forEach(h => {
+    if (!h || h === "_row") return;
+    const el = FIELD_UI[h];
+    if (!el) return;
+    payload[h] = el.value;
+  });
+  return payload;
 }
 
 async function saveItem(){
   if (!requireAdmin()) return;
-  const payload = collectDrawerPayload();
+  const payload = collectPayload();
 
   try{
-    // JSONP GET upsert: payload must be JSON string
     const res = await apiGet({
       action:"upsertInventory",
       tab: ACTIVE.tab,
@@ -317,22 +368,22 @@ async function saveItem(){
     });
     toast(`Saved ${res.TP_SKU || ""}.`);
     await loadInventory();
-    // reload row to refresh drawer
-    const fresh = await loadRow(ACTIVE.tab, ACTIVE.row);
-    fillDrawer(fresh);
+    const fresh = await apiRow(ACTIVE.tab, ACTIVE.row);
+    ACTIVE.item = fresh;
+    buildEditor(fresh);
   }catch(err){
     toast(err.message, "bad");
   }
 }
 
-async function generateHtml(){
-  if (!ACTIVE.row) return;
+async function genHtml(){
   if (!requireAdmin()) return;
   try{
     const res = await apiGet({ action:"generateEbayHtml", tab: ACTIVE.tab, row: ACTIVE.row, user:"yardos-web" });
     toast(`Generated eBay HTML (${res.bytes} bytes).`);
-    const fresh = await loadRow(ACTIVE.tab, ACTIVE.row);
-    fillDrawer(fresh);
+    const fresh = await apiRow(ACTIVE.tab, ACTIVE.row);
+    ACTIVE.item = fresh;
+    buildEditor(fresh);
   }catch(err){
     toast(err.message, "bad");
   }
@@ -340,38 +391,40 @@ async function generateHtml(){
 
 async function addItemWizard(){
   if (!requireAdmin()) return;
-
   const title = prompt("Title for new item?");
   if (!title) return;
 
-  const payload = {
-    Title: title,
-    Status: "INTAKE",
-    Yard_Location: "ROW-A / BAY-03 / SHELF-2 / BIN-04",
-    Qty: 1,
-  };
+  const payload = { Title:title, Status:"INTAKE", Qty:1 };
 
   try{
     const res = await apiGet({
       action:"upsertInventory",
       tab: ACTIVE.tab,
-      user: "yardos-web",
+      user:"yardos-web",
       payload: JSON.stringify(payload)
     });
     toast(`Created ${res.TP_SKU}.`);
     await loadInventory();
-    // open the created row by finding it via SKU
     const found = await apiGet({ action:"findBySku", tab: ACTIVE.tab, sku: res.TP_SKU });
     if (found.found){
       ACTIVE.row = found.row;
-      const item = found.item;
-      fillDrawer(item);
-      openDrawer();
+      ACTIVE.item = found.item;
+      buildEditor(found.item);
+      openModal();
     }
-  }catch(err){
-    toast(err.message, "bad");
-  }
+  }catch(err){ toast(err.message,"bad"); }
 }
+
+// Tab switching
+qsa(".tabBtn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    qsa(".tabBtn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const id = btn.getAttribute("data-tab");
+    qsa(".section").forEach(s=>s.classList.remove("show"));
+    qs(`#sec-${id}`).classList.add("show");
+  });
+});
 
 // events
 qs("#btnLoad").addEventListener("click", loadInventory);
@@ -379,6 +432,8 @@ qs("#q").addEventListener("keydown", (e)=>{ if(e.key==="Enter") loadInventory();
 
 qs("#btnAdmin").addEventListener("click", ()=>{ adminUnlock(); adminUiRefresh(); });
 qs("#btnLock").addEventListener("click", ()=>{ adminLock(); adminUiRefresh(); });
+
+qs("#btnAdd").addEventListener("click", addItemWizard);
 
 qs("#tbody").addEventListener("click", async (e)=>{
   const tr = e.target.closest("tr");
@@ -388,43 +443,46 @@ qs("#tbody").addEventListener("click", async (e)=>{
 
   try{
     ACTIVE.row = row;
-    const item = await loadRow(ACTIVE.tab, row);
-    fillDrawer(item);
-    openDrawer();
-  }catch(err){
-    toast(err.message, "bad");
-  }
+    const item = await apiRow(ACTIVE.tab, row);
+    ACTIVE.item = item;
+    buildEditor(item);
+    openModal();
+  }catch(err){ toast(err.message,"bad"); }
 });
 
-qs("#btnClose").addEventListener("click", closeDrawer);
-qs("#drawerBack").addEventListener("click", (e)=>{ if(e.target.id==="drawerBack") closeDrawer(); });
+qs("#btnClose").addEventListener("click", closeModal);
+qs("#modalBack").addEventListener("click", (e)=>{ if(e.target.id==="modalBack") closeModal(); });
 
-qs("#btnRefreshRow").addEventListener("click", async ()=>{
-  if (!ACTIVE.row) return;
+qs("#btnRefresh").addEventListener("click", async ()=>{
   try{
-    const item = await loadRow(ACTIVE.tab, ACTIVE.row);
-    fillDrawer(item);
+    const item = await apiRow(ACTIVE.tab, ACTIVE.row);
+    ACTIVE.item = item;
+    buildEditor(item);
     toast("Refreshed.");
   }catch(err){ toast(err.message,"bad"); }
 });
 
 qs("#btnSave").addEventListener("click", saveItem);
-qs("#btnGenHtml").addEventListener("click", generateHtml);
+qs("#btnGenHtml").addEventListener("click", genHtml);
 
 qs("#btnCopyHtml").addEventListener("click", async ()=>{
-  const txt = qs("#f_html").value.trim();
-  if (!txt) return toast("No HTML to copy.", "bad");
+  const el = FIELD_UI["eBay_HTML"];
+  const txt = el ? el.value.trim() : "";
+  if (!txt) return toast("No eBay HTML to copy.", "bad");
   await navigator.clipboard.writeText(txt);
   toast("Copied eBay HTML.");
 });
 
+// Status buttons
 qsa("button[data-status]").forEach(btn=>{
   btn.addEventListener("click", ()=>{
-    qs("#f_status").value = btn.getAttribute("data-status");
+    if (!requireAdmin()) return;
+    const st = btn.getAttribute("data-status");
+    const el = FIELD_UI["Status"];
+    if (el) el.value = st;
+    toast(`Status set: ${st}`);
   });
 });
-
-qs("#btnAdd").addEventListener("click", addItemWizard);
 
 // init
 (async function init(){
