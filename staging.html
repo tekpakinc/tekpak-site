@@ -5,50 +5,137 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>YardFlow Command Center — STAGING</title>
 <style>
-  :root{--bg:#070b14;--text:#eaf1ff;--muted:#9fb3d1;--line:rgba(255,255,255,.10);--accent:#3aa0ff;--good:#3dff8d;--warn:#ffd166;--r2:22px;--mono:ui-monospace,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,Roboto,Arial;--shadow:0 22px 60px rgba(0,0,0,.45)}
+  :root{
+    --bg:#070b14; --panel:#0f1727; --panel2:#0b1220; --text:#eaf1ff; --muted:#9fb3d1;
+    --line:rgba(255,255,255,.10); --accent:#3aa0ff; --good:#3dff8d; --warn:#ffd166; --bad:#ff4d6d;
+    --r:18px; --r2:22px; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: system-ui,-apple-system, Segoe UI, Roboto, Arial;
+    --shadow: 0 22px 60px rgba(0,0,0,.45);
+  }
   *{box-sizing:border-box}
-  body{margin:0;color:var(--text);font-family:var(--sans);background:radial-gradient(900px 600px at 15% -10%, rgba(58,160,255,.20), transparent 60%),radial-gradient(900px 600px at 95% 10%, rgba(255,77,109,.10), transparent 55%),var(--bg)}
-  header{position:sticky;top:0;z-index:10;padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg, rgba(15,23,39,.92), rgba(7,11,20,.70));backdrop-filter:blur(10px);display:flex;gap:12px;align-items:center;justify-content:space-between}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:38px;height:38px;border-radius:14px;background:linear-gradient(135deg, rgba(255,77,109,.85), rgba(58,160,255,.55));box-shadow:0 14px 40px rgba(0,0,0,.45)}
-  .title{font-weight:900}
-  .sub{color:var(--muted);font-size:12px;line-height:1.2}
-  .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
-  .chip{font-size:12px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);text-decoration:none;font-weight:800}
-  .chip.active{border-color:rgba(255,77,109,.65);box-shadow:0 0 0 2px rgba(255,77,109,.12) inset}
-  .wrap{display:grid;grid-template-columns:360px 1fr;gap:14px;padding:14px;max-width:1500px;margin:0 auto}
-  @media (max-width:1040px){.wrap{grid-template-columns:1fr}}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow);overflow:hidden}
-  .card h3{margin:0;padding:12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
-  .body{padding:12px}
-  .gridKpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-  @media (max-width:1040px){.gridKpi{grid-template-columns:repeat(2,1fr)}}
-  .kpi{border:1px solid var(--line);border-radius:18px;padding:10px;background:rgba(0,0,0,.20)}
-  .kpi .label{color:var(--muted);font-size:11px}
-  .kpi .value{font-weight:950;font-size:18px;margin-top:4px}
-  .kpi .mini{color:var(--muted);font-size:11px;margin-top:2px}
-  .lab{font-size:12px;color:var(--muted);margin:10px 0 6px}
-  input,select,textarea{width:100%;padding:10px 10px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--text);outline:none}
-  textarea{min-height:110px;resize:vertical}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .btns{display:flex;gap:10px;flex-wrap:wrap}
-  button{border:none;border-radius:14px;padding:10px 12px;cursor:pointer;background:rgba(255,255,255,.06);color:var(--text);font-weight:900;border:1px solid var(--line)}
-  button.primary{background:linear-gradient(135deg, rgba(58,160,255,.95), rgba(58,160,255,.55));border-color:rgba(58,160,255,.55)}
-  button.good{background:linear-gradient(135deg, rgba(61,255,141,.85), rgba(61,255,141,.35));border-color:rgba(61,255,141,.55);color:#06210f}
-  button.warn{background:linear-gradient(135deg, rgba(255,209,102,.9), rgba(255,209,102,.35));border-color:rgba(255,209,102,.55);color:#241600}
-  .list{display:flex;flex-direction:column;gap:8px;max-height:62vh;overflow:auto;padding-right:6px}
-  .item{padding:10px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer}
-  .tp{font-family:var(--mono);font-weight:950;font-size:12px}
-  .pill{font-size:11px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-  .meta{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.25}
-  .divider{height:1px;background:var(--line);margin:12px 0}
-  .hint{color:var(--muted);font-size:12px;line-height:1.35}
-  .rightHead{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .statusLine{color:var(--muted);font-size:12px}
-  .toast{position:fixed;left:14px;bottom:14px;background:rgba(0,0,0,.65);border:1px solid var(--line);padding:10px 12px;border-radius:14px;display:none}
-  .affix{display:flex;align-items:center;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(0,0,0,.25)}
-  .affix input{border:none;border-radius:0;background:transparent}
-  .affix span{padding:0 10px;color:var(--muted);font-size:12px;border-left:1px solid var(--line)}
+  body{
+    margin:0; color:var(--text); font-family:var(--sans);
+    background:
+      radial-gradient(900px 600px at 15% -10%, rgba(58,160,255,.20), transparent 60%),
+      radial-gradient(900px 600px at 95% 10%, rgba(255,77,109,.10), transparent 55%),
+      var(--bg);
+  }
+  header{
+    position:sticky; top:0; z-index:10;
+    padding:14px 16px; border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(15,23,39,.92), rgba(7,11,20,.70));
+    backdrop-filter: blur(10px);
+    display:flex; gap:12px; align-items:center; justify-content:space-between;
+  }
+  .brand{display:flex; gap:12px; align-items:center}
+  .logo{
+    width:38px; height:38px; border-radius:14px;
+    background:linear-gradient(135deg, rgba(255,77,109,.85), rgba(58,160,255,.55));
+    box-shadow:0 14px 40px rgba(0,0,0,.45);
+  }
+  .title{font-weight:900; letter-spacing:.2px}
+  .sub{color:var(--muted); font-size:12px; line-height:1.2}
+  .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+  .chipNav{
+    font-size:12px; padding:7px 10px; border-radius:999px; border:1px solid var(--line);
+    background:rgba(255,255,255,.04); color:var(--text); text-decoration:none; font-weight:800;
+  }
+  .chipNav.active{border-color:rgba(255,77,109,.65); box-shadow:0 0 0 2px rgba(255,77,109,.12) inset}
+  .wrap{
+    display:grid; grid-template-columns: 360px 1fr; gap:14px;
+    padding:14px; max-width:1500px; margin:0 auto;
+  }
+  @media (max-width: 1040px){ .wrap{grid-template-columns:1fr} }
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    border:1px solid var(--line);
+    border-radius:var(--r2);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .card h3{
+    margin:0; padding:12px;
+    border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-size:14px; letter-spacing:.2px;
+  }
+  .card .body{padding:12px}
+  .gridKpi{display:grid; grid-template-columns: repeat(4, 1fr); gap:10px}
+  @media (max-width: 1040px){ .gridKpi{grid-template-columns: repeat(2, 1fr)} }
+  .kpi{
+    border:1px solid var(--line); border-radius:18px; padding:10px;
+    background:rgba(0,0,0,.20);
+  }
+  .kpi .label{color:var(--muted); font-size:11px}
+  .kpi .value{font-weight:950; font-size:18px; margin-top:4px}
+  .kpi .mini{color:var(--muted); font-size:11px; margin-top:2px}
+
+  .lab{font-size:12px; color:var(--muted); margin:10px 0 6px}
+  input, select, textarea{
+    width:100%; padding:10px 10px; border-radius:14px;
+    border:1px solid var(--line); background:rgba(0,0,0,.25); color:var(--text);
+    outline:none;
+  }
+  textarea{min-height:110px; resize:vertical; font-family: var(--sans);}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+  @media (max-width: 700px){ .row,.row3{grid-template-columns:1fr} }
+  .btns{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  button{
+    border:none; border-radius:14px; padding:10px 12px; cursor:pointer;
+    background:rgba(255,255,255,.06); color:var(--text); font-weight:900;
+    border:1px solid var(--line);
+  }
+  button.primary{background:linear-gradient(135deg, rgba(58,160,255,.95), rgba(58,160,255,.55)); border-color:rgba(58,160,255,.55)}
+  button.good{background:linear-gradient(135deg, rgba(61,255,141,.85), rgba(61,255,141,.35)); border-color:rgba(61,255,141,.55); color:#06210f}
+  button.warn{background:linear-gradient(135deg, rgba(255,209,102,.9), rgba(255,209,102,.35)); border-color:rgba(255,209,102,.55); color:#241600}
+  button.danger{background:linear-gradient(135deg, rgba(255,77,109,.9), rgba(255,77,109,.35)); border-color:rgba(255,77,109,.55); color:#2a0010}
+  .list{display:flex; flex-direction:column; gap:8px; max-height:62vh; overflow:auto; padding-right:6px}
+  .item{
+    padding:10px; border-radius:18px; border:1px solid var(--line);
+    background:rgba(255,255,255,.03); cursor:pointer;
+  }
+  .item .top{display:flex; justify-content:space-between; gap:10px; align-items:center}
+  .tp{font-family:var(--mono); font-weight:950; font-size:12px}
+  .pill{font-size:11px; padding:5px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted)}
+  .meta{color:var(--muted); font-size:12px; margin-top:6px; line-height:1.25}
+  .divider{height:1px; background:var(--line); margin:12px 0}
+  .hint{color:var(--muted); font-size:12px; line-height:1.35}
+  .rightHead{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .statusLine{color:var(--muted); font-size:12px}
+  .toast{
+    position:fixed; left:14px; bottom:14px;
+    background:rgba(0,0,0,.65); border:1px solid var(--line);
+    padding:10px 12px; border-radius:14px; display:none;
+  }
+  .kbd{font-family:var(--mono); font-size:11px; color:var(--muted)}
+  .miniBtn{padding:8px 10px; border-radius:12px; font-size:12px}
+
+  /* Photos */
+  .photoBar{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .photoGrid{
+    display:grid;
+    grid-template-columns: repeat(6, minmax(120px, 1fr));
+    gap:10px;
+  }
+  @media (max-width: 1200px){ .photoGrid{grid-template-columns: repeat(3, minmax(120px, 1fr));} }
+  @media (max-width: 650px){ .photoGrid{grid-template-columns: repeat(2, minmax(120px, 1fr));} }
+  .thumb{
+    border:1px solid var(--line); border-radius:18px; overflow:hidden;
+    background:rgba(0,0,0,.25);
+  }
+  .thumb img{
+    width:100%; height:120px; object-fit:cover; display:block;
+    background:rgba(255,255,255,.04);
+  }
+  .thumb .cap{
+    padding:8px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between;
+    color:var(--muted); font-size:12px;
+  }
+  .cap .left{display:flex; gap:8px; align-items:center}
+  .badge{font-family:var(--mono); font-size:11px; color:var(--muted); border:1px solid var(--line); padding:3px 7px; border-radius:999px}
+  .urlBox{font-family:var(--mono); font-size:12px; min-height:84px}
+  .outBox{font-family:var(--mono); font-size:12px; min-height:240px; white-space:pre; }
 </style>
 </head>
 <body>
@@ -57,25 +144,26 @@
     <div class="logo"></div>
     <div>
       <div class="title">YardFlow Command Center</div>
-      <div class="sub"><b>STAGING</b> • Listing Prep • UI-only mock</div>
+      <div class="sub"><b>STAGING</b> • Photos + eBay HTML Generator • UI-only mock</div>
     </div>
   </div>
 
   <div class="nav">
-    <a class="chip" href="./intake.html">Intake</a>
-    <a class="chip" href="./processing.html">Processing</a>
-    <a class="chip active" href="./staging.html">Staging</a>
-    <a class="chip" href="./logistics.html">Logistics</a>
+    <a class="chipNav" href="./intake.html">Intake</a>
+    <a class="chipNav" href="./processing.html">Processing</a>
+    <a class="chipNav active" href="./staging.html">Staging</a>
+    <a class="chipNav" href="./logistics.html">Logistics</a>
     <button class="primary" onclick="newItem()">+ New TP</button>
   </div>
 </header>
 
 <div class="wrap">
+  <!-- LEFT: QUEUE -->
   <div class="card">
     <h3>STAGING Queue <span class="pill" id="queueCount">0</span></h3>
     <div class="body">
       <div class="lab">Search</div>
-      <input id="q" placeholder="TP, title…" oninput="renderList()" />
+      <input id="q" placeholder="TP, title, OS…" oninput="renderList()" />
 
       <div class="row">
         <div>
@@ -96,10 +184,16 @@
       <div class="list" id="list"></div>
 
       <div class="divider"></div>
-      <div class="hint"><b>Tip:</b> Keep title tight + searchable. Your future self will thank you.</div>
+      <div class="hint">
+        <b>Shortcuts:</b>
+        <span class="kbd">Enter</span> save •
+        <span class="kbd">Ctrl</span>+<span class="kbd">G</span> generate eBay HTML •
+        <span class="kbd">Ctrl</span>+<span class="kbd">F</span> search
+      </div>
     </div>
   </div>
 
+  <!-- RIGHT: COMMAND CENTER -->
   <div style="display:grid; gap:14px">
     <div class="card">
       <h3>Today’s Snapshot</h3>
@@ -108,24 +202,22 @@
           <div class="kpi"><div class="label">In Staging</div><div class="value" id="kpiQueue">0</div><div class="mini">items waiting</div></div>
           <div class="kpi"><div class="label">Missing Title</div><div class="value" id="kpiTitle">0</div><div class="mini">quick fix</div></div>
           <div class="kpi"><div class="label">Missing Price</div><div class="value" id="kpiPrice">0</div><div class="mini">USD</div></div>
-          <div class="kpi"><div class="label">Most Common OS</div><div class="value" id="kpiCommon">—</div><div class="mini">dropdown</div></div>
+          <div class="kpi"><div class="label">Photos Attached</div><div class="value" id="kpiPhotos">0</div><div class="mini">local per TP</div></div>
         </div>
       </div>
     </div>
 
     <div class="card">
       <h3><div class="rightHead"><span>Staging Form</span><span class="statusLine" id="statusLine">—</span></div></h3>
-      <div class="body" id="detail"><div class="hint">Select an item from the queue.</div></div>
+      <div class="body" id="detail">
+        <div class="hint">Select an item from the queue.</div>
+      </div>
     </div>
 
     <div class="card">
-      <h3>STAGING Checklist</h3>
-      <div class="body">
-        <div class="hint">
-          • Title + OS + Warranty + Shipping Policy<br>
-          • Description: tested state + what’s included<br>
-          • Price: sanity check vs market<br>
-        </div>
+      <h3>eBay HTML Generator</h3>
+      <div class="body" id="generator">
+        <div class="hint">Select an item to generate eBay HTML.</div>
       </div>
     </div>
   </div>
@@ -134,11 +226,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/*** Shared mock DB for all pages ***/
 const KEY = "yardflow_commandcenter_db_v1";
 const STAGE = "STAGING";
 const NEXT_STAGE = "LOGISTICS";
 const PREV_STAGE = "PROCESSING";
 
+/* UI defaults (later: pull these from your Dropdowns sheet) */
 const DROPDOWNS = {
   OperatingSystem: ["Windows 11","Windows 10","ChromeOS","macOS","Linux","No OS"],
   Warranty: ["None","7 Day","30 Day","90 Day"],
@@ -148,72 +242,109 @@ const DROPDOWNS = {
 let db = [];
 let currentTP = null;
 
-function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.style.display="block";setTimeout(()=>t.style.display="none",1600);}
-function loadDB(){db=JSON.parse(localStorage.getItem(KEY)||"[]");}
-function saveDB(){localStorage.setItem(KEY,JSON.stringify(db));}
-function escapeHtml(s){return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
-function escapeAttr(s){return escapeHtml(s).replaceAll("'","&#39;");}
-function uniq(list){return [...new Set(list.filter(Boolean))];}
+/* Photos store: local only (per TP). We store small-ish data URLs. */
+const PHOTO_KEY = "yardflow_photos_v1"; // { [TP]: [{name,dataUrl,ts}] }
+let photosDB = {};
 
-function selectHTML(list, selected){
-  return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  setTimeout(()=> t.style.display="none", 1600);
 }
-function affixPrefix(id, value, placeholder, prefix){
-  return `<div class="affix"><span style="border-left:none;border-right:1px solid var(--line)">${escapeHtml(prefix)}</span><input id="${id}" value="${escapeAttr(value||"")}" placeholder="${escapeAttr(placeholder)}"/></div>`;
+
+function escapeHtml(s){
+  return String(s||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+function escapeAttr(s){ return escapeHtml(s).replaceAll("'","&#39;"); }
+function uniq(list){ return [...new Set(list.filter(Boolean))]; }
+
+function loadDB(){
+  db = JSON.parse(localStorage.getItem(KEY) || "[]");
+  photosDB = JSON.parse(localStorage.getItem(PHOTO_KEY) || "{}");
+}
+function saveDB(){ localStorage.setItem(KEY, JSON.stringify(db)); }
+function savePhotos(){ localStorage.setItem(PHOTO_KEY, JSON.stringify(photosDB)); }
+
+function todayKey(){
+  const d = new Date();
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+}
+function newItem(){
+  const tkey = todayKey();
+  const todays = db.filter(x => (x.TP||"").includes(`TP-${tkey}-`));
+  const nextN = String(todays.length + 1).padStart(4,"0");
+  const tp = `TP-${tkey}-${nextN}`;
+  db.unshift({TP:tp, Stage:STAGE, CreatedAt:Date.now(), UpdatedAt:Date.now()});
+  saveDB();
+  renderList();
+  openItem(tp);
+  toast("New TP created");
 }
 
 function setFilterOptions(){
-  const sel=document.getElementById("filtOS");
-  const values=uniq(db.filter(x=>x.Stage===STAGE).map(x=>x.OperatingSystem));
-  sel.innerHTML=`<option value="">All</option>` + values.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
+  const sel = document.getElementById("filtOS");
+  const values = uniq(db.filter(x=>x.Stage===STAGE).map(x=>x.OperatingSystem));
+  sel.innerHTML = `<option value="">All</option>` + values.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
 }
 
 function renderKPIs(){
-  const queue=db.filter(x=>x.Stage===STAGE);
-  document.getElementById("kpiQueue").textContent=queue.length;
-  document.getElementById("kpiTitle").textContent=queue.filter(x=>!(x.Title||"").trim()).length;
-  document.getElementById("kpiPrice").textContent=queue.filter(x=>!(x.PriceUSD||"").trim()).length;
+  const queue = db.filter(x=>x.Stage===STAGE);
+  document.getElementById("kpiQueue").textContent = queue.length;
+  document.getElementById("kpiTitle").textContent = queue.filter(x=>!(x.Title||"").trim()).length;
+  document.getElementById("kpiPrice").textContent = queue.filter(x=>!(x.PriceUSD||"").trim()).length;
 
-  const os=queue.map(x=>x.OperatingSystem).filter(Boolean);
-  if(!os.length) document.getElementById("kpiCommon").textContent="—";
-  else{
-    const counts=os.reduce((m,c)=>(m[c]=(m[c]||0)+1,m),{});
-    const top=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
-    document.getElementById("kpiCommon").textContent=top;
-  }
+  let photoCount = 0;
+  queue.forEach(it=>{
+    const arr = (photosDB[it.TP] || []);
+    if (arr.length) photoCount++;
+  });
+  document.getElementById("kpiPhotos").textContent = photoCount;
 }
 
 function renderList(){
-  const q=(document.getElementById("q").value||"").toLowerCase();
-  const os=document.getElementById("filtOS").value||"";
-  const sortBy=document.getElementById("sortBy").value;
+  const q = (document.getElementById("q").value || "").toLowerCase();
+  const os = document.getElementById("filtOS").value || "";
+  const sortBy = document.getElementById("sortBy").value;
 
-  let list=db.filter(x=>x.Stage===STAGE);
-  if(os) list=list.filter(x=>(x.OperatingSystem||"")===os);
-  if(q){
-    list=list.filter(x=>{
-      const hay=[x.TP,x.Title,x.Description,x.PriceUSD].join(" ").toLowerCase();
+  let list = db.filter(x=>x.Stage===STAGE);
+  if (os) list = list.filter(x => (x.OperatingSystem||"") === os);
+
+  if (q){
+    list = list.filter(x=>{
+      const hay = [x.TP,x.Title,x.Description,x.PriceUSD,x.OperatingSystem,x.Warranty].join(" ").toLowerCase();
       return hay.includes(q);
     });
   }
-  if(sortBy==="newest") list.sort((a,b)=>(b.CreatedAt||0)-(a.CreatedAt||0));
-  if(sortBy==="oldest") list.sort((a,b)=>(a.CreatedAt||0)-(b.CreatedAt||0));
-  if(sortBy==="tp") list.sort((a,b)=>(a.TP||"").localeCompare(b.TP||""));
 
-  document.getElementById("queueCount").textContent=list.length;
-  const el=document.getElementById("list"); el.innerHTML="";
+  if (sortBy==="newest") list.sort((a,b)=>(b.CreatedAt||0)-(a.CreatedAt||0));
+  if (sortBy==="oldest") list.sort((a,b)=>(a.CreatedAt||0)-(b.CreatedAt||0));
+  if (sortBy==="tp") list.sort((a,b)=>(a.TP||"").localeCompare(b.TP||""));
 
-  if(!list.length){
-    el.innerHTML=`<div class="hint">No items in ${STAGE}.</div>`;
-    setFilterOptions(); renderKPIs(); return;
+  document.getElementById("queueCount").textContent = list.length;
+
+  const el = document.getElementById("list");
+  el.innerHTML = "";
+
+  if (!list.length){
+    el.innerHTML = `<div class="hint">No items in ${STAGE}.</div>`;
+    setFilterOptions(); renderKPIs();
+    return;
   }
 
   list.forEach(it=>{
-    const d=document.createElement("div");
-    d.className="item";
-    d.onclick=()=>openItem(it.TP);
-    const needs=(!(it.Title||"").trim() || !(it.PriceUSD||"").trim()) ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs basics</span>` : "";
-    d.innerHTML=`
+    const d = document.createElement("div");
+    d.className = "item";
+    d.onclick = ()=> openItem(it.TP);
+
+    const needs = (!(it.Title||"").trim() || !(it.PriceUSD||"").trim()) ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs basics</span>` : "";
+    const pcount = (photosDB[it.TP] || []).length;
+
+    d.innerHTML = `
       <div class="top">
         <div class="tp">${escapeHtml(it.TP)}</div>
         <div class="pill">${escapeHtml(it.OperatingSystem || "—")}</div>
@@ -221,41 +352,243 @@ function renderList(){
       <div class="meta">
         <b>${escapeHtml(it.Title || "—")}</b>${needs}<br>
         Price: ${escapeHtml(it.PriceUSD || "—")} • Warranty: ${escapeHtml(it.Warranty || "—")}
-      </div>`;
+        <br>📸 Photos: <b>${pcount}</b>
+      </div>
+    `;
     el.appendChild(d);
   });
 
-  setFilterOptions(); renderKPIs();
+  setFilterOptions();
+  renderKPIs();
 }
 
-function openItem(tp){
-  currentTP=tp;
-  const it=db.find(x=>x.TP===tp);
-  if(!it) return;
+/* UI helpers */
+function selectHTML(list, selected){
+  return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
+}
 
-  document.getElementById("statusLine").textContent=`${it.TP} • Stage: ${it.Stage}`;
+/* ---------- Photos ---------- */
 
-  document.getElementById("detail").innerHTML=`
-    <div>
-      <div class="lab">Title</div>
-      <input id="f_Title" value="${escapeAttr(it.Title||"")}" placeholder="Searchable title (Brand Model CPU RAM SSD etc.)"/>
+function getPhotos(tp){ return photosDB[tp] || []; }
+function setPhotos(tp, arr){ photosDB[tp] = arr; savePhotos(); }
+
+function fileToDataUrl(file, maxWidth=1600, quality=0.85){
+  // Compress images to keep localStorage from exploding.
+  return new Promise((resolve, reject)=>{
+    const fr = new FileReader();
+    fr.onerror = reject;
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width);
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // JPEG to reduce size
+        const dataUrl = c.toDataURL("image/jpeg", quality);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+async function addPhotosFromInput(){
+  if (!currentTP) return;
+  const input = document.getElementById("photoInput");
+  const files = [...(input.files || [])];
+  if (!files.length) return;
+
+  const existing = getPhotos(currentTP);
+
+  for (const f of files){
+    if (!f.type.startsWith("image/")) continue;
+    const dataUrl = await fileToDataUrl(f);
+    existing.push({ name: f.name, dataUrl, ts: Date.now() });
+    if (existing.length >= 12) break; // cap to avoid storage pain
+  }
+
+  setPhotos(currentTP, existing);
+  input.value = "";
+  renderPhotosPanel();
+  renderKPIs();
+  toast("Photos added (local)");
+}
+
+function removePhoto(idx){
+  if (!currentTP) return;
+  const arr = getPhotos(currentTP);
+  arr.splice(idx,1);
+  setPhotos(currentTP, arr);
+  renderPhotosPanel();
+  renderKPIs();
+}
+
+function movePhoto(idx, dir){
+  if (!currentTP) return;
+  const arr = getPhotos(currentTP);
+  const n = idx + dir;
+  if (n < 0 || n >= arr.length) return;
+  const tmp = arr[idx];
+  arr[idx] = arr[n];
+  arr[n] = tmp;
+  setPhotos(currentTP, arr);
+  renderPhotosPanel();
+}
+
+function clearAllPhotos(){
+  if (!currentTP) return;
+  if (!confirm("Remove all photos for this TP?")) return;
+  setPhotos(currentTP, []);
+  renderPhotosPanel();
+  renderKPIs();
+}
+
+/* ---------- eBay HTML Generator ---------- */
+
+function normalizeMulti(s){
+  return String(s||"").split(",").map(x=>x.trim()).filter(Boolean);
+}
+
+function buildSpecList(it){
+  const spec = [];
+  const add = (label, val) => { if (val && String(val).trim()) spec.push([label, String(val).trim()]); };
+
+  add("Category", it.Category);
+  add("Brand", it.Brand);
+  add("Model", it.Model);
+  add("Color", it.Color);
+
+  add("Screen Size", it.ScreenSizeIn ? `${it.ScreenSizeIn} in` : "");
+  add("CPU", it.CPU);
+  add("Memory", it.MemoryGB ? `${it.MemoryGB} GB` : "");
+  add("Storage", it.StorageGB ? `${it.StorageGB} GB` : "");
+  add("GPU", it.GPU);
+  add("Series", it.Series);
+
+  const conn = normalizeMulti(it.Connectivity).join(", ");
+  add("Connectivity", conn);
+
+  add("Condition", it.Condition);
+  add("Operating System", it.OperatingSystem);
+  add("Warranty", it.Warranty);
+
+  return spec;
+}
+
+function ebayDisclaimers(it){
+  const warranty = (it.Warranty||"").trim() || "None";
+  return `
+<li><b>Testing:</b> Item has been inspected/diagnosed to the best of our ability. See photos and description for details.</li>
+<li><b>Condition:</b> Cosmetic wear may include scratches/scuffs/shine/label residue typical of used electronics.</li>
+<li><b>What’s included:</b> Only what is shown/explicitly stated. Chargers/accessories are not included unless stated.</li>
+<li><b>Data:</b> Devices are wiped/reset when applicable, but buyer is responsible for setup and any software licensing.</li>
+<li><b>Warranty:</b> ${escapeHtml(warranty)} (unless otherwise stated in the listing).</li>
+<li><b>Shipping:</b> We pack with care. Tracking is provided. Please allow handling time as stated.</li>
+<li><b>Returns:</b> Returns accepted per eBay policy/listing terms. Serial numbers may be recorded for fraud prevention.</li>
+<li><b>Recycled packaging:</b> We often use <b>100% recycled</b> materials to reduce waste.</li>
+  `.trim();
+}
+
+/*
+  Images in eBay descriptions:
+  - Best practice: paste hosted URLs (or use placeholders and upload via eBay).
+*/
+function buildEbayHTML(it, imageUrls){
+  const title = (it.Title||"").trim() || `${[it.Brand,it.Model,it.CPU,it.MemoryGB?it.MemoryGB+"GB":"",it.StorageGB?it.StorageGB+"GB":""] .filter(Boolean).join(" ")}`.trim() || it.TP || "Item";
+  const desc = (it.Description||"").trim();
+  const shipPolicy = (it.ShippingPolicy||"").trim();
+
+  const specs = buildSpecList(it);
+
+  const imgBlock = imageUrls.length
+    ? imageUrls.map((u,i)=>`<div style="margin:10px 0;"><img src="${escapeAttr(u)}" alt="Photo ${i+1}" style="max-width:100%; border:1px solid #e6e6e6; border-radius:10px;"></div>`).join("")
+    : `<div style="padding:10px; border:1px dashed #bbb; border-radius:10px; color:#555;">
+         <b>Photos:</b> Upload images in the eBay listing UI (recommended).<br>
+         (Optional) Paste hosted image URLs into the STAGING generator to embed them here.
+       </div>`;
+
+  // Very eBay-safe: inline styles, minimal fancy stuff.
+  return `
+<div style="font-family:Arial, Helvetica, sans-serif; color:#111; line-height:1.35;">
+  <div style="border:1px solid #e6e6e6; border-radius:14px; overflow:hidden;">
+    <div style="padding:14px 16px; background:#0b2a4a; color:#fff;">
+      <div style="font-size:18px; font-weight:700;">${escapeHtml(title)}</div>
+      <div style="font-size:12px; opacity:.92; margin-top:4px;">
+        Sold by Tek-Pak • Internal Ref: ${escapeHtml(it.TP || "—")}
+      </div>
     </div>
 
+    <div style="padding:14px 16px;">
+      ${imgBlock}
+
+      <h3 style="margin:14px 0 8px; font-size:14px;">Item Details</h3>
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        ${specs.map(([k,v])=>`
+          <tr>
+            <td style="padding:8px 10px; border:1px solid #eee; width:34%; background:#fafafa;"><b>${escapeHtml(k)}</b></td>
+            <td style="padding:8px 10px; border:1px solid #eee;">${escapeHtml(v)}</td>
+          </tr>`).join("")}
+      </table>
+
+      <h3 style="margin:14px 0 8px; font-size:14px;">Description</h3>
+      <div style="padding:10px 12px; border:1px solid #eee; border-radius:12px; background:#fcfcfc; white-space:pre-wrap;">
+        ${escapeHtml(desc || "See item details and photos for condition and included items.")}
+      </div>
+
+      ${shipPolicy ? `
+      <h3 style="margin:14px 0 8px; font-size:14px;">Shipping Policy</h3>
+      <div style="padding:10px 12px; border:1px solid #eee; border-radius:12px; background:#fcfcfc;">
+        ${escapeHtml(shipPolicy)}
+      </div>` : ""}
+
+      <h3 style="margin:14px 0 8px; font-size:14px;">Important Information</h3>
+      <ul style="margin:0; padding-left:18px;">
+        ${ebayDisclaimers(it)}
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top:10px; font-size:11px; color:#666;">
+    © Tek-Pak — Inventory workflow generated description.
+  </div>
+</div>
+  `.trim();
+}
+
+/* ---------- Forms ---------- */
+
+function openItem(tp){
+  currentTP = tp;
+  const it = db.find(x=>x.TP===tp);
+  if (!it) return;
+
+  document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
+
+  // Staging form fields (your defined step)
+  document.getElementById("detail").innerHTML = `
     <div class="row">
+      <div>
+        <div class="lab">Title</div>
+        <input id="f_Title" value="${escapeAttr(it.Title||"")}" placeholder="Brand Model CPU RAM SSD etc."/>
+      </div>
       <div>
         <div class="lab">Operating System</div>
         <select id="f_OperatingSystem">${selectHTML(DROPDOWNS.OperatingSystem, it.OperatingSystem)}</select>
       </div>
-      <div>
-        <div class="lab">Warranty</div>
-        <select id="f_Warranty">${selectHTML(DROPDOWNS.Warranty, it.Warranty)}</select>
-      </div>
     </div>
 
     <div class="row">
       <div>
-        <div class="lab">Price</div>
-        ${affixPrefix("f_PriceUSD", it.PriceUSD, "e.g., 169.99", "$")}
+        <div class="lab">Warranty</div>
+        <select id="f_Warranty">${selectHTML(DROPDOWNS.Warranty, it.Warranty)}</select>
       </div>
       <div>
         <div class="lab">Shipping Policy</div>
@@ -263,82 +596,330 @@ function openItem(tp){
       </div>
     </div>
 
+    <div class="row">
+      <div>
+        <div class="lab">Price (USD)</div>
+        <input id="f_PriceUSD" value="${escapeAttr(it.PriceUSD||"")}" placeholder="e.g., 169.99"/>
+      </div>
+      <div>
+        <div class="lab">Quick Notes (optional)</div>
+        <input id="f_Quick" value="" placeholder="e.g., includes charger / missing keycap"/>
+      </div>
+    </div>
+
     <div class="lab">Description</div>
     <textarea id="f_Description" placeholder="Tested details, cosmetic notes, what's included…">${escapeHtml(it.Description||"")}</textarea>
 
     <div class="divider"></div>
+
+    <div class="photoBar">
+      <div style="flex:1">
+        <div class="lab">Photos (local workflow)</div>
+        <input id="photoInput" type="file" accept="image/*" multiple />
+      </div>
+      <button class="good miniBtn" onclick="addPhotosFromInput()">Add Photos</button>
+      <button class="danger miniBtn" onclick="clearAllPhotos()">Clear Photos</button>
+    </div>
+
+    <div class="hint" style="margin-top:8px">
+      📌 Photos are stored <b>locally</b> in this browser for now (UI-only). For eBay, use hosted URLs or upload in eBay’s photo section.
+    </div>
+
+    <div class="divider"></div>
+
     <div class="btns">
       <button class="good" onclick="save()">Save</button>
       <button class="warn" onclick="movePrev()">← Back</button>
       <button class="primary" onclick="moveNext()">Next → ${NEXT_STAGE}</button>
+      <button class="primary" onclick="generateNow()">Generate eBay HTML</button>
     </div>
-
-    <div class="hint" style="margin-top:10px">This station edits only: <b>Title, OperatingSystem, Warranty, Description, PriceUSD, ShippingPolicy</b>.</div>
   `;
+
+  renderPhotosPanel();
+  renderGenerator(it);
 }
 
 function save(){
-  if(!currentTP) return;
-  const it=db.find(x=>x.TP===currentTP);
-  if(!it) return;
+  if (!currentTP) return;
+  const it = db.find(x=>x.TP===currentTP);
+  if (!it) return;
 
-  it.Title=document.getElementById("f_Title").value.trim();
-  it.OperatingSystem=document.getElementById("f_OperatingSystem").value;
-  it.Warranty=document.getElementById("f_Warranty").value;
-  it.Description=document.getElementById("f_Description").value;
-  it.PriceUSD=document.getElementById("f_PriceUSD").value.trim();
-  it.ShippingPolicy=document.getElementById("f_ShippingPolicy").value;
-  it.UpdatedAt=Date.now();
+  it.Title = document.getElementById("f_Title").value.trim();
+  it.OperatingSystem = document.getElementById("f_OperatingSystem").value;
+  it.Warranty = document.getElementById("f_Warranty").value;
+  it.Description = document.getElementById("f_Description").value;
+  it.PriceUSD = document.getElementById("f_PriceUSD").value.trim();
+  it.ShippingPolicy = document.getElementById("f_ShippingPolicy").value;
 
-  saveDB(); renderList(); toast("Saved");
+  const quick = (document.getElementById("f_Quick")?.value || "").trim();
+  if (quick){
+    // Append quick notes nicely if not already present
+    if (!it.Description || !it.Description.trim()) it.Description = quick;
+    else if (!it.Description.includes(quick)) it.Description = it.Description.trim() + "\n\n" + quick;
+  }
+
+  it.UpdatedAt = Date.now();
+  saveDB();
+  renderList();
+  renderKPIs();
+  toast("Saved");
 }
 
 function moveNext(){
-  if(!currentTP) return;
+  if (!currentTP) return;
   save();
-  const it=db.find(x=>x.TP===currentTP);
-  it.Stage=NEXT_STAGE; it.UpdatedAt=Date.now();
+  const it = db.find(x=>x.TP===currentTP);
+  it.Stage = NEXT_STAGE;
+  it.UpdatedAt = Date.now();
   saveDB();
-  currentTP=null;
-  document.getElementById("detail").innerHTML=`<div class="hint">Moved to <b>${NEXT_STAGE}</b> (mock).</div>`;
-  document.getElementById("statusLine").textContent="—";
-  renderList(); toast("Forwarded");
+
+  currentTP = null;
+  document.getElementById("detail").innerHTML = `<div class="hint">Moved to <b>${NEXT_STAGE}</b> (mock).</div>`;
+  document.getElementById("generator").innerHTML = `<div class="hint">Select an item to generate eBay HTML.</div>`;
+  document.getElementById("statusLine").textContent = "—";
+  renderList();
+  renderKPIs();
+  toast("Forwarded");
 }
 
 function movePrev(){
-  if(!currentTP) return;
+  if (!currentTP) return;
   save();
-  const it=db.find(x=>x.TP===currentTP);
-  it.Stage=PREV_STAGE; it.UpdatedAt=Date.now();
+  const it = db.find(x=>x.TP===currentTP);
+  it.Stage = PREV_STAGE;
+  it.UpdatedAt = Date.now();
   saveDB();
-  currentTP=null;
-  document.getElementById("detail").innerHTML=`<div class="hint">Moved back to <b>${PREV_STAGE}</b> (mock).</div>`;
-  document.getElementById("statusLine").textContent="—";
-  renderList(); toast("Backed");
+
+  currentTP = null;
+  document.getElementById("detail").innerHTML = `<div class="hint">Moved back to <b>${PREV_STAGE}</b> (mock).</div>`;
+  document.getElementById("generator").innerHTML = `<div class="hint">Select an item to generate eBay HTML.</div>`;
+  document.getElementById("statusLine").textContent = "—";
+  renderList();
+  renderKPIs();
+  toast("Backed");
 }
 
-function todayKey(){
-  const d=new Date();
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
-}
-function newItem(){
-  const tkey=todayKey();
-  const todays=db.filter(x=>(x.TP||"").includes(`TP-${tkey}-`));
-  const nextN=String(todays.length+1).padStart(4,"0");
-  const tp=`TP-${tkey}-${nextN}`;
-  db.unshift({TP:tp, Stage:STAGE, CreatedAt:Date.now(), UpdatedAt:Date.now()});
-  saveDB(); renderList(); openItem(tp); toast("New TP created");
+/* Photos panel render */
+function renderPhotosPanel(){
+  if (!currentTP) return;
+  const it = db.find(x=>x.TP===currentTP);
+  const arr = getPhotos(currentTP);
+
+  const wrapId = "photosWrap";
+  let photosHtml = `
+    <div class="divider"></div>
+    <div class="lab">Attached Photos (${arr.length})</div>
+    ${arr.length ? `
+      <div class="photoGrid" id="${wrapId}">
+        ${arr.map((p,idx)=>`
+          <div class="thumb">
+            <img src="${p.dataUrl}" alt="photo ${idx+1}">
+            <div class="cap">
+              <div class="left">
+                <span class="badge">#${idx+1}</span>
+                <span title="${escapeAttr(p.name||"")}" style="max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                  ${escapeHtml((p.name||"photo").slice(0,18))}
+                </span>
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="miniBtn" onclick="movePhoto(${idx},-1)">◀</button>
+                <button class="miniBtn" onclick="movePhoto(${idx},1)">▶</button>
+                <button class="miniBtn danger" onclick="removePhoto(${idx})">✕</button>
+              </div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    ` : `<div class="hint">No photos yet. Add 4–6 pics (front, back, keyboard, BIOS/specs, any damage).</div>`}
+  `;
+
+  // Inject into form under photo inputs: we’ll append to the existing form HTML by finding the form and adding at the end.
+  // Since we re-render whole form in openItem(), we’ll add this at the bottom of the form container:
+  const detail = document.getElementById("detail");
+  // Remove any existing photos block by re-setting the end chunk:
+  // Simple approach: append if not present; if present, replace from last divider tag we control.
+  // We'll just remove previous by searching for a marker node.
+  const existing = document.getElementById("photoBlockMarker");
+  if (existing) existing.remove();
+
+  const marker = document.createElement("div");
+  marker.id = "photoBlockMarker";
+  marker.innerHTML = photosHtml;
+  detail.appendChild(marker);
 }
 
-document.addEventListener("keydown",(e)=>{
-  if(e.ctrlKey && (e.key==="f"||e.key==="F")){e.preventDefault();document.getElementById("q").focus();}
-  if(e.key==="Enter" && currentTP && document.activeElement && document.activeElement.tagName!=="TEXTAREA"){e.preventDefault();save();}
-  if(e.ctrlKey && e.key==="ArrowRight"){e.preventDefault();if(currentTP) moveNext();}
-  if(e.ctrlKey && e.key==="ArrowLeft"){e.preventDefault();if(currentTP) movePrev();}
+/* Generator panel render */
+function renderGenerator(it){
+  const tp = it.TP || "";
+  const pcount = (getPhotos(tp) || []).length;
+
+  document.getElementById("generator").innerHTML = `
+    <div class="hint">
+      Generates eBay-safe HTML using Intake + Processing + Staging fields.<br>
+      <b>Images:</b> best results are hosted URLs (or upload in eBay UI). Local photos attached: <b>${pcount}</b>.
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Image URL Mode (optional)</div>
+        <select id="imgMode" onchange="toggleImgMode()">
+          <option value="placeholders">Placeholders (upload photos in eBay UI)</option>
+          <option value="urls">Embed hosted image URLs in description</option>
+        </select>
+      </div>
+      <div>
+        <div class="lab">Copy/Export</div>
+        <div class="btns">
+          <button class="primary miniBtn" onclick="generateNow()">Generate</button>
+          <button class="good miniBtn" onclick="copyHtml()">Copy HTML</button>
+          <button class="miniBtn" onclick="downloadHtml()">Download .html</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="urlModeBox" style="display:none;">
+      <div class="lab">Hosted Image URLs (one per line, 4–6 recommended)</div>
+      <textarea class="urlBox" id="imgUrls" placeholder="https://.../photo1.jpg
+https://.../photo2.jpg"></textarea>
+      <div class="hint">If you don’t have hosted URLs, leave this blank and upload photos in eBay’s photo section.</div>
+    </div>
+
+    <div class="lab">Generated eBay Description HTML</div>
+    <textarea class="outBox" id="outHtml" placeholder="Click Generate…"></textarea>
+  `;
+}
+
+function toggleImgMode(){
+  const mode = document.getElementById("imgMode").value;
+  document.getElementById("urlModeBox").style.display = (mode === "urls") ? "block" : "none";
+}
+
+function generateNow(){
+  if (!currentTP) return;
+  save(); // ensure latest form values included
+  const it = db.find(x=>x.TP===currentTP);
+  if (!it) return;
+
+  const mode = document.getElementById("imgMode")?.value || "placeholders";
+  let urls = [];
+  if (mode === "urls"){
+    const raw = (document.getElementById("imgUrls")?.value || "").trim();
+    urls = raw ? raw.split("\n").map(x=>x.trim()).filter(Boolean) : [];
+  }
+  const html = buildEbayHTML(it, urls);
+  document.getElementById("outHtml").value = html;
+  toast("eBay HTML generated");
+}
+
+async function copyHtml(){
+  const box = document.getElementById("outHtml");
+  if (!box || !box.value.trim()) return toast("Generate first");
+  await navigator.clipboard.writeText(box.value);
+  toast("Copied");
+}
+
+function downloadHtml(){
+  const box = document.getElementById("outHtml");
+  if (!box || !box.value.trim()) return toast("Generate first");
+  const blob = new Blob([box.value], {type:"text/html;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (currentTP ? currentTP : "listing") + "_ebay_description.html";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* Keyboard shortcuts */
+document.addEventListener("keydown", (e)=>{
+  if (e.ctrlKey && (e.key==="f" || e.key==="F")){ e.preventDefault(); document.getElementById("q").focus(); }
+  if (e.key==="Enter" && currentTP && document.activeElement && document.activeElement.tagName!=="TEXTAREA"){ e.preventDefault(); save(); }
+  if (e.ctrlKey && (e.key==="g" || e.key==="G")){ e.preventDefault(); generateNow(); }
 });
 
+/* Boot */
 loadDB();
 renderList();
+renderKPIs();
+
+/* When selecting an item, also refresh generator panel */
+function openItem(tp){
+  currentTP = tp;
+  const it = db.find(x=>x.TP===tp);
+  if (!it) return;
+
+  document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
+
+  document.getElementById("detail").innerHTML = `
+    <div class="row">
+      <div>
+        <div class="lab">Title</div>
+        <input id="f_Title" value="${escapeAttr(it.Title||"")}" placeholder="Brand Model CPU RAM SSD etc."/>
+      </div>
+      <div>
+        <div class="lab">Operating System</div>
+        <select id="f_OperatingSystem">${selectHTML(DROPDOWNS.OperatingSystem, it.OperatingSystem)}</select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Warranty</div>
+        <select id="f_Warranty">${selectHTML(DROPDOWNS.Warranty, it.Warranty)}</select>
+      </div>
+      <div>
+        <div class="lab">Shipping Policy</div>
+        <select id="f_ShippingPolicy">${selectHTML(DROPDOWNS.ShippingPolicy, it.ShippingPolicy)}</select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Price (USD)</div>
+        <input id="f_PriceUSD" value="${escapeAttr(it.PriceUSD||"")}" placeholder="e.g., 169.99"/>
+      </div>
+      <div>
+        <div class="lab">Quick Notes (optional)</div>
+        <input id="f_Quick" value="" placeholder="e.g., includes charger / missing keycap"/>
+      </div>
+    </div>
+
+    <div class="lab">Description</div>
+    <textarea id="f_Description" placeholder="Tested details, cosmetic notes, what's included…">${escapeHtml(it.Description||"")}</textarea>
+
+    <div class="divider"></div>
+
+    <div class="photoBar">
+      <div style="flex:1">
+        <div class="lab">Photos (local workflow)</div>
+        <input id="photoInput" type="file" accept="image/*" multiple />
+      </div>
+      <button class="good miniBtn" onclick="addPhotosFromInput()">Add Photos</button>
+      <button class="danger miniBtn" onclick="clearAllPhotos()">Clear Photos</button>
+    </div>
+
+    <div class="hint" style="margin-top:8px">
+      📌 Photos are stored <b>locally</b> in this browser for now (UI-only). For eBay, use hosted URLs or upload in eBay’s photo section.
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="btns">
+      <button class="good" onclick="save()">Save</button>
+      <button class="warn" onclick="movePrev()">← Back</button>
+      <button class="primary" onclick="moveNext()">Next → ${NEXT_STAGE}</button>
+      <button class="primary" onclick="generateNow()">Generate eBay HTML</button>
+    </div>
+  `;
+
+  renderPhotosPanel();
+  renderGenerator(it);
+  renderKPIs();
+}
 </script>
 </body>
 </html>
