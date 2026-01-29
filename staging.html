@@ -154,7 +154,7 @@
     <div class="logo"></div>
     <div>
       <div class="title">YardFlow Command Center</div>
-      <div class="sub"><b>STAGING</b> • Photos + Tek-Pak eBay HTML Generator</div>
+      <div class="sub"><b>STAGING</b> • Sheet-backed • Photos + Tek-Pak eBay HTML Generator</div>
     </div>
   </div>
 
@@ -169,7 +169,6 @@
 </header>
 
 <div class="wrap">
-  <!-- LEFT: QUEUE -->
   <div class="card">
     <h3>STAGING Queue <span class="pill" id="queueCount">0</span></h3>
     <div class="body">
@@ -204,7 +203,6 @@
     </div>
   </div>
 
-  <!-- RIGHT: COMMAND CENTER -->
   <div style="display:grid; gap:14px">
     <div class="card">
       <h3>Today’s Snapshot</h3>
@@ -237,165 +235,43 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/*** Shared mock DB for all pages ***/
-const KEY = "yardflow_commandcenter_db_v1";
+/* ===================== CONFIG ===================== */
+const API_URL = "PASTE_YOUR_WEB_APP_URL_HERE"; // <-- REQUIRED
+const API_KEY = ""; // optional: match backend API_KEY if you set one
+
 const STAGE = "STAGING";
 const NEXT_STAGE = "LOGISTICS";
 const PREV_STAGE = "PROCESSING";
 
-/* UI defaults (later: pull these from your Dropdowns sheet) */
-const DROPDOWNS = {
-  OperatingSystem: ["Windows 11","Windows 10","ChromeOS","macOS","Linux","No OS"],
-  Warranty: ["None","7 Day","30 Day","90 Day"],
-  ShippingPolicy: ["Free Shipping","Flat Rate","Calculated","Local Pickup"],
-  SaleType: ["As-Is","Surplus","Refurbished","Standard"]
-};
-
-/* Logo support:
-   Put a file at: assets/tekpak-logo.png
-   OR override in generator with a hosted URL */
+/* Logo support */
 const DEFAULT_LOGO_URL = "assets/tekpak-logo.png";
 
-/* ========= TP# SETTINGS (Random 9-char default + optional customization) ========= */
+/* TP generator settings (random 9 default) */
 const TP_SETTINGS_KEY = "yardflow_tp_settings_v1";
 const DEFAULT_TP_SETTINGS = {
-  prefix: "",                 // you said format doesn't matter: default is just random 9
-  includeDate: false,         // off by default
-  sep: "-",                   // only matters if prefix/date is enabled
-  randLen: 9,                 // ✅ random 9-digit/letter
+  prefix: "",
+  includeDate: false,
+  sep: "-",
+  randLen: 9,
   charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-  case: "upper"               // upper | lower
+  case: "upper"
 };
 
-function loadTpSettings(){
-  try{
-    return { ...DEFAULT_TP_SETTINGS, ...(JSON.parse(localStorage.getItem(TP_SETTINGS_KEY) || "{}")) };
-  }catch{
-    return { ...DEFAULT_TP_SETTINGS };
-  }
-}
-function saveTpSettings(s){
-  localStorage.setItem(TP_SETTINGS_KEY, JSON.stringify(s));
-}
-function formatDateYYYYMMDD(d=new Date()){
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
-}
-function randomBlock(len, charset){
-  len = Math.max(3, Number(len)||9);
-  charset = String(charset || DEFAULT_TP_SETTINGS.charset);
-  // Prefer crypto randomness; fallback to Math.random if needed
-  try{
-    const out = [];
-    const arr = new Uint32Array(len);
-    crypto.getRandomValues(arr);
-    for (let i=0;i<len;i++) out.push(charset[arr[i] % charset.length]);
-    return out.join("");
-  }catch{
-    let out = "";
-    for (let i=0;i<len;i++){
-      out += charset[Math.floor(Math.random()*charset.length)];
-    }
-    return out;
-  }
-}
-function tpExists(tp){ return db.some(x => x.TP === tp); }
+const PHOTO_KEY = "yardflow_photos_v1"; // local-only: { [TP]: [{name,dataUrl,ts}] }
+let photosDB = {};
+let dropdowns = {};
 
-function generateTP(customOverrides = {}){
-  const s = { ...loadTpSettings(), ...customOverrides };
-  const parts = [];
-  const prefix = String(s.prefix || "").trim();
-  if (prefix) parts.push(prefix);
-  if (s.includeDate) parts.push(formatDateYYYYMMDD());
-
-  let block = randomBlock(s.randLen, s.charset);
-  block = (s.case === "lower") ? block.toLowerCase() : block.toUpperCase();
-  parts.push(block);
-
-  const sep = (s.sep ?? "-");
-  return parts.join(sep);
-}
-function generateUniqueTP(maxTries = 80){
-  for (let i=0;i<maxTries;i++){
-    const tp = generateTP();
-    if (!tpExists(tp)) return tp;
-  }
-  // ultra-rare fallback
-  return generateTP({ randLen: (loadTpSettings().randLen || 9) + 2 }) + "-" + Date.now().toString(36).toUpperCase();
-}
-
-function normalizeTP(tp){
-  return String(tp || "")
-    .trim()
-    .replace(/\s+/g, "")
-    .toUpperCase();
-}
-
-/* Your exact buyer agreement (formatted for eBay HTML output) */
-const ASIS_AGREEMENT_TEXT = `
-TEK-PAK INC. AS-IS PURCHASE AGREEMENT & RETURN POLICY
-
-By purchasing any item from Tek-Pak Inc. through eBay, the buyer acknowledges, understands,
-and expressly agrees to the following terms and conditions:
-
-1. AS-IS / NO RETURNS
-• All items marked AS-IS, NO RETURNS, FOR PARTS, or otherwise disclosed with defects are
-sold strictly AS-IS.
-• No returns, refunds, exchanges, or partial credits will be accepted for any reason.
-• Disclosed defects or limitations are not grounds for disputes or claims.
-
-2. FULL DISCLOSURE & BUYER RESPONSIBILITY
-• All known defects, limitations, and conditions are clearly disclosed in the item description.
-• Buyers are solely responsible for reading and understanding the listing prior to purchase.
-• Failure to read the listing does not entitle the buyer to a return, refund, or feedback revision.
-
-3. AGREEMENT AT PURCHASE
-By clicking Buy It Now, submitting an offer, or placing a bid, the buyer confirms acceptance of all terms.
-This constitutes a binding agreement.
-
-4. IMPROPER RETURN REQUESTS
-Submitting a return request or dispute for an issue disclosed in the listing is a violation of this agreement.
-Tek-Pak Inc. reserves the right to deny such requests.
-
-5. FEES, COST RECOVERY & DAMAGES
-• Tek-Pak Inc. reserves the right to recover all costs resulting from improper return attempts.
-• Recoverable costs may include shipping, handling, restocking, administrative, and platform fees.
-• Such amounts represent reasonable damages and are not penalties.
-
-6. ACCOUNT RESTRICTIONS
-Violations may result in permanent buyer blocks across all Tek-Pak Inc. sales channels.
-
-7. LEGAL REMEDIES
-Tek-Pak Inc. reserves all legal rights and remedies under applicable law.
-
-8. GOVERNING LAW
-This agreement shall be governed by the laws of the State of North Carolina.
-
-If you do not agree to these terms, do not purchase this item.
-`.trim();
-
-/* Optional extra professional bullets (always safe + clean) */
-const PROFESSIONAL_BULLETS = [
-  "Used electronics may show cosmetic wear (scratches/scuffs/shine/label residue). Review photos closely.",
-  "Only what is pictured/explicitly stated is included. Accessories (chargers, cables, etc.) are not included unless stated.",
-  "Devices are wiped/reset when applicable; buyer is responsible for setup and any software licensing/activation.",
-  "We use <b>100% recycled</b> packaging materials whenever possible to reduce waste.",
-  "Serial numbers/identifiers may be recorded to help prevent fraud."
-];
-
-let db = [];
+/* Queue cache (from sheet) */
+let db = []; // listItems payloads
 let currentTP = null;
 
-/* Photos store: local only (per TP). */
-const PHOTO_KEY = "yardflow_photos_v1"; // { [TP]: [{name,dataUrl,ts}] }
-let photosDB = {};
-
+/* ===================== UTIL ===================== */
 function toast(msg){
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.style.display = "block";
-  setTimeout(()=> t.style.display="none", 1600);
+  setTimeout(()=> t.style.display="none", 1700);
 }
-
 function escapeHtml(s){
   return String(s||"")
     .replaceAll("&","&amp;")
@@ -406,41 +282,145 @@ function escapeHtml(s){
 function escapeAttr(s){ return escapeHtml(s).replaceAll("'","&#39;"); }
 function uniq(list){ return [...new Set(list.filter(Boolean))]; }
 
-function loadDB(){
-  db = JSON.parse(localStorage.getItem(KEY) || "[]");
-  photosDB = JSON.parse(localStorage.getItem(PHOTO_KEY) || "{}");
-}
-function saveDB(){ localStorage.setItem(KEY, JSON.stringify(db)); }
+function loadPhotos(){ photosDB = JSON.parse(localStorage.getItem(PHOTO_KEY) || "{}"); }
 function savePhotos(){ localStorage.setItem(PHOTO_KEY, JSON.stringify(photosDB)); }
 
-/* NEW ITEM: randomized TP# */
-function newItem(){
-  const tp = generateUniqueTP();
-  db.unshift({
-    TP: tp,
-    Stage: STAGE,
-    SaleType: "As-Is",
-    ReturnsAccepted: false,
-    CreatedAt: Date.now(),
-    UpdatedAt: Date.now()
+/* ===================== JSONP GET ===================== */
+function apiGet(params){
+  return new Promise((resolve, reject)=>{
+    const cb = "cb_" + Math.random().toString(36).slice(2);
+    const timeout = setTimeout(()=>{
+      cleanup();
+      reject(new Error("API timeout"));
+    }, 12000);
+
+    function cleanup(){
+      clearTimeout(timeout);
+      try{ delete window[cb]; }catch{}
+      if (script && script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cb] = (data)=>{
+      cleanup();
+      resolve(data);
+    };
+
+    const q = new URLSearchParams({ ...params, callback: cb });
+    if (API_KEY) q.set("key", API_KEY);
+
+    const url = API_URL + (API_URL.includes("?") ? "&" : "?") + q.toString();
+    const script = document.createElement("script");
+    script.src = url;
+    script.onerror = ()=>{ cleanup(); reject(new Error("API load error")); };
+    document.head.appendChild(script);
   });
-  saveDB();
-  renderList();
-  openItem(tp);
-  toast("New TP created");
 }
 
+/* ===================== POST (best for large text) ===================== */
+async function apiPost(action, payload){
+  const url = API_URL + (API_URL.includes("?") ? "&" : "?") + new URLSearchParams({
+    action,
+    ...(API_KEY ? { key: API_KEY } : {})
+  }).toString();
+
+  // CORS is limited on Apps Script; use no-cors and then verify with a read.
+  await fetch(url, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  // Verify by pulling the item back via JSONP
+  if (payload && payload.TP){
+    const res = await apiGet({ action:"readItem", tp: payload.TP });
+    return res;
+  }
+  return { ok:true };
+}
+
+/* ===================== TP generator ===================== */
+function loadTpSettings(){
+  try{
+    return { ...DEFAULT_TP_SETTINGS, ...(JSON.parse(localStorage.getItem(TP_SETTINGS_KEY) || "{}")) };
+  }catch{
+    return { ...DEFAULT_TP_SETTINGS };
+  }
+}
+function saveTpSettings(s){ localStorage.setItem(TP_SETTINGS_KEY, JSON.stringify(s)); }
+function formatDateYYYYMMDD(d=new Date()){
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+}
+function randomBlock(len, charset){
+  len = Math.max(3, Number(len)||9);
+  charset = String(charset || DEFAULT_TP_SETTINGS.charset);
+  try{
+    const arr = new Uint32Array(len);
+    crypto.getRandomValues(arr);
+    let out = "";
+    for (let i=0;i<len;i++) out += charset[arr[i] % charset.length];
+    return out;
+  }catch{
+    let out = "";
+    for (let i=0;i<len;i++) out += charset[Math.floor(Math.random()*charset.length)];
+    return out;
+  }
+}
+function normalizeTP(tp){
+  return String(tp || "").trim().replace(/\s+/g,"").toUpperCase();
+}
+function generateTP(customOverrides = {}){
+  const s = { ...loadTpSettings(), ...customOverrides };
+  const parts = [];
+  const prefix = String(s.prefix || "").trim();
+  if (prefix) parts.push(prefix);
+  if (s.includeDate) parts.push(formatDateYYYYMMDD());
+  let block = randomBlock(s.randLen, s.charset);
+  block = (s.case === "lower") ? block.toLowerCase() : block.toUpperCase();
+  parts.push(block);
+  const sep = (s.sep ?? "-");
+  return parts.join(sep);
+}
+function tpExistsLocal(tp){ return db.some(x => String(x.TP||"").trim() === tp); }
+function generateUniqueTP(){
+  for (let i=0;i<100;i++){
+    const tp = generateTP();
+    if (!tpExistsLocal(tp)) return tp;
+  }
+  return generateTP({ randLen: (loadTpSettings().randLen || 9) + 2 }) + "-" + Date.now().toString(36).toUpperCase();
+}
+
+/* ===================== DROPDOWNS ===================== */
+function selectHTML(list, selected){
+  list = list || [];
+  return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
+}
+
+/* ===================== SHEET DATA ===================== */
+async function refreshQueue(){
+  const res = await apiGet({ action:"listItems", stage: STAGE, limit: 300 });
+  if (!res || !res.ok) throw new Error(res?.error || "Failed listItems");
+  db = res.items || [];
+}
+
+async function readItem(tp){
+  const res = await apiGet({ action:"readItem", tp });
+  if (!res || !res.ok) throw new Error(res?.error || "Failed readItem");
+  return res.item;
+}
+
+/* ===================== UI ===================== */
 function setFilterOptions(){
   const sel = document.getElementById("filtSaleType");
-  const values = uniq(db.filter(x=>x.Stage===STAGE).map(x=>x.SaleType));
+  const values = uniq(db.map(x=>x.SaleType).filter(Boolean));
   sel.innerHTML = `<option value="">All</option>` + values.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
 }
 
 function renderKPIs(){
-  const queue = db.filter(x=>x.Stage===STAGE);
+  const queue = db;
   document.getElementById("kpiQueue").textContent = queue.length;
-  document.getElementById("kpiTitle").textContent = queue.filter(x=>!(x.Title||"").trim()).length;
-  document.getElementById("kpiPrice").textContent = queue.filter(x=>!(x.PriceUSD||"").trim()).length;
+  document.getElementById("kpiTitle").textContent = queue.filter(x=>!(x.Title||"").toString().trim()).length;
+  document.getElementById("kpiPrice").textContent = queue.filter(x=>!(x.PriceUSD||"").toString().trim()).length;
 
   let photoCount = 0;
   queue.forEach(it=>{
@@ -455,7 +435,7 @@ function renderList(){
   const saleType = document.getElementById("filtSaleType").value || "";
   const sortBy = document.getElementById("sortBy").value;
 
-  let list = db.filter(x=>x.Stage===STAGE);
+  let list = [...db];
   if (saleType) list = list.filter(x => (x.SaleType||"") === saleType);
 
   if (q){
@@ -465,9 +445,9 @@ function renderList(){
     });
   }
 
-  if (sortBy==="newest") list.sort((a,b)=>(b.CreatedAt||0)-(a.CreatedAt||0));
-  if (sortBy==="oldest") list.sort((a,b)=>(a.CreatedAt||0)-(b.CreatedAt||0));
-  if (sortBy==="tp") list.sort((a,b)=>(a.TP||"").localeCompare(b.TP||""));
+  if (sortBy==="newest") list.sort((a,b)=>(Number(b.CreatedAt)||0)-(Number(a.CreatedAt)||0));
+  if (sortBy==="oldest") list.sort((a,b)=>(Number(a.CreatedAt)||0)-(Number(b.CreatedAt)||0));
+  if (sortBy==="tp") list.sort((a,b)=>(String(a.TP||"")).localeCompare(String(b.TP||"")));
 
   document.getElementById("queueCount").textContent = list.length;
 
@@ -485,10 +465,11 @@ function renderList(){
     d.className = "item";
     d.onclick = ()=> openItem(it.TP);
 
-    const needs = (!(it.Title||"").trim() || !(it.PriceUSD||"").trim())
+    const needs = (!(it.Title||"").toString().trim() || !(it.PriceUSD||"").toString().trim())
       ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs basics</span>` : "";
     const pcount = (photosDB[it.TP] || []).length;
-    const returnsLabel = (it.SaleType==="As-Is" || it.SaleType==="Surplus") ? "NO RETURNS" : (it.ReturnsAccepted ? "Returns OK" : "As listed");
+    const returnsAccepted = String(it.ReturnsAccepted).toLowerCase() === "true" || it.ReturnsAccepted === true || it.ReturnsAccepted === 1;
+    const returnsLabel = (it.SaleType==="As-Is" || it.SaleType==="Surplus") ? "NO RETURNS" : (returnsAccepted ? "Returns OK" : "As listed");
 
     d.innerHTML = `
       <div class="top">
@@ -508,12 +489,7 @@ function renderList(){
   renderKPIs();
 }
 
-/* UI helpers */
-function selectHTML(list, selected){
-  return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
-}
-
-/* ---------- Photos (local workflow) ---------- */
+/* ===================== Photos (local only) ===================== */
 function getPhotos(tp){ return photosDB[tp] || []; }
 function setPhotos(tp, arr){ photosDB[tp] = arr; savePhotos(); }
 
@@ -585,57 +561,57 @@ function clearAllPhotos(){
   renderKPIs();
 }
 
-/* ---------- TP Manual Override + Regenerate ---------- */
-function copyTP(){
-  if (!currentTP) return;
-  navigator.clipboard.writeText(currentTP);
-  toast("TP# copied");
-}
+/* ===================== Buyer Agreement / eBay HTML ===================== */
+const ASIS_AGREEMENT_TEXT = `
+TEK-PAK INC. AS-IS PURCHASE AGREEMENT & RETURN POLICY
 
-function applyTPChange(){
-  if (!currentTP) return;
-  const it = db.find(x => x.TP === currentTP);
-  if (!it) return;
+By purchasing any item from Tek-Pak Inc. through eBay, the buyer acknowledges, understands,
+and expressly agrees to the following terms and conditions:
 
-  const input = document.getElementById("f_TP");
-  const desired = normalizeTP(input?.value);
+1. AS-IS / NO RETURNS
+• All items marked AS-IS, NO RETURNS, FOR PARTS, or otherwise disclosed with defects are
+sold strictly AS-IS.
+• No returns, refunds, exchanges, or partial credits will be accepted for any reason.
+• Disclosed defects or limitations are not grounds for disputes or claims.
 
-  if (!desired) { input.value = currentTP; return toast("TP# can't be blank"); }
-  if (desired === currentTP) return toast("TP# unchanged");
+2. FULL DISCLOSURE & BUYER RESPONSIBILITY
+• All known defects, limitations, and conditions are clearly disclosed in the item description.
+• Buyers are solely responsible for reading and understanding the listing prior to purchase.
+• Failure to read the listing does not entitle the buyer to a return, refund, or feedback revision.
 
-  const taken = db.some(x => x.TP === desired);
-  if (taken){
-    input.value = currentTP;
-    return toast("That TP# already exists");
-  }
+3. AGREEMENT AT PURCHASE
+By clicking Buy It Now, submitting an offer, or placing a bid, the buyer confirms acceptance of all terms.
+This constitutes a binding agreement.
 
-  // Move photos mapping so photos follow the item
-  if (photosDB[currentTP]){
-    photosDB[desired] = photosDB[currentTP];
-    delete photosDB[currentTP];
-    savePhotos();
-  }
+4. IMPROPER RETURN REQUESTS
+Submitting a return request or dispute for an issue disclosed in the listing is a violation of this agreement.
+Tek-Pak Inc. reserves the right to deny such requests.
 
-  it.TP = desired;
-  it.UpdatedAt = Date.now();
-  saveDB();
+5. FEES, COST RECOVERY & DAMAGES
+• Tek-Pak Inc. reserves the right to recover all costs resulting from improper return attempts.
+• Recoverable costs may include shipping, handling, restocking, administrative, and platform fees.
+• Such amounts represent reasonable damages and are not penalties.
 
-  currentTP = desired;
-  renderList();
-  renderKPIs();
-  openItem(desired);
-  toast("TP# updated");
-}
+6. ACCOUNT RESTRICTIONS
+Violations may result in permanent buyer blocks across all Tek-Pak Inc. sales channels.
 
-function regenerateTP(){
-  if (!currentTP) return;
-  const input = document.getElementById("f_TP");
-  const newTP = generateUniqueTP();
-  if (input) input.value = newTP;
-  applyTPChange();
-}
+7. LEGAL REMEDIES
+Tek-Pak Inc. reserves all legal rights and remedies under applicable law.
 
-/* ---------- eBay HTML Generator ---------- */
+8. GOVERNING LAW
+This agreement shall be governed by the laws of the State of North Carolina.
+
+If you do not agree to these terms, do not purchase this item.
+`.trim();
+
+const PROFESSIONAL_BULLETS = [
+  "Used electronics may show cosmetic wear (scratches/scuffs/shine/label residue). Review photos closely.",
+  "Only what is pictured/explicitly stated is included. Accessories (chargers, cables, etc.) are not included unless stated.",
+  "Devices are wiped/reset when applicable; buyer is responsible for setup and any software licensing/activation.",
+  "We use <b>100% recycled</b> packaging materials whenever possible to reduce waste.",
+  "Serial numbers/identifiers may be recorded to help prevent fraud."
+];
+
 function normalizeMulti(s){
   return String(s||"").split(",").map(x=>x.trim()).filter(Boolean);
 }
@@ -662,16 +638,12 @@ function buildSpecRows(it){
   const spec = [];
   const add = (label, val) => { if (val && String(val).trim()) spec.push([label, String(val).trim()]); };
 
-  // Always include TP number
   add("Tek-Pak TP#", it.TP);
-
-  // Intake
   add("Category", it.Category);
   add("Brand", it.Brand);
   add("Model", it.Model);
   add("Color", it.Color);
 
-  // Processing
   add("Screen Size", it.ScreenSizeIn ? `${it.ScreenSizeIn} in` : "");
   add("CPU", it.CPU);
   add("Memory", it.MemoryGB ? `${it.MemoryGB} GB` : "");
@@ -682,7 +654,6 @@ function buildSpecRows(it){
   add("Connectivity", conn);
   add("Condition", it.Condition);
 
-  // Staging
   add("Sale Type", it.SaleType);
   add("Operating System", it.OperatingSystem);
   add("Warranty", it.Warranty);
@@ -814,13 +785,34 @@ function buildEbayHTML(it, imageUrls, logoUrl){
   `.trim();
 }
 
-/* ---------- Forms ---------- */
-function openItem(tp){
+/* ===================== CORE ACTIONS ===================== */
+async function newItem(){
+  const tp = generateUniqueTP();
+  const payload = {
+    TP: tp,
+    Stage: STAGE,
+    CreatedAt: Date.now(),
+    UpdatedAt: Date.now(),
+    SaleType: "As-Is",
+    ReturnsAccepted: false
+  };
+  await apiPost("upsertItem", payload);
+  await boot();
+  openItem(tp);
+  toast("New TP created (sheet)");
+}
+
+async function openItem(tp){
   currentTP = tp;
-  const it = db.find(x=>x.TP===tp);
-  if (!it) return;
+  const it = await readItem(tp);
 
   document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
+
+  const dd = dropdowns || {};
+  const saleTypes = dd.SaleType?.length ? dd.SaleType : ["As-Is","Surplus","Refurbished","Standard"];
+  const osList = dd.OperatingSystem?.length ? dd.OperatingSystem : ["Windows 11","Windows 10","ChromeOS","macOS","Linux","No OS"];
+  const warrantyList = dd.Warranty?.length ? dd.Warranty : ["None","7 Day","30 Day","90 Day"];
+  const shipList = dd.ShippingPolicy?.length ? dd.ShippingPolicy : ["Free Shipping","Flat Rate","Calculated","Local Pickup"];
 
   document.getElementById("detail").innerHTML = `
     <div class="tpCallout" style="align-items:flex-start;">
@@ -832,21 +824,21 @@ function openItem(tp){
           <button class="miniBtn warn" onclick="regenerateTP()">Regenerate</button>
           <button class="miniBtn good" onclick="applyTPChange()">Apply TP#</button>
         </div>
-        <div class="hint" style="margin-top:6px;">Default TP = random 9 alphanumeric. Must be unique (local).</div>
+        <div class="hint" style="margin-top:6px;">Default TP = random 9 alphanumeric. Unique check becomes global via sheet.</div>
       </div>
     </div>
 
     <div class="row">
       <div>
         <div class="lab">Sale Type</div>
-        <select id="f_SaleType">${selectHTML(DROPDOWNS.SaleType, it.SaleType)}</select>
+        <select id="f_SaleType">${selectHTML(saleTypes, it.SaleType)}</select>
       </div>
       <div>
         <div class="lab">Returns Accepted (only if listing allows)</div>
         <div class="checkRow">
           <label><input type="checkbox" id="f_ReturnsAccepted" ${it.ReturnsAccepted ? "checked" : ""}> Mark returns accepted</label>
         </div>
-        <div class="hint">Note: As-Is/Surplus typically = no returns.</div>
+        <div class="hint">As-Is/Surplus will auto-disable returns on save.</div>
       </div>
     </div>
 
@@ -857,18 +849,18 @@ function openItem(tp){
       </div>
       <div>
         <div class="lab">Operating System</div>
-        <select id="f_OperatingSystem">${selectHTML(DROPDOWNS.OperatingSystem, it.OperatingSystem)}</select>
+        <select id="f_OperatingSystem">${selectHTML(osList, it.OperatingSystem)}</select>
       </div>
     </div>
 
     <div class="row">
       <div>
         <div class="lab">Warranty</div>
-        <select id="f_Warranty">${selectHTML(DROPDOWNS.Warranty, it.Warranty)}</select>
+        <select id="f_Warranty">${selectHTML(warrantyList, it.Warranty)}</select>
       </div>
       <div>
         <div class="lab">Shipping Policy</div>
-        <select id="f_ShippingPolicy">${selectHTML(DROPDOWNS.ShippingPolicy, it.ShippingPolicy)}</select>
+        <select id="f_ShippingPolicy">${selectHTML(shipList, it.ShippingPolicy)}</select>
       </div>
     </div>
 
@@ -898,7 +890,7 @@ function openItem(tp){
     </div>
 
     <div class="hint" style="margin-top:8px">
-      📌 Photos are stored <b>locally</b> in this browser for now. For eBay, upload in the listing UI or paste hosted URLs into the generator.
+      📌 Photos are stored <b>locally</b> per PC for now. Sheet sync is for item data.
     </div>
 
     <div class="divider"></div>
@@ -908,6 +900,7 @@ function openItem(tp){
       <button class="warn" onclick="movePrev()">← Back</button>
       <button class="primary" onclick="moveNext()">Next → ${NEXT_STAGE}</button>
       <button class="primary" onclick="generateNow()">Generate eBay HTML</button>
+      <button class="miniBtn" onclick="refreshCurrent()">Refresh</button>
     </div>
   `;
 
@@ -916,74 +909,118 @@ function openItem(tp){
   renderKPIs();
 }
 
-function save(){
+function copyTP(){
   if (!currentTP) return;
-  const it = db.find(x=>x.TP===currentTP);
-  if (!it) return;
+  navigator.clipboard.writeText(currentTP);
+  toast("TP# copied");
+}
 
-  it.SaleType = document.getElementById("f_SaleType").value || it.SaleType;
-  it.ReturnsAccepted = !!document.getElementById("f_ReturnsAccepted").checked;
+async function refreshCurrent(){
+  if (!currentTP) return;
+  await boot(false);
+  await openItem(currentTP);
+  toast("Refreshed from sheet");
+}
 
-  // Guardrail: auto-disable returns when As-Is/Surplus
-  if (it.SaleType === "As-Is" || it.SaleType === "Surplus"){
-    it.ReturnsAccepted = false;
+async function applyTPChange(){
+  if (!currentTP) return;
+
+  const input = document.getElementById("f_TP");
+  const desired = normalizeTP(input?.value);
+
+  if (!desired) { input.value = currentTP; return toast("TP# can't be blank"); }
+  if (desired === currentTP) return toast("TP# unchanged");
+
+  // update sheet key
+  const res = await apiGet({ action:"updateTP", oldTp: currentTP, newTp: desired });
+  if (!res || !res.ok){
+    input.value = currentTP;
+    return toast(res?.error || "TP update failed");
   }
 
-  it.Title = document.getElementById("f_Title").value.trim();
-  it.OperatingSystem = document.getElementById("f_OperatingSystem").value;
-  it.Warranty = document.getElementById("f_Warranty").value;
-  it.Description = document.getElementById("f_Description").value;
-  it.PriceUSD = document.getElementById("f_PriceUSD").value.trim();
-  it.ShippingPolicy = document.getElementById("f_ShippingPolicy").value;
+  // move photos mapping local
+  if (photosDB[currentTP]){
+    photosDB[desired] = photosDB[currentTP];
+    delete photosDB[currentTP];
+    savePhotos();
+  }
+
+  currentTP = desired;
+  await boot(false);
+  await openItem(desired);
+  toast("TP# updated");
+}
+
+async function regenerateTP(){
+  const input = document.getElementById("f_TP");
+  const newTP = generateUniqueTP();
+  if (input) input.value = newTP;
+  await applyTPChange();
+}
+
+async function save(){
+  if (!currentTP) return;
+  const tp = currentTP;
+
+  const saleType = document.getElementById("f_SaleType").value || "";
+  let returnsAccepted = !!document.getElementById("f_ReturnsAccepted").checked;
+
+  if (saleType === "As-Is" || saleType === "Surplus") returnsAccepted = false;
+
+  const payload = {
+    TP: tp,
+    Stage: STAGE,
+    UpdatedAt: Date.now(),
+    SaleType: saleType,
+    ReturnsAccepted: returnsAccepted,
+    Title: document.getElementById("f_Title").value.trim(),
+    OperatingSystem: document.getElementById("f_OperatingSystem").value,
+    Warranty: document.getElementById("f_Warranty").value,
+    ShippingPolicy: document.getElementById("f_ShippingPolicy").value,
+    PriceUSD: document.getElementById("f_PriceUSD").value.trim(),
+    Description: document.getElementById("f_Description").value
+  };
 
   const quick = (document.getElementById("f_Quick")?.value || "").trim();
   if (quick){
-    if (!it.Description || !it.Description.trim()) it.Description = quick;
-    else if (!it.Description.includes(quick)) it.Description = it.Description.trim() + "\n\n" + quick;
+    if (!payload.Description || !payload.Description.trim()) payload.Description = quick;
+    else if (!payload.Description.includes(quick)) payload.Description = payload.Description.trim() + "\n\n" + quick;
   }
 
-  it.UpdatedAt = Date.now();
-  saveDB();
-  renderList();
-  renderKPIs();
-  toast("Saved");
+  await apiPost("upsertItem", payload);
+  await boot(false);
+  toast("Saved to sheet");
 }
 
-function moveNext(){
+async function moveNext(){
   if (!currentTP) return;
-  save();
-  const it = db.find(x=>x.TP===currentTP);
-  it.Stage = NEXT_STAGE;
-  it.UpdatedAt = Date.now();
-  saveDB();
+  await save();
+  const res = await apiGet({ action:"moveStage", tp: currentTP, stage: NEXT_STAGE });
+  if (!res || !res.ok) return toast(res?.error || "Move failed");
 
   currentTP = null;
-  document.getElementById("detail").innerHTML = `<div class="hint">Moved to <b>${NEXT_STAGE}</b> (mock).</div>`;
+  document.getElementById("detail").innerHTML = `<div class="hint">Moved to <b>${NEXT_STAGE}</b>.</div>`;
   document.getElementById("generator").innerHTML = `<div class="hint">Select an item to generate eBay HTML.</div>`;
   document.getElementById("statusLine").textContent = "—";
-  renderList();
-  renderKPIs();
+  await boot(false);
   toast("Forwarded");
 }
 
-function movePrev(){
+async function movePrev(){
   if (!currentTP) return;
-  save();
-  const it = db.find(x=>x.TP===currentTP);
-  it.Stage = PREV_STAGE;
-  it.UpdatedAt = Date.now();
-  saveDB();
+  await save();
+  const res = await apiGet({ action:"moveStage", tp: currentTP, stage: PREV_STAGE });
+  if (!res || !res.ok) return toast(res?.error || "Move failed");
 
   currentTP = null;
-  document.getElementById("detail").innerHTML = `<div class="hint">Moved back to <b>${PREV_STAGE}</b> (mock).</div>`;
+  document.getElementById("detail").innerHTML = `<div class="hint">Moved back to <b>${PREV_STAGE}</b>.</div>`;
   document.getElementById("generator").innerHTML = `<div class="hint">Select an item to generate eBay HTML.</div>`;
   document.getElementById("statusLine").textContent = "—";
-  renderList();
-  renderKPIs();
+  await boot(false);
   toast("Backed");
 }
 
-/* Photos panel render */
+/* Photos panel */
 function renderPhotosPanel(){
   if (!currentTP) return;
   const arr = getPhotos(currentTP);
@@ -1026,7 +1063,7 @@ function renderPhotosPanel(){
   detail.appendChild(marker);
 }
 
-/* Generator panel render */
+/* Generator panel */
 function renderGenerator(it){
   const tp = it.TP || "";
   const pcount = (getPhotos(tp) || []).length;
@@ -1040,7 +1077,7 @@ function renderGenerator(it){
     </div>
 
     <div class="hint" style="margin-top:10px;">
-      Generates eBay-safe HTML using Intake + Processing + Staging fields.
+      Generates eBay-safe HTML using sheet fields.
       Local photos attached: <b>${pcount}</b>.
     </div>
 
@@ -1050,7 +1087,7 @@ function renderGenerator(it){
       <div>
         <div class="lab">Logo URL (optional)</div>
         <input id="logoUrl" value="${escapeAttr(DEFAULT_LOGO_URL)}" placeholder="assets/tekpak-logo.png or https://..."/>
-        <div class="hint">If the logo doesn’t show on eBay, host it and paste the full URL here.</div>
+        <div class="hint">If logo doesn’t render on eBay, host it and paste full URL.</div>
       </div>
       <div>
         <div class="lab">Image Mode (optional)</div>
@@ -1085,11 +1122,10 @@ function toggleImgMode(){
   document.getElementById("urlModeBox").style.display = (mode === "urls") ? "block" : "none";
 }
 
-function generateNow(){
+async function generateNow(){
   if (!currentTP) return;
-  save();
-  const it = db.find(x=>x.TP===currentTP);
-  if (!it) return;
+  await save();
+  const it = await readItem(currentTP);
 
   const mode = document.getElementById("imgMode")?.value || "placeholders";
   let urls = [];
@@ -1125,7 +1161,7 @@ function downloadHtml(){
   URL.revokeObjectURL(url);
 }
 
-/* ========= TP SETTINGS UI (simple + saved per PC) ========= */
+/* TP Settings UI */
 function openTpSettings(){
   const s = loadTpSettings();
   const preview = generateTP(s);
@@ -1181,10 +1217,6 @@ function openTpSettings(){
 
     <div class="lab">Preview</div>
     <input id="tp_preview" readonly value="${escapeAttr(preview)}"/>
-
-    <div class="hint" style="margin-top:10px;">
-      Heads-up: this uniqueness check is local-only until we connect the shared sheet/API.
-    </div>
   `;
 }
 
@@ -1222,9 +1254,24 @@ document.addEventListener("keydown", (e)=>{
 });
 
 /* Boot */
-loadDB();
-renderList();
-renderKPIs();
+async function boot(showToast=true){
+  if (!API_URL || API_URL.includes("https://script.google.com/macros/s/AKfycbw5s7R5FFQBNKqmQPwNl-jSa6g987HeyXS2eMDR1Y2H9pq5XUEn4QHnqGA5-B8cXAelEw/exec")){
+    document.getElementById("list").innerHTML = `<div class="hint"><b>API_URL not set.</b><br>Paste your Apps Script Web App URL into staging.html.</div>`;
+    return;
+  }
+  try{
+    loadPhotos();
+    const dd = await apiGet({ action:"getDropdowns" });
+    dropdowns = dd?.dropdowns || {};
+    await refreshQueue();
+    renderList();
+    renderKPIs();
+    if (showToast) toast("Connected to sheet");
+  }catch(err){
+    document.getElementById("list").innerHTML = `<div class="hint"><b>API error.</b><br>${escapeHtml(err.message || String(err))}</div>`;
+  }
+}
+boot();
 </script>
 </body>
 </html>
