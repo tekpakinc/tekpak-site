@@ -78,6 +78,8 @@
   }
   textarea{min-height:96px; resize:vertical}
   .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  @media (max-width: 700px){ .row{grid-template-columns:1fr} }
+
   .btns{display:flex; gap:10px; flex-wrap:wrap}
   button{
     border:none; border-radius:14px; padding:10px 12px; cursor:pointer;
@@ -87,6 +89,9 @@
   button.primary{background:linear-gradient(135deg, rgba(58,160,255,.95), rgba(58,160,255,.55)); border-color:rgba(58,160,255,.55)}
   button.good{background:linear-gradient(135deg, rgba(61,255,141,.85), rgba(61,255,141,.35)); border-color:rgba(61,255,141,.55); color:#06210f}
   button.warn{background:linear-gradient(135deg, rgba(255,209,102,.9), rgba(255,209,102,.35)); border-color:rgba(255,209,102,.55); color:#241600}
+  button.danger{background:linear-gradient(135deg, rgba(255,77,109,.9), rgba(255,77,109,.35)); border-color:rgba(255,77,109,.55); color:#2a0010}
+  .miniBtn{padding:8px 10px; border-radius:12px; font-size:12px}
+  .kbd{font-family:var(--mono); font-size:11px; color:var(--muted)}
 
   .list{display:flex; flex-direction:column; gap:8px; max-height:62vh; overflow:auto; padding-right:6px}
   .item{
@@ -129,8 +134,12 @@
   .chipBox input{accent-color: var(--accent); width:16px; height:16px}
   .chipBox.on{border-color: rgba(58,160,255,.55); box-shadow: 0 0 0 2px rgba(58,160,255,.12) inset}
 
-  /* small */
-  .kbd{font-family:var(--mono); font-size:11px; color:var(--muted)}
+  .tpCallout{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    padding:10px; border-radius:16px; border:1px solid var(--line);
+    background:rgba(0,0,0,.22);
+  }
+  .tpCallout .big{font-family:var(--mono); font-weight:950;}
 </style>
 </head>
 <body>
@@ -148,6 +157,7 @@
     <a class="chipNav active" href="./processing.html">Processing</a>
     <a class="chipNav" href="./staging.html">Staging</a>
     <a class="chipNav" href="./logistics.html">Logistics</a>
+    <button class="miniBtn" onclick="openTpSettings()">TP Settings</button>
     <button class="primary" onclick="newItem()">+ New TP</button>
   </div>
 </header>
@@ -223,29 +233,36 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/*** Shared UI engine (mock DB). Same KEY used across all pages. ***/
-const KEY = "yardflow_commandcenter_db_v1";
+/* ===================== CONFIG ===================== */
+const API_URL = "PASTE_YOUR_WEB_APP_URL_HERE"; // <-- REQUIRED
+const API_KEY = ""; // optional: match backend API_KEY if you set one
+
 const STAGE = "PROCESSING";
 const NEXT_STAGE = "STAGING";
 const PREV_STAGE = "INTAKE";
 
-/* NOTE:
-   These are UI defaults. Later we’ll populate these from your Dropdowns sheet. */
-const DROPDOWNS = {
-  Connectivity: ["Wi-Fi","Bluetooth","Ethernet","LTE/5G","USB-C","Thunderbolt","HDMI","Other"],
-  Condition: ["A","B","C","Parts/Repair"]
+/* TP generator settings (random 9 default) */
+const TP_SETTINGS_KEY = "yardflow_tp_settings_v1";
+const DEFAULT_TP_SETTINGS = {
+  prefix: "",
+  includeDate: false,
+  sep: "-",
+  randLen: 9,
+  charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+  case: "upper"
 };
 
-let db = [];
-let currentTP = null;
+let dropdowns = {};
+let db = [];          // listItems payloads
+let currentTP = null; // active TP
 
+/* ===================== UTIL ===================== */
 function toast(msg){
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.style.display = "block";
   setTimeout(()=> t.style.display="none", 1600);
 }
-
 function escapeHtml(s){
   return String(s||"")
     .replaceAll("&","&amp;")
@@ -256,47 +273,140 @@ function escapeHtml(s){
 function escapeAttr(s){ return escapeHtml(s).replaceAll("'","&#39;"); }
 function uniq(list){ return [...new Set(list.filter(Boolean))]; }
 
-function loadDB(){
-  const raw = localStorage.getItem(KEY);
-  if (raw) db = JSON.parse(raw);
-  else db = [];
+/* ===================== JSONP GET ===================== */
+function apiGet(params){
+  return new Promise((resolve, reject)=>{
+    const cb = "cb_" + Math.random().toString(36).slice(2);
+    const timeout = setTimeout(()=>{
+      cleanup();
+      reject(new Error("API timeout"));
+    }, 12000);
+
+    function cleanup(){
+      clearTimeout(timeout);
+      try{ delete window[cb]; }catch{}
+      if (script && script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cb] = (data)=>{ cleanup(); resolve(data); };
+
+    const q = new URLSearchParams({ ...params, callback: cb });
+    if (API_KEY) q.set("key", API_KEY);
+
+    const url = API_URL + (API_URL.includes("?") ? "&" : "?") + q.toString();
+    const script = document.createElement("script");
+    script.src = url;
+    script.onerror = ()=>{ cleanup(); reject(new Error("API load error")); };
+    document.head.appendChild(script);
+  });
 }
 
-function saveDB(){ localStorage.setItem(KEY, JSON.stringify(db)); }
+/* ===================== POST (best for larger payloads) ===================== */
+async function apiPost(action, payload){
+  const url = API_URL + (API_URL.includes("?") ? "&" : "?") + new URLSearchParams({
+    action,
+    ...(API_KEY ? { key: API_KEY } : {})
+  }).toString();
 
-function todayKey(){
-  const d = new Date();
+  await fetch(url, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  // verify (JSONP readback)
+  if (payload && payload.TP){
+    return await apiGet({ action:"readItem", tp: payload.TP });
+  }
+  return { ok:true };
+}
+
+/* ===================== TP generator (same as staging) ===================== */
+function loadTpSettings(){
+  try{
+    return { ...DEFAULT_TP_SETTINGS, ...(JSON.parse(localStorage.getItem(TP_SETTINGS_KEY) || "{}")) };
+  }catch{
+    return { ...DEFAULT_TP_SETTINGS };
+  }
+}
+function saveTpSettings(s){ localStorage.setItem(TP_SETTINGS_KEY, JSON.stringify(s)); }
+function formatDateYYYYMMDD(d=new Date()){
   return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
 }
-
-function newItem(){
-  const tkey = todayKey();
-  const todays = db.filter(x => (x.TP||"").includes(`TP-${tkey}-`));
-  const nextN = String(todays.length + 1).padStart(4,"0");
-  const tp = `TP-${tkey}-${nextN}`;
-
-  db.unshift({TP:tp, Stage:STAGE, CreatedAt:Date.now(), UpdatedAt:Date.now()});
-  saveDB();
-  renderList();
-  openItem(tp);
-  toast("New TP created");
+function randomBlock(len, charset){
+  len = Math.max(3, Number(len)||9);
+  charset = String(charset || DEFAULT_TP_SETTINGS.charset);
+  try{
+    const arr = new Uint32Array(len);
+    crypto.getRandomValues(arr);
+    let out = "";
+    for (let i=0;i<len;i++) out += charset[arr[i] % charset.length];
+    return out;
+  }catch{
+    let out = "";
+    for (let i=0;i<len;i++) out += charset[Math.floor(Math.random()*charset.length)];
+    return out;
+  }
+}
+function normalizeTP(tp){
+  return String(tp || "").trim().replace(/\s+/g,"").toUpperCase();
+}
+function generateTP(customOverrides = {}){
+  const s = { ...loadTpSettings(), ...customOverrides };
+  const parts = [];
+  const prefix = String(s.prefix || "").trim();
+  if (prefix) parts.push(prefix);
+  if (s.includeDate) parts.push(formatDateYYYYMMDD());
+  let block = randomBlock(s.randLen, s.charset);
+  block = (s.case === "lower") ? block.toLowerCase() : block.toUpperCase();
+  parts.push(block);
+  const sep = (s.sep ?? "-");
+  return parts.join(sep);
+}
+function tpExistsLocal(tp){ return db.some(x => String(x.TP||"").trim() === tp); }
+function generateUniqueTP(){
+  for (let i=0;i<100;i++){
+    const tp = generateTP();
+    if (!tpExistsLocal(tp)) return tp;
+  }
+  return generateTP({ randLen: (loadTpSettings().randLen || 9) + 2 }) + "-" + Date.now().toString(36).toUpperCase();
 }
 
+/* ===================== SHEET DATA ===================== */
+async function refreshQueue(){
+  const res = await apiGet({ action:"listItems", stage: STAGE, limit: 300 });
+  if (!res || !res.ok) throw new Error(res?.error || "Failed listItems");
+  db = res.items || [];
+}
+async function readItem(tp){
+  const res = await apiGet({ action:"readItem", tp });
+  if (!res || !res.ok) throw new Error(res?.error || "Failed readItem");
+  return res.item;
+}
+
+/* ===================== DROPDOWNS ===================== */
+function selectHTML(list, selected){
+  list = list || [];
+  return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
+}
+
+/* ===================== LIST + KPIs ===================== */
 function setFilterOptions(){
   const sel = document.getElementById("filtCondition");
-  const values = uniq(db.filter(x=>x.Stage===STAGE).map(x=>x.Condition));
+  const values = uniq(db.map(x=>x.Condition).filter(Boolean));
   sel.innerHTML = `<option value="">All</option>` + values.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
 }
 
 function renderKPIs(){
-  const queue = db.filter(x=>x.Stage===STAGE);
+  const queue = db;
   document.getElementById("kpiQueue").textContent = queue.length;
-  document.getElementById("kpiCPU").textContent = queue.filter(x=>!(x.CPU||"").trim()).length;
-  document.getElementById("kpiMem").textContent = queue.filter(x=>!(x.MemoryGB||"").trim() || !(x.StorageGB||"").trim()).length;
+  document.getElementById("kpiCPU").textContent = queue.filter(x=>!(x.CPU||"").toString().trim()).length;
+  document.getElementById("kpiMem").textContent = queue.filter(x=>!(x.MemoryGB||"").toString().trim() || !(x.StorageGB||"").toString().trim()).length;
 
   const conds = queue.map(x=>x.Condition).filter(Boolean);
   if (!conds.length) document.getElementById("kpiCommon").textContent = "—";
-  else {
+  else{
     const counts = conds.reduce((m,c)=>(m[c]=(m[c]||0)+1,m),{});
     const top = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
     document.getElementById("kpiCommon").textContent = top;
@@ -308,19 +418,19 @@ function renderList(){
   const cond = document.getElementById("filtCondition").value || "";
   const sortBy = document.getElementById("sortBy").value;
 
-  let list = db.filter(x=>x.Stage===STAGE);
+  let list = [...db];
   if (cond) list = list.filter(x => (x.Condition||"") === cond);
 
   if (q){
     list = list.filter(x=>{
-      const hay = [x.TP,x.CPU,x.Series,x.GPU,x.ScreenSizeIn,x.MemoryGB,x.StorageGB,x.Connectivity].join(" ").toLowerCase();
+      const hay = [x.TP,x.CPU,x.Series,x.GPU,x.ScreenSizeIn,x.MemoryGB,x.StorageGB,x.Connectivity,x.Features].join(" ").toLowerCase();
       return hay.includes(q);
     });
   }
 
-  if (sortBy==="newest") list.sort((a,b)=>(b.CreatedAt||0)-(a.CreatedAt||0));
-  if (sortBy==="oldest") list.sort((a,b)=>(a.CreatedAt||0)-(b.CreatedAt||0));
-  if (sortBy==="tp") list.sort((a,b)=>(a.TP||"").localeCompare(b.TP||""));
+  if (sortBy==="newest") list.sort((a,b)=>(Number(b.CreatedAt)||0)-(Number(a.CreatedAt)||0));
+  if (sortBy==="oldest") list.sort((a,b)=>(Number(a.CreatedAt)||0)-(Number(b.CreatedAt)||0));
+  if (sortBy==="tp") list.sort((a,b)=>(String(a.TP||"")).localeCompare(String(b.TP||"")));
 
   document.getElementById("queueCount").textContent = list.length;
 
@@ -339,7 +449,8 @@ function renderList(){
     d.className = "item";
     d.onclick = ()=> openItem(it.TP);
 
-    const needs = (!it.CPU || !it.MemoryGB || !it.StorageGB) ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs specs</span>` : "";
+    const needs = (!it.CPU || !it.MemoryGB || !it.StorageGB)
+      ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs specs</span>` : "";
     const conn = (it.Connectivity||"").trim();
 
     d.innerHTML = `
@@ -362,10 +473,7 @@ function renderList(){
   renderKPIs();
 }
 
-/* Helpers */
-function selectHTML(list, selected){
-  return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
-}
+/* ===================== FORM HELPERS ===================== */
 function affix(id, value, placeholder, suffix){
   return `<div class="affix"><input id="${id}" value="${escapeAttr(value||"")}" placeholder="${escapeAttr(placeholder)}"/><span>${escapeHtml(suffix)}</span></div>`;
 }
@@ -379,9 +487,13 @@ function parseMulti(value){
 }
 function renderConnectivityChips(selectedList){
   const selected = new Set(selectedList);
+  const opts = (dropdowns.Connectivity && dropdowns.Connectivity.length)
+    ? dropdowns.Connectivity
+    : ["Wi-Fi","Bluetooth","Ethernet","LTE/5G","USB-C","Thunderbolt","HDMI","Other"];
+
   return `
     <div class="chips" id="connChips">
-      ${DROPDOWNS.Connectivity.map(opt=>{
+      ${opts.map(opt=>{
         const checked = selected.has(opt) ? "checked" : "";
         const on = selected.has(opt) ? "on" : "";
         return `
@@ -409,15 +521,45 @@ function getConnectivityFromChips(){
   return checked.join(", ");
 }
 
-/* Form */
-function openItem(tp){
+/* ===================== ACTIONS ===================== */
+async function newItem(){
+  const tp = generateUniqueTP();
+  const payload = {
+    TP: tp,
+    Stage: STAGE,
+    CreatedAt: Date.now(),
+    UpdatedAt: Date.now()
+  };
+  await apiPost("upsertItem", payload);
+  await boot(false);
+  await openItem(tp);
+  toast("New TP created (sheet)");
+}
+
+async function openItem(tp){
   currentTP = tp;
-  const it = db.find(x=>x.TP===tp);
-  if (!it) return;
+  const it = await readItem(tp);
 
   document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
 
+  const condList = (dropdowns.Condition && dropdowns.Condition.length)
+    ? dropdowns.Condition
+    : ["A","B","C","Parts/Repair"];
+
   document.getElementById("detail").innerHTML = `
+    <div class="tpCallout" style="align-items:flex-start;">
+      <div style="width:100%;">
+        <div style="color:var(--muted); font-size:12px; margin-bottom:6px;">TP Item Number (manual override allowed)</div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%;">
+          <input id="f_TP" value="${escapeAttr(it.TP)}" style="flex:1; min-width:220px; font-family:var(--mono); font-weight:950;" />
+          <button class="miniBtn" onclick="copyTP()">Copy</button>
+          <button class="miniBtn warn" onclick="regenerateTP()">Regenerate</button>
+          <button class="miniBtn good" onclick="applyTPChange()">Apply TP#</button>
+        </div>
+        <div class="hint" style="margin-top:6px;">Default TP = random 9 alphanumeric. Unique check becomes global via sheet.</div>
+      </div>
+    </div>
+
     <div class="row">
       <div>
         <div class="lab">Screen Size</div>
@@ -458,7 +600,7 @@ function openItem(tp){
       </div>
       <div>
         <div class="lab">Condition</div>
-        <select id="f_Condition">${selectHTML(DROPDOWNS.Condition, it.Condition)}</select>
+        <select id="f_Condition">${selectHTML(condList, it.Condition)}</select>
       </div>
     </div>
 
@@ -470,6 +612,7 @@ function openItem(tp){
       <button class="good" onclick="save()">Save</button>
       <button class="warn" onclick="movePrev()">← Back</button>
       <button class="primary" onclick="moveNext()">Next → ${NEXT_STAGE}</button>
+      <button class="miniBtn" onclick="refreshCurrent()">Refresh</button>
     </div>
 
     <div class="hint" style="margin-top:10px">
@@ -477,62 +620,190 @@ function openItem(tp){
     </div>
   `;
 
-  // Ensure styles match checked state
   setTimeout(syncChipStyles, 0);
 }
 
-function save(){
+function copyTP(){
   if (!currentTP) return;
-  const it = db.find(x=>x.TP===currentTP);
-  if (!it) return;
-
-  it.ScreenSizeIn = document.getElementById("f_ScreenSizeIn").value.trim();
-  it.CPU = document.getElementById("f_CPU").value.trim();
-  it.StorageGB = document.getElementById("f_StorageGB").value.trim();
-  it.MemoryGB = document.getElementById("f_MemoryGB").value.trim();
-  it.GPU = document.getElementById("f_GPU").value.trim();
-  it.Series = document.getElementById("f_Series").value.trim();
-  it.Condition = document.getElementById("f_Condition").value;
-  it.Connectivity = getConnectivityFromChips();
-  it.Features = document.getElementById("f_Features").value;
-
-  it.UpdatedAt = Date.now();
-  saveDB();
-  renderList();
-  toast("Saved");
+  navigator.clipboard.writeText(currentTP);
+  toast("TP# copied");
 }
 
-function moveNext(){
+async function refreshCurrent(){
   if (!currentTP) return;
-  save();
-  const it = db.find(x=>x.TP===currentTP);
-  it.Stage = NEXT_STAGE;
-  it.UpdatedAt = Date.now();
-  saveDB();
+  await boot(false);
+  await openItem(currentTP);
+  toast("Refreshed from sheet");
+}
+
+async function applyTPChange(){
+  if (!currentTP) return;
+  const input = document.getElementById("f_TP");
+  const desired = normalizeTP(input?.value);
+
+  if (!desired) { input.value = currentTP; return toast("TP# can't be blank"); }
+  if (desired === currentTP) return toast("TP# unchanged");
+
+  const res = await apiGet({ action:"updateTP", oldTp: currentTP, newTp: desired });
+  if (!res || !res.ok){
+    input.value = currentTP;
+    return toast(res?.error || "TP update failed");
+  }
+
+  currentTP = desired;
+  await boot(false);
+  await openItem(desired);
+  toast("TP# updated");
+}
+
+async function regenerateTP(){
+  const input = document.getElementById("f_TP");
+  const newTP = generateUniqueTP();
+  if (input) input.value = newTP;
+  await applyTPChange();
+}
+
+async function save(){
+  if (!currentTP) return;
+  const payload = {
+    TP: currentTP,
+    Stage: STAGE,
+    UpdatedAt: Date.now(),
+    ScreenSizeIn: document.getElementById("f_ScreenSizeIn").value.trim(),
+    CPU: document.getElementById("f_CPU").value.trim(),
+    StorageGB: document.getElementById("f_StorageGB").value.trim(),
+    MemoryGB: document.getElementById("f_MemoryGB").value.trim(),
+    GPU: document.getElementById("f_GPU").value.trim(),
+    Series: document.getElementById("f_Series").value.trim(),
+    Condition: document.getElementById("f_Condition").value,
+    Connectivity: getConnectivityFromChips(),
+    Features: document.getElementById("f_Features").value
+  };
+
+  await apiPost("upsertItem", payload);
+  await boot(false);
+  toast("Saved to sheet");
+}
+
+async function moveNext(){
+  if (!currentTP) return;
+  await save();
+  const res = await apiGet({ action:"moveStage", tp: currentTP, stage: NEXT_STAGE });
+  if (!res || !res.ok) return toast(res?.error || "Move failed");
 
   currentTP = null;
-  document.getElementById("detail").innerHTML = `<div class="hint">Moved to <b>${NEXT_STAGE}</b> (mock).</div>`;
+  document.getElementById("detail").innerHTML = `<div class="hint">Moved to <b>${NEXT_STAGE}</b>.</div>`;
   document.getElementById("statusLine").textContent = "—";
-  renderList();
+  await boot(false);
   toast("Forwarded");
 }
 
-function movePrev(){
+async function movePrev(){
   if (!currentTP) return;
-  save();
-  const it = db.find(x=>x.TP===currentTP);
-  it.Stage = PREV_STAGE;
-  it.UpdatedAt = Date.now();
-  saveDB();
+  await save();
+  const res = await apiGet({ action:"moveStage", tp: currentTP, stage: PREV_STAGE });
+  if (!res || !res.ok) return toast(res?.error || "Move failed");
 
   currentTP = null;
-  document.getElementById("detail").innerHTML = `<div class="hint">Moved back to <b>${PREV_STAGE}</b> (mock).</div>`;
+  document.getElementById("detail").innerHTML = `<div class="hint">Moved back to <b>${PREV_STAGE}</b>.</div>`;
   document.getElementById("statusLine").textContent = "—";
-  renderList();
+  await boot(false);
   toast("Backed");
 }
 
-/* Keyboard shortcuts */
+/* ===================== TP Settings UI (same style as staging) ===================== */
+function openTpSettings(){
+  const s = loadTpSettings();
+  const preview = generateTP(s);
+
+  document.getElementById("detail").innerHTML = `
+    <div class="tpCallout" style="justify-content:space-between; width:100%;">
+      <div>
+        <div style="color:#666; font-size:12px;">TP Settings (saved to this PC)</div>
+        <div class="big" style="margin-top:4px;">${escapeHtml(preview)}</div>
+      </div>
+      <button class="miniBtn" onclick="${currentTP ? "openItem(currentTP)" : "resetDetail()"}">Back</button>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Prefix (optional)</div>
+        <input id="tp_prefix" value="${escapeAttr(s.prefix)}" placeholder="TP"/>
+      </div>
+      <div>
+        <div class="lab">Separator</div>
+        <input id="tp_sep" value="${escapeAttr(s.sep)}" placeholder="-"/>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Random Length</div>
+        <input id="tp_len" type="number" min="3" max="20" value="${Number(s.randLen)||9}"/>
+      </div>
+      <div>
+        <div class="lab">Case</div>
+        <select id="tp_case">
+          <option value="upper" ${s.case==="upper"?"selected":""}>UPPER</option>
+          <option value="lower" ${s.case==="lower"?"selected":""}>lower</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="lab">Include Date (YYYYMMDD)</div>
+    <div class="chips">
+      <label class="chipBox on" style="cursor:default;">
+        <input type="checkbox" id="tp_date" ${s.includeDate ? "checked":""} />
+        <span>Include date stamp</span>
+      </label>
+    </div>
+
+    <div class="lab">Character Set (advanced)</div>
+    <input id="tp_charset" value="${escapeAttr(s.charset)}"/>
+
+    <div class="divider"></div>
+    <div class="btns">
+      <button class="good miniBtn" onclick="saveTpSettingsFromUI()">Save</button>
+      <button class="primary miniBtn" onclick="previewTpSettings()">Preview</button>
+      <button class="miniBtn warn" onclick="resetTpSettings()">Reset</button>
+    </div>
+
+    <div class="lab">Preview</div>
+    <input id="tp_preview" readonly value="${escapeAttr(preview)}"/>
+  `;
+}
+
+function resetDetail(){
+  document.getElementById("detail").innerHTML = `<div class="hint">Select an item from the queue.</div>`;
+}
+
+function readTpSettingsFromUI(){
+  return {
+    prefix: String(document.getElementById("tp_prefix")?.value || "").trim(),
+    sep: String(document.getElementById("tp_sep")?.value ?? "-"),
+    randLen: Number(document.getElementById("tp_len")?.value || 9),
+    case: String(document.getElementById("tp_case")?.value || "upper"),
+    includeDate: !!document.getElementById("tp_date")?.checked,
+    charset: String(document.getElementById("tp_charset")?.value || DEFAULT_TP_SETTINGS.charset).trim()
+  };
+}
+function previewTpSettings(){
+  const s = readTpSettingsFromUI();
+  document.getElementById("tp_preview").value = generateTP(s);
+}
+function saveTpSettingsFromUI(){
+  const s = readTpSettingsFromUI();
+  saveTpSettings(s);
+  document.getElementById("tp_preview").value = generateTP(s);
+  toast("TP settings saved");
+}
+function resetTpSettings(){
+  saveTpSettings(DEFAULT_TP_SETTINGS);
+  toast("TP settings reset");
+  openTpSettings();
+}
+
+/* ===================== Keyboard shortcuts ===================== */
 document.addEventListener("keydown", (e)=>{
   if (e.ctrlKey && (e.key==="f" || e.key==="F")){ e.preventDefault(); document.getElementById("q").focus(); }
   if (e.key==="Enter" && currentTP && document.activeElement && document.activeElement.tagName!=="TEXTAREA"){ e.preventDefault(); save(); }
@@ -540,8 +811,26 @@ document.addEventListener("keydown", (e)=>{
   if (e.ctrlKey && e.key==="ArrowLeft"){ e.preventDefault(); if(currentTP) movePrev(); }
 });
 
-loadDB();
-renderList();
+/* ===================== Boot ===================== */
+async function boot(showToast=true){
+  if (!API_URL || API_URL === "PASTE_YOUR_WEB_APP_URL_HERE"){
+    document.getElementById("list").innerHTML =
+      `<div class="hint"><b>API_URL not set.</b><br>Paste your Apps Script Web App URL into processing.html.</div>`;
+    return;
+  }
+  try{
+    const dd = await apiGet({ action:"getDropdowns" });
+    dropdowns = dd?.dropdowns || {};
+    await refreshQueue();
+    renderList();
+    renderKPIs();
+    if (showToast) toast("Connected to sheet");
+  }catch(err){
+    document.getElementById("list").innerHTML =
+      `<div class="hint"><b>API error.</b><br>${escapeHtml(err.message || String(err))}</div>`;
+  }
+}
+boot();
 </script>
 </body>
 </html>
