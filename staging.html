@@ -78,8 +78,7 @@
   }
   textarea{min-height:110px; resize:vertical; font-family: var(--sans);}
   .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
-  @media (max-width: 700px){ .row,.row3{grid-template-columns:1fr} }
+  @media (max-width: 700px){ .row{grid-template-columns:1fr} }
   .btns{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
   button{
     border:none; border-radius:14px; padding:10px 12px; cursor:pointer;
@@ -135,7 +134,18 @@
   .cap .left{display:flex; gap:8px; align-items:center}
   .badge{font-family:var(--mono); font-size:11px; color:var(--muted); border:1px solid var(--line); padding:3px 7px; border-radius:999px}
   .urlBox{font-family:var(--mono); font-size:12px; min-height:84px}
-  .outBox{font-family:var(--mono); font-size:12px; min-height:240px; white-space:pre; }
+  .outBox{font-family:var(--mono); font-size:12px; min-height:280px; white-space:pre; }
+
+  .checkRow{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .checkRow label{display:flex; gap:8px; align-items:center; color:var(--muted); font-size:12px}
+  .checkRow input[type="checkbox"]{width:16px; height:16px; accent-color: var(--accent);}
+
+  .tpCallout{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    padding:10px; border-radius:16px; border:1px solid var(--line);
+    background:rgba(0,0,0,.22);
+  }
+  .tpCallout .big{font-family:var(--mono); font-weight:950;}
 </style>
 </head>
 <body>
@@ -144,7 +154,7 @@
     <div class="logo"></div>
     <div>
       <div class="title">YardFlow Command Center</div>
-      <div class="sub"><b>STAGING</b> • Photos + eBay HTML Generator • UI-only mock</div>
+      <div class="sub"><b>STAGING</b> • Photos + Tek-Pak eBay HTML Generator</div>
     </div>
   </div>
 
@@ -167,8 +177,8 @@
 
       <div class="row">
         <div>
-          <div class="lab">Filter: OS</div>
-          <select id="filtOS" onchange="renderList()"></select>
+          <div class="lab">Filter: Sale Type</div>
+          <select id="filtSaleType" onchange="renderList()"></select>
         </div>
         <div>
           <div class="lab">Sort</div>
@@ -215,7 +225,7 @@
     </div>
 
     <div class="card">
-      <h3>eBay HTML Generator</h3>
+      <h3>Tek-Pak eBay HTML Generator</h3>
       <div class="body" id="generator">
         <div class="hint">Select an item to generate eBay HTML.</div>
       </div>
@@ -236,13 +246,71 @@ const PREV_STAGE = "PROCESSING";
 const DROPDOWNS = {
   OperatingSystem: ["Windows 11","Windows 10","ChromeOS","macOS","Linux","No OS"],
   Warranty: ["None","7 Day","30 Day","90 Day"],
-  ShippingPolicy: ["Free Shipping","Flat Rate","Calculated","Local Pickup"]
+  ShippingPolicy: ["Free Shipping","Flat Rate","Calculated","Local Pickup"],
+  SaleType: ["As-Is","Surplus","Refurbished","Standard"]
 };
+
+/* Logo support:
+   Put a file at: assets/tekpak-logo.png
+   OR override in generator with a hosted URL */
+const DEFAULT_LOGO_URL = "assets/tekpak-logo.png";
+
+/* Your exact buyer agreement (formatted for eBay HTML output) */
+const ASIS_AGREEMENT_TEXT = `
+TEK-PAK INC. AS-IS PURCHASE AGREEMENT & RETURN POLICY
+
+By purchasing any item from Tek-Pak Inc. through eBay, the buyer acknowledges, understands,
+and expressly agrees to the following terms and conditions:
+
+1. AS-IS / NO RETURNS
+• All items marked AS-IS, NO RETURNS, FOR PARTS, or otherwise disclosed with defects are
+sold strictly AS-IS.
+• No returns, refunds, exchanges, or partial credits will be accepted for any reason.
+• Disclosed defects or limitations are not grounds for disputes or claims.
+
+2. FULL DISCLOSURE & BUYER RESPONSIBILITY
+• All known defects, limitations, and conditions are clearly disclosed in the item description.
+• Buyers are solely responsible for reading and understanding the listing prior to purchase.
+• Failure to read the listing does not entitle the buyer to a return, refund, or feedback revision.
+
+3. AGREEMENT AT PURCHASE
+By clicking Buy It Now, submitting an offer, or placing a bid, the buyer confirms acceptance of all terms.
+This constitutes a binding agreement.
+
+4. IMPROPER RETURN REQUESTS
+Submitting a return request or dispute for an issue disclosed in the listing is a violation of this agreement.
+Tek-Pak Inc. reserves the right to deny such requests.
+
+5. FEES, COST RECOVERY & DAMAGES
+• Tek-Pak Inc. reserves the right to recover all costs resulting from improper return attempts.
+• Recoverable costs may include shipping, handling, restocking, administrative, and platform fees.
+• Such amounts represent reasonable damages and are not penalties.
+
+6. ACCOUNT RESTRICTIONS
+Violations may result in permanent buyer blocks across all Tek-Pak Inc. sales channels.
+
+7. LEGAL REMEDIES
+Tek-Pak Inc. reserves all legal rights and remedies under applicable law.
+
+8. GOVERNING LAW
+This agreement shall be governed by the laws of the State of North Carolina.
+
+If you do not agree to these terms, do not purchase this item.
+`.trim();
+
+/* Optional extra professional bullets (always safe + clean) */
+const PROFESSIONAL_BULLETS = [
+  "Used electronics may show cosmetic wear (scratches/scuffs/shine/label residue). Review photos closely.",
+  "Only what is pictured/explicitly stated is included. Accessories (chargers, cables, etc.) are not included unless stated.",
+  "Devices are wiped/reset when applicable; buyer is responsible for setup and any software licensing/activation.",
+  "We use <b>100% recycled</b> packaging materials whenever possible to reduce waste.",
+  "Serial numbers/identifiers may be recorded to help prevent fraud."
+];
 
 let db = [];
 let currentTP = null;
 
-/* Photos store: local only (per TP). We store small-ish data URLs. */
+/* Photos store: local only (per TP). */
 const PHOTO_KEY = "yardflow_photos_v1"; // { [TP]: [{name,dataUrl,ts}] }
 let photosDB = {};
 
@@ -279,7 +347,14 @@ function newItem(){
   const todays = db.filter(x => (x.TP||"").includes(`TP-${tkey}-`));
   const nextN = String(todays.length + 1).padStart(4,"0");
   const tp = `TP-${tkey}-${nextN}`;
-  db.unshift({TP:tp, Stage:STAGE, CreatedAt:Date.now(), UpdatedAt:Date.now()});
+  db.unshift({
+    TP: tp,
+    Stage: STAGE,
+    SaleType: "As-Is",
+    ReturnsAccepted: false,
+    CreatedAt: Date.now(),
+    UpdatedAt: Date.now()
+  });
   saveDB();
   renderList();
   openItem(tp);
@@ -287,8 +362,8 @@ function newItem(){
 }
 
 function setFilterOptions(){
-  const sel = document.getElementById("filtOS");
-  const values = uniq(db.filter(x=>x.Stage===STAGE).map(x=>x.OperatingSystem));
+  const sel = document.getElementById("filtSaleType");
+  const values = uniq(db.filter(x=>x.Stage===STAGE).map(x=>x.SaleType));
   sel.innerHTML = `<option value="">All</option>` + values.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
 }
 
@@ -308,15 +383,15 @@ function renderKPIs(){
 
 function renderList(){
   const q = (document.getElementById("q").value || "").toLowerCase();
-  const os = document.getElementById("filtOS").value || "";
+  const saleType = document.getElementById("filtSaleType").value || "";
   const sortBy = document.getElementById("sortBy").value;
 
   let list = db.filter(x=>x.Stage===STAGE);
-  if (os) list = list.filter(x => (x.OperatingSystem||"") === os);
+  if (saleType) list = list.filter(x => (x.SaleType||"") === saleType);
 
   if (q){
     list = list.filter(x=>{
-      const hay = [x.TP,x.Title,x.Description,x.PriceUSD,x.OperatingSystem,x.Warranty].join(" ").toLowerCase();
+      const hay = [x.TP,x.Title,x.Description,x.PriceUSD,x.OperatingSystem,x.Warranty,x.SaleType].join(" ").toLowerCase();
       return hay.includes(q);
     });
   }
@@ -341,18 +416,20 @@ function renderList(){
     d.className = "item";
     d.onclick = ()=> openItem(it.TP);
 
-    const needs = (!(it.Title||"").trim() || !(it.PriceUSD||"").trim()) ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs basics</span>` : "";
+    const needs = (!(it.Title||"").trim() || !(it.PriceUSD||"").trim())
+      ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs basics</span>` : "";
     const pcount = (photosDB[it.TP] || []).length;
+    const returnsLabel = (it.SaleType==="As-Is" || it.SaleType==="Surplus") ? "NO RETURNS" : (it.ReturnsAccepted ? "Returns OK" : "As listed");
 
     d.innerHTML = `
       <div class="top">
         <div class="tp">${escapeHtml(it.TP)}</div>
-        <div class="pill">${escapeHtml(it.OperatingSystem || "—")}</div>
+        <div class="pill">${escapeHtml(it.SaleType || "—")}</div>
       </div>
       <div class="meta">
         <b>${escapeHtml(it.Title || "—")}</b>${needs}<br>
         Price: ${escapeHtml(it.PriceUSD || "—")} • Warranty: ${escapeHtml(it.Warranty || "—")}
-        <br>📸 Photos: <b>${pcount}</b>
+        <br>🔁 ${escapeHtml(returnsLabel)} • 📸 <b>${pcount}</b>
       </div>
     `;
     el.appendChild(d);
@@ -367,13 +444,11 @@ function selectHTML(list, selected){
   return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
 }
 
-/* ---------- Photos ---------- */
-
+/* ---------- Photos (local workflow) ---------- */
 function getPhotos(tp){ return photosDB[tp] || []; }
 function setPhotos(tp, arr){ photosDB[tp] = arr; savePhotos(); }
 
 function fileToDataUrl(file, maxWidth=1600, quality=0.85){
-  // Compress images to keep localStorage from exploding.
   return new Promise((resolve, reject)=>{
     const fr = new FileReader();
     fr.onerror = reject;
@@ -386,12 +461,8 @@ function fileToDataUrl(file, maxWidth=1600, quality=0.85){
 
         const c = document.createElement("canvas");
         c.width = w; c.height = h;
-        const ctx = c.getContext("2d");
-        ctx.drawImage(img, 0, 0, w, h);
-
-        // JPEG to reduce size
-        const dataUrl = c.toDataURL("image/jpeg", quality);
-        resolve(dataUrl);
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", quality));
       };
       img.onerror = reject;
       img.src = fr.result;
@@ -407,14 +478,12 @@ async function addPhotosFromInput(){
   if (!files.length) return;
 
   const existing = getPhotos(currentTP);
-
   for (const f of files){
     if (!f.type.startsWith("image/")) continue;
     const dataUrl = await fileToDataUrl(f);
     existing.push({ name: f.name, dataUrl, ts: Date.now() });
-    if (existing.length >= 12) break; // cap to avoid storage pain
+    if (existing.length >= 12) break;
   }
-
   setPhotos(currentTP, existing);
   input.value = "";
   renderPhotosPanel();
@@ -430,19 +499,15 @@ function removePhoto(idx){
   renderPhotosPanel();
   renderKPIs();
 }
-
 function movePhoto(idx, dir){
   if (!currentTP) return;
   const arr = getPhotos(currentTP);
   const n = idx + dir;
   if (n < 0 || n >= arr.length) return;
-  const tmp = arr[idx];
-  arr[idx] = arr[n];
-  arr[n] = tmp;
+  [arr[idx], arr[n]] = [arr[n], arr[idx]];
   setPhotos(currentTP, arr);
   renderPhotosPanel();
 }
-
 function clearAllPhotos(){
   if (!currentTP) return;
   if (!confirm("Remove all photos for this TP?")) return;
@@ -452,61 +517,106 @@ function clearAllPhotos(){
 }
 
 /* ---------- eBay HTML Generator ---------- */
-
 function normalizeMulti(s){
   return String(s||"").split(",").map(x=>x.trim()).filter(Boolean);
 }
+function safeLine(s){ return String(s||"").trim(); }
 
-function buildSpecList(it){
+function returnPolicyLine(it){
+  const st = (it.SaleType || "").trim();
+  const returns = !!it.ReturnsAccepted;
+
+  if (st === "As-Is" || st === "Surplus"){
+    return "NO RETURNS: As-Is / Surplus items are sold as-is and are not eligible for returns or warranty unless explicitly stated otherwise in the listing.";
+  }
+  if (st === "Refurbished"){
+    return returns
+      ? "Returns/Warranty: Refurbished item — return eligibility and warranty terms are as stated in this listing’s item details."
+      : "Warranty/Returns: Refurbished item — terms are as stated in this listing’s item details.";
+  }
+  return returns
+    ? "Returns: Accepted only when stated in the listing’s item details (and handled per eBay policy)."
+    : "Returns: Only if explicitly stated in the listing’s item details.";
+}
+
+function buildSpecRows(it){
   const spec = [];
   const add = (label, val) => { if (val && String(val).trim()) spec.push([label, String(val).trim()]); };
 
+  // Always include TP number
+  add("Tek-Pak TP#", it.TP);
+
+  // Intake
   add("Category", it.Category);
   add("Brand", it.Brand);
   add("Model", it.Model);
   add("Color", it.Color);
 
+  // Processing
   add("Screen Size", it.ScreenSizeIn ? `${it.ScreenSizeIn} in` : "");
   add("CPU", it.CPU);
   add("Memory", it.MemoryGB ? `${it.MemoryGB} GB` : "");
   add("Storage", it.StorageGB ? `${it.StorageGB} GB` : "");
   add("GPU", it.GPU);
   add("Series", it.Series);
-
   const conn = normalizeMulti(it.Connectivity).join(", ");
   add("Connectivity", conn);
-
   add("Condition", it.Condition);
+
+  // Staging
+  add("Sale Type", it.SaleType);
   add("Operating System", it.OperatingSystem);
   add("Warranty", it.Warranty);
 
   return spec;
 }
 
-function ebayDisclaimers(it){
-  const warranty = (it.Warranty||"").trim() || "None";
-  return `
-<li><b>Testing:</b> Item has been inspected/diagnosed to the best of our ability. See photos and description for details.</li>
-<li><b>Condition:</b> Cosmetic wear may include scratches/scuffs/shine/label residue typical of used electronics.</li>
-<li><b>What’s included:</b> Only what is shown/explicitly stated. Chargers/accessories are not included unless stated.</li>
-<li><b>Data:</b> Devices are wiped/reset when applicable, but buyer is responsible for setup and any software licensing.</li>
-<li><b>Warranty:</b> ${escapeHtml(warranty)} (unless otherwise stated in the listing).</li>
-<li><b>Shipping:</b> We pack with care. Tracking is provided. Please allow handling time as stated.</li>
-<li><b>Returns:</b> Returns accepted per eBay policy/listing terms. Serial numbers may be recorded for fraud prevention.</li>
-<li><b>Recycled packaging:</b> We often use <b>100% recycled</b> materials to reduce waste.</li>
-  `.trim();
+function buildConditionNarrative(it){
+  const st = safeLine(it.SaleType);
+  const cond = safeLine(it.Condition);
+  if (st === "As-Is" || st === "Surplus"){
+    return "This item is sold <b>AS-IS</b>. It may be untested, partially tested, or have known/unknown issues. Please review the full description and photos carefully before purchase.";
+  }
+  if (cond){
+    return `Condition noted as <b>${escapeHtml(cond)}</b>. Item has been inspected and documented to the best of our ability. See photos and description for exact details.`;
+  }
+  return "Item has been inspected and documented to the best of our ability. See photos and description for exact details.";
+}
+
+function formatAgreementForHtml(text){
+  // Convert lines/bullets into HTML-safe formatting.
+  const lines = String(text||"").split("\n").map(l=>l.trim()).filter(l=>l.length);
+  const out = [];
+  for (const line of lines){
+    if (line.startsWith("•")){
+      out.push(`<li>${escapeHtml(line.replace(/^•\s*/,""))}</li>`);
+    } else if (/^\d+\./.test(line)){
+      out.push(`<div style="margin-top:8px; font-weight:700;">${escapeHtml(line)}</div>`);
+    } else {
+      out.push(`<div style="margin-top:4px;">${escapeHtml(line)}</div>`);
+    }
+  }
+  // Wrap bullet lines in a list
+  let html = out.join("");
+  // naive wrap: ensure any <li> blocks are within <ul>
+  // We'll replace sequences of <li>...</li> with <ul>...</ul>
+  html = html.replace(/((?:<li>.*?<\/li>)+)/gs, '<ul style="margin:6px 0 10px; padding-left:18px;">$1</ul>');
+  return html;
 }
 
 /*
-  Images in eBay descriptions:
-  - Best practice: paste hosted URLs (or use placeholders and upload via eBay).
+  eBay-safe HTML (inline styles, minimal fancy).
+  Note: eBay may still enforce its own buyer protection / return rules in some cases,
+  but this is your listing language + agreement presentation.
 */
-function buildEbayHTML(it, imageUrls){
-  const title = (it.Title||"").trim() || `${[it.Brand,it.Model,it.CPU,it.MemoryGB?it.MemoryGB+"GB":"",it.StorageGB?it.StorageGB+"GB":""] .filter(Boolean).join(" ")}`.trim() || it.TP || "Item";
-  const desc = (it.Description||"").trim();
-  const shipPolicy = (it.ShippingPolicy||"").trim();
+function buildEbayHTML(it, imageUrls, logoUrl){
+  const title = safeLine(it.Title) || [it.Brand,it.Model,it.CPU,it.MemoryGB?it.MemoryGB+"GB":"",it.StorageGB?it.StorageGB+"GB":""] .filter(Boolean).join(" ").trim() || it.TP || "Item";
+  const desc = safeLine(it.Description);
+  const shipPolicy = safeLine(it.ShippingPolicy);
+  const tp = safeLine(it.TP) || "—";
+  const saleType = safeLine(it.SaleType) || "Standard";
 
-  const specs = buildSpecList(it);
+  const specs = buildSpecRows(it);
 
   const imgBlock = imageUrls.length
     ? imageUrls.map((u,i)=>`<div style="margin:10px 0;"><img src="${escapeAttr(u)}" alt="Photo ${i+1}" style="max-width:100%; border:1px solid #e6e6e6; border-radius:10px;"></div>`).join("")
@@ -515,19 +625,48 @@ function buildEbayHTML(it, imageUrls){
          (Optional) Paste hosted image URLs into the STAGING generator to embed them here.
        </div>`;
 
-  // Very eBay-safe: inline styles, minimal fancy stuff.
+  const policyLine = returnPolicyLine(it);
+  const conditionNarr = buildConditionNarrative(it);
+
+  const agreementHtml = (saleType === "As-Is" || saleType === "Surplus")
+    ? `<div style="margin-top:12px; border:1px solid #f0d0d0; border-radius:12px; padding:12px; background:#fff7f8;">
+         <div style="font-size:13px; font-weight:800; color:#8a0f22;">AS-IS PURCHASE AGREEMENT & RETURN POLICY</div>
+         <div style="font-size:12px; color:#333; margin-top:8px;">
+           ${formatAgreementForHtml(ASIS_AGREEMENT_TEXT)}
+         </div>
+       </div>`
+    : "";
+
+  const profBullets = PROFESSIONAL_BULLETS.map(b=>`<li>${b}</li>`).join("");
+
+  const logoBlock = logoUrl
+    ? `<div style="display:flex; align-items:center; gap:10px;">
+         <img src="${escapeAttr(logoUrl)}" alt="Tek-Pak" style="height:34px; width:auto;">
+         <div style="font-size:12px; opacity:.95;">Tek-Pak Inc.</div>
+       </div>`
+    : `<div style="font-size:12px; opacity:.95;">Tek-Pak Inc.</div>`;
+
   return `
 <div style="font-family:Arial, Helvetica, sans-serif; color:#111; line-height:1.35;">
   <div style="border:1px solid #e6e6e6; border-radius:14px; overflow:hidden;">
     <div style="padding:14px 16px; background:#0b2a4a; color:#fff;">
-      <div style="font-size:18px; font-weight:700;">${escapeHtml(title)}</div>
+      ${logoBlock}
+      <div style="margin-top:10px; font-size:18px; font-weight:700;">${escapeHtml(title)}</div>
       <div style="font-size:12px; opacity:.92; margin-top:4px;">
-        Sold by Tek-Pak • Internal Ref: ${escapeHtml(it.TP || "—")}
+        Internal Ref (TP#): <b>${escapeHtml(tp)}</b> • Sale Type: <b>${escapeHtml(saleType)}</b>
       </div>
     </div>
 
     <div style="padding:14px 16px;">
       ${imgBlock}
+
+      <div style="margin-top:12px; padding:10px 12px; border:1px solid #eee; border-radius:12px; background:#fcfcfc; font-size:13px;">
+        <b>Return Policy:</b> ${escapeHtml(policyLine)}
+      </div>
+
+      <div style="margin-top:10px; padding:10px 12px; border:1px solid #eee; border-radius:12px; background:#fcfcfc; font-size:13px;">
+        ${conditionNarr}
+      </div>
 
       <h3 style="margin:14px 0 8px; font-size:14px;">Item Details</h3>
       <table style="width:100%; border-collapse:collapse; font-size:13px;">
@@ -549,22 +688,23 @@ function buildEbayHTML(it, imageUrls){
         ${escapeHtml(shipPolicy)}
       </div>` : ""}
 
-      <h3 style="margin:14px 0 8px; font-size:14px;">Important Information</h3>
+      <h3 style="margin:14px 0 8px; font-size:14px;">Buyer Agreement & Professional Notes</h3>
       <ul style="margin:0; padding-left:18px;">
-        ${ebayDisclaimers(it)}
+        ${profBullets}
       </ul>
-    </div>
-  </div>
 
-  <div style="margin-top:10px; font-size:11px; color:#666;">
-    © Tek-Pak — Inventory workflow generated description.
+      ${agreementHtml}
+
+      <div style="margin-top:12px; font-size:11px; color:#666;">
+        Internal Ref (TP#): <b>${escapeHtml(tp)}</b>
+      </div>
+    </div>
   </div>
 </div>
   `.trim();
 }
 
 /* ---------- Forms ---------- */
-
 function openItem(tp){
   currentTP = tp;
   const it = db.find(x=>x.TP===tp);
@@ -572,8 +712,27 @@ function openItem(tp){
 
   document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
 
-  // Staging form fields (your defined step)
   document.getElementById("detail").innerHTML = `
+    <div class="tpCallout">
+      <div style="color:var(--muted); font-size:12px;">TP Item Number</div>
+      <div class="big" id="tpBig">${escapeHtml(it.TP)}</div>
+      <button class="miniBtn" onclick="copyTP()">Copy TP#</button>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="lab">Sale Type</div>
+        <select id="f_SaleType">${selectHTML(DROPDOWNS.SaleType, it.SaleType)}</select>
+      </div>
+      <div>
+        <div class="lab">Returns Accepted (only if listing allows)</div>
+        <div class="checkRow">
+          <label><input type="checkbox" id="f_ReturnsAccepted" ${it.ReturnsAccepted ? "checked" : ""}> Mark returns accepted</label>
+        </div>
+        <div class="hint">Note: As-Is/Surplus typically = no returns.</div>
+      </div>
+    </div>
+
     <div class="row">
       <div>
         <div class="lab">Title</div>
@@ -622,7 +781,7 @@ function openItem(tp){
     </div>
 
     <div class="hint" style="margin-top:8px">
-      📌 Photos are stored <b>locally</b> in this browser for now (UI-only). For eBay, use hosted URLs or upload in eBay’s photo section.
+      📌 Photos are stored <b>locally</b> in this browser for now. For eBay, upload in the listing UI or paste hosted URLs into the generator.
     </div>
 
     <div class="divider"></div>
@@ -637,12 +796,27 @@ function openItem(tp){
 
   renderPhotosPanel();
   renderGenerator(it);
+  renderKPIs();
+}
+
+function copyTP(){
+  if (!currentTP) return;
+  navigator.clipboard.writeText(currentTP);
+  toast("TP# copied");
 }
 
 function save(){
   if (!currentTP) return;
   const it = db.find(x=>x.TP===currentTP);
   if (!it) return;
+
+  it.SaleType = document.getElementById("f_SaleType").value || it.SaleType;
+  it.ReturnsAccepted = !!document.getElementById("f_ReturnsAccepted").checked;
+
+  // Guardrail: auto-disable returns when As-Is/Surplus (you can override by changing SaleType)
+  if (it.SaleType === "As-Is" || it.SaleType === "Surplus"){
+    it.ReturnsAccepted = false;
+  }
 
   it.Title = document.getElementById("f_Title").value.trim();
   it.OperatingSystem = document.getElementById("f_OperatingSystem").value;
@@ -653,7 +827,6 @@ function save(){
 
   const quick = (document.getElementById("f_Quick")?.value || "").trim();
   if (quick){
-    // Append quick notes nicely if not already present
     if (!it.Description || !it.Description.trim()) it.Description = quick;
     else if (!it.Description.includes(quick)) it.Description = it.Description.trim() + "\n\n" + quick;
   }
@@ -702,15 +875,21 @@ function movePrev(){
 /* Photos panel render */
 function renderPhotosPanel(){
   if (!currentTP) return;
-  const it = db.find(x=>x.TP===currentTP);
   const arr = getPhotos(currentTP);
 
-  const wrapId = "photosWrap";
-  let photosHtml = `
+  const markerId = "photoBlockMarker";
+  const detail = document.getElementById("detail");
+  const existing = document.getElementById(markerId);
+  if (existing) existing.remove();
+
+  const marker = document.createElement("div");
+  marker.id = markerId;
+
+  marker.innerHTML = `
     <div class="divider"></div>
     <div class="lab">Attached Photos (${arr.length})</div>
     ${arr.length ? `
-      <div class="photoGrid" id="${wrapId}">
+      <div class="photoGrid">
         ${arr.map((p,idx)=>`
           <div class="thumb">
             <img src="${p.dataUrl}" alt="photo ${idx+1}">
@@ -730,21 +909,9 @@ function renderPhotosPanel(){
           </div>
         `).join("")}
       </div>
-    ` : `<div class="hint">No photos yet. Add 4–6 pics (front, back, keyboard, BIOS/specs, any damage).</div>`}
+    ` : `<div class="hint">No photos yet. Add 4–6 pics (front/back/keyboard/ports/spec screen + any damage).</div>`}
   `;
 
-  // Inject into form under photo inputs: we’ll append to the existing form HTML by finding the form and adding at the end.
-  // Since we re-render whole form in openItem(), we’ll add this at the bottom of the form container:
-  const detail = document.getElementById("detail");
-  // Remove any existing photos block by re-setting the end chunk:
-  // Simple approach: append if not present; if present, replace from last divider tag we control.
-  // We'll just remove previous by searching for a marker node.
-  const existing = document.getElementById("photoBlockMarker");
-  if (existing) existing.remove();
-
-  const marker = document.createElement("div");
-  marker.id = "photoBlockMarker";
-  marker.innerHTML = photosHtml;
   detail.appendChild(marker);
 }
 
@@ -754,28 +921,31 @@ function renderGenerator(it){
   const pcount = (getPhotos(tp) || []).length;
 
   document.getElementById("generator").innerHTML = `
-    <div class="hint">
-      Generates eBay-safe HTML using Intake + Processing + Staging fields.<br>
-      <b>Images:</b> best results are hosted URLs (or upload in eBay UI). Local photos attached: <b>${pcount}</b>.
+    <div class="tpCallout">
+      <div style="color:#666; font-size:12px;">This HTML will include TP#</div>
+      <div class="big">${escapeHtml(tp)}</div>
+      <button class="miniBtn" onclick="copyTP()">Copy TP#</button>
+    </div>
+
+    <div class="hint" style="margin-top:10px;">
+      Generates eBay-safe HTML using Intake + Processing + Staging fields.
+      Local photos attached: <b>${pcount}</b>.
     </div>
 
     <div class="divider"></div>
 
     <div class="row">
       <div>
-        <div class="lab">Image URL Mode (optional)</div>
+        <div class="lab">Logo URL (optional)</div>
+        <input id="logoUrl" value="${escapeAttr(DEFAULT_LOGO_URL)}" placeholder="assets/tekpak-logo.png or https://..."/>
+        <div class="hint">If the logo doesn’t show on eBay, host it and paste the full URL here.</div>
+      </div>
+      <div>
+        <div class="lab">Image Mode (optional)</div>
         <select id="imgMode" onchange="toggleImgMode()">
           <option value="placeholders">Placeholders (upload photos in eBay UI)</option>
           <option value="urls">Embed hosted image URLs in description</option>
         </select>
-      </div>
-      <div>
-        <div class="lab">Copy/Export</div>
-        <div class="btns">
-          <button class="primary miniBtn" onclick="generateNow()">Generate</button>
-          <button class="good miniBtn" onclick="copyHtml()">Copy HTML</button>
-          <button class="miniBtn" onclick="downloadHtml()">Download .html</button>
-        </div>
       </div>
     </div>
 
@@ -783,7 +953,14 @@ function renderGenerator(it){
       <div class="lab">Hosted Image URLs (one per line, 4–6 recommended)</div>
       <textarea class="urlBox" id="imgUrls" placeholder="https://.../photo1.jpg
 https://.../photo2.jpg"></textarea>
-      <div class="hint">If you don’t have hosted URLs, leave this blank and upload photos in eBay’s photo section.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="btns">
+      <button class="primary miniBtn" onclick="generateNow()">Generate</button>
+      <button class="good miniBtn" onclick="copyHtml()">Copy HTML</button>
+      <button class="miniBtn" onclick="downloadHtml()">Download .html</button>
     </div>
 
     <div class="lab">Generated eBay Description HTML</div>
@@ -798,7 +975,7 @@ function toggleImgMode(){
 
 function generateNow(){
   if (!currentTP) return;
-  save(); // ensure latest form values included
+  save();
   const it = db.find(x=>x.TP===currentTP);
   if (!it) return;
 
@@ -808,7 +985,9 @@ function generateNow(){
     const raw = (document.getElementById("imgUrls")?.value || "").trim();
     urls = raw ? raw.split("\n").map(x=>x.trim()).filter(Boolean) : [];
   }
-  const html = buildEbayHTML(it, urls);
+  const logoUrl = (document.getElementById("logoUrl")?.value || "").trim();
+
+  const html = buildEbayHTML(it, urls, logoUrl);
   document.getElementById("outHtml").value = html;
   toast("eBay HTML generated");
 }
@@ -845,81 +1024,6 @@ document.addEventListener("keydown", (e)=>{
 loadDB();
 renderList();
 renderKPIs();
-
-/* When selecting an item, also refresh generator panel */
-function openItem(tp){
-  currentTP = tp;
-  const it = db.find(x=>x.TP===tp);
-  if (!it) return;
-
-  document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
-
-  document.getElementById("detail").innerHTML = `
-    <div class="row">
-      <div>
-        <div class="lab">Title</div>
-        <input id="f_Title" value="${escapeAttr(it.Title||"")}" placeholder="Brand Model CPU RAM SSD etc."/>
-      </div>
-      <div>
-        <div class="lab">Operating System</div>
-        <select id="f_OperatingSystem">${selectHTML(DROPDOWNS.OperatingSystem, it.OperatingSystem)}</select>
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <div class="lab">Warranty</div>
-        <select id="f_Warranty">${selectHTML(DROPDOWNS.Warranty, it.Warranty)}</select>
-      </div>
-      <div>
-        <div class="lab">Shipping Policy</div>
-        <select id="f_ShippingPolicy">${selectHTML(DROPDOWNS.ShippingPolicy, it.ShippingPolicy)}</select>
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <div class="lab">Price (USD)</div>
-        <input id="f_PriceUSD" value="${escapeAttr(it.PriceUSD||"")}" placeholder="e.g., 169.99"/>
-      </div>
-      <div>
-        <div class="lab">Quick Notes (optional)</div>
-        <input id="f_Quick" value="" placeholder="e.g., includes charger / missing keycap"/>
-      </div>
-    </div>
-
-    <div class="lab">Description</div>
-    <textarea id="f_Description" placeholder="Tested details, cosmetic notes, what's included…">${escapeHtml(it.Description||"")}</textarea>
-
-    <div class="divider"></div>
-
-    <div class="photoBar">
-      <div style="flex:1">
-        <div class="lab">Photos (local workflow)</div>
-        <input id="photoInput" type="file" accept="image/*" multiple />
-      </div>
-      <button class="good miniBtn" onclick="addPhotosFromInput()">Add Photos</button>
-      <button class="danger miniBtn" onclick="clearAllPhotos()">Clear Photos</button>
-    </div>
-
-    <div class="hint" style="margin-top:8px">
-      📌 Photos are stored <b>locally</b> in this browser for now (UI-only). For eBay, use hosted URLs or upload in eBay’s photo section.
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="btns">
-      <button class="good" onclick="save()">Save</button>
-      <button class="warn" onclick="movePrev()">← Back</button>
-      <button class="primary" onclick="moveNext()">Next → ${NEXT_STAGE}</button>
-      <button class="primary" onclick="generateNow()">Generate eBay HTML</button>
-    </div>
-  `;
-
-  renderPhotosPanel();
-  renderGenerator(it);
-  renderKPIs();
-}
 </script>
 </body>
 </html>
