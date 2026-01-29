@@ -1,10 +1,9 @@
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Tek-Pak YardOS</title>
+  <title>Tek-Pak YardOS — Portal</title>
   <link rel="stylesheet" href="./styles.css"/>
 </head>
 <body>
@@ -12,10 +11,11 @@
     <div class="wrap">
       <div class="brand">
         <img id="logo" alt="Tek-Pak" />
-        <span class="badge">YARDOS v0.1</span>
+        <span class="badge">YARDOS v0.2</span>
       </div>
       <nav class="nav">
-        <a class="active" href="./index.html">Dashboard</a>
+        <!-- If this file is your homepage, you can rename it to index.html later -->
+        <a class="active" href="./portal.html">Dashboard</a>
         <a href="./inventory.html">Inventory</a>
         <a href="./ebay.html">eBay Tools</a>
         <a href="./store.html">Store</a>
@@ -24,6 +24,7 @@
   </header>
 
   <main class="container">
+    <!-- Row 1 -->
     <div class="grid cols-3">
       <div class="card">
         <div class="hd">
@@ -52,7 +53,7 @@
             <div class="sub">Counts from Inventory_Retail</div>
           </div>
         </div>
-        <div class="bd" id="retailKPIs">
+        <div class="bd">
           <div class="kpi"><div><div class="label">Total Items</div><div class="value" id="retTotal">—</div></div></div>
           <div style="height:10px"></div>
           <div class="kpi"><div><div class="label">Sellable (AVAILABLE + LISTED)</div><div class="value" id="retSell">—</div></div></div>
@@ -76,7 +77,58 @@
 
     <div style="height:14px"></div>
 
+    <!-- Row 2 -->
     <div class="grid cols-2">
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>YardFlow Pipeline</h2>
+            <div class="sub">Live counts from your TP flow stages</div>
+          </div>
+        </div>
+        <div class="bd" id="flowKPIs">
+          <div class="grid cols-2" style="gap:10px">
+            <div class="kpi">
+              <div>
+                <div class="label">INTAKE</div>
+                <div class="value" id="kpiIntake">—</div>
+              </div>
+              <a class="pill" href="./intake.html" style="text-decoration:none">OPEN</a>
+            </div>
+
+            <div class="kpi">
+              <div>
+                <div class="label">PROCESSING</div>
+                <div class="value" id="kpiProcessing">—</div>
+              </div>
+              <a class="pill" href="./processing.html" style="text-decoration:none">OPEN</a>
+            </div>
+
+            <div class="kpi">
+              <div>
+                <div class="label">STAGING</div>
+                <div class="value" id="kpiStaging">—</div>
+              </div>
+              <a class="pill" href="./staging.html" style="text-decoration:none">OPEN</a>
+            </div>
+
+            <div class="kpi">
+              <div>
+                <div class="label">LOGISTICS</div>
+                <div class="value" id="kpiLogistics">—</div>
+              </div>
+              <a class="pill" href="./logistics.html" style="text-decoration:none">OPEN</a>
+            </div>
+          </div>
+
+          <hr class="sep">
+
+          <div class="small" id="flowMeta">
+            Tip: This panel makes it painfully obvious where the bottleneck is. (So we can bully it.) 😈
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="hd">
           <div>
@@ -87,6 +139,9 @@
         <div class="bd">
           <div class="controls">
             <a class="btn primary" href="./inventory.html">Open Inventory</a>
+            <a class="btn" href="./intake.html">New Intake</a>
+            <a class="btn" href="./processing.html">Processing Station</a>
+            <a class="btn" href="./logistics.html">Logistics Station</a>
             <a class="btn" href="./ebay.html">Generate eBay HTML</a>
             <a class="btn" href="./store.html">Open Store View</a>
           </div>
@@ -97,20 +152,41 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <!-- Row 3 -->
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>Needs Attention</h2>
+            <div class="sub">Auto-detected “fix me” stuff from the pipeline</div>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="small" id="attentionSub">Loading…</div>
+          <div style="height:10px"></div>
+          <div id="attentionList" class="small"></div>
+        </div>
+      </div>
 
       <div class="card">
         <div class="hd">
           <div>
             <h2>System Notes</h2>
-            <div class="sub">What’s in v0.1</div>
+            <div class="sub">What’s in v0.2</div>
           </div>
         </div>
         <div class="bd">
           <ul class="small" style="margin:0; padding-left:18px;">
+            <li>Portal now includes YardFlow pipeline snapshot</li>
+            <li>“Needs Attention” auto list from Intake/Processing/Logistics</li>
             <li>Inventory viewer (Retail + Parts)</li>
             <li>Store view (sellable items)</li>
             <li>eBay HTML generation + copy tool</li>
-            <li>Next: Upsert editor, role gating, label printing, timeclock, links hub</li>
+            <li>Next: Role gating, label printing, timeclock, links hub, audit trails</li>
           </ul>
         </div>
       </div>
@@ -119,34 +195,128 @@
 
 <script src="./app.js"></script>
 <script>
+/* Safe helpers if app.js ever changes */
+function _qs(sel){ return (typeof qs==="function") ? qs(sel) : document.querySelector(sel); }
+function _toast(msg, kind){ return (typeof toast==="function") ? toast(msg, kind||"") : alert(msg); }
+
+/* Make sure isSellableStatus exists; fallback */
+function _isSellable(st){
+  if (typeof isSellableStatus === "function") return isSellableStatus(st);
+  st = String(st||"").toUpperCase().trim();
+  return st==="AVAILABLE" || st==="LISTED";
+}
+
+/* YardFlow attention heuristics */
+function needsAttentionItem(it){
+  const stage = String(it.Stage||"").toUpperCase();
+  const missingCPU = !String(it.CPU||"").trim();
+  const missingMem = !String(it.MemoryGB||"").trim();
+  const missingSto = !String(it.StorageGB||"").trim();
+  const missingLoc = !String(it.Location||"").trim();
+  const missingStatus = !String(it.Status||"").trim();
+
+  if (stage==="PROCESSING" && (missingCPU || missingMem || missingSto)) {
+    return "Missing specs (CPU/RAM/SSD)";
+  }
+  if (stage==="LOGISTICS" && (missingLoc || missingStatus)) {
+    return "Missing location/status";
+  }
+  if (stage==="INTAKE" && !String(it.ItemType||it.Type||"").trim()) {
+    return "Missing item type";
+  }
+  return "";
+}
+
+/* Render attention list */
+function renderAttention(items){
+  const el = _qs("#attentionList");
+  if (!items.length){
+    _qs("#attentionSub").textContent = "No fires detected. (Either we’re winning… or the fire is hiding.)";
+    el.innerHTML = "";
+    return;
+  }
+  _qs("#attentionSub").textContent = `Top ${items.length} items that need a quick fix:`;
+
+  el.innerHTML = items.map(x=>{
+    const tp = x.TP || "—";
+    const stage = x.Stage || "—";
+    const why = x._why || "Needs review";
+    const link =
+      String(stage).toUpperCase()==="PROCESSING" ? "./processing.html" :
+      String(stage).toUpperCase()==="LOGISTICS"  ? "./logistics.html"  :
+      String(stage).toUpperCase()==="STAGING"    ? "./staging.html"    :
+      "./intake.html";
+
+    return `
+      <div style="padding:10px; border:1px solid rgba(255,255,255,.10); border-radius:14px; margin-bottom:10px; background:rgba(255,255,255,.03)">
+        <div style="display:flex; justify-content:space-between; gap:10px; align-items:center">
+          <div style="font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:900">${tp}</div>
+          <div class="pill">${stage}</div>
+        </div>
+        <div style="opacity:.85; margin-top:6px">${why}</div>
+        <div style="margin-top:8px">
+          <a class="btn" href="${link}" style="display:inline-flex; padding:8px 10px">Open station</a>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 (async function init(){
   try{
     const ping = await apiGet({ action:"ping" });
-    qs("#apiSub").textContent = "Connected";
-    qs("#apiOk").textContent = "OK";
-    qs("#apiPill").style.display = "inline-flex";
-    qs("#apiMeta").textContent = `Version: ${ping.version} • Server time: ${ping.serverTime}`;
+    _qs("#apiSub").textContent = "Connected";
+    _qs("#apiOk").textContent = "OK";
+    _qs("#apiPill").style.display = "inline-flex";
+    _qs("#apiMeta").textContent = `Version: ${ping.version} • Server time: ${ping.serverTime}`;
 
-    // logo from your Settings would be nicer later; for now use the same as generator
-    qs("#logo").src = "https://raw.githubusercontent.com/tekpakinc/tekpak-site/b8d52da6ac61c4f06d12cd8b9253cb6103b8dad9/tekpak-logo.png";
+    _qs("#logo").src = "https://raw.githubusercontent.com/tekpakinc/tekpak-site/b8d52da6ac61c4f06d12cd8b9253cb6103b8dad9/tekpak-logo.png";
 
-    const retail = await apiGet({ action:"listInventory", tab:"Inventory_Retail" });
-    const parts  = await apiGet({ action:"listInventory", tab:"Inventory_Parts" });
+    // Inventory counts
+    const [retail, parts] = await Promise.all([
+      apiGet({ action:"listInventory", tab:"Inventory_Retail" }),
+      apiGet({ action:"listInventory", tab:"Inventory_Parts" })
+    ]);
 
-    const retTotal = retail.items.length;
-    const retSell  = retail.items.filter(it => isSellableStatus(it.Status)).length;
-    const parTotal = parts.items.length;
-    const parSell  = parts.items.filter(it => isSellableStatus(it.Status)).length;
+    const retTotal = (retail.items||[]).length;
+    const retSell  = (retail.items||[]).filter(it => _isSellable(it.Status)).length;
+    const parTotal = (parts.items||[]).length;
+    const parSell  = (parts.items||[]).filter(it => _isSellable(it.Status)).length;
 
-    qs("#retTotal").textContent = retTotal;
-    qs("#retSell").textContent  = retSell;
-    qs("#parTotal").textContent = parTotal;
-    qs("#parSell").textContent  = parSell;
+    _qs("#retTotal").textContent = retTotal;
+    _qs("#retSell").textContent  = retSell;
+    _qs("#parTotal").textContent = parTotal;
+    _qs("#parSell").textContent  = parSell;
+
+    // YardFlow stage counts (requires listItems action)
+    const stages = ["INTAKE","PROCESSING","STAGING","LOGISTICS"];
+    const stageResults = await Promise.all(
+      stages.map(s => apiGet({ action:"listItems", stage:s, limit:300 }).catch(()=>({ ok:false, items:[] })))
+    );
+
+    const counts = {};
+    stages.forEach((s,i)=> counts[s] = (stageResults[i].items||[]).length );
+
+    _qs("#kpiIntake").textContent     = counts.INTAKE ?? "—";
+    _qs("#kpiProcessing").textContent = counts.PROCESSING ?? "—";
+    _qs("#kpiStaging").textContent    = counts.STAGING ?? "—";
+    _qs("#kpiLogistics").textContent  = counts.LOGISTICS ?? "—";
+
+    // Needs Attention aggregation
+    const allItems = stageResults.flatMap(r => (r.items||[]));
+    const flagged = allItems
+      .map(it => ({...it, _why: needsAttentionItem(it)}))
+      .filter(it => it._why)
+      .sort((a,b)=>(Number(b.UpdatedAt)||0)-(Number(a.UpdatedAt)||0))
+      .slice(0, 8);
+
+    renderAttention(flagged);
 
   }catch(err){
-    qs("#apiSub").textContent = "Offline / error";
-    qs("#apiOk").textContent = "NO";
-    toast(err.message, "bad");
+    _qs("#apiSub").textContent = "Offline / error";
+    _qs("#apiOk").textContent = "NO";
+    _toast(err.message || String(err), "bad");
+    _qs("#attentionSub").textContent = "Unable to load attention list (API offline).";
   }
 })();
 </script>
