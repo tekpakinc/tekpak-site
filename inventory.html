@@ -97,6 +97,25 @@
       margin-bottom: 12px;
       backdrop-filter: blur(8px);
     }
+    .dirtyBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,209,102,.35);
+      background: rgba(255,209,102,.14);
+      font-weight: 900;
+      font-size: 12px;
+      color: #6a4b00;
+    }
+    .stickyRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
   </style>
 </head>
 <body>
@@ -168,7 +187,7 @@
 
 <!-- Modal -->
 <div class="modalBack" id="modalBack">
-  <div class="modal" role="dialog" aria-modal="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Inventory editor">
     <div class="mhd">
       <div>
         <h3 id="mTitle">Edit Item</h3>
@@ -181,12 +200,25 @@
 
     <div class="mbd">
       <div class="stickyBar">
+        <div class="stickyRow">
+          <div class="controls">
+            <button class="btn" id="btnPrev">← Prev</button>
+            <button class="btn" id="btnNext">Next →</button>
+            <button class="btn" id="btnRefresh">Refresh</button>
+            <button class="btn primary" id="btnSave">Save</button>
+          </div>
+          <div>
+            <span class="dirtyBadge" id="dirtyBadge" style="display:none;">⚠ Unsaved changes</span>
+          </div>
+        </div>
+
+        <div style="height:8px"></div>
+
         <div class="controls">
-          <button class="btn" id="btnRefresh">Refresh</button>
-          <button class="btn primary" id="btnSave">Save</button>
           <button class="btn" id="btnGenHtml">Generate eBay HTML</button>
           <button class="btn" id="btnCopyHtml">Copy eBay HTML</button>
         </div>
+
         <div style="height:8px"></div>
         <div class="controls">
           <button class="btn good" data-status="AVAILABLE">AVAILABLE</button>
@@ -226,8 +258,16 @@ let ACTIVE = { tab:"Inventory_Retail", row:0, item:null };
 
 const FIELD_UI = {}; // header -> input element
 
+let DIRTY = false;
+let _searchTimer = null;
+
 function adminUiRefresh(){
   qs("#adminState").textContent = adminIsUnlocked() ? "UNLOCKED" : "LOCKED";
+}
+
+function setDirty(on){
+  DIRTY = !!on;
+  qs("#dirtyBadge").style.display = DIRTY ? "inline-flex" : "none";
 }
 
 function statusPill(status){
@@ -238,6 +278,7 @@ function statusPill(status){
 
 function renderTable(headers, items){
   const showCols = ["_row","TP_SKU","Title","Category","Brand","Model","Status","Yard_Location","Qty","List_Price","eBay_ItemID"];
+
   qs("#thead").innerHTML = `<tr>${showCols.map(h => `<th>${escHtml(h)}</th>`).join("")}</tr>`;
   qs("#tbody").innerHTML = items.map(it => `
     <tr data-row="${it._row}">
@@ -264,6 +305,7 @@ async function loadInventory(){
   const status = qs("#statusSel").value.trim();
 
   try{
+    qs("#meta").textContent = "Loading…";
     const data = await apiGet({ action:"listInventory", tab: ACTIVE.tab, q, status });
     HEADERS = data.headers || [];
     ITEMS = data.items || [];
@@ -276,11 +318,18 @@ async function loadInventory(){
 
 function openModal(){
   qs("#modalBack").classList.add("show");
+  document.body.style.overflow = "hidden";
 }
-function closeModal(){
+function closeModal(force=false){
+  if (!force && DIRTY){
+    const ok = confirm("You have unsaved changes. Close anyway?");
+    if (!ok) return;
+  }
   qs("#modalBack").classList.remove("show");
+  document.body.style.overflow = "";
   ACTIVE.row = 0;
   ACTIVE.item = null;
+  setDirty(false);
 }
 
 function fieldBox(label, inputHtml){
@@ -331,7 +380,6 @@ function buildEditor(item){
   qs("#sec-pricing").innerHTML = sectionMarkup(pricing);
   qs("#sec-logistics").innerHTML = sectionMarkup(logistics);
 
-  // All fields (everything from header row)
   qs("#sec-all").innerHTML = `<div class="fieldGrid">` + HEADERS
     .filter(h => h && h !== "_row")
     .map(h => fieldBox(h, makeInputForHeader(h, get(h))))
@@ -341,7 +389,17 @@ function buildEditor(item){
   qsa("[data-field]").forEach(el => {
     const f = el.getAttribute("data-field");
     FIELD_UI[f] = el;
+    el.addEventListener("input", ()=> setDirty(true));
+    el.addEventListener("change", ()=> setDirty(true));
   });
+
+  // focus first input for speed
+  setTimeout(()=>{
+    const first = qs("#sec-ess").querySelector("input,textarea,select");
+    if (first) first.focus();
+  }, 0);
+
+  setDirty(false);
 }
 
 function collectPayload(){
@@ -367,6 +425,7 @@ async function saveItem(){
       payload: JSON.stringify(payload)
     });
     toast(`Saved ${res.TP_SKU || ""}.`);
+    setDirty(false);
     await loadInventory();
     const fresh = await apiRow(ACTIVE.tab, ACTIVE.row);
     ACTIVE.item = fresh;
@@ -415,6 +474,34 @@ async function addItemWizard(){
   }catch(err){ toast(err.message,"bad"); }
 }
 
+function getRowList(){
+  // ITEMS has _row for each visible item; keep navigation within the current filtered view
+  return (ITEMS||[]).map(x => Number(x._row)).filter(Boolean);
+}
+
+async function openByRow(row){
+  ACTIVE.row = row;
+  const item = await apiRow(ACTIVE.tab, row);
+  ACTIVE.item = item;
+  buildEditor(item);
+  openModal();
+}
+
+async function navRow(dir){
+  if (!ACTIVE.row) return;
+  if (DIRTY){
+    const ok = confirm("You have unsaved changes. Save before navigating?");
+    if (ok) await saveItem();
+    else setDirty(false);
+  }
+  const rows = getRowList();
+  const idx = rows.indexOf(Number(ACTIVE.row));
+  if (idx < 0) return;
+  const nextIdx = idx + dir;
+  if (nextIdx < 0 || nextIdx >= rows.length) return toast("No more items that way.");
+  await openByRow(rows[nextIdx]);
+}
+
 // Tab switching
 qsa(".tabBtn").forEach(btn=>{
   btn.addEventListener("click", ()=>{
@@ -428,6 +515,14 @@ qsa(".tabBtn").forEach(btn=>{
 
 // events
 qs("#btnLoad").addEventListener("click", loadInventory);
+
+qs("#tabSel").addEventListener("change", ()=> loadInventory());
+qs("#statusSel").addEventListener("change", ()=> loadInventory());
+
+qs("#q").addEventListener("input", ()=>{
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(()=> loadInventory(), 320);
+});
 qs("#q").addEventListener("keydown", (e)=>{ if(e.key==="Enter") loadInventory(); });
 
 qs("#btnAdmin").addEventListener("click", ()=>{ adminUnlock(); adminUiRefresh(); });
@@ -442,19 +537,19 @@ qs("#tbody").addEventListener("click", async (e)=>{
   if (!row) return;
 
   try{
-    ACTIVE.row = row;
-    const item = await apiRow(ACTIVE.tab, row);
-    ACTIVE.item = item;
-    buildEditor(item);
-    openModal();
+    await openByRow(row);
   }catch(err){ toast(err.message,"bad"); }
 });
 
-qs("#btnClose").addEventListener("click", closeModal);
-qs("#modalBack").addEventListener("click", (e)=>{ if(e.target.id==="modalBack") closeModal(); });
+qs("#btnClose").addEventListener("click", ()=> closeModal(false));
+qs("#modalBack").addEventListener("click", (e)=>{ if(e.target.id==="modalBack") closeModal(false); });
+
+qs("#btnPrev").addEventListener("click", ()=> navRow(-1));
+qs("#btnNext").addEventListener("click", ()=> navRow(1));
 
 qs("#btnRefresh").addEventListener("click", async ()=>{
   try{
+    if (!ACTIVE.row) return;
     const item = await apiRow(ACTIVE.tab, ACTIVE.row);
     ACTIVE.item = item;
     buildEditor(item);
@@ -480,8 +575,29 @@ qsa("button[data-status]").forEach(btn=>{
     const st = btn.getAttribute("data-status");
     const el = FIELD_UI["Status"];
     if (el) el.value = st;
+    setDirty(true);
     toast(`Status set: ${st}`);
   });
+});
+
+// Global hotkeys
+document.addEventListener("keydown", (e)=>{
+  if (e.key === "Escape" && qs("#modalBack").classList.contains("show")){
+    e.preventDefault();
+    closeModal(false);
+  }
+  if (e.ctrlKey && e.key === "ArrowLeft" && qs("#modalBack").classList.contains("show")){
+    e.preventDefault();
+    navRow(-1);
+  }
+  if (e.ctrlKey && e.key === "ArrowRight" && qs("#modalBack").classList.contains("show")){
+    e.preventDefault();
+    navRow(1);
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && qs("#modalBack").classList.contains("show")){
+    e.preventDefault();
+    saveItem();
+  }
 });
 
 // init
