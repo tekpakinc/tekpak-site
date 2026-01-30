@@ -77,7 +77,6 @@
   }
   textarea{min-height:96px; resize:vertical}
   .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
   .btns{display:flex; gap:10px; flex-wrap:wrap}
   button{
     border:none; border-radius:14px; padding:10px 12px; cursor:pointer;
@@ -87,11 +86,14 @@
   button.primary{background:linear-gradient(135deg, rgba(58,160,255,.95), rgba(58,160,255,.55)); border-color:rgba(58,160,255,.55)}
   button.good{background:linear-gradient(135deg, rgba(61,255,141,.85), rgba(61,255,141,.35)); border-color:rgba(61,255,141,.55); color:#06210f}
   button.warn{background:linear-gradient(135deg, rgba(255,209,102,.9), rgba(255,209,102,.35)); border-color:rgba(255,209,102,.55); color:#241600}
+  button.bad{background:linear-gradient(135deg, rgba(255,77,109,.85), rgba(255,77,109,.35)); border-color:rgba(255,77,109,.55); color:#2a000a}
+
   .list{display:flex; flex-direction:column; gap:8px; max-height:62vh; overflow:auto; padding-right:6px}
   .item{
     padding:10px; border-radius:18px; border:1px solid var(--line);
     background:rgba(255,255,255,.03); cursor:pointer;
   }
+  .item.active{border-color: rgba(58,160,255,.55); box-shadow: 0 0 0 2px rgba(58,160,255,.12) inset}
   .item .top{display:flex; justify-content:space-between; gap:10px; align-items:center}
   .tp{font-family:var(--mono); font-weight:950; font-size:12px}
   .pill{font-size:11px; padding:5px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted)}
@@ -99,7 +101,7 @@
   .divider{height:1px; background:var(--line); margin:12px 0}
   .hint{color:var(--muted); font-size:12px; line-height:1.35}
   .rightHead{display:flex; align-items:center; justify-content:space-between; gap:10px}
-  .statusLine{color:var(--muted); font-size:12px}
+  .statusLine{color:var(--muted); font-size:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap}
   .toast{
     position:fixed; left:14px; bottom:14px;
     background:rgba(0,0,0,.65); border:1px solid var(--line);
@@ -114,6 +116,35 @@
   .check b{font-size:12px}
   .check span{color:var(--muted); font-size:12px; line-height:1.25}
   .shortcut{font-family:var(--mono); font-size:11px; color:var(--muted)}
+
+  /* Required field highlight */
+  .req{
+    border-color: rgba(255,209,102,.55) !important;
+    box-shadow: 0 0 0 2px rgba(255,209,102,.10) inset;
+  }
+  .dirtyBadge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,209,102,.35);
+    background: rgba(255,209,102,.14);
+    font-weight: 900;
+    font-size: 12px;
+    color: #6a4b00;
+  }
+  .quickBtns{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+  .qbtn{
+    padding:7px 10px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.06);
+    color:var(--text);
+    cursor:pointer;
+    font-weight:900;
+    font-size:12px;
+  }
 </style>
 </head>
 <body>
@@ -162,7 +193,12 @@
 
       <div class="divider"></div>
       <div class="hint">
-        <b>Shortcuts:</b> <span class="shortcut">Enter</span> save • <span class="shortcut">Ctrl</span>+<span class="shortcut">→</span> next stage • <span class="shortcut">Ctrl</span>+<span class="shortcut">F</span> focus search
+        <b>Shortcuts:</b>
+        <span class="shortcut">Enter</span> save •
+        <span class="shortcut">Ctrl</span>+<span class="shortcut">→</span> next stage •
+        <span class="shortcut">Ctrl</span>+<span class="shortcut">←</span> prev item •
+        <span class="shortcut">Ctrl</span>+<span class="shortcut">→</span> next item •
+        <span class="shortcut">Ctrl</span>+<span class="shortcut">F</span> focus search
       </div>
     </div>
   </div>
@@ -197,7 +233,12 @@
     </div>
 
     <div class="card">
-      <h3><div class="rightHead"><span>Intake Form</span><span class="statusLine" id="statusLine">—</span></div></h3>
+      <h3>
+        <div class="rightHead">
+          <span>Intake Form</span>
+          <span class="statusLine" id="statusLine">—</span>
+        </div>
+      </h3>
       <div class="body" id="detail">
         <div class="hint">Select an item on the left or hit <b>+ New TP</b>.</div>
       </div>
@@ -234,12 +275,25 @@ const DROPDOWNS = {
 
 let db = [];
 let currentTP = null;
+let DIRTY = false;
 
 function toast(msg){
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.style.display = "block";
   setTimeout(()=> t.style.display="none", 1600);
+}
+
+function setDirty(on){
+  DIRTY = !!on;
+  const s = document.getElementById("statusLine");
+  if (!s) return;
+  if (!currentTP){
+    s.textContent = "—";
+    return;
+  }
+  const it = db.find(x=>x.TP===currentTP);
+  s.innerHTML = `${escapeHtml(it?.TP||"")} • Stage: ${escapeHtml(it?.Stage||"")} ${DIRTY ? ' <span class="dirtyBadge">⚠ Unsaved</span>' : ''}`;
 }
 
 function todayKey(){
@@ -254,7 +308,6 @@ function loadDB(){
   const raw = localStorage.getItem(KEY);
   if (raw) db = JSON.parse(raw);
   else {
-    // Seed example data spanning stages so you can see flow across pages.
     db = [
       {TP:`TP-${todayKey()}-0001`, Stage:"INTAKE", CreatedAt:Date.now(), UpdatedAt:Date.now(),
         Category:"Laptop", Brand:"Dell", Model:"Latitude 5420", Color:"Black", IntakeNotes:"No charger. Sticker residue on lid."},
@@ -274,13 +327,14 @@ function loadDB(){
   }
 }
 function saveDB(){ localStorage.setItem(KEY, JSON.stringify(db)); }
-
 function uniq(list){ return [...new Set(list.filter(Boolean))]; }
 
 function setFilterOptions(){
   const sel = document.getElementById("filtCategory");
   const values = uniq(db.filter(x=>x.Stage===STAGE).map(x=>x.Category));
-  sel.innerHTML = `<option value="">All</option>` + values.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
+  // Always include dropdown list too so the filter isn't empty on a fresh queue
+  const merged = uniq([ ...values, ...DROPDOWNS.Category ]);
+  sel.innerHTML = `<option value="">All</option>` + merged.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
 }
 
 function renderKPIs(){
@@ -295,7 +349,6 @@ function renderKPIs(){
   const avg = notes.length ? Math.round(notes.reduce((a,b)=>a+b,0)/notes.length) : 0;
   document.getElementById("kpiNotes").textContent = avg;
 
-  // "Fastest win" highlight: items missing model (quickly fix)
   const win = queue.find(x => !(x.Model||"").trim());
   document.getElementById("kpiWin").textContent = win ? "Fill missing model" : "All good";
 }
@@ -327,14 +380,19 @@ function renderList(){
 
   if (!list.length){
     el.innerHTML = `<div class="hint">No items in ${STAGE}. (Either you’re crushing it… or the gremlins hid the pallets.)</div>`;
+    setFilterOptions(); renderKPIs();
     return;
   }
 
   list.forEach(it=>{
     const d = document.createElement("div");
-    d.className = "item";
+    d.className = "item" + (it.TP===currentTP ? " active" : "");
     d.onclick = ()=> openItem(it.TP);
-    const missing = (!it.Category || !it.Brand || !it.Model || !it.Color) ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs fields</span>` : "";
+
+    const missing = (!it.Category || !it.Brand || !it.Model || !it.Color)
+      ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs fields</span>`
+      : "";
+
     d.innerHTML = `
       <div class="top">
         <div class="tp">${escapeHtml(it.TP)}</div>
@@ -357,32 +415,53 @@ function selectHTML(list, selected){
   return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
 }
 
+function requiredOK(it){
+  return !!(it.Category && it.Brand && (it.Model||"").trim() && it.Color);
+}
+
+function markRequired(){
+  const ids = ["f_Category","f_Brand","f_Model","f_Color"];
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if (!el) return;
+    const v = (el.value||"").trim();
+    if (!v) el.classList.add("req");
+    else el.classList.remove("req");
+  });
+}
+
 function openItem(tp){
+  if (currentTP && DIRTY){
+    const ok = confirm("You have unsaved changes. Save before switching items?");
+    if (ok) save();
+    else setDirty(false);
+  }
+
   currentTP = tp;
   const it = db.find(x=>x.TP===tp);
   if (!it) return;
 
-  document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
+  setDirty(false);
 
   document.getElementById("detail").innerHTML = `
     <div class="row">
       <div>
-        <div class="lab">Category</div>
+        <div class="lab">Category <span class="pill" style="margin-left:6px">required</span></div>
         <select id="f_Category">${selectHTML(DROPDOWNS.Category, it.Category)}</select>
       </div>
       <div>
-        <div class="lab">Brand</div>
+        <div class="lab">Brand <span class="pill" style="margin-left:6px">required</span></div>
         <select id="f_Brand">${selectHTML(DROPDOWNS.Brand, it.Brand)}</select>
       </div>
     </div>
 
     <div class="row">
       <div>
-        <div class="lab">Model</div>
+        <div class="lab">Model <span class="pill" style="margin-left:6px">required</span></div>
         <input id="f_Model" value="${escapeAttr(it.Model||"")}" placeholder="e.g., Latitude 5420" />
       </div>
       <div>
-        <div class="lab">Color</div>
+        <div class="lab">Color <span class="pill" style="margin-left:6px">required</span></div>
         <select id="f_Color">${selectHTML(DROPDOWNS.Color, it.Color)}</select>
       </div>
     </div>
@@ -390,16 +469,55 @@ function openItem(tp){
     <div class="lab">Intake Notes</div>
     <textarea id="f_IntakeNotes" placeholder="missing charger, cracked screen, lot tag…">${escapeHtml(it.IntakeNotes||"")}</textarea>
 
+    <div class="quickBtns">
+      <button class="qbtn" type="button" onclick="appendNote('No charger')">No charger</button>
+      <button class="qbtn" type="button" onclick="appendNote('Cracked screen')">Cracked screen</button>
+      <button class="qbtn" type="button" onclick="appendNote('No battery')">No battery</button>
+      <button class="qbtn" type="button" onclick="appendNote('Password locked')">Password locked</button>
+      <button class="qbtn" type="button" onclick="appendNote('Parts only')">Parts only</button>
+    </div>
+
     <div class="divider"></div>
     <div class="btns">
       <button class="good" onclick="save()">Save</button>
       <button class="primary" onclick="moveNext()">Next → ${NEXT_STAGE}</button>
+      <button class="warn" onclick="navItem(-1)">← Prev Item</button>
+      <button class="warn" onclick="navItem(1)">Next Item →</button>
     </div>
 
     <div class="hint" style="margin-top:10px">
-      This station only edits: <b>Category, Brand, Model, Color, IntakeNotes</b>.
+      This station edits: <b>Category, Brand, Model, Color, IntakeNotes</b>.
+      <br>Tip: Fill required fields before moving forward.
     </div>
   `;
+
+  // Hook dirty tracking
+  ["f_Category","f_Brand","f_Model","f_Color","f_IntakeNotes"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener("input", ()=>{ setDirty(true); markRequired(); });
+    el.addEventListener("change", ()=>{ setDirty(true); markRequired(); });
+  });
+
+  setDirty(false);
+  markRequired();
+  renderList();
+
+  // focus model if missing; else notes
+  setTimeout(()=>{
+    const model = document.getElementById("f_Model");
+    const notes = document.getElementById("f_IntakeNotes");
+    if (model && !model.value.trim()) model.focus();
+    else notes?.focus();
+  }, 0);
+}
+
+function appendNote(txt){
+  const el = document.getElementById("f_IntakeNotes");
+  if (!el) return;
+  const cur = el.value.trim();
+  el.value = cur ? (cur + (cur.endsWith(".") ? " " : ". ") + txt) : txt;
+  el.dispatchEvent(new Event("input"));
 }
 
 function save(){
@@ -415,25 +533,55 @@ function save(){
   it.UpdatedAt = Date.now();
 
   saveDB();
+  setDirty(false);
   renderList();
   toast("Saved");
 }
 
 function moveNext(){
   if (!currentTP) return;
-  save();
+
+  // Validate required fields before stage move
   const it = db.find(x=>x.TP===currentTP);
+  if (!it) return;
+
+  // grab UI values into it (so validation checks current edits)
+  it.Category = document.getElementById("f_Category").value;
+  it.Brand = document.getElementById("f_Brand").value;
+  it.Model = document.getElementById("f_Model").value.trim();
+  it.Color = document.getElementById("f_Color").value;
+  it.IntakeNotes = document.getElementById("f_IntakeNotes").value;
+
+  if (!requiredOK(it)){
+    markRequired();
+    toast("Fill required fields before moving forward.");
+    return;
+  }
+
   it.Stage = NEXT_STAGE;
   it.UpdatedAt = Date.now();
   saveDB();
+
   currentTP = null;
+  setDirty(false);
   document.getElementById("detail").innerHTML = `<div class="hint">Moved to <b>${NEXT_STAGE}</b> (mock).</div>`;
   document.getElementById("statusLine").textContent = "—";
   renderList();
   toast("Forwarded");
 }
 
+function todayKeyForTP(tp){
+  const m = String(tp||"").match(/^TP-(\d{8})-/);
+  return m ? m[1] : "";
+}
+
 function newItem(){
+  if (currentTP && DIRTY){
+    const ok = confirm("You have unsaved changes. Save before creating a new TP?");
+    if (ok) save();
+    else setDirty(false);
+  }
+
   const tkey = todayKey();
   const todays = db.filter(x => (x.TP||"").includes(`TP-${tkey}-`));
   const nextN = String(todays.length + 1).padStart(4,"0");
@@ -450,8 +598,42 @@ function newItem(){
   toast("New TP created");
 }
 
+function getVisibleList(){
+  // use current filters/search so nav matches what you're seeing
+  const q = (document.getElementById("q").value || "").toLowerCase();
+  const cat = document.getElementById("filtCategory").value || "";
+  let list = db.filter(x=>x.Stage===STAGE);
+  if (cat) list = list.filter(x => (x.Category||"") === cat);
+  if (q){
+    list = list.filter(x=>{
+      const hay = [x.TP,x.Category,x.Brand,x.Model,x.Color,x.IntakeNotes].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  // consistent ordering with current sort
+  const sortBy = document.getElementById("sortBy").value;
+  if (sortBy==="newest") list.sort((a,b)=>(b.CreatedAt||0)-(a.CreatedAt||0));
+  if (sortBy==="oldest") list.sort((a,b)=>(a.CreatedAt||0)-(b.CreatedAt||0));
+  if (sortBy==="tp") list.sort((a,b)=>(a.TP||"").localeCompare(b.TP||""));
+  return list.map(x=>x.TP);
+}
+
+function navItem(dir){
+  if (!currentTP) return;
+  const ids = getVisibleList();
+  const idx = ids.indexOf(currentTP);
+  if (idx < 0) return;
+  const next = idx + dir;
+  if (next < 0 || next >= ids.length) return toast("No more items that way.");
+  openItem(ids[next]);
+}
+
 function escapeHtml(s){
-  return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  return String(s||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
 }
 function escapeAttr(s){
   return escapeHtml(s).replaceAll("'","&#39;");
@@ -461,7 +643,13 @@ function escapeAttr(s){
 document.addEventListener("keydown", (e)=>{
   if (e.ctrlKey && (e.key==="f" || e.key==="F")){ e.preventDefault(); document.getElementById("q").focus(); }
   if (e.key==="Enter" && currentTP && document.activeElement && document.activeElement.tagName!=="TEXTAREA"){ e.preventDefault(); save(); }
-  if (e.ctrlKey && e.key==="ArrowRight"){ e.preventDefault(); if(currentTP) moveNext(); }
+  if (e.ctrlKey && e.key==="ArrowRight"){
+    e.preventDefault();
+    // If an item is open, Ctrl+→ navigates items; Shift+Ctrl+→ moves stage
+    if (e.shiftKey){ if(currentTP) moveNext(); }
+    else if (currentTP) navItem(1);
+  }
+  if (e.ctrlKey && e.key==="ArrowLeft"){ e.preventDefault(); if(currentTP) navItem(-1); }
 });
 
 loadDB();
