@@ -237,16 +237,16 @@
 
 <script>
 /* ===================== CONFIG ===================== */
-const API_URL = "PASTE_YOUR_WEB_APP_URL_HERE"; // <-- REQUIRED: your Apps Script Web App /exec URL
+const API_URL = "https://script.google.com/macros/s/AKfycbw5s7R5FFQBNKqmQPwNl-jSa6g987HeyXS2eMDR1Y2H9pq5XUEn4QHnqGA5-B8cXAelEw/exec"; // <-- REQUIRED: your Apps Script Web App /exec URL
 const API_KEY = ""; // optional: match backend API_KEY if you set one
-const PLACEHOLDER = "PASTE_YOUR_WEB_APP_URL_HERE";
+const PLACEHOLDER = "https://script.google.com/macros/s/AKfycbw5s7R5FFQBNKqmQPwNl-jSa6g987HeyXS2eMDR1Y2H9pq5XUEn4QHnqGA5-B8cXAelEw/exec";
 
 const STAGE = "STAGING";
 const NEXT_STAGE = "LOGISTICS";
 const PREV_STAGE = "PROCESSING";
 
 /* Logo support */
-const DEFAULT_LOGO_URL = "assets/tekpak-logo.png";
+const DEFAULT_LOGO_URL = "tekpak-logo.png";
 
 /* TP generator settings (random 9 default) */
 const TP_SETTINGS_KEY = "yardflow_tp_settings_v1";
@@ -1109,7 +1109,7 @@ function renderGenerator(it){
     <div class="row">
       <div>
         <div class="lab">Logo URL (optional)</div>
-        <input id="logoUrl" value="${escapeAttr(DEFAULT_LOGO_URL)}" placeholder="assets/tekpak-logo.png or https://..."/>
+        <input id="logoUrl" value="${escapeAttr(DEFAULT_LOGO_URL)}" placeholder="tekpak-logo.png or https://..."/>
         <div class="hint">If logo doesn’t render on eBay, host it and paste full URL.</div>
       </div>
       <div>
