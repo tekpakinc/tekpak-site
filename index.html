@@ -5,30 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Tek-Pak Store</title>
   <link rel="stylesheet" href="./styles.css"/>
-  <style>
-    .emptyState{
-      border:1px dashed var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      background: rgba(255,255,255,.04);
-      color: var(--muted);
-      line-height: 1.35;
-    }
-    .toggleRow{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    }
-    .toggle{
-      display:flex; align-items:center; gap:10px;
-      padding: 8px 10px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255,255,255,.04);
-      cursor:pointer;
-      user-select:none;
-    }
-    .toggle input{ width:auto; }
-    .priceBig{ font-weight:950; font-size: 16px; }
-  </style>
 </head>
 <body>
 <header class="topbar">
@@ -60,24 +36,11 @@
           <select class="select" id="cat">
             <option value="">All categories</option>
           </select>
-          <select class="select" id="sort">
-            <option value="newest">Sort: Newest</option>
-            <option value="priceLow">Sort: Price (Low)</option>
-            <option value="priceHigh">Sort: Price (High)</option>
-            <option value="titleAZ">Sort: Title (A–Z)</option>
-          </select>
           <button class="btn primary" id="btnLoad">Search</button>
         </div>
 
-        <div style="height:10px"></div>
-
-        <div class="toggleRow">
-          <label class="toggle">
-            <input type="checkbox" id="listedOnly"/>
-            <span class="small"><b>Show LISTED only</b> (hide AVAILABLE not-yet-posted)</span>
-          </label>
-          <div class="small" id="meta">Loading…</div>
-        </div>
+        <div style="height:12px"></div>
+        <div class="small" id="meta">Loading…</div>
       </div>
     </div>
 
@@ -109,7 +72,6 @@
     </div>
     <div class="bd">
       <div class="grid cols-3" id="grid"></div>
-      <div id="empty" class="emptyState" style="display:none;"></div>
     </div>
   </div>
 </main>
@@ -158,56 +120,45 @@
   </div>
 </div>
 
+<!-- ✅ API endpoint injected here -->
+<script>
+  window.YARDOS_API_URL = "https://script.google.com/macros/s/AKfycbwRXMtWXFH35aPQbjnfeA3gvQXnaSgtTZ4tgMiI5Psc6fAFmwj9-WdYG4L04qf0Rj5J/exec";
+  window.API_URL = window.YARDOS_API_URL;
+  window.API_BASE = window.YARDOS_API_URL;
+</script>
+
 <script src="./app.js"></script>
 <script>
 let CONFIG = { companyName:"Tek-Pak Inc.", logoUrl:"" };
-let ALL_SELLABLE = []; // unfiltered sellable list
-let ITEMS = [];        // rendered list
-let _debounce = null;
+let ITEMS = [];
+let DROPDOWNS = {};
 
 function openDrawer(){ qs("#drawerBack").classList.add("show"); }
 function closeDrawer(){ qs("#drawerBack").classList.remove("show"); }
 
-function toNumPrice(v){
-  const s = String(v ?? "").trim();
-  if (!s) return NaN;
-  const cleaned = s.replace(/[^0-9.]/g,"");
-  const n = Number(cleaned);
-  return Number.isFinite(n) ? n : NaN;
-}
-
 function publicFilter(items){
-  const listedOnly = qs("#listedOnly").checked;
   return items.filter(it => {
     const st = String(it.Status||"").toUpperCase();
-    if (listedOnly) return st === "LISTED";
     return (st === "AVAILABLE" || st === "LISTED");
   });
 }
 
-function safeText(v){ return String(v ?? "").trim(); }
-
 function cardHtml(it){
-  const title = safeText(it.Title) || "Item";
-  const sku = safeText(it.TP_SKU);
-  const brand = safeText(it.Brand);
-  const model = safeText(it.Model);
-  const priceRaw = it.List_Price || it.Price || "";
-  const priceNum = toNumPrice(priceRaw);
+  const title = it.Title || "Item";
+  const sku = it.TP_SKU || "";
+  const brand = it.Brand || "";
+  const model = it.Model || "";
+  const price = it.List_Price || it.Price || "";
   const status = String(it.Status||"").toUpperCase();
 
   const specs = [brand, model].filter(Boolean).join(" • ") || "See details";
 
   const pill = (status === "AVAILABLE" || status === "LISTED")
-    ? `<span class="pill good">${escHtml(status)}</span>`
-    : `<span class="pill warn">${escHtml(status||"—")}</span>`;
-
-  const priceLine = Number.isFinite(priceNum)
-    ? `<div class="small priceBig">$${priceNum.toFixed(2)}</div>`
-    : (priceRaw ? `<div class="small"><strong>Price:</strong> ${escHtml(priceRaw)}</div>` : ``);
+    ? `<span class="pill good">${status}</span>`
+    : `<span class="pill warn">${status||"—"}</span>`;
 
   return `
-    <div class="card" data-open="${escHtml(sku)}" style="cursor:pointer;">
+    <div class="card" data-sku="${escHtml(sku)}">
       <div class="hd">
         <div>
           <h2>${escHtml(title)}</h2>
@@ -217,11 +168,10 @@ function cardHtml(it){
       </div>
       <div class="bd">
         <div class="small mono">${escHtml(sku)}</div>
-        <div style="height:8px"></div>
-        ${priceLine}
+        ${price ? `<div style="height:8px"></div><div class="small"><strong>Price:</strong> ${escHtml(price)}</div>` : ``}
         <div style="height:10px"></div>
         <div class="controls">
-          <button class="btn primary" data-open-btn="${escHtml(sku)}">View</button>
+          <button class="btn primary" data-open="${escHtml(sku)}">View</button>
         </div>
       </div>
     </div>
@@ -229,26 +179,12 @@ function cardHtml(it){
 }
 
 function renderGrid(){
-  const grid = qs("#grid");
-  const empty = qs("#empty");
-
-  grid.innerHTML = ITEMS.map(cardHtml).join("");
-
-  if (!ITEMS.length){
-    empty.style.display = "block";
-    empty.innerHTML = `
-      <b>No matching items.</b><br>
-      Try a different search, clear the category filter, or turn off “LISTED only”.
-    `;
-  } else {
-    empty.style.display = "none";
-  }
-
+  qs("#grid").innerHTML = ITEMS.map(cardHtml).join("");
   qs("#meta").textContent = `Showing ${ITEMS.length} item(s).`;
 }
 
-function fillCategoryDropdownFromAllSellable(){
-  const cats = new Set(ALL_SELLABLE.map(x => String(x.Category||"").trim()).filter(Boolean));
+function fillCategoryDropdown(items){
+  const cats = new Set(items.map(x => String(x.Category||"").trim()).filter(Boolean));
   const sel = qs("#cat");
   const keep = sel.value;
   sel.innerHTML = `<option value="">All categories</option>` + Array.from(cats).sort()
@@ -264,7 +200,7 @@ function ebayUrlFor(it){
   const itemId = String(it.eBay_ItemID || it.Ebay_ItemID || it.ebay_itemid || "").trim();
   if (itemId) return `https://www.ebay.com/itm/${encodeURIComponent(itemId)}`;
   const direct = String(it.eBay_URL || it.Ebay_URL || "").trim();
-  return direct || "";
+  return direct || "https://www.ebay.com/";
 }
 
 function showItem(it){
@@ -278,43 +214,9 @@ function showItem(it){
   qs("#dIncluded").textContent = it.Included || "See listing/photos.";
   qs("#dIssues").textContent = it.Known_Issues || "None listed beyond photos/description.";
 
-  const url = ebayUrlFor(it);
-  const btn = qs("#btnEbay");
-  if (url){
-    btn.href = url;
-    btn.textContent = "View Listing";
-    btn.classList.remove("warn");
-  } else {
-    btn.href = "https://www.ebay.com/";
-    btn.textContent = "Listing not linked";
-  }
+  qs("#btnEbay").href = ebayUrlFor(it);
 
   openDrawer();
-}
-
-function sortItems(items){
-  const mode = qs("#sort").value;
-  const copy = [...items];
-
-  if (mode === "titleAZ"){
-    copy.sort((a,b)=> safeText(a.Title).localeCompare(safeText(b.Title)));
-  } else if (mode === "priceLow" || mode === "priceHigh"){
-    copy.sort((a,b)=>{
-      const ap = toNumPrice(a.List_Price || a.Price);
-      const bp = toNumPrice(b.List_Price || b.Price);
-      const an = Number.isFinite(ap) ? ap : 1e18;
-      const bn = Number.isFinite(bp) ? bp : 1e18;
-      return mode === "priceLow" ? (an-bn) : (bn-an);
-    });
-  } else {
-    // newest
-    copy.sort((a,b)=>{
-      const aa = Number(a.UpdatedAt || a.Intake_Date || a._row || 0);
-      const bb = Number(b.UpdatedAt || b.Intake_Date || b._row || 0);
-      return (bb - aa);
-    });
-  }
-  return copy;
 }
 
 async function loadStore(){
@@ -323,17 +225,10 @@ async function loadStore(){
 
   try{
     const res = await apiGet({ action:"listInventory", tab:"Inventory_Retail", q });
-    const raw = res.items || [];
+    let items = publicFilter(res.items || []);
 
-    // 1) Store full sellable list for dropdown fill
-    ALL_SELLABLE = publicFilter(raw);
-
-    // 2) Apply category filter + sorting
-    let items = ALL_SELLABLE;
     if (cat) items = items.filter(x => String(x.Category||"") === cat);
-    items = sortItems(items);
 
-    // IMPORTANT: strip internal-only fields (just in case)
     ITEMS = items.map(it => {
       const clean = { ...it };
       delete clean.Notes_Internal;
@@ -344,36 +239,22 @@ async function loadStore(){
       return clean;
     });
 
-    fillCategoryDropdownFromAllSellable();
+    fillCategoryDropdown(ITEMS);
     renderGrid();
     toast("Loaded store items.");
   }catch(err){
     toast(err.message, "bad");
     qs("#meta").textContent = "Error loading store.";
-    qs("#grid").innerHTML = "";
-    qs("#empty").style.display = "block";
-    qs("#empty").innerHTML = `<b>Couldn’t load items.</b><br>${escHtml(err.message || "Unknown error")}`;
   }
 }
 
-// events
 qs("#btnLoad").addEventListener("click", loadStore);
-
-qs("#q").addEventListener("input", ()=>{
-  clearTimeout(_debounce);
-  _debounce = setTimeout(loadStore, 350);
-});
 qs("#q").addEventListener("keydown", (e)=>{ if(e.key==="Enter") loadStore(); });
 
-qs("#cat").addEventListener("change", loadStore);
-qs("#sort").addEventListener("change", loadStore);
-qs("#listedOnly").addEventListener("change", loadStore);
-
 qs("#grid").addEventListener("click", (e)=>{
-  const openBtn = e.target.closest("[data-open-btn]");
-  const card = e.target.closest("[data-open]");
-  const sku = openBtn?.getAttribute("data-open-btn") || card?.getAttribute("data-open");
-  if (!sku) return;
+  const btn = e.target.closest("button[data-open]");
+  if (!btn) return;
+  const sku = btn.getAttribute("data-open");
   const it = pickItemBySku(sku);
   if (it) showItem(it);
 });
@@ -387,7 +268,6 @@ qs("#btnCopySku").addEventListener("click", async ()=>{
   toast("Copied SKU.");
 });
 
-// init
 (async function init(){
   CONFIG = await loadConfig();
   setLogo(qs("#logo"), CONFIG.logoUrl);
