@@ -85,69 +85,34 @@
   }
   button.primary{background:linear-gradient(135deg, rgba(58,160,255,.95), rgba(58,160,255,.55)); border-color:rgba(58,160,255,.55)}
   button.good{background:linear-gradient(135deg, rgba(61,255,141,.85), rgba(61,255,141,.35)); border-color:rgba(61,255,141,.55); color:#06210f}
-  button.warn{background:linear-gradient(135deg, rgba(255,209,102,.9), rgba(255,209,102,.35)); border-color:rgba(255,209,102,.55); color:#241600}
-  button.bad{background:linear-gradient(135deg, rgba(255,77,109,.85), rgba(255,77,109,.35)); border-color:rgba(255,77,109,.55); color:#2a000a}
-
   .list{display:flex; flex-direction:column; gap:8px; max-height:62vh; overflow:auto; padding-right:6px}
   .item{
     padding:10px; border-radius:18px; border:1px solid var(--line);
     background:rgba(255,255,255,.03); cursor:pointer;
   }
-  .item.active{border-color: rgba(58,160,255,.55); box-shadow: 0 0 0 2px rgba(58,160,255,.12) inset}
   .item .top{display:flex; justify-content:space-between; gap:10px; align-items:center}
   .tp{font-family:var(--mono); font-weight:950; font-size:12px}
   .pill{font-size:11px; padding:5px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted)}
   .meta{color:var(--muted); font-size:12px; margin-top:6px; line-height:1.25}
   .divider{height:1px; background:var(--line); margin:12px 0}
   .hint{color:var(--muted); font-size:12px; line-height:1.35}
-  .rightHead{display:flex; align-items:center; justify-content:space-between; gap:10px}
-  .statusLine{color:var(--muted); font-size:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap}
   .toast{
     position:fixed; left:14px; bottom:14px;
     background:rgba(0,0,0,.65); border:1px solid var(--line);
     padding:10px 12px; border-radius:14px; display:none;
   }
-  .checklist{display:grid; gap:8px}
-  .check{
-    display:flex; gap:10px; align-items:flex-start;
-    border:1px solid var(--line); border-radius:16px; padding:10px;
-    background:rgba(0,0,0,.18);
-  }
-  .check b{font-size:12px}
-  .check span{color:var(--muted); font-size:12px; line-height:1.25}
   .shortcut{font-family:var(--mono); font-size:11px; color:var(--muted)}
-
-  /* Required field highlight */
-  .req{
-    border-color: rgba(255,209,102,.55) !important;
-    box-shadow: 0 0 0 2px rgba(255,209,102,.10) inset;
-  }
-  .dirtyBadge{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:5px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,209,102,.35);
-    background: rgba(255,209,102,.14);
-    font-weight: 900;
-    font-size: 12px;
-    color: #6a4b00;
-  }
-  .quickBtns{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
-  .qbtn{
-    padding:7px 10px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.06);
-    color:var(--text);
-    cursor:pointer;
-    font-weight:900;
-    font-size:12px;
-  }
 </style>
 </head>
 <body>
+
+<!-- ✅ API endpoint injected (not used yet, but ready) -->
+<script>
+  window.YARDOS_API_URL = "https://script.google.com/macros/s/AKfycbwRXMtWXFH35aPQbjnfeA3gvQXnaSgtTZ4tgMiI5Psc6fAFmwj9-WdYG4L04qf0Rj5J/exec";
+  window.API_URL = window.YARDOS_API_URL;
+  window.API_BASE = window.YARDOS_API_URL;
+</script>
+
 <header>
   <div class="brand">
     <div class="logo"></div>
@@ -193,12 +158,7 @@
 
       <div class="divider"></div>
       <div class="hint">
-        <b>Shortcuts:</b>
-        <span class="shortcut">Enter</span> save •
-        <span class="shortcut">Ctrl</span>+<span class="shortcut">→</span> next stage •
-        <span class="shortcut">Ctrl</span>+<span class="shortcut">←</span> prev item •
-        <span class="shortcut">Ctrl</span>+<span class="shortcut">→</span> next item •
-        <span class="shortcut">Ctrl</span>+<span class="shortcut">F</span> focus search
+        <b>Shortcuts:</b> <span class="shortcut">Enter</span> save • <span class="shortcut">Ctrl</span>+<span class="shortcut">→</span> next stage • <span class="shortcut">Ctrl</span>+<span class="shortcut">F</span> focus search
       </div>
     </div>
   </div>
@@ -208,51 +168,18 @@
       <h3>Today’s Snapshot</h3>
       <div class="body">
         <div class="gridKpi">
-          <div class="kpi">
-            <div class="label">In Intake Queue</div>
-            <div class="value" id="kpiQueue">0</div>
-            <div class="mini">items waiting</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Created Today</div>
-            <div class="value" id="kpiToday">0</div>
-            <div class="mini">new TP#</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Avg Notes Length</div>
-            <div class="value" id="kpiNotes">0</div>
-            <div class="mini">characters</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Fastest Win</div>
-            <div class="value" id="kpiWin">—</div>
-            <div class="mini">auto-highlight</div>
-          </div>
+          <div class="kpi"><div class="label">In Intake Queue</div><div class="value" id="kpiQueue">0</div><div class="mini">items waiting</div></div>
+          <div class="kpi"><div class="label">Created Today</div><div class="value" id="kpiToday">0</div><div class="mini">new TP#</div></div>
+          <div class="kpi"><div class="label">Avg Notes Length</div><div class="value" id="kpiNotes">0</div><div class="mini">characters</div></div>
+          <div class="kpi"><div class="label">Fastest Win</div><div class="value" id="kpiWin">—</div><div class="mini">auto-highlight</div></div>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <h3>
-        <div class="rightHead">
-          <span>Intake Form</span>
-          <span class="statusLine" id="statusLine">—</span>
-        </div>
-      </h3>
+      <h3><div style="display:flex; align-items:center; justify-content:space-between; gap:10px"><span>Intake Form</span><span class="hint" id="statusLine">—</span></div></h3>
       <div class="body" id="detail">
         <div class="hint">Select an item on the left or hit <b>+ New TP</b>.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>INTAKE Checklist</h3>
-      <div class="body">
-        <div class="checklist">
-          <div class="check"><div>✅</div><div><b>Tag it</b><br><span>Give TP#, basic identity fields.</span></div></div>
-          <div class="check"><div>✅</div><div><b>Sort it</b><br><span>Category + Brand + Model + Color.</span></div></div>
-          <div class="check"><div>✅</div><div><b>Capture notes</b><br><span>Missing parts, obvious damage, lot info.</span></div></div>
-          <div class="check"><div>✅</div><div><b>Send forward</b><br><span>Next → Processing when ready.</span></div></div>
-        </div>
       </div>
     </div>
   </div>
@@ -261,11 +188,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/*** Shared UI engine (mock DB). Same KEY used across all pages. ***/
 const KEY = "yardflow_commandcenter_db_v1";
 const STAGE = "INTAKE";
 const NEXT_STAGE = "PROCESSING";
-const PREV_STAGE = null;
 
 const DROPDOWNS = {
   Category: ["Laptop","Desktop","Tablet","Console","Parts","Accessory","Other"],
@@ -275,7 +200,6 @@ const DROPDOWNS = {
 
 let db = [];
 let currentTP = null;
-let DIRTY = false;
 
 function toast(msg){
   const t = document.getElementById("toast");
@@ -284,24 +208,9 @@ function toast(msg){
   setTimeout(()=> t.style.display="none", 1600);
 }
 
-function setDirty(on){
-  DIRTY = !!on;
-  const s = document.getElementById("statusLine");
-  if (!s) return;
-  if (!currentTP){
-    s.textContent = "—";
-    return;
-  }
-  const it = db.find(x=>x.TP===currentTP);
-  s.innerHTML = `${escapeHtml(it?.TP||"")} • Stage: ${escapeHtml(it?.Stage||"")} ${DIRTY ? ' <span class="dirtyBadge">⚠ Unsaved</span>' : ''}`;
-}
-
 function todayKey(){
   const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,"0");
-  const day = String(d.getDate()).padStart(2,"0");
-  return `${y}${m}${day}`;
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
 }
 
 function loadDB(){
@@ -310,31 +219,17 @@ function loadDB(){
   else {
     db = [
       {TP:`TP-${todayKey()}-0001`, Stage:"INTAKE", CreatedAt:Date.now(), UpdatedAt:Date.now(),
-        Category:"Laptop", Brand:"Dell", Model:"Latitude 5420", Color:"Black", IntakeNotes:"No charger. Sticker residue on lid."},
-
-      {TP:`TP-${todayKey()}-0002`, Stage:"PROCESSING", CreatedAt:Date.now()-600000, UpdatedAt:Date.now()-600000,
-        ScreenSizeIn:"15.6", CPU:"i5-1135G7", StorageGB:"256", Features:"Backlit KB\nFingerprint", GPU:"Intel UHD",
-        Series:"Latitude", MemoryGB:"16", Connectivity:"Wi-Fi + BT", Condition:"B"},
-
-      {TP:`TP-${todayKey()}-0003`, Stage:"STAGING", CreatedAt:Date.now()-1200000, UpdatedAt:Date.now()-1200000,
-        Title:"Lenovo ThinkPad T480 i5 16GB 256GB SSD", OperatingSystem:"Windows 11", Warranty:"30 Day",
-        Description:"Tested, cleaned, ready to ship.", PriceUSD:"169.99", ShippingPolicy:"Free Shipping"},
-
-      {TP:`TP-${todayKey()}-0004`, Stage:"LOGISTICS", CreatedAt:Date.now()-2000000, UpdatedAt:Date.now()-2000000,
-        DimensionsLxWxH:"14 x 9 x 2", WeightValue:"4.2", WeightUnit:"lb", Location:"A-1", Status:"Shelved"}
+        Category:"Laptop", Brand:"Dell", Model:"Latitude 5420", Color:"Black", IntakeNotes:"No charger. Sticker residue on lid."}
     ];
     saveDB();
   }
 }
 function saveDB(){ localStorage.setItem(KEY, JSON.stringify(db)); }
-function uniq(list){ return [...new Set(list.filter(Boolean))]; }
 
 function setFilterOptions(){
   const sel = document.getElementById("filtCategory");
-  const values = uniq(db.filter(x=>x.Stage===STAGE).map(x=>x.Category));
-  // Always include dropdown list too so the filter isn't empty on a fresh queue
-  const merged = uniq([ ...values, ...DROPDOWNS.Category ]);
-  sel.innerHTML = `<option value="">All</option>` + merged.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
+  const values = [...new Set(db.filter(x=>x.Stage===STAGE).map(x=>x.Category).filter(Boolean))];
+  sel.innerHTML = `<option value="">All</option>` + values.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
 }
 
 function renderKPIs(){
@@ -359,7 +254,6 @@ function renderList(){
   const sortBy = document.getElementById("sortBy").value;
 
   let list = db.filter(x=>x.Stage===STAGE);
-
   if (cat) list = list.filter(x => (x.Category||"") === cat);
 
   if (q){
@@ -377,31 +271,23 @@ function renderList(){
 
   const el = document.getElementById("list");
   el.innerHTML = "";
-
   if (!list.length){
-    el.innerHTML = `<div class="hint">No items in ${STAGE}. (Either you’re crushing it… or the gremlins hid the pallets.)</div>`;
-    setFilterOptions(); renderKPIs();
+    el.innerHTML = `<div class="hint">No items in ${STAGE}.</div>`;
     return;
   }
 
   list.forEach(it=>{
     const d = document.createElement("div");
-    d.className = "item" + (it.TP===currentTP ? " active" : "");
+    d.className = "item";
     d.onclick = ()=> openItem(it.TP);
-
-    const missing = (!it.Category || !it.Brand || !it.Model || !it.Color)
-      ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs fields</span>`
-      : "";
-
     d.innerHTML = `
       <div class="top">
         <div class="tp">${escapeHtml(it.TP)}</div>
         <div class="pill">${escapeHtml(it.Category || "—")}</div>
       </div>
       <div class="meta">
-        <b>${escapeHtml(it.Brand || "—")}</b> ${escapeHtml(it.Model || "")}${missing}<br>
+        <b>${escapeHtml(it.Brand || "—")}</b> ${escapeHtml(it.Model || "")}<br>
         Color: ${escapeHtml(it.Color || "—")}
-        ${it.IntakeNotes ? `<br>📝 ${escapeHtml(it.IntakeNotes).slice(0,60)}${it.IntakeNotes.length>60?'…':''}` : ""}
       </div>
     `;
     el.appendChild(d);
@@ -415,109 +301,45 @@ function selectHTML(list, selected){
   return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
 }
 
-function requiredOK(it){
-  return !!(it.Category && it.Brand && (it.Model||"").trim() && it.Color);
-}
-
-function markRequired(){
-  const ids = ["f_Category","f_Brand","f_Model","f_Color"];
-  ids.forEach(id=>{
-    const el = document.getElementById(id);
-    if (!el) return;
-    const v = (el.value||"").trim();
-    if (!v) el.classList.add("req");
-    else el.classList.remove("req");
-  });
-}
-
 function openItem(tp){
-  if (currentTP && DIRTY){
-    const ok = confirm("You have unsaved changes. Save before switching items?");
-    if (ok) save();
-    else setDirty(false);
-  }
-
   currentTP = tp;
   const it = db.find(x=>x.TP===tp);
   if (!it) return;
 
-  setDirty(false);
+  document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
 
   document.getElementById("detail").innerHTML = `
     <div class="row">
       <div>
-        <div class="lab">Category <span class="pill" style="margin-left:6px">required</span></div>
+        <div class="lab">Category</div>
         <select id="f_Category">${selectHTML(DROPDOWNS.Category, it.Category)}</select>
       </div>
       <div>
-        <div class="lab">Brand <span class="pill" style="margin-left:6px">required</span></div>
+        <div class="lab">Brand</div>
         <select id="f_Brand">${selectHTML(DROPDOWNS.Brand, it.Brand)}</select>
       </div>
     </div>
 
     <div class="row">
       <div>
-        <div class="lab">Model <span class="pill" style="margin-left:6px">required</span></div>
+        <div class="lab">Model</div>
         <input id="f_Model" value="${escapeAttr(it.Model||"")}" placeholder="e.g., Latitude 5420" />
       </div>
       <div>
-        <div class="lab">Color <span class="pill" style="margin-left:6px">required</span></div>
+        <div class="lab">Color</div>
         <select id="f_Color">${selectHTML(DROPDOWNS.Color, it.Color)}</select>
       </div>
     </div>
 
     <div class="lab">Intake Notes</div>
-    <textarea id="f_IntakeNotes" placeholder="missing charger, cracked screen, lot tag…">${escapeHtml(it.IntakeNotes||"")}</textarea>
-
-    <div class="quickBtns">
-      <button class="qbtn" type="button" onclick="appendNote('No charger')">No charger</button>
-      <button class="qbtn" type="button" onclick="appendNote('Cracked screen')">Cracked screen</button>
-      <button class="qbtn" type="button" onclick="appendNote('No battery')">No battery</button>
-      <button class="qbtn" type="button" onclick="appendNote('Password locked')">Password locked</button>
-      <button class="qbtn" type="button" onclick="appendNote('Parts only')">Parts only</button>
-    </div>
+    <textarea id="f_IntakeNotes">${escapeHtml(it.IntakeNotes||"")}</textarea>
 
     <div class="divider"></div>
     <div class="btns">
       <button class="good" onclick="save()">Save</button>
       <button class="primary" onclick="moveNext()">Next → ${NEXT_STAGE}</button>
-      <button class="warn" onclick="navItem(-1)">← Prev Item</button>
-      <button class="warn" onclick="navItem(1)">Next Item →</button>
-    </div>
-
-    <div class="hint" style="margin-top:10px">
-      This station edits: <b>Category, Brand, Model, Color, IntakeNotes</b>.
-      <br>Tip: Fill required fields before moving forward.
     </div>
   `;
-
-  // Hook dirty tracking
-  ["f_Category","f_Brand","f_Model","f_Color","f_IntakeNotes"].forEach(id=>{
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.addEventListener("input", ()=>{ setDirty(true); markRequired(); });
-    el.addEventListener("change", ()=>{ setDirty(true); markRequired(); });
-  });
-
-  setDirty(false);
-  markRequired();
-  renderList();
-
-  // focus model if missing; else notes
-  setTimeout(()=>{
-    const model = document.getElementById("f_Model");
-    const notes = document.getElementById("f_IntakeNotes");
-    if (model && !model.value.trim()) model.focus();
-    else notes?.focus();
-  }, 0);
-}
-
-function appendNote(txt){
-  const el = document.getElementById("f_IntakeNotes");
-  if (!el) return;
-  const cur = el.value.trim();
-  el.value = cur ? (cur + (cur.endsWith(".") ? " " : ". ") + txt) : txt;
-  el.dispatchEvent(new Event("input"));
 }
 
 function save(){
@@ -533,123 +355,51 @@ function save(){
   it.UpdatedAt = Date.now();
 
   saveDB();
-  setDirty(false);
   renderList();
   toast("Saved");
 }
 
 function moveNext(){
   if (!currentTP) return;
-
-  // Validate required fields before stage move
+  save();
   const it = db.find(x=>x.TP===currentTP);
-  if (!it) return;
-
-  // grab UI values into it (so validation checks current edits)
-  it.Category = document.getElementById("f_Category").value;
-  it.Brand = document.getElementById("f_Brand").value;
-  it.Model = document.getElementById("f_Model").value.trim();
-  it.Color = document.getElementById("f_Color").value;
-  it.IntakeNotes = document.getElementById("f_IntakeNotes").value;
-
-  if (!requiredOK(it)){
-    markRequired();
-    toast("Fill required fields before moving forward.");
-    return;
-  }
-
   it.Stage = NEXT_STAGE;
   it.UpdatedAt = Date.now();
   saveDB();
-
   currentTP = null;
-  setDirty(false);
   document.getElementById("detail").innerHTML = `<div class="hint">Moved to <b>${NEXT_STAGE}</b> (mock).</div>`;
   document.getElementById("statusLine").textContent = "—";
   renderList();
   toast("Forwarded");
 }
 
-function todayKeyForTP(tp){
-  const m = String(tp||"").match(/^TP-(\d{8})-/);
-  return m ? m[1] : "";
-}
-
 function newItem(){
-  if (currentTP && DIRTY){
-    const ok = confirm("You have unsaved changes. Save before creating a new TP?");
-    if (ok) save();
-    else setDirty(false);
-  }
-
   const tkey = todayKey();
   const todays = db.filter(x => (x.TP||"").includes(`TP-${tkey}-`));
   const nextN = String(todays.length + 1).padStart(4,"0");
   const tp = `TP-${tkey}-${nextN}`;
 
-  db.unshift({
-    TP: tp, Stage: STAGE,
-    CreatedAt: Date.now(), UpdatedAt: Date.now(),
+  db.unshift({ TP:tp, Stage:STAGE, CreatedAt:Date.now(), UpdatedAt:Date.now(),
     Category:"", Brand:"", Model:"", Color:"", IntakeNotes:""
   });
+
   saveDB();
   renderList();
   openItem(tp);
   toast("New TP created");
 }
 
-function getVisibleList(){
-  // use current filters/search so nav matches what you're seeing
-  const q = (document.getElementById("q").value || "").toLowerCase();
-  const cat = document.getElementById("filtCategory").value || "";
-  let list = db.filter(x=>x.Stage===STAGE);
-  if (cat) list = list.filter(x => (x.Category||"") === cat);
-  if (q){
-    list = list.filter(x=>{
-      const hay = [x.TP,x.Category,x.Brand,x.Model,x.Color,x.IntakeNotes].join(" ").toLowerCase();
-      return hay.includes(q);
-    });
-  }
-  // consistent ordering with current sort
-  const sortBy = document.getElementById("sortBy").value;
-  if (sortBy==="newest") list.sort((a,b)=>(b.CreatedAt||0)-(a.CreatedAt||0));
-  if (sortBy==="oldest") list.sort((a,b)=>(a.CreatedAt||0)-(b.CreatedAt||0));
-  if (sortBy==="tp") list.sort((a,b)=>(a.TP||"").localeCompare(b.TP||""));
-  return list.map(x=>x.TP);
-}
-
-function navItem(dir){
-  if (!currentTP) return;
-  const ids = getVisibleList();
-  const idx = ids.indexOf(currentTP);
-  if (idx < 0) return;
-  const next = idx + dir;
-  if (next < 0 || next >= ids.length) return toast("No more items that way.");
-  openItem(ids[next]);
-}
-
 function escapeHtml(s){
-  return String(s||"")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;");
+  return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
 }
 function escapeAttr(s){
   return escapeHtml(s).replaceAll("'","&#39;");
 }
 
-// Keyboard shortcuts
 document.addEventListener("keydown", (e)=>{
   if (e.ctrlKey && (e.key==="f" || e.key==="F")){ e.preventDefault(); document.getElementById("q").focus(); }
   if (e.key==="Enter" && currentTP && document.activeElement && document.activeElement.tagName!=="TEXTAREA"){ e.preventDefault(); save(); }
-  if (e.ctrlKey && e.key==="ArrowRight"){
-    e.preventDefault();
-    // If an item is open, Ctrl+→ navigates items; Shift+Ctrl+→ moves stage
-    if (e.shiftKey){ if(currentTP) moveNext(); }
-    else if (currentTP) navItem(1);
-  }
-  if (e.ctrlKey && e.key==="ArrowLeft"){ e.preventDefault(); if(currentTP) navItem(-1); }
+  if (e.ctrlKey && e.key==="ArrowRight"){ e.preventDefault(); if(currentTP) moveNext(); }
 });
 
 loadDB();
