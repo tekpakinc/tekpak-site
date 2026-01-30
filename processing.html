@@ -157,8 +157,7 @@
     <a class="chipNav active" href="./processing.html">Processing</a>
     <a class="chipNav" href="./staging.html">Staging</a>
     <a class="chipNav" href="./logistics.html">Logistics</a>
-    <button class="miniBtn" onclick="openTpSettings()">TP Settings</button>
-    <button class="primary" onclick="newItem()">+ New TP</button>
+    <button class="primary" onclick="newItem()">+ New Item</button>
   </div>
 </header>
 
@@ -167,7 +166,7 @@
     <h3>PROCESSING Queue <span class="pill" id="queueCount">0</span></h3>
     <div class="body">
       <div class="lab">Search</div>
-      <input id="q" placeholder="TP, CPU, series…" oninput="renderList()" />
+      <input id="q" placeholder="SKU, CPU, series…" oninput="renderList()" />
 
       <div class="row">
         <div>
@@ -179,7 +178,7 @@
           <select id="sortBy" onchange="renderList()">
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
-            <option value="tp">TP#</option>
+            <option value="sku">SKU</option>
           </select>
         </div>
       </div>
@@ -191,7 +190,6 @@
       <div class="hint">
         <b>Shortcuts:</b>
         <span class="kbd">Enter</span> save •
-        <span class="kbd">Ctrl</span>+<span class="kbd">←</span> back •
         <span class="kbd">Ctrl</span>+<span class="kbd">→</span> next •
         <span class="kbd">Ctrl</span>+<span class="kbd">F</span> search
       </div>
@@ -203,7 +201,7 @@
       <h3>Today’s Snapshot</h3>
       <div class="body">
         <div class="gridKpi">
-          <div class="kpi"><div class="label">In Processing</div><div class="value" id="kpiQueue">0</div><div class="mini">items waiting</div></div>
+          <div class="kpi"><div class="label">In Queue (TRIAGE)</div><div class="value" id="kpiQueue">0</div><div class="mini">items waiting</div></div>
           <div class="kpi"><div class="label">Missing CPU</div><div class="value" id="kpiCPU">0</div><div class="mini">quick fix</div></div>
           <div class="kpi"><div class="label">Missing RAM/SSD</div><div class="value" id="kpiMem">0</div><div class="mini">GB fields</div></div>
           <div class="kpi"><div class="label">Most Common</div><div class="value" id="kpiCommon">—</div><div class="mini">condition</div></div>
@@ -233,28 +231,23 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===================== CONFIG ===================== */
-const API_URL = "https://script.google.com/macros/s/AKfycbwRXMtWXFH35aPQbjnfeA3gvQXnaSgtTZ4tgMiI5Psc6fAFmwj9-WdYG4L04qf0Rj5J/exec"; // <-- REQUIRED
-const API_KEY = ""; // optional: match backend API_KEY if you set one
+/* ===================== CONFIG (YARDOS API) ===================== */
+const API_URL = "https://script.google.com/macros/s/AKfycbwRXMtWXFH35aPQbjnfeA3gvQXnaSgtTZ4tgMiI5Psc6fAFmwj9-WdYG4L04qf0Rj5J/exec";
+const API_KEY = ""; // optional: matches Settings!API_KEY if you set one
 
-const STAGE = "PROCESSING";
-const NEXT_STAGE = "STAGING";
-const PREV_STAGE = "INTAKE";
+// YardOS uses tabs. We’ll use Retail by default for this lane.
+const TAB = "Inventory_Retail";
 
-/* TP generator settings (random 9 default) */
-const TP_SETTINGS_KEY = "yardflow_tp_settings_v1";
-const DEFAULT_TP_SETTINGS = {
-  prefix: "",
-  includeDate: false,
-  sep: "-",
-  randLen: 9,
-  charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-  case: "upper"
-};
+// Processing lane = items whose Status is TRIAGE (change if you want)
+const QUEUE_STATUS = "TRIAGE";
+// “Next” button will set Status to INTAKE (change if you want)
+const NEXT_STATUS = "INTAKE";
 
 let dropdowns = {};
-let db = [];          // listItems payloads
-let currentTP = null; // active TP
+let headers = [];
+let db = [];           // listInventory results
+let currentRow = 0;    // _row
+let currentItem = null;
 
 /* ===================== UTIL ===================== */
 function toast(msg){
@@ -277,6 +270,8 @@ function uniq(list){ return [...new Set(list.filter(Boolean))]; }
 function apiGet(params){
   return new Promise((resolve, reject)=>{
     const cb = "cb_" + Math.random().toString(36).slice(2);
+    let script;
+
     const timeout = setTimeout(()=>{
       cleanup();
       reject(new Error("API timeout"));
@@ -294,117 +289,64 @@ function apiGet(params){
     if (API_KEY) q.set("key", API_KEY);
 
     const url = API_URL + (API_URL.includes("?") ? "&" : "?") + q.toString();
-    const script = document.createElement("script");
+    script = document.createElement("script");
     script.src = url;
     script.onerror = ()=>{ cleanup(); reject(new Error("API load error")); };
     document.head.appendChild(script);
   });
 }
 
-/* ===================== POST (best for larger payloads) ===================== */
-async function apiPost(action, payload){
-  const url = API_URL + (API_URL.includes("?") ? "&" : "?") + new URLSearchParams({
-    action,
-    ...(API_KEY ? { key: API_KEY } : {})
-  }).toString();
-
-  await fetch(url, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-
-  // verify (JSONP readback)
-  if (payload && payload.TP){
-    return await apiGet({ action:"readItem", tp: payload.TP });
-  }
-  return { ok:true };
+/* ===================== DATA ===================== */
+async function loadDropdowns(){
+  const dd = await apiGet({ action:"getDropdowns" });
+  if (!dd || !dd.ok) throw new Error(dd?.error || "Dropdowns failed");
+  dropdowns = dd.dropdowns || {};
 }
 
-/* ===================== TP generator (same as staging) ===================== */
-function loadTpSettings(){
-  try{
-    return { ...DEFAULT_TP_SETTINGS, ...(JSON.parse(localStorage.getItem(TP_SETTINGS_KEY) || "{}")) };
-  }catch{
-    return { ...DEFAULT_TP_SETTINGS };
-  }
-}
-function saveTpSettings(s){ localStorage.setItem(TP_SETTINGS_KEY, JSON.stringify(s)); }
-function formatDateYYYYMMDD(d=new Date()){
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
-}
-function randomBlock(len, charset){
-  len = Math.max(3, Number(len)||9);
-  charset = String(charset || DEFAULT_TP_SETTINGS.charset);
-  try{
-    const arr = new Uint32Array(len);
-    crypto.getRandomValues(arr);
-    let out = "";
-    for (let i=0;i<len;i++) out += charset[arr[i] % charset.length];
-    return out;
-  }catch{
-    let out = "";
-    for (let i=0;i<len;i++) out += charset[Math.floor(Math.random()*charset.length)];
-    return out;
-  }
-}
-function normalizeTP(tp){
-  return String(tp || "").trim().replace(/\s+/g,"").toUpperCase();
-}
-function generateTP(customOverrides = {}){
-  const s = { ...loadTpSettings(), ...customOverrides };
-  const parts = [];
-  const prefix = String(s.prefix || "").trim();
-  if (prefix) parts.push(prefix);
-  if (s.includeDate) parts.push(formatDateYYYYMMDD());
-  let block = randomBlock(s.randLen, s.charset);
-  block = (s.case === "lower") ? block.toLowerCase() : block.toUpperCase();
-  parts.push(block);
-  const sep = (s.sep ?? "-");
-  return parts.join(sep);
-}
-function tpExistsLocal(tp){ return db.some(x => String(x.TP||"").trim() === tp); }
-function generateUniqueTP(){
-  for (let i=0;i<100;i++){
-    const tp = generateTP();
-    if (!tpExistsLocal(tp)) return tp;
-  }
-  return generateTP({ randLen: (loadTpSettings().randLen || 9) + 2 }) + "-" + Date.now().toString(36).toUpperCase();
-}
-
-/* ===================== SHEET DATA ===================== */
 async function refreshQueue(){
-  const res = await apiGet({ action:"listItems", stage: STAGE, limit: 300 });
-  if (!res || !res.ok) throw new Error(res?.error || "Failed listItems");
-  db = res.items || [];
+  // Pull all, then filter by Status === QUEUE_STATUS (YardOS listInventory can filter status but only exact)
+  const res = await apiGet({ action:"listInventory", tab: TAB });
+  if (!res || !res.ok) throw new Error(res?.error || "listInventory failed");
+  headers = res.headers || [];
+  const all = res.items || [];
+  db = all.filter(x => String(x.Status||"").toUpperCase() === QUEUE_STATUS);
 }
-async function readItem(tp){
-  const res = await apiGet({ action:"readItem", tp });
-  if (!res || !res.ok) throw new Error(res?.error || "Failed readItem");
+
+async function getRow(row){
+  const res = await apiGet({ action:"getRow", tab:TAB, row });
+  if (!res || !res.ok) throw new Error(res?.error || "getRow failed");
   return res.item;
 }
 
-/* ===================== DROPDOWNS ===================== */
-function selectHTML(list, selected){
-  list = list || [];
-  return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
+async function upsertRow(payload){
+  const res = await apiGet({
+    action:"upsertInventory",
+    tab: TAB,
+    user: "yardflow-processing",
+    payload: JSON.stringify(payload)
+  });
+  if (!res || !res.ok) throw new Error(res?.error || "upsertInventory failed");
+  return res;
 }
 
 /* ===================== LIST + KPIs ===================== */
 function setFilterOptions(){
   const sel = document.getElementById("filtCondition");
-  const values = uniq(db.map(x=>x.Condition).filter(Boolean));
+  const values = uniq(db.map(x=>x.Condition_Grade || x.Condition).filter(Boolean));
   sel.innerHTML = `<option value="">All</option>` + values.map(v=>`<option>${escapeHtml(v)}</option>`).join("");
 }
 
 function renderKPIs(){
   const queue = db;
   document.getElementById("kpiQueue").textContent = queue.length;
-  document.getElementById("kpiCPU").textContent = queue.filter(x=>!(x.CPU||"").toString().trim()).length;
-  document.getElementById("kpiMem").textContent = queue.filter(x=>!(x.MemoryGB||"").toString().trim() || !(x.StorageGB||"").toString().trim()).length;
 
-  const conds = queue.map(x=>x.Condition).filter(Boolean);
+  const missCPU = queue.filter(x=>!(x.CPU||"").toString().trim()).length;
+  document.getElementById("kpiCPU").textContent = missCPU;
+
+  const missMem = queue.filter(x=>!(x.MemoryGB||"").toString().trim() || !(x.StorageGB||"").toString().trim()).length;
+  document.getElementById("kpiMem").textContent = missMem;
+
+  const conds = queue.map(x=>x.Condition_Grade || x.Condition).filter(Boolean);
   if (!conds.length) document.getElementById("kpiCommon").textContent = "—";
   else{
     const counts = conds.reduce((m,c)=>(m[c]=(m[c]||0)+1,m),{});
@@ -419,18 +361,25 @@ function renderList(){
   const sortBy = document.getElementById("sortBy").value;
 
   let list = [...db];
-  if (cond) list = list.filter(x => (x.Condition||"") === cond);
+
+  if (cond){
+    list = list.filter(x => String(x.Condition_Grade || x.Condition || "") === cond);
+  }
 
   if (q){
     list = list.filter(x=>{
-      const hay = [x.TP,x.CPU,x.Series,x.GPU,x.ScreenSizeIn,x.MemoryGB,x.StorageGB,x.Connectivity,x.Features].join(" ").toLowerCase();
+      const hay = [
+        x.TP_SKU, x.Title, x.CPU, x.Series, x.GPU,
+        x.ScreenSizeIn, x.MemoryGB, x.StorageGB,
+        x.Connectivity, x.Features, x.Brand, x.Model
+      ].join(" ").toLowerCase();
       return hay.includes(q);
     });
   }
 
-  if (sortBy==="newest") list.sort((a,b)=>(Number(b.CreatedAt)||0)-(Number(a.CreatedAt)||0));
-  if (sortBy==="oldest") list.sort((a,b)=>(Number(a.CreatedAt)||0)-(Number(b.CreatedAt)||0));
-  if (sortBy==="tp") list.sort((a,b)=>(String(a.TP||"")).localeCompare(String(b.TP||"")));
+  if (sortBy==="newest") list.sort((a,b)=>(Number(b._row)||0)-(Number(a._row)||0));
+  if (sortBy==="oldest") list.sort((a,b)=>(Number(a._row)||0)-(Number(b._row)||0));
+  if (sortBy==="sku") list.sort((a,b)=>(String(a.TP_SKU||"")).localeCompare(String(b.TP_SKU||"")));
 
   document.getElementById("queueCount").textContent = list.length;
 
@@ -438,7 +387,7 @@ function renderList(){
   el.innerHTML = "";
 
   if (!list.length){
-    el.innerHTML = `<div class="hint">No items in ${STAGE}. (Either you’re crushing it… or they’re all hiding.)</div>`;
+    el.innerHTML = `<div class="hint">No items with Status <b>${escapeHtml(QUEUE_STATUS)}</b>.</div>`;
     setFilterOptions();
     renderKPIs();
     return;
@@ -447,16 +396,17 @@ function renderList(){
   list.forEach(it=>{
     const d = document.createElement("div");
     d.className = "item";
-    d.onclick = ()=> openItem(it.TP);
+    d.onclick = ()=> openItem(it._row);
 
     const needs = (!it.CPU || !it.MemoryGB || !it.StorageGB)
       ? ` <span class="pill" style="border-color:rgba(255,209,102,.55)">Needs specs</span>` : "";
-    const conn = (it.Connectivity||"").trim();
+    const conn = String(it.Connectivity||"").trim();
+    const condShow = it.Condition_Grade || it.Condition || "—";
 
     d.innerHTML = `
       <div class="top">
-        <div class="tp">${escapeHtml(it.TP)}</div>
-        <div class="pill">${escapeHtml(it.Condition || "—")}</div>
+        <div class="tp">${escapeHtml(it.TP_SKU || ("Row " + it._row))}</div>
+        <div class="pill">${escapeHtml(condShow)}</div>
       </div>
       <div class="meta">
         CPU: <b>${escapeHtml(it.CPU || "—")}</b>${needs}<br>
@@ -520,43 +470,48 @@ function getConnectivityFromChips(){
   const checked = [...wrap.querySelectorAll('input[type="checkbox"]:checked')].map(i=>i.value);
   return checked.join(", ");
 }
+function selectHTML(list, selected){
+  list = list || [];
+  return `<option value="">—</option>` + list.map(v=>`<option ${v===selected?'selected':''}>${escapeHtml(v)}</option>`).join("");
+}
 
 /* ===================== ACTIONS ===================== */
 async function newItem(){
-  const tp = generateUniqueTP();
+  // Create new row in YardOS
+  const title = prompt("Title for new item?");
+  if (!title) return;
+
   const payload = {
-    TP: tp,
-    Stage: STAGE,
-    CreatedAt: Date.now(),
-    UpdatedAt: Date.now()
+    Title: title,
+    Status: QUEUE_STATUS,
+    Qty: 1
   };
-  await apiPost("upsertItem", payload);
+
+  await upsertRow(payload);
   await boot(false);
-  await openItem(tp);
-  toast("New TP created (sheet)");
+  toast("New item created");
 }
 
-async function openItem(tp){
-  currentTP = tp;
-  const it = await readItem(tp);
+async function openItem(row){
+  currentRow = Number(row||0);
+  if (!currentRow) return;
 
-  document.getElementById("statusLine").textContent = `${it.TP} • Stage: ${it.Stage}`;
+  const it = await getRow(currentRow);
+  currentItem = it;
 
-  const condList = (dropdowns.Condition && dropdowns.Condition.length)
-    ? dropdowns.Condition
-    : ["A","B","C","Parts/Repair"];
+  const sku = it.TP_SKU || `Row ${currentRow}`;
+  const condList = (dropdowns.Condition_Grade && dropdowns.Condition_Grade.length)
+    ? dropdowns.Condition_Grade
+    : (dropdowns.Condition && dropdowns.Condition.length ? dropdowns.Condition : ["A","B","C","Parts/Repair"]);
+
+  document.getElementById("statusLine").textContent = `${sku} • Status: ${it.Status || "—"}`;
 
   document.getElementById("detail").innerHTML = `
     <div class="tpCallout" style="align-items:flex-start;">
       <div style="width:100%;">
-        <div style="color:var(--muted); font-size:12px; margin-bottom:6px;">TP Item Number (manual override allowed)</div>
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%;">
-          <input id="f_TP" value="${escapeAttr(it.TP)}" style="flex:1; min-width:220px; font-family:var(--mono); font-weight:950;" />
-          <button class="miniBtn" onclick="copyTP()">Copy</button>
-          <button class="miniBtn warn" onclick="regenerateTP()">Regenerate</button>
-          <button class="miniBtn good" onclick="applyTPChange()">Apply TP#</button>
-        </div>
-        <div class="hint" style="margin-top:6px;">Default TP = random 9 alphanumeric. Unique check becomes global via sheet.</div>
+        <div style="color:var(--muted); font-size:12px; margin-bottom:6px;">SKU</div>
+        <div class="big">${escapeHtml(sku)}</div>
+        <div class="hint" style="margin-top:6px;">Editing core spec fields for listing prep.</div>
       </div>
     </div>
 
@@ -600,7 +555,7 @@ async function openItem(tp){
       </div>
       <div>
         <div class="lab">Condition</div>
-        <select id="f_Condition">${selectHTML(condList, it.Condition)}</select>
+        <select id="f_Condition_Grade">${selectHTML(condList, it.Condition_Grade || it.Condition)}</select>
       </div>
     </div>
 
@@ -610,8 +565,7 @@ async function openItem(tp){
     <div class="divider"></div>
     <div class="btns">
       <button class="good" onclick="save()">Save</button>
-      <button class="warn" onclick="movePrev()">← Back</button>
-      <button class="primary" onclick="moveNext()">Next → ${NEXT_STAGE}</button>
+      <button class="primary" onclick="moveNext()">Next → Set Status ${escapeHtml(NEXT_STATUS)}</button>
       <button class="miniBtn" onclick="refreshCurrent()">Refresh</button>
     </div>
 
@@ -623,204 +577,62 @@ async function openItem(tp){
   setTimeout(syncChipStyles, 0);
 }
 
-function copyTP(){
-  if (!currentTP) return;
-  navigator.clipboard.writeText(currentTP);
-  toast("TP# copied");
-}
-
 async function refreshCurrent(){
-  if (!currentTP) return;
+  if (!currentRow) return;
   await boot(false);
-  await openItem(currentTP);
+  await openItem(currentRow);
   toast("Refreshed from sheet");
 }
 
-async function applyTPChange(){
-  if (!currentTP) return;
-  const input = document.getElementById("f_TP");
-  const desired = normalizeTP(input?.value);
-
-  if (!desired) { input.value = currentTP; return toast("TP# can't be blank"); }
-  if (desired === currentTP) return toast("TP# unchanged");
-
-  const res = await apiGet({ action:"updateTP", oldTp: currentTP, newTp: desired });
-  if (!res || !res.ok){
-    input.value = currentTP;
-    return toast(res?.error || "TP update failed");
-  }
-
-  currentTP = desired;
-  await boot(false);
-  await openItem(desired);
-  toast("TP# updated");
-}
-
-async function regenerateTP(){
-  const input = document.getElementById("f_TP");
-  const newTP = generateUniqueTP();
-  if (input) input.value = newTP;
-  await applyTPChange();
-}
-
 async function save(){
-  if (!currentTP) return;
+  if (!currentRow) return;
+
   const payload = {
-    TP: currentTP,
-    Stage: STAGE,
-    UpdatedAt: Date.now(),
+    _row: currentRow,
     ScreenSizeIn: document.getElementById("f_ScreenSizeIn").value.trim(),
     CPU: document.getElementById("f_CPU").value.trim(),
     StorageGB: document.getElementById("f_StorageGB").value.trim(),
     MemoryGB: document.getElementById("f_MemoryGB").value.trim(),
     GPU: document.getElementById("f_GPU").value.trim(),
     Series: document.getElementById("f_Series").value.trim(),
-    Condition: document.getElementById("f_Condition").value,
     Connectivity: getConnectivityFromChips(),
-    Features: document.getElementById("f_Features").value
+    Features: document.getElementById("f_Features").value,
+    // Prefer Condition_Grade column if it exists in your sheet; otherwise Condition
+    Condition_Grade: document.getElementById("f_Condition_Grade").value,
+    Condition: document.getElementById("f_Condition_Grade").value
   };
 
-  await apiPost("upsertItem", payload);
+  await upsertRow(payload);
   await boot(false);
   toast("Saved to sheet");
 }
 
 async function moveNext(){
-  if (!currentTP) return;
+  if (!currentRow) return;
   await save();
-  const res = await apiGet({ action:"moveStage", tp: currentTP, stage: NEXT_STAGE });
-  if (!res || !res.ok) return toast(res?.error || "Move failed");
 
-  currentTP = null;
-  document.getElementById("detail").innerHTML = `<div class="hint">Moved to <b>${NEXT_STAGE}</b>.</div>`;
+  // Set Status to NEXT_STATUS
+  await upsertRow({ _row: currentRow, Status: NEXT_STATUS });
+
+  currentRow = 0;
+  currentItem = null;
+  document.getElementById("detail").innerHTML = `<div class="hint">Updated Status to <b>${escapeHtml(NEXT_STATUS)}</b>.</div>`;
   document.getElementById("statusLine").textContent = "—";
   await boot(false);
   toast("Forwarded");
 }
 
-async function movePrev(){
-  if (!currentTP) return;
-  await save();
-  const res = await apiGet({ action:"moveStage", tp: currentTP, stage: PREV_STAGE });
-  if (!res || !res.ok) return toast(res?.error || "Move failed");
-
-  currentTP = null;
-  document.getElementById("detail").innerHTML = `<div class="hint">Moved back to <b>${PREV_STAGE}</b>.</div>`;
-  document.getElementById("statusLine").textContent = "—";
-  await boot(false);
-  toast("Backed");
-}
-
-/* ===================== TP Settings UI (same style as staging) ===================== */
-function openTpSettings(){
-  const s = loadTpSettings();
-  const preview = generateTP(s);
-
-  document.getElementById("detail").innerHTML = `
-    <div class="tpCallout" style="justify-content:space-between; width:100%;">
-      <div>
-        <div style="color:#666; font-size:12px;">TP Settings (saved to this PC)</div>
-        <div class="big" style="margin-top:4px;">${escapeHtml(preview)}</div>
-      </div>
-      <button class="miniBtn" onclick="${currentTP ? "openItem(currentTP)" : "resetDetail()"}">Back</button>
-    </div>
-
-    <div class="row">
-      <div>
-        <div class="lab">Prefix (optional)</div>
-        <input id="tp_prefix" value="${escapeAttr(s.prefix)}" placeholder="TP"/>
-      </div>
-      <div>
-        <div class="lab">Separator</div>
-        <input id="tp_sep" value="${escapeAttr(s.sep)}" placeholder="-"/>
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <div class="lab">Random Length</div>
-        <input id="tp_len" type="number" min="3" max="20" value="${Number(s.randLen)||9}"/>
-      </div>
-      <div>
-        <div class="lab">Case</div>
-        <select id="tp_case">
-          <option value="upper" ${s.case==="upper"?"selected":""}>UPPER</option>
-          <option value="lower" ${s.case==="lower"?"selected":""}>lower</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="lab">Include Date (YYYYMMDD)</div>
-    <div class="chips">
-      <label class="chipBox on" style="cursor:default;">
-        <input type="checkbox" id="tp_date" ${s.includeDate ? "checked":""} />
-        <span>Include date stamp</span>
-      </label>
-    </div>
-
-    <div class="lab">Character Set (advanced)</div>
-    <input id="tp_charset" value="${escapeAttr(s.charset)}"/>
-
-    <div class="divider"></div>
-    <div class="btns">
-      <button class="good miniBtn" onclick="saveTpSettingsFromUI()">Save</button>
-      <button class="primary miniBtn" onclick="previewTpSettings()">Preview</button>
-      <button class="miniBtn warn" onclick="resetTpSettings()">Reset</button>
-    </div>
-
-    <div class="lab">Preview</div>
-    <input id="tp_preview" readonly value="${escapeAttr(preview)}"/>
-  `;
-}
-
-function resetDetail(){
-  document.getElementById("detail").innerHTML = `<div class="hint">Select an item from the queue.</div>`;
-}
-
-function readTpSettingsFromUI(){
-  return {
-    prefix: String(document.getElementById("tp_prefix")?.value || "").trim(),
-    sep: String(document.getElementById("tp_sep")?.value ?? "-"),
-    randLen: Number(document.getElementById("tp_len")?.value || 9),
-    case: String(document.getElementById("tp_case")?.value || "upper"),
-    includeDate: !!document.getElementById("tp_date")?.checked,
-    charset: String(document.getElementById("tp_charset")?.value || DEFAULT_TP_SETTINGS.charset).trim()
-  };
-}
-function previewTpSettings(){
-  const s = readTpSettingsFromUI();
-  document.getElementById("tp_preview").value = generateTP(s);
-}
-function saveTpSettingsFromUI(){
-  const s = readTpSettingsFromUI();
-  saveTpSettings(s);
-  document.getElementById("tp_preview").value = generateTP(s);
-  toast("TP settings saved");
-}
-function resetTpSettings(){
-  saveTpSettings(DEFAULT_TP_SETTINGS);
-  toast("TP settings reset");
-  openTpSettings();
-}
-
 /* ===================== Keyboard shortcuts ===================== */
 document.addEventListener("keydown", (e)=>{
   if (e.ctrlKey && (e.key==="f" || e.key==="F")){ e.preventDefault(); document.getElementById("q").focus(); }
-  if (e.key==="Enter" && currentTP && document.activeElement && document.activeElement.tagName!=="TEXTAREA"){ e.preventDefault(); save(); }
-  if (e.ctrlKey && e.key==="ArrowRight"){ e.preventDefault(); if(currentTP) moveNext(); }
-  if (e.ctrlKey && e.key==="ArrowLeft"){ e.preventDefault(); if(currentTP) movePrev(); }
+  if (e.key==="Enter" && currentRow && document.activeElement && document.activeElement.tagName!=="TEXTAREA"){ e.preventDefault(); save(); }
+  if (e.ctrlKey && e.key==="ArrowRight"){ e.preventDefault(); if(currentRow) moveNext(); }
 });
 
 /* ===================== Boot ===================== */
 async function boot(showToast=true){
-  if (!API_URL || API_URL === "PASTE_YOUR_WEB_APP_URL_HERE"){
-    document.getElementById("list").innerHTML =
-      `<div class="hint"><b>API_URL not set.</b><br>Paste your Apps Script Web App URL into processing.html.</div>`;
-    return;
-  }
   try{
-    const dd = await apiGet({ action:"getDropdowns" });
-    dropdowns = dd?.dropdowns || {};
+    await loadDropdowns();
     await refreshQueue();
     renderList();
     renderKPIs();
