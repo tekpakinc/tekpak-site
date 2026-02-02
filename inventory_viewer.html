@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Falcon1 Inventory Viewer</title>
+  <title>Tek-Pak • Inventory Viewer</title>
   <style>
     :root{
       --bg:#0b1020;
@@ -141,7 +141,7 @@
     .toast.show{transform:translateY(0); opacity:1;}
     .subtle{color:var(--muted); font-size:12px; line-height:1.4}
 
-    /* Simple “lock screen” so customers don’t casually stumble into it */
+    /* Soft lock */
     .lock{
       position:fixed; inset:0; z-index:9999;
       display:flex; align-items:center; justify-content:center;
@@ -170,7 +170,6 @@
 </head>
 <body>
 
-<!-- Optional soft lock -->
 <div class="lock" id="lock">
   <div class="lockCard">
     <h3>Employee Access</h3>
@@ -180,7 +179,7 @@
       <button class="primary" id="unlockBtn">Unlock</button>
     </div>
     <div class="lockFine">
-      Tip: If you don’t want a passphrase screen at all, set <span class="mono">LOCK_ENABLED</span> to <span class="mono">false</span> in the script.
+      If you don’t want this screen, set <span class="mono">LOCK_ENABLED</span> to <span class="mono">false</span> below.
     </div>
   </div>
 </div>
@@ -189,7 +188,7 @@
   <div class="wrap">
     <div class="topbar">
       <div class="brand">
-        <h1>Falcon1 Inventory Viewer</h1>
+        <h1>Tek-Pak • Inventory Viewer</h1>
         <span class="pill" id="countPill">Loading…</span>
       </div>
       <div class="controls">
@@ -240,18 +239,14 @@
 
 <script>
   /****************************************************
-   * CONFIG — already filled with your script URL
+   * CONFIG (already filled)
    ****************************************************/
   const API_BASE = "https://script.google.com/macros/s/AKfycbxOUySH9ghQ1AUkDSQ4miKqdhe8kqXrezSCIWjRpggrlu221GarsX4tGNXZkxRKkp9D/exec";
+  const API_KEY  = "Falcon1-9f3k2p7q-6m1v8z4r";
 
-  // IMPORTANT: This must match the API_KEY string in your Apps Script api.gs
-  // Example: const API_KEY = "Falcon1-9f3k2p7q-6m1v8z4r";
-  const API_KEY  = "PASTE_YOUR_API_KEY_HERE";
-
-  // Soft lock (keeps customers from casually opening it)
-  // This is NOT bank-level security; it’s a speed bump.
+  // Soft lock (change passphrase here)
   const LOCK_ENABLED = true;
-  const LOCK_PASSPHRASE = "tekpak"; // change this to whatever you want
+  const LOCK_PASSPHRASE = "tekpak";  // <- change this
 
   const $ = (id) => document.getElementById(id);
   let META = { statusOptions: [], locationOptions: [] };
@@ -357,245 +352,4 @@
   function statusOptionsHtml(selected){
     const opts = [`<option value="">(blank)</option>`]
       .concat((META.statusOptions||[]).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
-    const sel = escapeHtml(selected || "");
-    return opts.join("").replace(`value="${sel}"`, `value="${sel}" selected`);
-  }
-  function locationOptionsHtml(selected){
-    const opts = [`<option value="">(blank)</option>`]
-      .concat((META.locationOptions||[]).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
-    const sel = escapeHtml(selected || "");
-    return opts.join("").replace(`value="${sel}"`, `value="${sel}" selected`);
-  }
-
-  function buildDetail(item){
-    CURRENT = item;
-
-    const sku = safe(item.TP_SKU || "");
-    const id  = safe(item.ItemID || "");
-    const status = safe(item.Status || "");
-    const location = safe(item.Location || "");
-    const price = safe(item.Price || "");
-    const notes = safe(item.Notes || "");
-    const ebayTitle = safe(item.EbayTitle || "");
-    const ebayHtml = safe(item.EbayHTML || "");
-
-    const statusDot = dotClassForStatus(status);
-
-    $("detail").innerHTML = `
-      <div class="row">
-        <div class="tag"><span class="dot ${statusDot}"></span><b class="mono">${escapeHtml(sku || id || "(no id)")}</b></div>
-        <div class="tag">Status: <b>${escapeHtml(status || "—")}</b></div>
-        <div class="tag">Location: <b>${escapeHtml(location || "—")}</b></div>
-      </div>
-
-      <div class="field">
-        <label>Status</label>
-        <select id="editStatus">${statusOptionsHtml(status)}</select>
-      </div>
-
-      <div class="field">
-        <label>Location</label>
-        <select id="editLocation">${locationOptionsHtml(location)}</select>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label>Price</label>
-          <input id="editPrice" placeholder="e.g. 149.99" value="${escapeHtml(price)}" />
-        </div>
-        <div class="field">
-          <label>Last Updated</label>
-          <input disabled value="${escapeHtml(fmtDate(item.LastUpdatedAt || ""))}" />
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Notes</label>
-        <textarea id="editNotes" placeholder="Internal notes…">${escapeHtml(notes)}</textarea>
-      </div>
-
-      <div class="actions">
-        <button class="primary" id="saveBtn">Save changes</button>
-        <button class="ghost" id="regenBtn">Regenerate eBay</button>
-      </div>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,.12);margin:14px 0;">
-
-      <div class="field">
-        <label>eBay Title</label>
-        <input id="ebTitle" class="mono" value="${escapeHtml(ebayTitle)}" />
-      </div>
-
-      <div class="actions">
-        <button class="ghost" id="copyTitleBtn">Copy Title</button>
-        <button class="ghost" id="copyHtmlBtn">Copy HTML</button>
-      </div>
-
-      <div class="field">
-        <label>eBay HTML (edit box)</label>
-        <textarea id="ebHtml" class="mono">${escapeHtml(ebayHtml)}</textarea>
-      </div>
-
-      <div class="actions">
-        <button class="ghost" id="copyJsonBtn">Copy Item JSON</button>
-      </div>
-    `;
-
-    $("saveBtn").onclick = saveCurrent;
-    $("regenBtn").onclick = regenEbay;
-    $("copyTitleBtn").onclick = () => copyText($("ebTitle").value);
-    $("copyHtmlBtn").onclick = () => copyText($("ebHtml").value);
-    $("copyJsonBtn").onclick = () => copyText(JSON.stringify(item, null, 2));
-  }
-
-  async function refresh(){
-    $("tbody").innerHTML = `<tr><td colspan="7" class="empty">Loading…</td></tr>`;
-
-    const q = $("q").value || "";
-    const status = $("status").value || "";
-    const location = $("location").value || "";
-
-    let res;
-    try{
-      res = await jsonp({ action:"listItems", q, status, location });
-    }catch(e){
-      $("tbody").innerHTML = `<tr><td colspan="7" class="empty">Startup error: ${escapeHtml(e.message || e)}</td></tr>`;
-      return;
-    }
-
-    if (!res || !res.ok){
-      $("tbody").innerHTML = `<tr><td colspan="7" class="empty">Error: ${escapeHtml((res && res.error) || "Unknown")}</td></tr>`;
-      return;
-    }
-
-    META.statusOptions = res.statusOptions || [];
-    META.locationOptions = res.locationOptions || [];
-
-    // populate filter dropdowns (keep current selection)
-    const sVal = $("status").value;
-    const lVal = $("location").value;
-
-    $("status").innerHTML =
-      `<option value="">All statuses</option>` +
-      META.statusOptions.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
-
-    $("location").innerHTML =
-      `<option value="">All locations</option>` +
-      META.locationOptions.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
-
-    $("status").value = sVal;
-    $("location").value = lVal;
-
-    const items = res.items || [];
-    $("countPill").textContent = `${items.length} shown`;
-
-    if (!items.length){
-      $("tbody").innerHTML = `<tr><td colspan="7" class="empty">No matches. Try a different search/filter.</td></tr>`;
-      return;
-    }
-
-    $("tbody").innerHTML = items.map(rowTemplate).join("");
-
-    for (const tr of $("tbody").querySelectorAll("tr[data-key]")){
-      tr.addEventListener("click", () => {
-        const key = tr.getAttribute("data-key");
-        if (key) openItem(key);
-      });
-    }
-  }
-
-  async function openItem(key){
-    const res = await jsonp({ action:"getItem", lookup:key });
-    if (!res || !res.ok){
-      toast("Open failed");
-      return;
-    }
-    buildDetail(res.item);
-  }
-
-  async function saveCurrent(){
-    if (!CURRENT) return;
-
-    const key = CURRENT.TP_SKU || CURRENT.ItemID;
-    const patch = {
-      Status: $("editStatus").value,
-      Location: $("editLocation").value,
-      Price: $("editPrice").value,
-      Notes: $("editNotes").value,
-      EbayTitle: $("ebTitle").value,
-      EbayHTML: $("ebHtml").value
-    };
-
-    const res = await jsonp({ action:"updateItem", lookup:key, patch: JSON.stringify(patch) });
-    if (!res || !res.ok){
-      toast("Save failed: " + escapeHtml((res && res.error) || "unknown"));
-      return;
-    }
-    toast("Saved");
-    await refresh();
-    await openItem(key);
-  }
-
-  async function regenEbay(){
-    if (!CURRENT) return;
-    const key = CURRENT.TP_SKU || CURRENT.ItemID;
-
-    const res = await jsonp({ action:"regenEbay", lookup:key });
-    if (!res || !res.ok){
-      toast("Regen failed: " + escapeHtml((res && res.error) || "unknown"));
-      return;
-    }
-
-    toast("eBay regenerated");
-    if ($("ebTitle")) $("ebTitle").value = res.EbayTitle || $("ebTitle").value;
-    if ($("ebHtml")) $("ebHtml").value = res.EbayHTML || $("ebHtml").value;
-  }
-
-  function wire(){
-    $("refreshBtn").addEventListener("click", ()=>refresh().catch(()=>toast("Error")));
-    $("q").addEventListener("keydown", (e)=>{ if (e.key === "Enter") refresh().catch(()=>{}); });
-    $("status").addEventListener("change", ()=>refresh().catch(()=>{}));
-    $("location").addEventListener("change", ()=>refresh().catch(()=>{}));
-
-    $("apiHint").textContent =
-      "Staff viewer • API bridge connected • If you see 'Unauthorized', set API_KEY in this file to match api.gs.";
-  }
-
-  async function boot(){
-    wire();
-
-    // Lock screen handling
-    if (!LOCK_ENABLED){
-      $("lock").style.display = "none";
-    } else {
-      const ok = sessionStorage.getItem("inv_viewer_unlocked") === "1";
-      if (ok) $("lock").style.display = "none";
-      $("unlockBtn").onclick = () => {
-        const v = ($("pass").value || "").trim();
-        if (v === LOCK_PASSPHRASE){
-          sessionStorage.setItem("inv_viewer_unlocked","1");
-          $("lock").style.display = "none";
-        } else {
-          toast("Nope 😅 wrong passphrase");
-        }
-      };
-      $("pass").addEventListener("keydown", (e)=>{ if(e.key==="Enter") $("unlockBtn").click(); });
-      if (!ok) return; // don’t load inventory until unlocked
-    }
-
-    try{
-      const ping = await jsonp({ action:"ping" });
-      if (!ping || !ping.ok){
-        $("tbody").innerHTML = `<tr><td colspan="7" class="empty">API ping failed.</td></tr>`;
-        return;
-      }
-      await refresh();
-    }catch(e){
-      $("tbody").innerHTML = `<tr><td colspan="7" class="empty">Startup error: ${escapeHtml(e.message || e)}</td></tr>`;
-    }
-  }
-
-  boot();
-</script>
-</body>
-</html>
+    const sel = escapeHtml(
