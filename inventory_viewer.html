@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Falcon1 Inventory Viewer</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a33;
+      --panel2:#0f162d;
+      --text:#eaf1ff;
+      --muted:#9fb3d1;
+      --line:rgba(255,255,255,.10);
+      --accent:#3aa0ff;
+      --good:#3dff8d;
+      --warn:#ffd166;
+      --bad:#ff4d6d;
+      --shadow:0 22px 60px rgba(0,0,0,.45);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 800px at 15% 0%, rgba(58,160,255,.18), transparent 50%),
+        radial-gradient(900px 700px at 90% 20%, rgba(61,255,141,.10), transparent 55%),
+        linear-gradient(180deg,#070b14,var(--bg));
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px) saturate(1.2);
+      background:rgba(11,16,32,.65);
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{max-width:1280px; margin:0 auto; padding:14px 16px;}
+    .topbar{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+    .brand{display:flex; align-items:baseline; gap:10px;}
+    .brand h1{margin:0; font-size:18px; letter-spacing:.2px;}
+    .pill{
+      font-size:12px; color:var(--muted);
+      padding:4px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+    }
+    .controls{display:flex; gap:10px; flex:1; justify-content:flex-end; flex-wrap:wrap;}
+    input, select, button, textarea{
+      font:inherit;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      outline:none;
+    }
+    input, select{min-width:190px}
+    textarea{width:100%; min-height:110px; resize:vertical;}
+    button{
+      cursor:pointer;
+      border:1px solid rgba(58,160,255,.35);
+      background:linear-gradient(180deg, rgba(58,160,255,.22), rgba(255,255,255,.04));
+      box-shadow:0 10px 22px rgba(58,160,255,.10);
+    }
+    button.primary{
+      background:linear-gradient(180deg, rgba(58,160,255,.95), rgba(58,160,255,.55));
+      border-color:rgba(58,160,255,.75);
+      box-shadow:0 16px 34px rgba(58,160,255,.18);
+    }
+    button.ghost{
+      background:rgba(255,255,255,.03);
+      border-color:var(--line);
+      box-shadow:none;
+    }
+    button:disabled{opacity:.55; cursor:not-allowed}
+    main{padding:18px 16px;}
+    .grid{
+      max-width:1280px; margin:0 auto;
+      display:grid; grid-template-columns: 1fr 440px; gap:14px;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card h2{
+      margin:0; padding:14px 14px 0 14px;
+      font-size:13px; color:var(--muted); font-weight:700;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+    }
+    .tableWrap{overflow:auto; padding:12px;}
+    table{width:100%; border-collapse:separate; border-spacing:0;}
+    th, td{
+      text-align:left;
+      padding:10px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      font-size:13px;
+      white-space:nowrap;
+    }
+    th{
+      position:sticky; top:0; z-index:2;
+      background:rgba(16,22,45,.85);
+      color:var(--muted); font-weight:800;
+    }
+    tbody tr{cursor:pointer}
+    tbody tr:hover td{background:rgba(58,160,255,.08)}
+    .right{padding:12px;}
+    .empty{padding:22px 14px; color:var(--muted); font-size:13px;}
+    .row{display:flex; gap:10px; flex-wrap:wrap;}
+    .row > *{flex:1}
+    .field{margin-top:10px;}
+    .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px;}
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .tag{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:5px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      font-size:12px; color:var(--muted);
+      background:rgba(255,255,255,.04);
+    }
+    .dot{width:9px;height:9px;border-radius:999px;background:var(--muted);}
+    .dot.good{background:var(--good)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+    .toast{
+      position:fixed; right:16px; bottom:16px;
+      background:rgba(10,14,26,.92); color:var(--text);
+      padding:10px 12px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 18px 36px rgba(0,0,0,.45);
+      font-size:13px;
+      transform:translateY(20px); opacity:0; pointer-events:none;
+      transition:.18s ease;
+      max-width: 520px;
+    }
+    .toast.show{transform:translateY(0); opacity:1;}
+    .subtle{color:var(--muted); font-size:12px; line-height:1.4}
+
+    /* Simple “lock screen” so customers don’t casually stumble into it */
+    .lock{
+      position:fixed; inset:0; z-index:9999;
+      display:flex; align-items:center; justify-content:center;
+      padding:18px;
+      background:rgba(0,0,0,.55);
+      backdrop-filter: blur(10px) saturate(1.1);
+    }
+    .lockCard{
+      width:min(520px, 100%);
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:18px;
+      box-shadow:0 30px 80px rgba(0,0,0,.55);
+      padding:16px;
+    }
+    .lockCard h3{margin:0 0 6px 0; font-size:16px;}
+    .lockCard p{margin:0 0 12px 0; color:var(--muted); font-size:13px; line-height:1.35}
+    .lockRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .lockRow input{flex:1; min-width:200px}
+    .lockRow button{white-space:nowrap}
+    .lockFine{margin-top:10px; font-size:12px; color:var(--muted)}
+    @media (max-width: 1050px){
+      .grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Optional soft lock -->
+<div class="lock" id="lock">
+  <div class="lockCard">
+    <h3>Employee Access</h3>
+    <p>This page is for Tek-Pak staff. Enter the passphrase to continue.</p>
+    <div class="lockRow">
+      <input id="pass" type="password" placeholder="Passphrase" autocomplete="current-password"/>
+      <button class="primary" id="unlockBtn">Unlock</button>
+    </div>
+    <div class="lockFine">
+      Tip: If you don’t want a passphrase screen at all, set <span class="mono">LOCK_ENABLED</span> to <span class="mono">false</span> in the script.
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Falcon1 Inventory Viewer</h1>
+        <span class="pill" id="countPill">Loading…</span>
+      </div>
+      <div class="controls">
+        <input id="q" placeholder="Search (SKU, brand, model, serial…)" />
+        <select id="status"><option value="">All statuses</option></select>
+        <select id="location"><option value="">All locations</option></select>
+        <button class="primary" id="refreshBtn">Refresh</button>
+      </div>
+    </div>
+    <div class="subtle" id="apiHint"></div>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+    <div class="card">
+      <h2>Inventory</h2>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Status</th>
+              <th>Location</th>
+              <th>Brand</th>
+              <th>Model</th>
+              <th>Serial</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="7" class="empty">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Item detail</h2>
+      <div class="right" id="detail">
+        <div class="empty">Click an item on the left.</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /****************************************************
+   * CONFIG — already filled with your script URL
+   ****************************************************/
+  const API_BASE = "https://script.google.com/macros/s/AKfycbxOUySH9ghQ1AUkDSQ4miKqdhe8kqXrezSCIWjRpggrlu221GarsX4tGNXZkxRKkp9D/exec";
+
+  // IMPORTANT: This must match the API_KEY string in your Apps Script api.gs
+  // Example: const API_KEY = "Falcon1-...long...random...";
+  const API_KEY  = "PASTE_YOUR_API_KEY_HERE";
+
+  // Soft lock (keeps customers from casually opening it)
+  // This is NOT bank-level security; it’s a speed bump.
+  const LOCK_ENABLED = true;
+  const LOCK_PASSPHRASE = "tekpak"; // change this to whatever you want
+
+  const $ = (id) => document.getElementById(id);
+  let META = { statusOptions: [], locationOptions: [] };
+  let CURRENT = null;
+
+  function toast(msg){
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 1700);
+  }
+
+  function escapeHtml(s){
+    return String(s || "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function fmtDate(v){
+    try{
+      if (!v) return "";
+      const d = (v instanceof Date) ? v : new Date(v);
+      if (isNaN(d.getTime())) return String(v);
+      return d.toLocaleString();
+    }catch{ return String(v||""); }
+  }
+
+  function dotClassForStatus(status){
+    const s = (status||"").toLowerCase();
+    if (["listed","sold","ready"].some(x=>s.includes(x))) return "good";
+    if (["hold","needs","repair","processing"].some(x=>s.includes(x))) return "warn";
+    if (["return","bad","junk","scrap"].some(x=>s.includes(x))) return "bad";
+    return "";
+  }
+
+  // JSONP helper (avoids CORS)
+  function jsonp(params){
+    return new Promise((resolve, reject) => {
+      const cb = "cb_" + Math.random().toString(36).slice(2);
+      const url = new URL(API_BASE);
+      Object.entries(params || {}).forEach(([k,v]) => url.searchParams.set(k, v));
+      url.searchParams.set("key", API_KEY);
+      url.searchParams.set("callback", cb);
+
+      const s = document.createElement("script");
+      window[cb] = (data) => { cleanup(); resolve(data); };
+      s.onerror = () => { cleanup(); reject(new Error("JSONP failed")); };
+      function cleanup(){
+        try{ delete window[cb]; }catch{}
+        s.remove();
+      }
+      s.src = url.toString();
+      document.body.appendChild(s);
+    });
+  }
+
+  function safe(v){ return (v === null || v === undefined) ? "" : String(v); }
+
+  function copyText(text){
+    const t = text || "";
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(()=>toast("Copied!")).catch(()=>fallbackCopy(t));
+    } else fallbackCopy(t);
+  }
+  function fallbackCopy(text){
+    const ta = document.createElement("textarea");
+    ta.value = text || "";
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); toast("Copied!"); }
+    catch{ toast("Copy failed"); }
+    document.body.removeChild(ta);
+  }
+
+  function rowTemplate(item){
+    const sku = safe(item.TP_SKU || item.ItemID || "");
+    const status = safe(item.Status || "");
+    const location = safe(item.Location || "");
+    const brand = safe(item.Brand || item.Make || "");
+    const model = safe(item.Model || "");
+    const serial = safe(item.Serial || item["Serial Number"] || item["S/N"] || "");
+    const created = fmtDate(item.CreatedAt || "");
+    const dot = dotClassForStatus(status);
+
+    return `
+      <tr data-key="${escapeHtml(item.TP_SKU || item.ItemID || "")}">
+        <td class="mono">${escapeHtml(sku)}</td>
+        <td><span class="tag"><span class="dot ${dot}"></span>${escapeHtml(status || "—")}</span></td>
+        <td>${escapeHtml(location || "—")}</td>
+        <td>${escapeHtml(brand)}</td>
+        <td>${escapeHtml(model)}</td>
+        <td class="mono">${escapeHtml(serial)}</td>
+        <td>${escapeHtml(created)}</td>
+      </tr>
+    `;
+  }
+
+  function statusOptionsHtml(selected){
+    const opts = [`<option value="">(blank)</option>`]
+      .concat((META.statusOptions||[]).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
+    const sel = escapeHtml(selected || "");
+    return opts.join("").replace(`value="${sel}"`, `value="${sel}" selected`);
+  }
+  function locationOptionsHtml(selected){
+    const opts = [`<option value="">(blank)</option>`]
+      .concat((META.locationOptions||[]).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
+    const sel = escapeHtml(selected || "");
+    return opts.join("").replace(`value="${sel}"`, `value="${sel}" selected`);
+  }
+
+  function buildDetail(item){
+    CURRENT = item;
+
+    const sku = safe(item.TP_SKU || "");
+    const id  = safe(item.ItemID || "");
+    const status = safe(item.Status || "");
+    const location = safe(item.Location || "");
+    const price = safe(item.Price || "");
+    const notes = safe(item.Notes || "");
+    const ebayTitle = safe(item.EbayTitle || "");
+    const ebayHtml = safe(item.EbayHTML || "");
+
+    const statusDot = dotClassForStatus(status);
+
+    $("detail").innerHTML = `
+      <div class="row">
+        <div class="tag"><span class="dot ${statusDot}"></span><b class="mono">${escapeHtml(sku || id || "(no id)")}</b></div>
+        <div class="tag">Status: <b>${escapeHtml(status || "—")}</b></div>
+        <div class="tag">Location: <b>${escapeHtml(location || "—")}</b></div>
+      </div>
+
+      <div class="field">
+        <label>Status</label>
+        <select id="editStatus">${statusOptionsHtml(status)}</select>
+      </div>
+
+      <div class="field">
+        <label>Location</label>
+        <select id="editLocation">${locationOptionsHtml(location)}</select>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Price</label>
+          <input id="editPrice" placeholder="e.g. 149.99" value="${escapeHtml(price)}" />
+        </div>
+        <div class="field">
+          <label>Last Updated</label>
+          <input disabled value="${escapeHtml(fmtDate(item.LastUpdatedAt || ""))}" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="editNotes" placeholder="Internal notes…">${escapeHtml(notes)}</textarea>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="saveBtn">Save changes</button>
+        <button class="ghost" id="regenBtn">Regenerate eBay</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,.12);margin:14px 0;">
+
+      <div class="field">
+        <label>eBay Title</label>
+        <input id="ebTitle" class="mono" value="${escapeHtml(ebayTitle)}" />
+      </div>
+
+      <div class="actions">
+        <button class="ghost" id="copyTitleBtn">Copy Title</button>
+        <button class="ghost" id="copyHtmlBtn">Copy HTML</button>
+      </div>
+
+      <div class="field">
+        <label>eBay HTML (edit box)</label>
+        <textarea id="ebHtml" class="mono">${escapeHtml(ebayHtml)}</textarea>
+      </div>
+
+      <div class="actions">
+        <button class="ghost" id="copyJsonBtn">Copy Item JSON</button>
+      </div>
+    `;
+
+    $("saveBtn").onclick = saveCurrent;
+    $("regenBtn").onclick = regenEbay;
+    $("copyTitleBtn").onclick = () => copyText($("ebTitle").value);
+    $("copyHtmlBtn").onclick = () => copyText($("ebHtml").value);
+    $("copyJsonBtn").onclick = () => copyText(JSON.stringify(item, null, 2));
+  }
+
+  async function refresh(){
+    $("tbody").innerHTML = `<tr><td colspan="7" class="empty">Loading…</td></tr>`;
+
+    const q = $("q").value || "";
+    const status = $("status").value || "";
+    const location = $("location").value || "";
+
+    let res;
+    try{
+      res = await jsonp({ action:"listItems", q, status, location });
+    }catch(e){
+      $("tbody").innerHTML = `<tr><td colspan="7" class="empty">Startup error: ${escapeHtml(e.message || e)}</td></tr>`;
+      return;
+    }
+
+    if (!res || !res.ok){
+      $("tbody").innerHTML = `<tr><td colspan="7" class="empty">Error: ${escapeHtml((res && res.error) || "Unknown")}</td></tr>`;
+      return;
+    }
+
+    META.statusOptions = res.statusOptions || [];
+    META.locationOptions = res.locationOptions || [];
+
+    // populate filter dropdowns (keep current selection)
+    const sVal = $("status").value;
+    const lVal = $("location").value;
+
+    $("status").innerHTML =
+      `<option value="">All statuses</option>` +
+      META.statusOptions.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+
+    $("location").innerHTML =
+      `<option value="">All locations</option>` +
+      META.locationOptions.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+
+    $("status").value = sVal;
+    $("location").value = lVal;
+
+    const items = res.items || [];
+    $("countPill").textContent = `${items.length} shown`;
+
+    if (!items.length){
+      $("tbody").innerHTML = `<tr><td colspan="7" class="empty">No matches. Try a different search/filter.</td></tr>`;
+      return;
+    }
+
+    $("tbody").innerHTML = items.map(rowTemplate).join("");
+
+    for (const tr of $("tbody").querySelectorAll("tr[data-key]")){
+      tr.addEventListener("click", () => {
+        const key = tr.getAttribute("data-key");
+        if (key) openItem(key);
+      });
+    }
+  }
+
+  async function openItem(key){
+    const res = await jsonp({ action:"getItem", lookup:key });
+    if (!res || !res.ok){
+      toast("Open failed");
+      return;
+    }
+    buildDetail(res.item);
+  }
+
+  async function saveCurrent(){
+    if (!CURRENT) return;
+
+    const key = CURRENT.TP_SKU || CURRENT.ItemID;
+    const patch = {
+      Status: $("editStatus").value,
+      Location: $("editLocation").value,
+      Price: $("editPrice").value,
+      Notes: $("editNotes").value,
+      EbayTitle: $("ebTitle").value,
+      EbayHTML: $("ebHtml").value
+    };
+
+    const res = await jsonp({ action:"updateItem", lookup:key, patch: JSON.stringify(patch) });
+    if (!res || !res.ok){
+      toast("Save failed: " + escapeHtml((res && res.error) || "unknown"));
+      return;
+    }
+    toast("Saved");
+    await refresh();
+    await openItem(key);
+  }
+
+  async function regenEbay(){
+    if (!CURRENT) return;
+    const key = CURRENT.TP_SKU || CURRENT.ItemID;
+
+    const res = await jsonp({ action:"regenEbay", lookup:key });
+    if (!res || !res.ok){
+      toast("Regen failed: " + escapeHtml((res && res.error) || "unknown"));
+      return;
+    }
+
+    toast("eBay regenerated");
+    if ($("ebTitle")) $("ebTitle").value = res.EbayTitle || $("ebTitle").value;
+    if ($("ebHtml")) $("ebHtml").value = res.EbayHTML || $("ebHtml").value;
+  }
+
+  function wire(){
+    $("refreshBtn").addEventListener("click", ()=>refresh().catch(()=>toast("Error")));
+    $("q").addEventListener("keydown", (e)=>{ if (e.key === "Enter") refresh().catch(()=>{}); });
+    $("status").addEventListener("change", ()=>refresh().catch(()=>{}));
+    $("location").addEventListener("change", ()=>refresh().catch(()=>{}));
+
+    $("apiHint").textContent =
+      "Staff viewer • API bridge connected • If you see 'Unauthorized', set API_KEY in this file to match api.gs.";
+  }
+
+  async function boot(){
+    wire();
+
+    // Lock screen handling
+    if (!LOCK_ENABLED){
+      $("lock").style.display = "none";
+    } else {
+      const ok = sessionStorage.getItem("inv_viewer_unlocked") === "1";
+      if (ok) $("lock").style.display = "none";
+      $("unlockBtn").onclick = () => {
+        const v = ($("pass").value || "").trim();
+        if (v === LOCK_PASSPHRASE){
+          sessionStorage.setItem("inv_viewer_unlocked","1");
+          $("lock").style.display = "none";
+        } else {
+          toast("Nope 😅 wrong passphrase");
+        }
+      };
+      $("pass").addEventListener("keydown", (e)=>{ if(e.key==="Enter") $("unlockBtn").click(); });
+      if (!ok) return; // don’t load inventory until unlocked
+    }
+
+    try{
+      const ping = await jsonp({ action:"ping" });
+      if (!ping || !ping.ok){
+        $("tbody").innerHTML = `<tr><td colspan="7" class="empty">API ping failed.</td></tr>`;
+        return;
+      }
+      await refresh();
+    }catch(e){
+      $("tbody").innerHTML = `<tr><td colspan="7" class="empty">Startup error: ${escapeHtml(e.message || e)}</td></tr>`;
+    }
+  }
+
+  boot();
+</script>
+</body>
+</html>
