@@ -1,278 +1,147 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Tek-Pak Store</title>
-  <link rel="stylesheet" href="./styles.css"/>
-</head>
-<body>
-<header class="topbar">
-  <div class="wrap">
-    <div class="brand">
-      <img id="logo" alt="Tek-Pak" />
-      <span class="badge">Surplus Store</span>
-    </div>
+<!-- =======================
+  TEK-PAK GLOBAL HEADER
+  Requires: tekpak-logo.png
+======================== -->
+<header class="tp-header">
+  <div class="tp-header__inner">
+    <a class="tp-brand" href="index.html" aria-label="Tek-Pak Home">
+      <img src="tekpak-logo.png" alt="Tek-Pak" class="tp-brand__logo" />
+      <div class="tp-brand__text">
+        <div class="tp-brand__name">TEK-PAK</div>
+        <div class="tp-brand__tag">IT Services • E-Waste • Rapid Response</div>
+      </div>
+    </a>
 
-    <nav class="nav">
-      <a class="active" href="./index.html">Shop</a>
-      <a href="./portal.html">Employee Portal</a>
+    <nav class="tp-nav" aria-label="Primary">
+      <a class="tp-nav__link" href="store.html">Store</a>
+      <a class="tp-nav__link" href="services.html">Services</a>
+      <a class="tp-nav__link" href="inventory_viewer.html">Inventory</a>
+      <a class="tp-nav__link" href="contact.html">Contact</a>
+      <a class="tp-nav__btn" href="employee.html">Employee Portal</a>
     </nav>
   </div>
 </header>
 
-<main class="container">
-  <div class="grid cols-2">
-    <div class="card">
-      <div class="hd">
-        <div>
-          <h2>Browse Inventory</h2>
-          <div class="sub">If it’s listed here, it’s available. (AVAILABLE + LISTED only)</div>
-        </div>
-      </div>
-      <div class="bd">
-        <div class="controls">
-          <input class="input" id="q" placeholder="Search (SKU, title, brand, model…)" />
-          <select class="select" id="cat">
-            <option value="">All categories</option>
-          </select>
-          <button class="btn primary" id="btnLoad">Search</button>
-        </div>
-
-        <div style="height:12px"></div>
-        <div class="small" id="meta">Loading…</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="hd">
-        <div>
-          <h2>Quick Notes</h2>
-          <div class="sub">Public-facing info only</div>
-        </div>
-      </div>
-      <div class="bd">
-        <ul class="small" style="margin:0; padding-left:18px;">
-          <li>Read the full item description and photos before purchase.</li>
-          <li>Items may have known issues; those will be listed clearly.</li>
-          <li>Questions? Message through the platform listing.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <div style="height:14px"></div>
-
-  <div class="card">
-    <div class="hd">
-      <div>
-        <h2>Items</h2>
-        <div class="sub">Click an item card for details</div>
-      </div>
-    </div>
-    <div class="bd">
-      <div class="grid cols-3" id="grid"></div>
-    </div>
-  </div>
-</main>
-
-<!-- Public item modal -->
-<div class="drawerBack" id="drawerBack">
-  <div class="drawer" role="dialog" aria-modal="true">
-    <div class="dhd">
-      <div>
-        <h3 id="dTitle">Item</h3>
-        <div class="small" id="dSub"></div>
-      </div>
-      <div class="controls">
-        <button class="btn" id="btnClose">Close</button>
-      </div>
-    </div>
-    <div class="dbd">
-      <div class="small"><strong>SKU:</strong> <span class="mono" id="dSku"></span></div>
-      <div style="height:10px"></div>
-
-      <div class="small"><strong>Specs:</strong> <span id="dSpecs"></span></div>
-      <div style="height:10px"></div>
-
-      <div class="small"><strong>Condition:</strong> <span id="dCond"></span></div>
-      <div style="height:10px"></div>
-
-      <div class="small"><strong>Included:</strong></div>
-      <div class="small" id="dIncluded" style="white-space:pre-wrap;"></div>
-      <div style="height:10px"></div>
-
-      <div class="small"><strong>Known issues (if any):</strong></div>
-      <div class="small" id="dIssues" style="white-space:pre-wrap;"></div>
-
-      <hr class="sep">
-
-      <div class="controls">
-        <a class="btn primary" id="btnEbay" target="_blank" rel="noopener">View Listing</a>
-        <button class="btn" id="btnCopySku">Copy SKU</button>
-      </div>
-
-      <div style="height:12px"></div>
-      <div class="small">
-        Want internal info (bin location, internal notes, etc.)? Use the Employee Portal.
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ✅ API endpoint injected here -->
-<script>
-  window.YARDOS_API_URL = "https://script.google.com/macros/s/AKfycbwRXMtWXFH35aPQbjnfeA3gvQXnaSgtTZ4tgMiI5Psc6fAFmwj9-WdYG4L04qf0Rj5J/exec";
-  window.API_URL = window.YARDOS_API_URL;
-  window.API_BASE = window.YARDOS_API_URL;
-</script>
-
-<script src="./app.js"></script>
-<script>
-let CONFIG = { companyName:"Tek-Pak Inc.", logoUrl:"" };
-let ITEMS = [];
-let DROPDOWNS = {};
-
-function openDrawer(){ qs("#drawerBack").classList.add("show"); }
-function closeDrawer(){ qs("#drawerBack").classList.remove("show"); }
-
-function publicFilter(items){
-  return items.filter(it => {
-    const st = String(it.Status||"").toUpperCase();
-    return (st === "AVAILABLE" || st === "LISTED");
-  });
-}
-
-function cardHtml(it){
-  const title = it.Title || "Item";
-  const sku = it.TP_SKU || "";
-  const brand = it.Brand || "";
-  const model = it.Model || "";
-  const price = it.List_Price || it.Price || "";
-  const status = String(it.Status||"").toUpperCase();
-
-  const specs = [brand, model].filter(Boolean).join(" • ") || "See details";
-
-  const pill = (status === "AVAILABLE" || status === "LISTED")
-    ? `<span class="pill good">${status}</span>`
-    : `<span class="pill warn">${status||"—"}</span>`;
-
-  return `
-    <div class="card" data-sku="${escHtml(sku)}">
-      <div class="hd">
-        <div>
-          <h2>${escHtml(title)}</h2>
-          <div class="sub">${escHtml(specs)}</div>
-        </div>
-        <div>${pill}</div>
-      </div>
-      <div class="bd">
-        <div class="small mono">${escHtml(sku)}</div>
-        ${price ? `<div style="height:8px"></div><div class="small"><strong>Price:</strong> ${escHtml(price)}</div>` : ``}
-        <div style="height:10px"></div>
-        <div class="controls">
-          <button class="btn primary" data-open="${escHtml(sku)}">View</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderGrid(){
-  qs("#grid").innerHTML = ITEMS.map(cardHtml).join("");
-  qs("#meta").textContent = `Showing ${ITEMS.length} item(s).`;
-}
-
-function fillCategoryDropdown(items){
-  const cats = new Set(items.map(x => String(x.Category||"").trim()).filter(Boolean));
-  const sel = qs("#cat");
-  const keep = sel.value;
-  sel.innerHTML = `<option value="">All categories</option>` + Array.from(cats).sort()
-    .map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join("");
-  sel.value = keep;
-}
-
-function pickItemBySku(sku){
-  return ITEMS.find(x => String(x.TP_SKU||"") === String(sku));
-}
-
-function ebayUrlFor(it){
-  const itemId = String(it.eBay_ItemID || it.Ebay_ItemID || it.ebay_itemid || "").trim();
-  if (itemId) return `https://www.ebay.com/itm/${encodeURIComponent(itemId)}`;
-  const direct = String(it.eBay_URL || it.Ebay_URL || "").trim();
-  return direct || "https://www.ebay.com/";
-}
-
-function showItem(it){
-  qs("#dTitle").textContent = it.Title || "Item";
-  qs("#dSub").textContent = CONFIG.companyName;
-
-  qs("#dSku").textContent = it.TP_SKU || "";
-  qs("#dSpecs").textContent = [it.Brand, it.Model, it.Part_Number].filter(Boolean).join(" • ") || "See listing";
-  qs("#dCond").textContent = it.Condition_Grade || it.Condition || "See listing";
-
-  qs("#dIncluded").textContent = it.Included || "See listing/photos.";
-  qs("#dIssues").textContent = it.Known_Issues || "None listed beyond photos/description.";
-
-  qs("#btnEbay").href = ebayUrlFor(it);
-
-  openDrawer();
-}
-
-async function loadStore(){
-  const q = qs("#q").value.trim();
-  const cat = qs("#cat").value.trim();
-
-  try{
-    const res = await apiGet({ action:"listInventory", tab:"Inventory_Retail", q });
-    let items = publicFilter(res.items || []);
-
-    if (cat) items = items.filter(x => String(x.Category||"") === cat);
-
-    ITEMS = items.map(it => {
-      const clean = { ...it };
-      delete clean.Notes_Internal;
-      delete clean.Yard_Location;
-      delete clean.Cost;
-      delete clean.Internal_Notes;
-      delete clean.Password;
-      return clean;
-    });
-
-    fillCategoryDropdown(ITEMS);
-    renderGrid();
-    toast("Loaded store items.");
-  }catch(err){
-    toast(err.message, "bad");
-    qs("#meta").textContent = "Error loading store.";
+<style>
+  :root{
+    --tp-bg:#0b1220;              /* deep navy */
+    --tp-bg2:#0f1a33;             /* slightly lighter navy */
+    --tp-text:#eaf1ff;            /* crisp light text */
+    --tp-muted:rgba(234,241,255,.72);
+    --tp-line:rgba(255,255,255,.10);
+    --tp-blue:#2d7dff;            /* medium blue accent */
+    --tp-yellow:#ffd24a;          /* hazard-ish yellow accent */
+    --tp-radius:16px;
   }
-}
 
-qs("#btnLoad").addEventListener("click", loadStore);
-qs("#q").addEventListener("keydown", (e)=>{ if(e.key==="Enter") loadStore(); });
+  .tp-header{
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: linear-gradient(180deg, var(--tp-bg2), var(--tp-bg));
+    border-bottom: 1px solid var(--tp-line);
+    backdrop-filter: blur(10px);
+  }
 
-qs("#grid").addEventListener("click", (e)=>{
-  const btn = e.target.closest("button[data-open]");
-  if (!btn) return;
-  const sku = btn.getAttribute("data-open");
-  const it = pickItemBySku(sku);
-  if (it) showItem(it);
-});
+  .tp-header__inner{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
 
-qs("#btnClose").addEventListener("click", closeDrawer);
-qs("#drawerBack").addEventListener("click", (e)=>{ if(e.target.id==="drawerBack") closeDrawer(); });
+  .tp-brand{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--tp-text);
+    min-width: 260px;
+  }
 
-qs("#btnCopySku").addEventListener("click", async ()=>{
-  const sku = qs("#dSku").textContent.trim();
-  await navigator.clipboard.writeText(sku);
-  toast("Copied SKU.");
-});
+  .tp-brand__logo{
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,.35));
+  }
 
-(async function init(){
-  CONFIG = await loadConfig();
-  setLogo(qs("#logo"), CONFIG.logoUrl);
-  await loadStore();
-})();
-</script>
-</body>
-</html>
+  .tp-brand__name{
+    font-weight: 800;
+    letter-spacing: .06em;
+    font-size: 14px;
+    line-height: 1.1;
+  }
+
+  .tp-brand__tag{
+    font-size: 12px;
+    color: var(--tp-muted);
+    line-height: 1.1;
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+
+  .tp-nav{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .tp-nav__link{
+    color: var(--tp-muted);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    transition: transform .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
+  }
+
+  .tp-nav__link:hover{
+    color: var(--tp-text);
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.10);
+    transform: translateY(-1px);
+  }
+
+  .tp-nav__btn{
+    color: #0b1220;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--tp-yellow), #ffb703);
+    box-shadow: 0 10px 20px rgba(0,0,0,.25);
+    border: 1px solid rgba(0,0,0,.15);
+    transition: transform .12s ease, filter .12s ease;
+  }
+
+  .tp-nav__btn:hover{
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+  }
+
+  /* Responsive: collapse into a cleaner bar */
+  @media (max-width: 820px){
+    .tp-header__inner{
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .tp-brand{
+      justify-content: center;
+    }
+    .tp-nav{
+      justify-content: center;
+    }
+    .tp-brand__tag{
+      white-space: normal;
+      text-align: center;
+    }
+  }
+</style>
