@@ -3,397 +3,484 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dan Sauer, CLA | Paralegal Services</title>
-  <meta name="description" content="Professional paralegal support by Dan Sauer, CLA. Document preparation, case support, legal research, and administrative legal services." />
+  <title>Dan Sauer, CLA | Paralegal Practice</title>
+  <meta name="description" content="Dan Sauer, CLA — professional paralegal services including document preparation, case support, and legal-adjacent administrative assistance." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#f7f9fc;
-      --surface:#ffffff;
-      --text:#12203a;
-      --muted:#5f6f8f;
-      --line:#d9e1f2;
-      --primary:#1f4fbf;
-      --primary-2:#2f6cff;
-      --accent:#8aa8ff;
-      --radius:16px;
-      --shadow:0 14px 36px rgba(23,42,95,.09);
-      --max:1120px;
+      --bg:#f4f3f1;
+      --paper:#ffffff;
+      --ink:#171717;
+      --muted:#5e5e5e;
+      --line:#ddd9d3;
+      --accent:#1f2b3a;
+      --max:1180px;
+      --radius:2px;
     }
 
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{
       margin:0;
-      font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1000px 500px at 90% -10%, rgba(47,108,255,.08), transparent 60%),
-        radial-gradient(900px 600px at -10% 5%, rgba(138,168,255,.15), transparent 60%),
-        var(--bg);
-      line-height:1.6;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      line-height:1.65;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
     }
 
-    a{color:inherit;text-decoration:none}
     .container{width:min(var(--max),92vw);margin-inline:auto}
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+
+    /* Top Bar */
+    .topbar{
+      border-bottom:1px solid var(--line);
+      background:#f8f7f5;
+      font-size:.83rem;
+      color:#4c4c4c;
+    }
+    .topbar .container{
+      display:flex;
+      justify-content:space-between;
+      gap:1rem;
+      padding:.55rem 0;
+      flex-wrap:wrap;
+    }
 
     /* Header */
-    .site-header{
-      position:sticky; top:0; z-index:30;
-      background:rgba(247,249,252,.88);
-      backdrop-filter:blur(8px);
+    .header{
+      background:var(--paper);
       border-bottom:1px solid var(--line);
+      position:sticky;
+      top:0;
+      z-index:20;
     }
     .nav{
-      min-height:76px;
-      display:flex; align-items:center; justify-content:space-between; gap:1rem;
-    }
-    .brand{
-      display:flex; align-items:center; gap:.75rem;
-      font-weight:800; letter-spacing:.2px;
-    }
-    .brand-mark{
-      width:38px;height:38px;border-radius:10px;
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      box-shadow:0 8px 18px rgba(31,79,191,.25);
-      position:relative;
-    }
-    .brand-mark::after{
-      content:"";
-      position:absolute; inset:8px;
-      border:2px solid rgba(255,255,255,.85);
-      border-radius:6px;
-    }
-    .brand small{
-      display:block; font-size:.75rem; font-weight:600; color:var(--muted);
-      margin-top:2px;
+      min-height:86px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
     }
 
-    .nav-links{display:flex; gap:.9rem; flex-wrap:wrap}
-    .nav-links a{
-      font-size:.92rem; color:#23407c; font-weight:600;
-      padding:.45rem .65rem; border-radius:10px;
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:.16rem;
     }
-    .nav-links a:hover{background:#ebf0fb}
+    .brand-title{
+      font-family:"Instrument Serif",Georgia,"Times New Roman",serif;
+      font-size:1.8rem;
+      letter-spacing:.2px;
+      line-height:1;
+    }
+    .brand-sub{
+      font-size:.78rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#666;
+    }
+
+    .nav-links{
+      display:flex;
+      gap:1.4rem;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .nav-links a{
+      font-size:.92rem;
+      color:#2b2b2b;
+      position:relative;
+      padding-bottom:2px;
+    }
+    .nav-links a:after{
+      content:"";
+      position:absolute;
+      left:0; bottom:0;
+      width:100%; height:1px;
+      background:#1d1d1d;
+      transform:scaleX(0);
+      transform-origin:left;
+      transition:.22s ease;
+    }
+    .nav-links a:hover:after{transform:scaleX(1)}
 
     .btn{
-      display:inline-flex; align-items:center; gap:.4rem;
-      border-radius:12px; padding:.66rem 1rem;
-      border:1px solid transparent;
-      font-weight:700; font-size:.92rem;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #1f1f1f;
+      color:#1f1f1f;
+      background:transparent;
+      padding:.62rem 1rem;
+      border-radius:var(--radius);
+      font-size:.85rem;
+      letter-spacing:.06em;
+      text-transform:uppercase;
       transition:.2s ease;
+      font-weight:600;
     }
-    .btn-primary{
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      color:#fff; box-shadow:0 10px 22px rgba(31,79,191,.24);
+    .btn:hover{
+      background:#1f1f1f;
+      color:#fff;
     }
-    .btn-primary:hover{transform:translateY(-1px)}
-    .btn-ghost{
-      border-color:#b9c9ea; color:#24417a; background:#fff;
-    }
-    .btn-ghost:hover{border-color:#8ea8da}
 
     /* Hero */
-    .hero{padding:72px 0 26px}
-    .hero-wrap{
-      background:linear-gradient(180deg,#ffffff,#fbfcff);
-      border:1px solid var(--line);
-      border-radius:calc(var(--radius) + 6px);
-      box-shadow:var(--shadow);
-      overflow:hidden;
+    .hero{
+      background:var(--paper);
+      border-bottom:1px solid var(--line);
     }
     .hero-grid{
       display:grid;
-      grid-template-columns:1.25fr .75fr;
+      grid-template-columns:1.15fr .85fr;
+      gap:0;
     }
-    .hero-main{padding:48px 42px}
-    .eyebrow{
-      display:inline-flex; align-items:center; gap:.45rem;
-      font-size:.76rem; font-weight:800; text-transform:uppercase; letter-spacing:.35px;
-      color:#22437f; background:#eef3ff;
-      border:1px solid #d5e1fb; border-radius:999px;
-      padding:.32rem .62rem;
+    .hero-main{
+      padding:84px 54px 86px 0;
+    }
+    .kicker{
+      font-size:.76rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#666;
+      margin-bottom:1.25rem;
     }
     h1{
-      margin:.95rem 0 .7rem;
-      font-size:clamp(2rem,4.3vw,3.1rem);
-      line-height:1.08; letter-spacing:-.5px;
+      margin:0;
+      font-family:"Instrument Serif",Georgia,"Times New Roman",serif;
+      font-size:clamp(2.1rem,5.2vw,4rem);
+      line-height:1.04;
+      letter-spacing:.1px;
+      font-weight:400;
+      max-width:14ch;
     }
-    .lead{
-      margin:0; color:var(--muted); font-size:1.03rem; max-width:60ch;
+    .hero p{
+      margin:1.35rem 0 0;
+      max-width:58ch;
+      color:var(--muted);
+      font-size:1.03rem;
     }
-    .hero-cta{margin-top:1.35rem; display:flex; gap:.7rem; flex-wrap:wrap}
-
-    .hero-card{
-      border-left:1px solid var(--line);
-      background:linear-gradient(180deg,#f8fbff,#f3f7ff);
-      padding:22px;
-      display:flex; align-items:center;
+    .hero-actions{
+      margin-top:2rem;
+      display:flex;
+      gap:.7rem;
+      flex-wrap:wrap;
     }
-    .contact-card{
-      width:100%;
+    .btn-solid{
+      border:1px solid #202020;
+      background:#202020;
+      color:#fff;
+    }
+    .btn-solid:hover{
       background:#fff;
-      border:1px solid #d7e1f6;
-      border-radius:14px;
-      padding:16px;
-      box-shadow:0 8px 20px rgba(28,53,113,.07);
+      color:#202020;
     }
-    .contact-card h3{margin:.1rem 0 .6rem; font-size:1rem}
-    .info-list{list-style:none; margin:0; padding:0; display:grid; gap:.55rem}
-    .info-list li{
-      border:1px solid #e2e9f9; border-radius:10px;
-      background:#fcfdff; padding:.56rem .66rem;
-      font-size:.93rem; color:#28457f;
+
+    .hero-side{
+      border-left:1px solid var(--line);
+      padding:54px 0 54px 44px;
+      display:flex;
+      align-items:center;
     }
-    .info-list .label{display:block; color:#5d6f93; font-size:.78rem; font-weight:600}
+    .panel{
+      width:100%;
+      border:1px solid var(--line);
+      padding:24px;
+      background:#fbfbfa;
+    }
+    .panel h3{
+      margin:0 0 1rem;
+      font-family:"Instrument Serif",Georgia,serif;
+      font-size:1.35rem;
+      font-weight:400;
+    }
+    .panel-row{
+      padding:.7rem 0;
+      border-top:1px solid var(--line);
+      font-size:.95rem;
+      color:#3d3d3d;
+    }
+    .panel-row:first-of-type{border-top:0;padding-top:0}
 
     /* Sections */
-    .section{padding:26px 0 68px}
-    .section-head{
-      margin-bottom:14px;
-      display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; flex-wrap:wrap;
+    section.content{
+      padding:74px 0;
+      background:var(--paper);
+      border-bottom:1px solid var(--line);
     }
-    .section h2{
-      margin:0;
-      font-size:clamp(1.35rem,2.8vw,2rem);
-      letter-spacing:-.2px;
-    }
-    .section-head p{margin:0; color:var(--muted)}
 
-    .cards{
+    .section-head{
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:1rem;
+      margin-bottom:2rem;
+      flex-wrap:wrap;
+    }
+    .section-head h2{
+      margin:0;
+      font-family:"Instrument Serif",Georgia,serif;
+      font-weight:400;
+      font-size:2rem;
+      letter-spacing:.2px;
+    }
+    .section-head p{
+      margin:0;
+      color:var(--muted);
+      max-width:56ch;
+      font-size:.98rem;
+    }
+
+    .services{
       display:grid;
       grid-template-columns:repeat(12,1fr);
-      gap:14px;
+      gap:0;
+      border:1px solid var(--line);
+      background:#fff;
     }
-    .card{
-      grid-column:span 4;
-      background:var(--surface);
-      border:1px solid #dfe7f7;
-      border-radius:var(--radius);
-      padding:18px;
-      box-shadow:0 6px 16px rgba(23,42,95,.06);
-      transition:.2s ease;
+    .service{
+      grid-column:span 6;
+      padding:28px 24px;
+      border-right:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      min-height:160px;
     }
-    .card:hover{
-      transform:translateY(-2px);
-      border-color:#bed0f2;
-      box-shadow:0 10px 24px rgba(23,42,95,.1);
+    .service:nth-child(2n){border-right:0}
+    .service h3{
+      margin:0 0 .6rem;
+      font-size:1.04rem;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      font-weight:600;
+      color:#212121;
     }
-    .pill{
-      display:inline-block;
-      font-size:.72rem; font-weight:800;
-      color:#234584;
-      border:1px solid #cad9f8;
-      background:#eef3ff;
-      border-radius:999px;
-      padding:.22rem .5rem;
-      margin-bottom:.62rem;
+    .service p{
+      margin:0;
+      color:var(--muted);
+      font-size:.95rem;
+      max-width:46ch;
     }
-    .card h3{margin:0 0 .3rem; font-size:1.04rem}
-    .card p{margin:0; color:var(--muted); font-size:.94rem}
 
     .two-col{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:14px;
+      gap:22px;
     }
-    .panel{
+    .box{
+      border:1px solid var(--line);
       background:#fff;
-      border:1px solid #dfe7f7;
-      border-radius:var(--radius);
-      padding:18px;
-      box-shadow:0 6px 16px rgba(23,42,95,.06);
+      padding:26px;
     }
-    .checklist{list-style:none; margin:0; padding:0; display:grid; gap:.55rem}
-    .checklist li{
-      display:flex; gap:.5rem; align-items:flex-start;
-      color:#2a457d; font-size:.94rem;
+    .box h3{
+      margin:0 0 .85rem;
+      font-family:"Instrument Serif",Georgia,serif;
+      font-size:1.45rem;
+      font-weight:400;
     }
-    .dot{
-      width:8px; height:8px; border-radius:999px; margin-top:.52rem;
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      flex:0 0 auto;
+    .list{
+      list-style:none;
+      margin:0; padding:0;
     }
+    .list li{
+      padding:.65rem 0;
+      border-top:1px solid var(--line);
+      color:#383838;
+      font-size:.95rem;
+    }
+    .list li:first-child{border-top:0;padding-top:0}
 
     .cta{
-      background:linear-gradient(135deg,#1f4fbf,#2f6cff);
-      color:#fff;
-      border-radius:20px;
-      padding:26px;
-      box-shadow:0 16px 34px rgba(31,79,191,.28);
-      display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;
+      border:1px solid var(--line);
+      background:#f8f7f5;
+      padding:34px 28px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:1.2rem;
+      flex-wrap:wrap;
     }
-    .cta h3{margin:0; font-size:1.3rem}
-    .cta p{margin:.25rem 0 0; color:#e8eeff}
+    .cta h3{
+      margin:0;
+      font-family:"Instrument Serif",Georgia,serif;
+      font-size:1.8rem;
+      font-weight:400;
+      line-height:1.15;
+    }
+    .cta p{
+      margin:.35rem 0 0;
+      color:var(--muted);
+      max-width:58ch;
+    }
 
+    /* Footer */
     footer{
-      border-top:1px solid var(--line);
-      background:#f3f6fc;
-      padding:20px 0 34px;
-      color:#53638a;
-      font-size:.92rem;
+      background:#f3f1ee;
+      padding:24px 0 34px;
+      color:#555;
+      font-size:.86rem;
     }
     .footer-grid{
-      display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+      display:flex;
+      justify-content:space-between;
+      gap:1rem;
+      flex-wrap:wrap;
     }
 
     @media (max-width:980px){
       .hero-grid{grid-template-columns:1fr}
-      .hero-card{border-left:0;border-top:1px solid var(--line)}
-      .hero-main{padding:38px 22px}
-      .card{grid-column:span 6}
+      .hero-main{padding:58px 0 48px}
+      .hero-side{
+        border-left:0;
+        border-top:1px solid var(--line);
+        padding:32px 0 40px;
+      }
+      .service{grid-column:span 12;border-right:0}
       .two-col{grid-template-columns:1fr}
     }
-    @media (max-width:640px){
-      .nav{min-height:68px}
+
+    @media (max-width:700px){
       .nav-links{display:none}
-      .card{grid-column:span 12}
+      .brand-title{font-size:1.5rem}
+      h1{max-width:100%}
     }
   </style>
 </head>
 <body>
 
-  <header class="site-header">
+  <div class="topbar">
+    <div class="container">
+      <div>Professional Paralegal Support</div>
+      <div>By Appointment • Confidential Handling • Client-Focused Service</div>
+    </div>
+  </div>
+
+  <header class="header">
     <div class="container nav">
-      <a class="brand" href="#top" aria-label="Dan Sauer CLA home">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span>
-          Dan Sauer, CLA
-          <small>Paralegal Services</small>
-        </span>
+      <a href="#top" class="brand" aria-label="Dan Sauer CLA home">
+        <span class="brand-title">Dan Sauer, CLA</span>
+        <span class="brand-sub">Paralegal Practice</span>
       </a>
 
-      <nav class="nav-links" aria-label="Primary">
+      <nav class="nav-links" aria-label="Primary navigation">
         <a href="#services">Services</a>
-        <a href="#process">Process</a>
-        <a href="#about">About</a>
+        <a href="#approach">Approach</a>
         <a href="#contact">Contact</a>
       </nav>
 
-      <a class="btn btn-primary" href="#contact">Request Consultation</a>
+      <a class="btn" href="#contact">Request Consultation</a>
     </div>
   </header>
 
   <main id="top">
     <section class="hero">
-      <div class="container hero-wrap">
-        <div class="hero-grid">
-          <div class="hero-main">
-            <span class="eyebrow">Professional • Organized • Responsive</span>
-            <h1>Paralegal Support You Can Rely On</h1>
-            <p class="lead">
-              Dan Sauer, CLA provides dependable, detail-driven paralegal services for clients
-              who need clear communication, precise documentation, and consistent follow-through.
-            </p>
-            <div class="hero-cta">
-              <a class="btn btn-primary" href="#contact">Book an Intake</a>
-              <a class="btn btn-ghost" href="#services">View Services</a>
-            </div>
+      <div class="container hero-grid">
+        <div class="hero-main">
+          <div class="kicker">Dan Sauer, CLA</div>
+          <h1>Clear, dependable paralegal support.</h1>
+          <p>
+            I provide detail-oriented paralegal services with a focus on professionalism,
+            organization, and consistent communication—helping clients move forward with clarity.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-solid" href="#contact">Schedule an Intake</a>
+            <a class="btn" href="https://tekpakinc.store/dansauercla" target="_blank" rel="noopener">Visit Practice Page</a>
           </div>
-
-          <aside class="hero-card" aria-label="Contact details">
-            <div class="contact-card">
-              <h3>Quick Contact</h3>
-              <ul class="info-list">
-                <li>
-                  <span class="label">Website</span>
-                  <a href="https://tekpakinc.store/dansauercla" target="_blank" rel="noopener">tekpakinc.store/dansauercla</a>
-                </li>
-                <li>
-                  <span class="label">Service Type</span>
-                  Paralegal Services (CLA)
-                </li>
-                <li>
-                  <span class="label">Consultations</span>
-                  By appointment
-                </li>
-              </ul>
-            </div>
-          </aside>
         </div>
+
+        <aside class="hero-side">
+          <div class="panel" aria-label="Practice details">
+            <h3>Practice Details</h3>
+            <div class="panel-row"><strong>Service Area:</strong> Paralegal Services</div>
+            <div class="panel-row"><strong>Website:</strong> tekpakinc.store/dansauercla</div>
+            <div class="panel-row"><strong>Consultations:</strong> By Appointment</div>
+            <div class="panel-row"><strong>Style:</strong> Professional, Confidential, Efficient</div>
+          </div>
+        </aside>
       </div>
     </section>
 
-    <section id="services" class="section">
+    <section id="services" class="content">
       <div class="container">
         <div class="section-head">
           <h2>Services</h2>
-          <p>Tailored support for legal-adjacent administrative and documentation needs.</p>
+          <p>
+            Administrative and document support for legal-adjacent workflows, delivered with
+            discipline and attention to detail.
+          </p>
         </div>
 
-        <div class="cards">
-          <article class="card">
-            <span class="pill">Documentation</span>
+        <div class="services">
+          <article class="service">
             <h3>Document Preparation</h3>
-            <p>Drafting and formatting support for legal documents, forms, correspondence, and organized case files.</p>
+            <p>Drafting, formatting, and organizing documents for consistent, professional presentation.</p>
           </article>
 
-          <article class="card">
-            <span class="pill">Case Support</span>
-            <h3>Case File Management</h3>
-            <p>Structured file organization, timeline tracking, exhibit indexing, and administrative coordination.</p>
+          <article class="service">
+            <h3>Case File Organization</h3>
+            <p>Structured file management, timelines, and document indexing to improve case readiness.</p>
           </article>
 
-          <article class="card">
-            <span class="pill">Research</span>
+          <article class="service">
             <h3>Legal Research Assistance</h3>
-            <p>Targeted legal-adjacent research support, source collection, and summary preparation.</p>
+            <p>Focused legal-adjacent research support and concise summary preparation.</p>
           </article>
 
-          <article class="card">
-            <span class="pill">Client Readiness</span>
-            <h3>Intake & Information Collection</h3>
-            <p>Guided intake processes and checklist-driven information gathering to streamline next steps.</p>
+          <article class="service">
+            <h3>Intake & Records Support</h3>
+            <p>Client intake handling and documentation tracking designed to reduce friction and delay.</p>
           </article>
 
-          <article class="card">
-            <span class="pill">Operations</span>
-            <h3>Administrative Support</h3>
-            <p>Deadline management, status updates, workflow tracking, and communications support.</p>
+          <article class="service">
+            <h3>Administrative Coordination</h3>
+            <p>Workflow coordination, deadline tracking, and communication support throughout engagement.</p>
           </article>
 
-          <article class="card">
-            <span class="pill">Professional Standards</span>
-            <h3>Confidential Handling</h3>
-            <p>Professional care with sensitive records and communication throughout your support process.</p>
+          <article class="service">
+            <h3>Professional Review Prep</h3>
+            <p>Preparation and organization of materials before final review by appropriate counsel.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="process" class="section" style="padding-top:0;">
+    <section id="approach" class="content">
       <div class="container two-col">
-        <article class="panel">
-          <h2 style="margin:0 0 .5rem;">How It Works</h2>
-          <ul class="checklist">
-            <li><span class="dot"></span><span><strong>1) Consultation:</strong> Brief discussion to identify needs, timeline, and scope.</span></li>
-            <li><span class="dot"></span><span><strong>2) Intake:</strong> Gather relevant details and documentation.</span></li>
-            <li><span class="dot"></span><span><strong>3) Service Delivery:</strong> Organized work execution with transparent updates.</span></li>
-            <li><span class="dot"></span><span><strong>4) Review:</strong> Final review and handoff of completed deliverables.</span></li>
+        <article class="box">
+          <h3>Engagement Approach</h3>
+          <ul class="list">
+            <li><strong>1) Initial Consultation:</strong> Define scope, priorities, and timeline.</li>
+            <li><strong>2) Intake & Collection:</strong> Gather required documents and case details.</li>
+            <li><strong>3) Service Delivery:</strong> Execute tasks with clear progress updates.</li>
+            <li><strong>4) Final Handoff:</strong> Deliver organized work product for next steps.</li>
           </ul>
         </article>
 
-        <article id="about" class="panel">
-          <h2 style="margin:0 0 .5rem;">Why Clients Choose Dan Sauer, CLA</h2>
-          <ul class="checklist">
-            <li><span class="dot"></span><span>Clear communication and practical next steps.</span></li>
-            <li><span class="dot"></span><span>Detail-oriented documentation and workflow discipline.</span></li>
-            <li><span class="dot"></span><span>Reliable turnaround with professional presentation.</span></li>
-            <li><span class="dot"></span><span>Business-minded support aligned with real-world client needs.</span></li>
+        <article class="box">
+          <h3>Practice Standards</h3>
+          <ul class="list">
+            <li>Clear and timely communication.</li>
+            <li>Confidential, respectful handling of records.</li>
+            <li>Detail-oriented documentation practices.</li>
+            <li>Consistent, client-focused professionalism.</li>
           </ul>
         </article>
       </div>
     </section>
 
-    <section class="section" id="contact" style="padding-top:0;">
+    <section id="contact" class="content">
       <div class="container">
         <div class="cta">
           <div>
-            <h3>Ready to get started?</h3>
-            <p>Request an intake consultation and get a clear plan for your paralegal support needs.</p>
+            <h3>Request a consultation.</h3>
+            <p>Share your needs and receive a clear next-step plan for paralegal support.</p>
           </div>
           <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
-            <a class="btn btn-ghost" style="background:#fff;color:#1f4fbf;border-color:#fff;" href="https://tekpakinc.store/dansauercla" target="_blank" rel="noopener">Visit CLA Page</a>
-            <a class="btn btn-ghost" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.55);" href="mailto:info@tekpakinc.store">Email Inquiry</a>
+            <a class="btn btn-solid" href="mailto:info@tekpakinc.store">Email Inquiry</a>
+            <a class="btn" href="https://tekpakinc.store/dansauercla" target="_blank" rel="noopener">Practice Page</a>
           </div>
         </div>
       </div>
@@ -402,18 +489,13 @@
 
   <footer>
     <div class="container footer-grid">
-      <div>
-        <strong>Dan Sauer, CLA</strong><br />
-        Professional Paralegal Services
-      </div>
-      <div>
-        © <span id="yr"></span> All rights reserved.
-      </div>
+      <div>© <span id="year"></span> Dan Sauer, CLA. All rights reserved.</div>
+      <div>Paralegal Practice • Professional Service</div>
     </div>
   </footer>
 
   <script>
-    document.getElementById('yr').textContent = new Date().getFullYear();
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
