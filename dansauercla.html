@@ -189,8 +189,26 @@
     .panel{
       width:100%;
       border:1px solid var(--line);
-      padding:24px;
       background:#fbfbfa;
+      overflow:hidden;
+    }
+
+    .headshot-wrap{
+      border-bottom:1px solid var(--line);
+      background:#f1f0ee;
+      padding:14px;
+    }
+    .headshot{
+      width:100%;
+      aspect-ratio:4/5;
+      object-fit:cover;
+      object-position:center 20%;
+      border:1px solid #cfc9c1;
+      background:#e8e5e1;
+    }
+
+    .panel-body{
+      padding:20px 24px 24px;
     }
     .panel h3{
       margin:0 0 1rem;
@@ -392,12 +410,19 @@
         </div>
 
         <aside class="hero-side">
-          <div class="panel" aria-label="Practice details">
-            <h3>Practice Details</h3>
-            <div class="panel-row"><strong>Service Area:</strong> Paralegal Services</div>
-            <div class="panel-row"><strong>Website:</strong> tekpakinc.store/dansauercla</div>
-            <div class="panel-row"><strong>Consultations:</strong> By Appointment</div>
-            <div class="panel-row"><strong>Style:</strong> Professional, Confidential, Efficient</div>
+          <div class="panel" aria-label="Practice details and headshot">
+            <div class="headshot-wrap">
+              <img
+                class="headshot"
+                src="A_digital_photograph_features_a_professionally_dre.png"
+                alt="Professional headshot of Dan Sauer, CLA"
+              />
+            </div>
+            <div class="panel-body">
+              <h3>Practice Details</h3>
+              <div class="panel-row"><strong>Service Area:</strong> Alamance County, NC - Guilford County, NC - Randolph County, NC</div>
+              <div class="panel-row"><strong>Consultations:</strong> By Appointment</div>
+            </div>
           </div>
         </aside>
       </div>
