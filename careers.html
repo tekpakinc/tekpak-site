@@ -854,3 +854,236 @@ No header / no nav / no footer
     .tp-cta-actions{ width:100%; }
   }
 </style>
+
+<!-- =========================
+TEK-PAK MATCHING FOOTER (NO HEADER/NO NAV)
+Drop this near bottom of <body>
+========================= -->
+<footer class="tp-footer" aria-label="Tek-Pak Footer">
+  <div class="tp-footer-glow tp-footer-glow-1" aria-hidden="true"></div>
+  <div class="tp-footer-glow tp-footer-glow-2" aria-hidden="true"></div>
+
+  <div class="tp-footer-inner">
+    <!-- Left: Brand / Message -->
+    <section class="tp-footer-brand">
+      <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-footer-main-logo">
+      <p class="tp-footer-tagline">Your tech go-to, for all tech.</p>
+      <p class="tp-footer-copy">
+        Enterprise-grade IT services with real human support, fast response, and practical solutions for modern businesses.
+      </p>
+    </section>
+
+    <!-- Middle: Links -->
+    <section class="tp-footer-links-wrap" aria-label="Footer Links">
+      <h3>Quick Links</h3>
+      <div class="tp-footer-links-grid">
+        <a href="/it-services">IT Services</a>
+        <a href="/https://www.ncelectronicrecycling.com">Electronic Recycling</a>
+        <a href="/it-services/help-desk">Help Desk</a>
+        <a href="/development.html">Software</a>
+        <a href="/policies.html">Policies</a>
+        <a href="/careers.html">Careers</a>
+        <a href="/contact">Contact</a>
+        <a href="/support">Support Request</a>
+      </div>
+    </section>
+
+    <!-- Right: Partner / Compliance Logos -->
+    <section class="tp-footer-badges" aria-label="Affiliations and Compliance">
+      <h3>Affiliations & Compliance</h3>
+      <div class="tp-badge-row">
+        <img src="tekpak-logo.png" alt="Tek-Pak Brand Logo" class="tp-badge">
+        <img src="dorlogo.png" alt="DOR Logo" class="tp-badge">
+        <img src="compliant.png" alt="Compliance Logo" class="tp-badge">
+      </div>
+      <p class="tp-footer-note">
+        Trusted service practices, responsible operations, and standards-focused delivery.
+      </p>
+    </section>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="tp-footer-bottom">
+    <span>© <span id="tpYear"></span> Tek-Pak Inc. All rights reserved.</span>
+    <span class="tp-sep">•</span>
+    <span>Built for secure, reliable business IT operations.</span>
+  </div>
+</footer>
+
+<style>
+  :root{
+    --tp-blue-900:#0b1733;
+    --tp-blue-800:#10224a;
+    --tp-blue-700:#163066;
+    --tp-lime-500:#9BFF2E;
+    --tp-lime-400:#b7ff67;
+    --tp-white:#ffffff;
+    --tp-ink:#eaf1ff;
+    --tp-muted:#b8c5e3;
+    --tp-line:rgba(255,255,255,.14);
+    --tp-glass:rgba(255,255,255,.06);
+    --tp-shadow:0 18px 45px rgba(0,0,0,.34);
+  }
+
+  .tp-footer{
+    position:relative;
+    overflow:hidden;
+    margin-top:clamp(28px,4vw,56px);
+    color:var(--tp-ink);
+    background:
+      radial-gradient(900px 380px at 0% 0%, rgba(155,255,46,.11), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(36,99,214,.18), transparent 60%),
+      linear-gradient(180deg, #0a1430 0%, #091127 100%);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:24px;
+    box-shadow:var(--tp-shadow);
+    font-family:"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  .tp-footer-glow{
+    position:absolute;
+    width:360px;height:360px;border-radius:999px;filter:blur(56px);pointer-events:none;
+  }
+  .tp-footer-glow-1{left:-120px;bottom:-120px;background:rgba(155,255,46,.18);}
+  .tp-footer-glow-2{right:-100px;top:-120px;background:rgba(36,99,214,.24);}
+
+  .tp-footer-inner{
+    position:relative;
+    z-index:1;
+    width:min(1180px, 94%);
+    margin-inline:auto;
+    padding:clamp(24px, 4.2vw, 42px) 0;
+    display:grid;
+    grid-template-columns:1.1fr .95fr .95fr;
+    gap:20px;
+  }
+
+  .tp-footer-brand,
+  .tp-footer-links-wrap,
+  .tp-footer-badges{
+    border:1px solid var(--tp-line);
+    background:linear-gradient(170deg, rgba(255,255,255,.11), rgba(255,255,255,.03) 70%);
+    border-radius:18px;
+    padding:18px;
+    backdrop-filter:blur(8px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
+  }
+
+  .tp-footer-main-logo{
+    width:min(220px, 100%);
+    height:auto;
+    display:block;
+    margin-bottom:10px;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,.32));
+  }
+
+  .tp-footer-tagline{
+    margin:0 0 8px;
+    color:var(--tp-lime-500);
+    font-weight:800;
+    letter-spacing:.01em;
+  }
+
+  .tp-footer-copy{
+    margin:0;
+    color:var(--tp-muted);
+    line-height:1.65;
+    font-size:.96rem;
+  }
+
+  .tp-footer-links-wrap h3,
+  .tp-footer-badges h3{
+    margin:0 0 12px;
+    font-size:1.02rem;
+    color:#f4f8ff;
+    letter-spacing:.01em;
+  }
+
+  .tp-footer-links-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:8px 12px;
+  }
+
+  .tp-footer-links-grid a{
+    text-decoration:none;
+    color:#d8e6ff;
+    padding:8px 10px;
+    border:1px solid transparent;
+    border-radius:10px;
+    transition:all .18s ease;
+    font-size:.94rem;
+  }
+
+  .tp-footer-links-grid a:hover{
+    color:#0f2200;
+    background:linear-gradient(180deg, var(--tp-lime-400), var(--tp-lime-500));
+    border-color:rgba(155,255,46,.55);
+    transform:translateY(-1px);
+  }
+
+  .tp-badge-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+  }
+
+  .tp-badge{
+    height:52px;
+    width:auto;
+    max-width:100%;
+    object-fit:contain;
+    padding:6px 10px;
+    border:1px solid var(--tp-line);
+    border-radius:12px;
+    background:rgba(255,255,255,.06);
+    box-shadow:0 8px 18px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  .tp-footer-note{
+    margin:12px 0 0;
+    color:var(--tp-muted);
+    font-size:.9rem;
+    line-height:1.5;
+  }
+
+  .tp-footer-bottom{
+    position:relative;
+    z-index:1;
+    border-top:1px solid rgba(255,255,255,.12);
+    background:rgba(0,0,0,.20);
+    padding:12px 16px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    justify-content:center;
+    font-size:.88rem;
+    color:#d0dcf5;
+  }
+
+  .tp-sep{ opacity:.65; }
+
+  @media (max-width: 980px){
+    .tp-footer-inner{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media (max-width: 560px){
+    .tp-footer-links-grid{
+      grid-template-columns:1fr;
+    }
+    .tp-badge{
+      height:46px;
+    }
+  }
+</style>
+
+<script>
+  (function(){
+    var y = document.getElementById('tpYear');
+    if(y) y.textContent = new Date().getFullYear();
+  })();
+</script>
