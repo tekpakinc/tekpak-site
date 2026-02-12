@@ -1,1014 +1,406 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tek-Pak Careers</title>
+<!-- =========================
+TEK-PAK HEADER (UPDATED MENU)
+========================= -->
+<header class="tp-header">
+  <div class="tp-header-accent"></div>
+  <div class="tp-header-sheen"></div>
 
-  <style>
-    /* =========================
-       GLOBAL TOKENS (define once)
-    ========================== */
-    :root{
-      --tp-bg:#ffffff;
-      --tp-text:#0f172a;
-      --tp-muted:#475569;
+  <div class="tp-header-inner">
+    <!-- Brand -->
+    <a href="/index" class="tp-brand" aria-label="Tek-Pak Home">
+      <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-logo" />
+    </a>
 
-      --tp-silver-1:#f8fafc;
-      --tp-silver-2:#eef2f7;
-      --tp-silver-3:#d7dee8;
-      --tp-silver-4:#aab4c2;
-      --tp-steel:#5b6678;
+    <!-- Mobile Toggle -->
+    <button class="tp-menu-toggle" aria-expanded="false" aria-controls="tpNav" aria-label="Toggle navigation" type="button">
+      <span></span><span></span><span></span>
+    </button>
 
-      --tp-lime:#97ff3f;
-      --tp-lime-deep:#69d020;
-      --tp-lime-500:#9BFF2E;
-      --tp-lime-400:#b7ff67;
+    <!-- Nav -->
+    <nav id="tpNav" class="tp-nav" aria-label="Primary Navigation">
+      <ul class="tp-menu">
+        <!-- Home -->
+        <li><a href="/index">Home</a></li>
 
-      --tp-line:#e5eaf1;
-      --tp-ink:#eaf1ff;
+        <!-- Services Dropdown -->
+        <li class="tp-dropdown">
+          <button class="tp-dropdown-btn" aria-expanded="false" aria-haspopup="true" type="button">Services</button>
+          <ul class="tp-submenu" role="menu" aria-label="Services submenu">
+            <li><a href="/it-support">IT Support</a></li>
+            <li><a href="https://www.ncelectronicrecycling.com" target="_blank" rel="noopener noreferrer">Electronic Recycling</a></li>
+            <li><a href="/development">Development</a></li>
+          </ul>
+        </li>
 
-      --tp-blue-900:#0b1733;
-      --tp-blue-800:#10224a;
-      --tp-blue-700:#163066;
-      --tp-blue-500:#2463d6;
+        <!-- Shop Dropdown -->
+        <li class="tp-dropdown">
+          <button class="tp-dropdown-btn" aria-expanded="false" aria-haspopup="true" type="button">Shop</button>
+          <ul class="tp-submenu" role="menu" aria-label="Shop submenu">
+            <li><a href="https://www.tekpakinc.store/surplus" target="_blank" rel="noopener noreferrer">Surplus Electronics</a></li>
+            <li><a href="https://www.tekpakinc.store/refurbished" target="_blank" rel="noopener noreferrer">Refurbished Electronics</a></li>
+            <li><a href="https://www.thercreserve.com/#shop" target="_blank" rel="noopener noreferrer">Remote Control Hobbies</a></li>
+            <li><a href="https://www.tekpak.store/software" target="_blank" rel="noopener noreferrer">Software</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
 
-      --tp-glass:rgba(255,255,255,.06);
-      --tp-shadow-soft:0 8px 24px rgba(15,23,42,.10);
-      --tp-shadow:
-        0 18px 45px rgba(0,0,0,.35);
-      --tp-shadow-3d:
-        0 18px 38px rgba(15,23,42,.14),
-        0 4px 14px rgba(15,23,42,.08);
-    }
+<style>
+  :root{
+    --tp-bg:#ffffff;
+    --tp-text:#0f172a;
+    --tp-line:#e5eaf1;
+    --tp-lime:#97ff3f;
+    --tp-lime-deep:#69d020;
+    --tp-shadow-soft:0 8px 24px rgba(15,23,42,.10);
+    --tp-shadow-3d:0 18px 38px rgba(15,23,42,.14), 0 4px 14px rgba(15,23,42,.08);
+  }
 
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0}
-    body{
-      font-family:"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:#081224;
-      color:#fff;
-    }
+  *{box-sizing:border-box}
 
-    /* =========================
-       HEADER
-    ========================== */
-    .tp-header{
-      position:sticky;
-      top:0;
-      z-index:1000;
-      background:var(--tp-bg);
+  .tp-header{
+    position:sticky;
+    top:0;
+    z-index:5000;
+    background:var(--tp-bg);
+    border-bottom:1px solid var(--tp-line);
+    box-shadow:var(--tp-shadow-soft);
+    overflow:visible; /* allows dropdowns to overlay page content */
+  }
+
+  .tp-header-accent{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:4px;
+    background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime),var(--tp-lime-deep));
+    filter:saturate(1.1);
+    pointer-events:none;
+  }
+
+  .tp-header-sheen{
+    position:absolute;
+    top:0; left:-40%;
+    width:35%;
+    height:100%;
+    background:linear-gradient(100deg,transparent 0%, rgba(255,255,255,.9) 48%, transparent 100%);
+    transform:skewX(-20deg);
+    animation:tpSheen 7s linear infinite;
+    pointer-events:none;
+    opacity:.38;
+  }
+
+  @keyframes tpSheen{
+    0%{left:-40%}
+    100%{left:140%}
+  }
+
+  .tp-header-inner{
+    max-width:1240px;
+    margin:0 auto;
+    padding:10px 18px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    min-height:86px;
+    position:relative;
+    overflow:visible;
+  }
+
+  .tp-brand{
+    display:flex;
+    align-items:center;
+    text-decoration:none;
+    flex:0 0 auto;
+  }
+
+  .tp-logo{
+    width:96px;
+    height:96px;
+    object-fit:contain;
+    filter:
+      drop-shadow(0 6px 10px rgba(15,23,42,.20))
+      drop-shadow(0 0 10px rgba(151,255,63,.20));
+    transition:transform .2s ease, filter .2s ease;
+  }
+
+  .tp-brand:hover .tp-logo{
+    transform:translateY(-1px) scale(1.02);
+    filter:
+      drop-shadow(0 8px 14px rgba(15,23,42,.24))
+      drop-shadow(0 0 14px rgba(151,255,63,.32));
+  }
+
+  .tp-nav{ margin-left:auto; overflow:visible; }
+
+  .tp-menu{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    overflow:visible;
+  }
+
+  .tp-menu > li{ position:relative; }
+
+  .tp-menu a,
+  .tp-dropdown-btn{
+    position:relative;
+    isolation:isolate;
+    overflow:hidden;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:var(--tp-text);
+    font-weight:800;
+    font-size:.95rem;
+    letter-spacing:.2px;
+    padding:10px 14px;
+    border-radius:12px;
+    border:1px solid #dbe2ec;
+    background:linear-gradient(180deg,#ffffff 0%, #f4f7fb 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.95),
+      0 2px 0 rgba(15,23,42,.05),
+      0 8px 16px rgba(91,102,120,.12);
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    cursor:pointer;
+    font-family:inherit;
+    white-space:nowrap;
+  }
+
+  .tp-menu a::before,
+  .tp-dropdown-btn::before{
+    content:"";
+    position:absolute;
+    left:-120%;
+    top:0;
+    width:80%;
+    height:100%;
+    background:linear-gradient(100deg,transparent 0%, rgba(151,255,63,.55) 50%, transparent 100%);
+    transform:skewX(-24deg);
+    transition:left .45s ease;
+    z-index:-1;
+  }
+
+  .tp-menu a:hover,
+  .tp-dropdown-btn:hover{
+    transform:translateY(-1px);
+    border-color:#c9d3e2;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.98),
+      0 4px 0 rgba(15,23,42,.06),
+      0 12px 22px rgba(91,102,120,.16);
+  }
+
+  .tp-menu a:hover::before,
+  .tp-dropdown-btn:hover::before{ left:140%; }
+
+  .tp-menu a:active,
+  .tp-dropdown-btn:active{
+    transform:translateY(1px);
+    box-shadow:
+      inset 0 2px 7px rgba(15,23,42,.10),
+      0 1px 0 rgba(15,23,42,.05);
+  }
+
+  .tp-menu a.active{
+    border-color:#83e92f;
+    color:#0b1304;
+    background:linear-gradient(180deg,#eaffd7 0%, #bbff79 35%, #97ff3f 70%, #79dc29 100%);
+    text-shadow:0 1px 0 rgba(255,255,255,.55);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.8),
+      0 3px 0 rgba(66,125,19,.30),
+      0 12px 20px rgba(121,220,41,.35);
+  }
+
+  .tp-dropdown{ position:relative; overflow:visible; }
+
+  .tp-submenu{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    min-width:270px;
+    list-style:none;
+    margin:0;
+    padding:8px;
+    background:#fff;
+    border:1px solid #dbe2ec;
+    border-radius:14px;
+    box-shadow:var(--tp-shadow-3d);
+    display:none;
+    z-index:6000;
+  }
+
+  .tp-dropdown.open .tp-submenu{ display:block; }
+
+  .tp-submenu a{
+    display:block;
+    border-radius:10px;
+    padding:9px 10px;
+    border:1px solid transparent;
+    background:transparent;
+    box-shadow:none;
+    font-weight:700;
+    color:#0f172a;
+  }
+
+  .tp-submenu a:hover{
+    background:#f6fbf1;
+    border-color:#d7f2bf;
+    transform:none;
+  }
+
+  .tp-menu-toggle{
+    display:none;
+    margin-left:auto;
+    width:46px;
+    height:40px;
+    border-radius:12px;
+    border:1px solid #dbe2ec;
+    background:linear-gradient(180deg,#fff,#f3f6fb);
+    box-shadow:0 5px 12px rgba(15,23,42,.10);
+    padding:8px;
+    cursor:pointer;
+  }
+
+  .tp-menu-toggle span{
+    display:block;
+    height:2px;
+    margin:5px 0;
+    background:#4b5563;
+    border-radius:2px;
+  }
+
+  @media (max-width:980px){
+    .tp-logo{width:72px;height:72px}
+    .tp-header-inner{min-height:78px}
+    .tp-menu-toggle{display:block}
+
+    .tp-nav{
+      position:absolute;
+      left:0; right:0; top:100%;
+      background:#fff;
+      border-top:1px solid #eef2f7;
       border-bottom:1px solid var(--tp-line);
-      box-shadow:var(--tp-shadow-soft);
-      overflow:clip;
+      box-shadow:var(--tp-shadow-3d);
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .28s ease;
+      z-index:5500;
     }
-
-    .tp-header-accent{
-      position:absolute;
-      left:0; right:0; bottom:0;
-      height:4px;
-      background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime),var(--tp-lime-deep));
-      filter:saturate(1.1);
-    }
-
-    .tp-header-sheen{
-      position:absolute;
-      top:0; left:-40%;
-      width:35%;
-      height:100%;
-      background:linear-gradient(100deg,transparent 0%, rgba(255,255,255,.9) 48%, transparent 100%);
-      transform:skewX(-20deg);
-      animation:tpSheen 7s linear infinite;
-      pointer-events:none;
-      opacity:.38;
-    }
-
-    @keyframes tpSheen{
-      0%{left:-40%}
-      100%{left:140%}
-    }
-
-    .tp-header-inner{
-      max-width:1240px;
-      margin:0 auto;
-      padding:10px 18px;
-      display:flex;
-      align-items:center;
-      gap:18px;
-      position:relative;
-      min-height:86px;
-    }
-
-    .tp-brand{
-      display:flex;
-      align-items:center;
-      text-decoration:none;
-      flex:0 0 auto;
-    }
-
-    /* fixed logo sizing */
-    .tp-logo{
-      width:96px;
-      height:96px;
-      object-fit:contain;
-      filter:
-        drop-shadow(0 6px 10px rgba(15,23,42,.20))
-        drop-shadow(0 0 10px rgba(151,255,63,.20));
-      transition:transform .2s ease, filter .2s ease;
-    }
-
-    .tp-brand:hover .tp-logo{
-      transform:translateY(-1px) scale(1.02);
-      filter:
-        drop-shadow(0 8px 14px rgba(15,23,42,.24))
-        drop-shadow(0 0 14px rgba(151,255,63,.32));
-    }
-
-    .tp-nav{ margin-left:auto; }
+    .tp-nav.open{max-height:620px}
 
     .tp-menu{
-      list-style:none;
-      margin:0;
-      padding:0;
-      display:flex;
-      align-items:center;
+      padding:12px;
+      flex-direction:column;
+      align-items:stretch;
       gap:8px;
     }
 
-    .tp-menu a,
-    .tp-dropdown-btn{
-      position:relative;
-      isolation:isolate;
-      overflow:hidden;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      color:var(--tp-text);
-      font-weight:800;
-      font-size:.95rem;
-      letter-spacing:.2px;
-      padding:10px 14px;
-      border-radius:12px;
-      border:1px solid #dbe2ec;
-      background:linear-gradient(180deg,#ffffff 0%, #f4f7fb 100%);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.95),
-        0 2px 0 rgba(15,23,42,.05),
-        0 8px 16px rgba(91,102,120,.12);
-      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-      cursor:pointer;
-      font-family:inherit;
-    }
-
-    .tp-menu a::before,
-    .tp-dropdown-btn::before{
-      content:"";
-      position:absolute;
-      left:-120%;
-      top:0;
-      width:80%;
-      height:100%;
-      background:linear-gradient(100deg,transparent 0%, rgba(151,255,63,.55) 50%, transparent 100%);
-      transform:skewX(-24deg);
-      transition:left .45s ease;
-      z-index:-1;
-    }
-
-    .tp-menu a:hover,
-    .tp-dropdown-btn:hover{
-      transform:translateY(-1px);
-      border-color:#c9d3e2;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.98),
-        0 4px 0 rgba(15,23,42,.06),
-        0 12px 22px rgba(91,102,120,.16);
-    }
-
-    .tp-menu a:hover::before,
-    .tp-dropdown-btn:hover::before{ left:140%; }
-
-    .tp-menu a:active,
-    .tp-dropdown-btn:active{
-      transform:translateY(1px);
-      box-shadow:
-        inset 0 2px 7px rgba(15,23,42,.10),
-        0 1px 0 rgba(15,23,42,.05);
-    }
-
-    .tp-menu a.active{
-      border-color:#83e92f;
-      color:#0b1304;
-      background:linear-gradient(180deg,#eaffd7 0%, #bbff79 35%, #97ff3f 70%, #79dc29 100%);
-      text-shadow:0 1px 0 rgba(255,255,255,.55);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.8),
-        0 3px 0 rgba(66,125,19,.30),
-        0 12px 20px rgba(121,220,41,.35);
-    }
-
-    .tp-dropdown{ position:relative; }
-
-    .tp-submenu{
-      position:absolute;
-      top:calc(100% + 10px);
-      right:0;
-      min-width:220px;
-      list-style:none;
-      margin:0;
-      padding:8px;
-      background:#fff;
-      border:1px solid #dbe2ec;
-      border-radius:14px;
-      box-shadow:var(--tp-shadow-3d);
-      display:none;
-    }
-
-    .tp-dropdown.open .tp-submenu{ display:block; }
-
-    .tp-submenu a{
-      display:block;
-      border-radius:10px;
-      padding:9px 10px;
-      border:1px solid transparent;
-      background:transparent;
+    /* Keep submenu inside mobile panel for stable UX */
+    .tp-dropdown .tp-submenu{
+      position:static;
+      margin-top:8px;
+      min-width:0;
       box-shadow:none;
-      font-weight:700;
+      border-color:#e6ebf2;
+      background:#fbfcfe;
+      z-index:auto;
     }
-
-    .tp-submenu a:hover{
-      background:#f6fbf1;
-      border-color:#d7f2bf;
-      transform:none;
-    }
-
-    .tp-menu-toggle{
-      display:none;
-      margin-left:auto;
-      width:46px;
-      height:40px;
-      border-radius:12px;
-      border:1px solid #dbe2ec;
-      background:linear-gradient(180deg,#fff,#f3f6fb);
-      box-shadow:0 5px 12px rgba(15,23,42,.10);
-      padding:8px;
-      cursor:pointer;
-    }
-
-    .tp-menu-toggle span{
-      display:block;
-      height:2px;
-      margin:5px 0;
-      background:#4b5563;
-      border-radius:2px;
-    }
-
-    @media (max-width:980px){
-      .tp-logo{width:72px;height:72px}
-      .tp-header-inner{min-height:78px}
-      .tp-menu-toggle{display:block}
-
-      .tp-nav{
-        position:absolute;
-        left:0; right:0; top:100%;
-        background:#fff;
-        border-top:1px solid #eef2f7;
-        border-bottom:1px solid var(--tp-line);
-        box-shadow:var(--tp-shadow-3d);
-        max-height:0;
-        overflow:hidden;
-        transition:max-height .28s ease;
-      }
-      .tp-nav.open{max-height:560px}
-
-      .tp-menu{
-        padding:12px;
-        flex-direction:column;
-        align-items:stretch;
-        gap:8px;
-      }
-
-      .tp-dropdown .tp-submenu{
-        position:static;
-        margin-top:8px;
-        box-shadow:none;
-        border-color:#e6ebf2;
-        background:#fbfcfe;
-      }
-    }
-
-    @media (max-width:640px){
-      .tp-logo{width:58px;height:58px}
-      .tp-header-inner{padding:8px 12px}
-    }
-
-    /* =========================
-       CAREERS BODY
-    ========================== */
-    .tp-careers-wrap{
-      position:relative;
-      isolation:isolate;
-      overflow:hidden;
-      background:
-        radial-gradient(1200px 600px at 20% -10%, rgba(36,99,214,.22), transparent 56%),
-        radial-gradient(900px 500px at 100% 0%, rgba(155,255,46,.11), transparent 48%),
-        linear-gradient(180deg, #081224 0%, #0b1733 45%, #0a1838 100%);
-      color:var(--tp-ink);
-      padding: clamp(48px, 7vw, 96px) 20px clamp(68px, 8vw, 108px);
-    }
-
-    .tp-careers-bg-grid{
-      position:absolute; inset:0;
-      background-image:
-        linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
-      background-size: 42px 42px;
-      mask-image: radial-gradient(circle at center, black 45%, transparent 92%);
-      opacity:.24;
-      z-index:-2;
-      pointer-events:none;
-    }
-
-    .tp-careers-glow{
-      position:absolute;
-      width:500px; height:500px;
-      border-radius:999px;
-      filter:blur(62px);
-      z-index:-1;
-      pointer-events:none;
-    }
-    .tp-careers-glow-1{ left:-140px; top:-120px; background:rgba(36,99,214,.32); }
-    .tp-careers-glow-2{ right:-180px; top:120px; background:rgba(155,255,46,.19); }
-
-    .tp-careers-container{
-      width:min(1180px, 100%);
-      margin-inline:auto;
-      display:grid;
-      gap: clamp(36px, 5vw, 62px);
-    }
-
-    .tp-kicker{
-      display:inline-flex;
-      align-items:center;
-      border:1px solid rgba(255,255,255,.13);
-      background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
-      padding:.42rem .78rem;
-      border-radius:999px;
-      font-size:.74rem;
-      font-weight:800;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:var(--tp-lime-500);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
-    }
-
-    .tp-careers-hero h1{
-      margin:16px 0 14px;
-      font-size:clamp(2rem, 4.8vw, 4rem);
-      line-height:1.08;
-      letter-spacing:-.02em;
-    }
-
-    .tp-careers-hero h1 span{ color:#fff; }
-
-    .tp-hero-sub{
-      max-width:780px;
-      margin:0;
-      color:#b8c5e3;
-      font-size:clamp(1rem, 1.35vw, 1.16rem);
-      line-height:1.72;
-    }
-
-    .tp-hero-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      margin-top:24px;
-    }
-
-    .tp-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      font-weight:800;
-      border-radius:14px;
-      padding:12px 18px;
-      border:1px solid transparent;
-      transition:transform .18s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
-    }
-
-    .tp-btn:hover{ transform:translateY(-2px); }
-
-    .tp-btn-primary{
-      background:linear-gradient(180deg, var(--tp-lime-400), var(--tp-lime-500));
-      color:#112600;
-      box-shadow:0 10px 28px rgba(155,255,46,.24), inset 0 1px 0 rgba(255,255,255,.5);
-    }
-
-    .tp-btn-ghost{
-      color:var(--tp-ink);
-      border-color:rgba(255,255,255,.13);
-      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
-    }
-
-    .tp-btn-lg{
-      font-size:1.04rem;
-      padding:14px 22px;
-    }
-
-    .tp-trust-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:20px;
-    }
-
-    .tp-trust-chip{
-      border:1px solid rgba(255,255,255,.13);
-      background:rgba(255,255,255,.06);
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:.86rem;
-      color:#d6e4ff;
-      backdrop-filter:blur(8px);
-    }
-
-    .tp-values h2,
-    .tp-qualities h2,
-    .tp-process h2,
-    .tp-cta-band h2{
-      margin:0 0 10px;
-      font-size:clamp(1.5rem, 2.4vw, 2.15rem);
-      letter-spacing:-.01em;
-    }
-
-    .tp-section-sub{
-      margin:0 0 22px;
-      color:#b8c5e3;
-      font-size:1rem;
-    }
-
-    .tp-card-grid{
-      display:grid;
-      grid-template-columns:repeat(12, 1fr);
-      gap:14px;
-    }
-
-    .tp-card{
-      grid-column:span 4;
-      border:1px solid rgba(255,255,255,.13);
-      background:linear-gradient(165deg, rgba(255,255,255,.10), rgba(255,255,255,.03) 65%);
-      border-radius:20px;
-      padding:20px;
-      box-shadow:var(--tp-shadow);
-      backdrop-filter:blur(9px);
-      transition:transform .2s ease, border-color .2s ease;
-    }
-
-    .tp-card:hover{
-      transform:translateY(-4px);
-      border-color:rgba(155,255,46,.45);
-    }
-
-    .tp-card-icon{ font-size:1.4rem; margin-bottom:8px; }
-    .tp-card h3{ margin:0 0 8px; font-size:1.08rem; color:#f4f8ff; }
-    .tp-card p{ margin:0; color:#b8c5e3; line-height:1.65; font-size:.95rem; }
-
-    .tp-qualities{
-      display:grid;
-      grid-template-columns:1.2fr .8fr;
-      gap:16px;
-    }
-
-    .tp-qualities-copy,
-    .tp-qualities-panel{
-      border:1px solid rgba(255,255,255,.13);
-      background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
-      border-radius:20px;
-      padding:22px;
-      box-shadow:var(--tp-shadow);
-    }
-
-    .tp-qualities-copy p{
-      margin:0 0 12px;
-      color:#b8c5e3;
-      line-height:1.72;
-    }
-
-    .tp-bullets{
-      margin:0;
-      padding-left:18px;
-      display:grid;
-      gap:8px;
-      color:#dce8ff;
-      line-height:1.5;
-    }
-
-    .tp-qualities-panel h3{
-      margin:0 0 12px;
-      font-size:1.02rem;
-      color:#f4f8ff;
-    }
-
-    .tp-role-list{ display:grid; gap:8px; }
-
-    .tp-role{
-      border:1px solid rgba(255,255,255,.13);
-      border-radius:12px;
-      padding:10px 12px;
-      background:rgba(255,255,255,.04);
-      color:#dfebff;
-      font-size:.95rem;
-    }
-
-    .tp-note{
-      margin:12px 0 0;
-      color:#b8c5e3;
-      font-size:.88rem;
-    }
-
-    .tp-step-grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:12px;
-    }
-
-    .tp-step{
-      border:1px solid rgba(255,255,255,.13);
-      border-radius:16px;
-      padding:16px;
-      background:linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-      box-shadow:var(--tp-shadow);
-    }
-
-    .tp-step-num{
-      width:30px;height:30px;
-      display:inline-grid;place-items:center;
-      border-radius:999px;
-      background:linear-gradient(180deg, var(--tp-lime-400), var(--tp-lime-500));
-      color:#0f2200;
-      font-size:.9rem;
-      font-weight:900;
-      margin-bottom:10px;
-    }
-
-    .tp-step h3{
-      margin:0 0 8px;
-      font-size:1rem;
-      color:#f5f9ff;
-    }
-
-    .tp-step p{
-      margin:0;
-      color:#b8c5e3;
-      font-size:.93rem;
-      line-height:1.6;
-    }
-
-    .tp-cta-band{
-      border:1px solid rgba(155,255,46,.35);
-      border-radius:22px;
-      padding:22px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      background:
-        linear-gradient(180deg, rgba(155,255,46,.16), rgba(155,255,46,.08)),
-        linear-gradient(140deg, rgba(255,255,255,.12), rgba(255,255,255,.03));
-      box-shadow:0 18px 35px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.34);
-    }
-
-    .tp-cta-band p{ margin:0; color:#e6f1ff; }
-
-    @media (max-width: 1024px){
-      .tp-step-grid{ grid-template-columns:repeat(2,1fr); }
-      .tp-card{ grid-column:span 6; }
-      .tp-qualities{ grid-template-columns:1fr; }
-    }
-
-    @media (max-width: 640px){
-      .tp-careers-wrap{ padding-inline:14px; }
-      .tp-card{ grid-column:span 12; }
-      .tp-step-grid{ grid-template-columns:1fr; }
-      .tp-cta-band{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-      .tp-btn{ width:100%; }
-    }
-
-    /* =========================
-       FOOTER
-    ========================== */
-    .tp-footer{
-      position:relative;
-      overflow:hidden;
-      margin:clamp(28px,4vw,56px) auto 24px;
-      width:min(1180px, calc(100% - 24px));
-      color:#eaf1ff;
-      background:
-        radial-gradient(900px 380px at 0% 0%, rgba(155,255,46,.11), transparent 60%),
-        radial-gradient(1000px 500px at 100% 0%, rgba(36,99,214,.18), transparent 60%),
-        linear-gradient(180deg, #0a1430 0%, #091127 100%);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:24px;
-      box-shadow:0 18px 45px rgba(0,0,0,.34);
-    }
-
-    .tp-footer-glow{
-      position:absolute;
-      width:360px;height:360px;border-radius:999px;filter:blur(56px);pointer-events:none;
-    }
-    .tp-footer-glow-1{left:-120px;bottom:-120px;background:rgba(155,255,46,.18);}
-    .tp-footer-glow-2{right:-100px;top:-120px;background:rgba(36,99,214,.24);}
-
-    .tp-footer-inner{
-      position:relative;
-      z-index:1;
-      width:min(1120px, 94%);
-      margin-inline:auto;
-      padding:clamp(24px, 4.2vw, 42px) 0;
-      display:grid;
-      grid-template-columns:1.1fr .95fr .95fr;
-      gap:20px;
-    }
-
-    .tp-footer-brand,
-    .tp-footer-links-wrap,
-    .tp-footer-badges{
-      border:1px solid rgba(255,255,255,.14);
-      background:linear-gradient(170deg, rgba(255,255,255,.11), rgba(255,255,255,.03) 70%);
-      border-radius:18px;
-      padding:18px;
-      backdrop-filter:blur(8px);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
-    }
-
-    .tp-footer-main-logo{
-      width:min(220px, 100%);
-      height:auto;
-      display:block;
-      margin-bottom:10px;
-      filter:drop-shadow(0 6px 18px rgba(0,0,0,.32));
-    }
-
-    .tp-footer-tagline{
-      margin:0 0 8px;
-      color:var(--tp-lime-500);
-      font-weight:800;
-      letter-spacing:.01em;
-    }
-
-    .tp-footer-copy{
-      margin:0;
-      color:#b8c5e3;
-      line-height:1.65;
-      font-size:.96rem;
-    }
-
-    .tp-footer-links-wrap h3,
-    .tp-footer-badges h3{
-      margin:0 0 12px;
-      font-size:1.02rem;
-      color:#f4f8ff;
-      letter-spacing:.01em;
-    }
-
-    .tp-footer-links-grid{
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0,1fr));
-      gap:8px 12px;
-    }
-
-    .tp-footer-links-grid a{
-      text-decoration:none;
-      color:#d8e6ff;
-      padding:8px 10px;
-      border:1px solid transparent;
-      border-radius:10px;
-      transition:all .18s ease;
-      font-size:.94rem;
-    }
-
-    .tp-footer-links-grid a:hover{
-      color:#0f2200;
-      background:linear-gradient(180deg, var(--tp-lime-400), var(--tp-lime-500));
-      border-color:rgba(155,255,46,.55);
-      transform:translateY(-1px);
-    }
-
-    .tp-badge-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
-
-    .tp-badge{
-      height:52px;
-      width:auto;
-      max-width:100%;
-      object-fit:contain;
-      padding:6px 10px;
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:12px;
-      background:rgba(255,255,255,.06);
-      box-shadow:0 8px 18px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.18);
-    }
-
-    .tp-footer-note{
-      margin:12px 0 0;
-      color:#b8c5e3;
-      font-size:.9rem;
-      line-height:1.5;
-    }
-
-    .tp-footer-bottom{
-      position:relative;
-      z-index:1;
-      border-top:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.20);
-      padding:12px 16px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-      justify-content:center;
-      font-size:.88rem;
-      color:#d0dcf5;
-      border-radius:0 0 24px 24px;
-    }
-
-    .tp-sep{ opacity:.65; }
-
-    @media (max-width: 980px){
-      .tp-footer-inner{ grid-template-columns:1fr; }
-    }
-
-    @media (max-width: 560px){
-      .tp-footer-links-grid{ grid-template-columns:1fr; }
-      .tp-badge{ height:46px; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- =========================
-       HEADER
-  ========================== -->
-  <header class="tp-header">
-    <div class="tp-header-accent"></div>
-    <div class="tp-header-sheen"></div>
-
-    <div class="tp-header-inner">
-      <a href="/index.html" class="tp-brand" aria-label="Tek-Pak Home">
-        <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-logo" />
-      </a>
-
-      <button class="tp-menu-toggle" aria-expanded="false" aria-controls="tpNav" aria-label="Toggle navigation">
-        <span></span><span></span><span></span>
-      </button>
-
-      <nav id="tpNav" class="tp-nav" aria-label="Primary">
-        <ul class="tp-menu">
-          <li><a href="/index.html">Home</a></li>
-          <li><a href="/about.html">About</a></li>
-          <li><a href="/services.html">Services</a></li>
-          <li><a href="https://www.tekpakinc.store" target="_blank" rel="noopener noreferrer">Store</a></li>
-          <li><a href="/contact.html">Contact</a></li>
-
-          <li class="tp-dropdown">
-            <button class="tp-dropdown-btn" aria-expanded="false" aria-haspopup="true">More</button>
-            <ul class="tp-submenu">
-              <li><a href="/careers.html">Careers</a></li>
-              <li><a href="/faq.html">FAQ</a></li>
-              <li><a href="/support.html">Support</a></li>
-            </ul>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <!-- =========================
-       CAREERS BODY
-  ========================== -->
-  <section class="tp-careers-wrap" aria-label="Tek-Pak Careers">
-    <div class="tp-careers-bg-grid" aria-hidden="true"></div>
-    <div class="tp-careers-glow tp-careers-glow-1" aria-hidden="true"></div>
-    <div class="tp-careers-glow tp-careers-glow-2" aria-hidden="true"></div>
-
-    <div class="tp-careers-container">
-      <section class="tp-careers-hero">
-        <p class="tp-kicker">CAREERS AT TEK-PAK</p>
-        <h1>Build a Career That <span>Actually Moves Forward</span></h1>
-        <p class="tp-hero-sub">
-          We’re a fast-moving IT and technology services company that values problem-solvers, self-starters,
-          and people who care about doing good work for real clients. If you like ownership, learning, and impact—
-          you’ll fit right in.
-        </p>
-
-        <div class="tp-hero-actions">
-          <a href="https://tekpakinc.net/careers.html" class="tp-btn tp-btn-primary">Apply Now</a>
-          <a href="#why-tekpak" class="tp-btn tp-btn-ghost">Why Work Here</a>
-        </div>
-
-        <div class="tp-trust-row" role="list" aria-label="Career Highlights">
-          <div class="tp-trust-chip" role="listitem">Growth-Oriented Environment</div>
-          <div class="tp-trust-chip" role="listitem">Hands-On Technical Work</div>
-          <div class="tp-trust-chip" role="listitem">Team-First Culture</div>
-          <div class="tp-trust-chip" role="listitem">Real Career Pathways</div>
-        </div>
-      </section>
-
-      <section class="tp-values" id="why-tekpak">
-        <h2>Why Join Tek-Pak?</h2>
-        <p class="tp-section-sub">We combine high standards with practical support, so people can do their best work and keep growing.</p>
-
-        <div class="tp-card-grid">
-          <article class="tp-card"><div class="tp-card-icon">📈</div><h3>Career Growth That’s Real</h3><p>We promote based on effort, ownership, and results. If you’re hungry to learn and lead, you’ll have room to advance.</p></article>
-          <article class="tp-card"><div class="tp-card-icon">🧠</div><h3>Continuous Learning</h3><p>Work across systems, tools, and client environments that build your technical range and confidence.</p></article>
-          <article class="tp-card"><div class="tp-card-icon">🤝</div><h3>Supportive Team Culture</h3><p>We value communication, reliability, and helping each other win. No ego—just strong execution.</p></article>
-          <article class="tp-card"><div class="tp-card-icon">🛠️</div><h3>Hands-On Problem Solving</h3><p>You won’t be stuck doing one repetitive task forever. Expect meaningful work with visible impact.</p></article>
-          <article class="tp-card"><div class="tp-card-icon">🏢</div><h3>Professional Standards</h3><p>We operate with accountability and client trust at the center—because details matter in IT.</p></article>
-          <article class="tp-card"><div class="tp-card-icon">🚀</div><h3>Momentum & Opportunity</h3><p>As Tek-Pak grows, so do opportunities to specialize, cross-train, and shape what comes next.</p></article>
-        </div>
-      </section>
-
-      <section class="tp-qualities">
-        <div class="tp-qualities-copy">
-          <h2>What We Look For</h2>
-          <p>We hire people who show up, think critically, and follow through. Technical experience helps, but character and work ethic are non-negotiable.</p>
-          <ul class="tp-bullets">
-            <li>Dependable attendance and professional communication</li>
-            <li>Strong troubleshooting mindset</li>
-            <li>Willingness to learn quickly and adapt</li>
-            <li>Comfort working independently and with a team</li>
-            <li>Respect for process, documentation, and client standards</li>
-          </ul>
-        </div>
-
-        <div class="tp-qualities-panel" aria-label="Typical Roles">
-          <h3>Common Role Paths</h3>
-          <div class="tp-role-list">
-            <div class="tp-role">IT Support Technician</div>
-            <div class="tp-role">Field Service Technician</div>
-            <div class="tp-role">Help Desk Specialist</div>
-            <div class="tp-role">Inventory / Processing Technician</div>
-            <div class="tp-role">Operations Support</div>
-            <div class="tp-role">Client Services Coordinator</div>
-          </div>
-          <p class="tp-note">Openings may vary based on business needs and project demand.</p>
-        </div>
-      </section>
-
-      <section class="tp-process">
-        <h2>Hiring Process</h2>
-        <p class="tp-section-sub">Simple, clear, and respectful of your time.</p>
-
-        <div class="tp-step-grid">
-          <article class="tp-step"><span class="tp-step-num">1</span><h3>Apply Online</h3><p>Submit your application with accurate contact info and relevant work history.</p></article>
-          <article class="tp-step"><span class="tp-step-num">2</span><h3>Initial Review</h3><p>We review fit, availability, and role alignment based on current openings.</p></article>
-          <article class="tp-step"><span class="tp-step-num">3</span><h3>Interview</h3><p>Qualified applicants are invited to speak with our team about experience and goals.</p></article>
-          <article class="tp-step"><span class="tp-step-num">4</span><h3>Next Steps</h3><p>Selected candidates receive role details, onboarding expectations, and start guidance.</p></article>
-        </div>
-      </section>
-
-      <section class="tp-cta-band">
-        <div>
-          <h2>Ready to Join Tek-Pak?</h2>
-          <p>Bring your skills, mindset, and ambition—we’ll build something strong together.</p>
-        </div>
-        <div class="tp-cta-actions">
-          <a href="https://tekpakinc.net/careers.html" class="tp-btn tp-btn-primary tp-btn-lg">Apply Now</a>
-        </div>
-      </section>
-    </div>
-  </section>
-
-  <!-- =========================
-       FOOTER
-  ========================== -->
-  <footer class="tp-footer" aria-label="Tek-Pak Footer">
-    <div class="tp-footer-glow tp-footer-glow-1" aria-hidden="true"></div>
-    <div class="tp-footer-glow tp-footer-glow-2" aria-hidden="true"></div>
-
-    <div class="tp-footer-inner">
-      <section class="tp-footer-brand">
-        <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-footer-main-logo">
-        <p class="tp-footer-tagline">Raising your signal at fair prices.</p>
-        <p class="tp-footer-copy">
-          Enterprise-grade IT services with real human support, fast response, and practical solutions for modern businesses.
-        </p>
-      </section>
-
-      <section class="tp-footer-links-wrap" aria-label="Footer Links">
-        <h3>Quick Links</h3>
-        <div class="tp-footer-links-grid">
-          <a href="/it-services">IT Services</a>
-          <a href="https://www.ncelectronicrecycling.com" target="_blank" rel="noopener noreferrer">Electronic Recycling</a>
-          <a href="/it-services/help-desk">Help Desk</a>
-          <a href="/it-services/cybersecurity">Cybersecurity</a>
-          <a href="/it-services/cloud">Cloud Services</a>
-          <a href="/it-services/networking">Networking</a>
-          <a href="/contact">Contact</a>
-          <a href="/support">Support Request</a>
-        </div>
-      </section>
-
-      <section class="tp-footer-badges" aria-label="Affiliations and Compliance">
-        <h3>Affiliations & Compliance</h3>
-        <div class="tp-badge-row">
-          <img src="tekpaklogo.png" alt="Tek-Pak Brand Logo" class="tp-badge">
-          <img src="dorlogo.png" alt="DOR Logo" class="tp-badge">
-          <img src="compliant.png" alt="Compliance Logo" class="tp-badge">
-        </div>
-        <p class="tp-footer-note">
-          Trusted service practices, responsible operations, and standards-focused delivery.
-        </p>
-      </section>
-    </div>
-
-    <div class="tp-footer-bottom">
-      <span>© <span id="tpYear"></span> Tek-Pak Inc. All rights reserved.</span>
-      <span class="tp-sep">•</span>
-      <span>Built for secure, reliable business IT operations.</span>
-    </div>
-  </footer>
-
-  <script>
-    (function(){
-      const nav = document.getElementById('tpNav');
-      const toggle = document.querySelector('.tp-menu-toggle');
-      const dropdowns = document.querySelectorAll('.tp-dropdown');
-
-      // Mobile toggle
-      if(toggle && nav){
-        toggle.addEventListener('click', () => {
-          const expanded = toggle.getAttribute('aria-expanded') === 'true';
-          toggle.setAttribute('aria-expanded', String(!expanded));
-          nav.classList.toggle('open');
-        });
-      }
-
-      // Dropdown behavior + ARIA
-      dropdowns.forEach((dd) => {
-        const btn = dd.querySelector('.tp-dropdown-btn');
-        if(!btn) return;
-
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const wasOpen = dd.classList.contains('open');
-
-          dropdowns.forEach((el) => {
-            if(el !== dd){
-              el.classList.remove('open');
-              const b = el.querySelector('.tp-dropdown-btn');
-              if(b) b.setAttribute('aria-expanded','false');
-            }
-          });
-
-          dd.classList.toggle('open', !wasOpen);
-          btn.setAttribute('aria-expanded', String(!wasOpen));
-        });
+  }
+
+  @media (max-width:640px){
+    .tp-logo{width:58px;height:58px}
+    .tp-header-inner{padding:8px 12px}
+  }
+</style>
+
+<script>
+  (function(){
+    const nav = document.getElementById('tpNav');
+    const toggle = document.querySelector('.tp-menu-toggle');
+    const dropdowns = document.querySelectorAll('.tp-dropdown');
+
+    // Mobile nav toggle
+    if(toggle && nav){
+      toggle.addEventListener('click', () => {
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        nav.classList.toggle('open');
       });
+    }
 
-      // Close dropdowns on outside click
-      document.addEventListener('click', (e) => {
-        if(!e.target.closest('.tp-dropdown')){
-          dropdowns.forEach((el) => {
+    // Dropdown open/close
+    dropdowns.forEach((dd) => {
+      const btn = dd.querySelector('.tp-dropdown-btn');
+      if(!btn) return;
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const wasOpen = dd.classList.contains('open');
+
+        dropdowns.forEach((el) => {
+          if(el !== dd){
             el.classList.remove('open');
             const b = el.querySelector('.tp-dropdown-btn');
             if(b) b.setAttribute('aria-expanded','false');
-          });
-        }
-      });
-
-      // Auto-active nav link by pathname
-      const current = location.pathname.replace(/\/+$/, '') || '/';
-      document.querySelectorAll('.tp-menu a[href]').forEach(a => {
-        const url = new URL(a.getAttribute('href'), location.origin);
-        const path = url.pathname.replace(/\/+$/, '') || '/';
-        if(path === current) a.classList.add('active');
-      });
-
-      // Close mobile nav when clicking a nav link
-      document.querySelectorAll('.tp-menu a').forEach(link => {
-        link.addEventListener('click', () => {
-          if(window.matchMedia('(max-width: 980px)').matches && nav && toggle){
-            nav.classList.remove('open');
-            toggle.setAttribute('aria-expanded', 'false');
           }
         });
-      });
 
-      // Footer year
-      const y = document.getElementById('tpYear');
-      if(y) y.textContent = new Date().getFullYear();
-    })();
-  </script>
-</body>
-</html>
+        dd.classList.toggle('open', !wasOpen);
+        btn.setAttribute('aria-expanded', String(!wasOpen));
+      });
+    });
+
+    // Click outside closes dropdowns
+    document.addEventListener('click', (e) => {
+      if(!e.target.closest('.tp-dropdown')){
+        dropdowns.forEach((el) => {
+          el.classList.remove('open');
+          const b = el.querySelector('.tp-dropdown-btn');
+          if(b) b.setAttribute('aria-expanded','false');
+        });
+      }
+    });
+
+    // ESC closes dropdowns + mobile nav
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape'){
+        dropdowns.forEach((el) => {
+          el.classList.remove('open');
+          const b = el.querySelector('.tp-dropdown-btn');
+          if(b) b.setAttribute('aria-expanded','false');
+        });
+        if(nav && toggle){
+          nav.classList.remove('open');
+          toggle.setAttribute('aria-expanded','false');
+        }
+      }
+    });
+
+    // Auto-highlight current internal page
+    const current = (location.pathname.replace(/\/+$/, '') || '/').toLowerCase();
+    document.querySelectorAll('.tp-menu a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if(!href || href.startsWith('http')) return; // skip external links
+      const path = (new URL(href, location.origin).pathname.replace(/\/+$/, '') || '/').toLowerCase();
+      if(path === current) a.classList.add('active');
+    });
+
+    // Close mobile nav when link clicked
+    document.querySelectorAll('.tp-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        if(window.matchMedia('(max-width: 980px)').matches && nav && toggle){
+          nav.classList.remove('open');
+          toggle.setAttribute('aria-expanded','false');
+        }
+      });
+    });
+  })();
+</script>
