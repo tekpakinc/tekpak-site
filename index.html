@@ -1,1 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tek-Pak Surplus Store</title>
+  <meta name="description" content="Tek-Pak Inc. Surplus Tech Store" />
+  <style>
+    :root{
+      --tp-lime:#8CC63F;
+      --tp-blue:#1f4e79;
+      --tp-dark:#0f172a;
+      --tp-muted:#64748b;
+      --tp-bg:#f8fafc;
+      --tp-white:#ffffff;
+      --tp-border:#e2e8f0;
+      --radius:14px;
+      --shadow:0 8px 24px rgba(2,6,23,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:var(--tp-bg);
+      color:var(--tp-dark);
+    }
+    a{text-decoration:none;color:inherit}
+    .container{max-width:1200px;margin:0 auto;padding:0 16px}
 
+    /* Header */
+    header{
+      background:var(--tp-white);
+      border-bottom:1px solid var(--tp-border);
+      position:sticky; top:0; z-index:20;
+    }
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      min-height:72px;
+      gap:12px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;font-weight:800;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:10px;
+      background:linear-gradient(135deg,var(--tp-lime),#b8e56f);
+      display:grid;place-items:center;color:#102100;font-weight:900;
+      box-shadow:var(--shadow);
+    }
+    .brand small{display:block;font-size:.76rem;color:var(--tp-muted);font-weight:600}
+    .actions{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    }
+    .search{
+      min-width:260px; max-width:420px; width:42vw;
+      border:1px solid var(--tp-border);
+      border-radius:12px;
+      padding:10px 12px;
+      outline:none;
+      background:#fff;
+    }
+    .btn{
+      border:0; cursor:pointer;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+    }
+    .btn-primary{background:var(--tp-blue);color:#fff}
+    .btn-ghost{background:#fff;border:1px solid var(--tp-border)}
+    .hero{
+      margin:18px 0;
+      background:linear-gradient(120deg,#ffffff, #f1f5f9);
+      border:1px solid var(--tp-border);
+      border-radius:var(--radius);
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+    .hero h1{margin:0 0 8px;font-size:1.5rem}
+    .hero p{margin:0;color:var(--tp-muted)}
+
+    .filters{
+      display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 18px;
+    }
+    .chip{
+      background:#fff;
+      border:1px solid var(--tp-border);
+      border-radius:999px;
+      padding:8px 12px;
+      cursor:pointer;
+      font-weight:600;
+      color:#334155;
+    }
+    .chip.active{border-color:var(--tp-lime);box-shadow:0 0 0 3px rgba(140,198,63,.15)}
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+      gap:14px;
+      margin-bottom:30px;
+    }
+    .card{
+      background:#fff; border:1px solid var(--tp-border);
+      border-radius:14px; overflow:hidden; box-shadow:var(--shadow);
+      display:flex; flex-direction:column;
+    }
+    .thumb{
+      height:160px; background:#f1f5f9; display:grid; place-items:center;
+      color:#94a3b8; font-weight:700;
+    }
+    .body{padding:12px}
+    .title{font-weight:800; line-height:1.25; margin-bottom:6px}
+    .meta{font-size:.86rem;color:var(--tp-muted);margin-bottom:8px}
+    .price{font-size:1.1rem;font-weight:900;color:#0f172a}
+    .pill{
+      display:inline-block; font-size:.74rem; padding:4px 8px;
+      border-radius:999px; background:rgba(140,198,63,.15); color:#2f4d10;
+      margin-left:6px;
+    }
+    .empty{
+      text-align:center; padding:36px; color:var(--tp-muted);
+      border:1px dashed var(--tp-border); border-radius:12px; background:#fff;
+    }
+    footer{
+      border-top:1px solid var(--tp-border);
+      color:#64748b; background:#fff;
+      padding:22px 0; margin-top:28px;
+      font-size:.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="/">
+        <div class="logo">TP</div>
+        <div>
+          Tek-Pak Inc. Surplus
+          <small>Raising your signal at fair prices</small>
+        </div>
+      </a>
+      <div class="actions">
+        <input id="search" class="search" type="search" placeholder="Search surplus tech..." />
+        <a class="btn btn-ghost" href="/admin.html">Admin</a>
+        <a class="btn btn-primary" href="https://www.tekpakinc.store" target="_blank" rel="noopener">Main Store</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Surplus Electronics, Refurb Gear, and Tech Lots</h1>
+      <p>Fresh pulls, tested hardware, and value-focused listings from Tek-Pak inventory.</p>
+    </section>
+
+    <div id="categoryFilters" class="filters"></div>
+    <section id="productGrid" class="grid"></section>
+    <div id="emptyState" class="empty" style="display:none;">No products found. Try a different search or category.</div>
+  </main>
+
+  <footer>
+    <div class="container">
+      © <span id="year"></span> Tek-Pak Inc. · Surplus Tech Store
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE = ''; // same origin
+    let allProducts = [];
+    let activeCategory = 'All';
+
+    const productGrid = document.getElementById('productGrid');
+    const searchInput = document.getElementById('search');
+    const categoryFilters = document.getElementById('categoryFilters');
+    const emptyState = document.getElementById('emptyState');
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    async function fetchProducts() {
+      const res = await fetch(`${API_BASE}/api/products`);
+      if (!res.ok) throw new Error('Failed to load products');
+      allProducts = await res.json();
+      renderFilters();
+      renderProducts();
+    }
+
+    function renderFilters() {
+      const categories = ['All', ...new Set(allProducts.map(p => p.category || 'Other'))];
+      categoryFilters.innerHTML = '';
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `chip ${cat === activeCategory ? 'active' : ''}`;
+        btn.textContent = cat;
+        btn.addEventListener('click', () => {
+          activeCategory = cat;
+          renderFilters();
+          renderProducts();
+        });
+        categoryFilters.appendChild(btn);
+      });
+    }
+
+    function renderProducts() {
+      const q = searchInput.value.trim().toLowerCase();
+      const filtered = allProducts.filter(p => {
+        const matchesCategory = activeCategory === 'All' || (p.category || 'Other') === activeCategory;
+        const matchesSearch =
+          !q ||
+          p.title.toLowerCase().includes(q) ||
+          (p.sku || '').toLowerCase().includes(q) ||
+          (p.description || '').toLowerCase().includes(q);
+        return matchesCategory && matchesSearch;
+      });
+
+      productGrid.innerHTML = '';
+      if (!filtered.length) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      filtered.forEach(p => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="thumb">${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.title)}" style="max-width:100%;max-height:100%;object-fit:cover;width:100%;height:100%;" />` : 'No Image'}</div>
+          <div class="body">
+            <div class="title">${escapeHtml(p.title)}</div>
+            <div class="meta">SKU: ${escapeHtml(p.sku || 'N/A')} · ${escapeHtml(p.condition || 'Used')}</div>
+            <div class="meta">${escapeHtml(p.category || 'Other')}</div>
+            <div class="price">$${Number(p.price || 0).toFixed(2)} ${p.inStock ? '<span class="pill">In Stock</span>' : '<span class="pill" style="background:#fee2e2;color:#7f1d1d;">Out</span>'}</div>
+          </div>
+        `;
+        productGrid.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str='') {
+      return str.replace(/[&<>"']/g, s => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[s]));
+    }
+
+    searchInput.addEventListener('input', renderProducts);
+    fetchProducts().catch(err => {
+      productGrid.innerHTML = `<div class="empty">Could not load products (${err.message}).</div>`;
+    });
+  </script>
+</body>
+</html>
