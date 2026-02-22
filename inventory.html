@@ -5,9 +5,10 @@
 <style>
   body{font-family:system-ui;margin:18px;background:#f6f7fb}
   table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e6e9f2;border-radius:12px;overflow:hidden}
-  th,td{padding:10px;border-bottom:1px solid #eef1f8;text-align:left;font-size:13px}
+  th,td{padding:10px;border-bottom:1px solid #eef1f8;text-align:left;font-size:13px;vertical-align:top}
   th{background:#fbfcff;font-weight:800}
   input{padding:10px 12px;border:1px solid #d7dbe7;border-radius:10px}
+  button{padding:10px 12px;border:0;border-radius:10px;background:#111;color:#fff;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
@@ -27,7 +28,7 @@ async function load(){
   const token = document.getElementById("token").value.trim();
   const res = await fetch(`${API}?action=listInternal&token=${encodeURIComponent(token)}`);
   const data = await res.json();
-  if(!data.ok){ document.getElementById("out").innerHTML = `<div>${data.error}</div>`; return; }
+  if(!data.ok){ document.getElementById("out").innerHTML = `<div>${esc(data.error)}</div>`; return; }
   ITEMS = data.items || [];
   render();
 }
@@ -39,13 +40,15 @@ function render(){
     return JSON.stringify(it).toLowerCase().includes(q);
   });
   let html = `<table><thead><tr>
-    <th>ID</th><th>SKU</th><th>Title</th><th>Price</th><th>Qty</th><th>Status</th><th>Visibility</th><th>Location</th><th>Updated</th>
+    <th>ID</th><th>SKU</th><th>Title</th><th>Price</th><th>Qty</th><th>Status</th><th>Visibility</th><th>PickupOnly</th><th>WeightOz</th><th>Location</th><th>Updated</th>
   </tr></thead><tbody>`;
   for(const it of items){
     html += `<tr>
       <td>${esc(it.ID)}</td><td>${esc(it.SKU)}</td><td>${esc(it.Title)}</td>
       <td>$${Number(it.Price||0).toFixed(2)}</td><td>${esc(it.Qty)}</td>
-      <td>${esc(it.Status)}</td><td>${esc(it.Visibility)}</td><td>${esc(it.Location)}</td><td>${esc(it.UpdatedAt)}</td>
+      <td>${esc(it.Status)}</td><td>${esc(it.Visibility)}</td>
+      <td>${esc(it.PickupOnly)}</td><td>${esc(it.WeightOz)}</td>
+      <td>${esc(it.Location)}</td><td>${esc(it.UpdatedAt)}</td>
     </tr>`;
   }
   html += `</tbody></table>`;
