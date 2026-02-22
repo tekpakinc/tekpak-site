@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tek-Pak Inventory</title>
+<style>
+  body{font-family:system-ui;margin:18px;background:#f6f7fb}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e6e9f2;border-radius:12px;overflow:hidden}
+  th,td{padding:10px;border-bottom:1px solid #eef1f8;text-align:left;font-size:13px}
+  th{background:#fbfcff;font-weight:800}
+  input{padding:10px 12px;border:1px solid #d7dbe7;border-radius:10px}
+</style>
+</head>
+<body>
+<h2>Inventory View</h2>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">
+  <input id="token" placeholder="Internal token">
+  <input id="q" placeholder="Search…" oninput="render()">
+  <button onclick="load()">Load</button>
+</div>
+<div id="out"></div>
+
+<script>
+const API="YOUR_WEB_APP_URL_HERE";
+let ITEMS=[];
+
+async function load(){
+  const token = document.getElementById("token").value.trim();
+  const res = await fetch(`${API}?action=listInternal&token=${encodeURIComponent(token)}`);
+  const data = await res.json();
+  if(!data.ok){ document.getElementById("out").innerHTML = `<div>${data.error}</div>`; return; }
+  ITEMS = data.items || [];
+  render();
+}
+
+function render(){
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const items = ITEMS.filter(it=>{
+    if(!q) return true;
+    return JSON.stringify(it).toLowerCase().includes(q);
+  });
+  let html = `<table><thead><tr>
+    <th>ID</th><th>SKU</th><th>Title</th><th>Price</th><th>Qty</th><th>Status</th><th>Visibility</th><th>Location</th><th>Updated</th>
+  </tr></thead><tbody>`;
+  for(const it of items){
+    html += `<tr>
+      <td>${esc(it.ID)}</td><td>${esc(it.SKU)}</td><td>${esc(it.Title)}</td>
+      <td>$${Number(it.Price||0).toFixed(2)}</td><td>${esc(it.Qty)}</td>
+      <td>${esc(it.Status)}</td><td>${esc(it.Visibility)}</td><td>${esc(it.Location)}</td><td>${esc(it.UpdatedAt)}</td>
+    </tr>`;
+  }
+  html += `</tbody></table>`;
+  document.getElementById("out").innerHTML = html;
+}
+
+function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));}
+</script>
+</body>
+</html>
