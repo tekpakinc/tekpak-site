@@ -1,107 +1,507 @@
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tek-Pak Admin</title>
-<style>
-  body{font-family:system-ui;margin:18px;background:#f6f7fb}
-  .card{background:#fff;border:1px solid #e6e9f2;border-radius:12px;padding:14px;max-width:980px}
-  .row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-  input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d7dbe7;border-radius:10px}
-  textarea{min-height:90px}
-  button{padding:10px 12px;border:0;border-radius:10px;background:#111;color:#fff;font-weight:800;cursor:pointer}
-  .muted{opacity:.75;font-size:12px;margin-top:6px}
-</style>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Tek-Pak Admin Console</title>
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#fff; --line:#e6e9f2; --muted:#6b7280; --text:#111;
+      --shadow:0 18px 50px rgba(0,0,0,.10);
+      --radius:16px;
+    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+    header{
+      position:sticky;top:0;z-index:10;background:var(--card);
+      border-bottom:1px solid var(--line); box-shadow:0 2px 14px rgba(0,0,0,.06);
+      padding:14px 18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    }
+    header .title{font-weight:900}
+    header .sub{font-size:13px;color:var(--muted)}
+    .wrap{max-width:1200px;margin:18px auto;padding:0 16px;}
+    .grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:start}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr;} }
+
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+      box-shadow:var(--shadow); overflow:hidden;
+    }
+    .cardHead{padding:14px 14px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .cardHead b{font-size:15px}
+    .pill{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#fbfcff;color:#111}
+    .cardBody{padding:14px}
+    .row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    @media (max-width: 980px){ .row{grid-template-columns:repeat(2,minmax(0,1fr));} }
+    @media (max-width: 520px){ .row{grid-template-columns:1fr;} }
+
+    label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px}
+    input,select,textarea{
+      width:100%; box-sizing:border-box; padding:10px 12px;
+      border:1px solid #d7dbe7; border-radius:12px; background:#fff; outline:none;
+    }
+    textarea{min-height:110px;resize:vertical}
+    .btn{
+      border:0;border-radius:12px;padding:10px 12px;font-weight:850;cursor:pointer;
+      background:#111;color:#fff;
+    }
+    .btnGhost{background:#f3f5fb;color:#111;border:1px solid #e0e4f2}
+    .btnDanger{background:#b00020}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap}
+    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.35}
+    .toast{
+      position:fixed; right:16px; bottom:16px; z-index:9999;
+      background:#111;color:#fff;padding:12px 14px;border-radius:14px;opacity:0;transform:translateY(8px);
+      transition:all .2s ease;
+    }
+    .toast.show{opacity:1;transform:translateY(0)}
+    .previewImg{
+      height:240px;border-radius:14px;border:1px solid var(--line);background:#eef1f8;
+      display:flex;align-items:center;justify-content:center;overflow:hidden;
+    }
+    .previewImg img{max-width:100%;max-height:100%;object-fit:contain}
+    .kv{font-size:13px;color:var(--muted);line-height:1.45}
+    .kv b{color:#111}
+    .hr{height:1px;background:var(--line);margin:12px 0}
+    .warn{font-size:12px;color:#b00020;display:none;margin-top:8px}
+    .mini{font-size:12px;color:var(--muted)}
+    .searchRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  </style>
 </head>
 <body>
-<h2>Admin Console</h2>
 
-<div class="card">
-  <div class="row">
-    <input id="token" placeholder="Internal token">
-    <input id="ID" placeholder="ID (blank = new)">
-    <input id="SKU" placeholder="SKU">
-    <input id="Title" placeholder="Title">
-    <input id="Price" placeholder="Price">
-    <input id="Qty" placeholder="Qty">
-    <input id="Category" placeholder="Category">
-    <input id="Condition" placeholder="Condition">
-    <input id="Brand" placeholder="Brand">
-    <input id="Model" placeholder="Model">
-    <input id="PhotoURL" placeholder="PhotoURL">
-    <input id="Location" placeholder="Location">
-    <input id="WeightOz" placeholder="WeightOz">
-    <input id="LengthIn" placeholder="LengthIn">
-    <input id="WidthIn" placeholder="WidthIn">
-    <input id="HeightIn" placeholder="HeightIn">
-    <select id="PickupOnly">
-      <option value="">PickupOnly: No</option>
-      <option value="TRUE">PickupOnly: YES</option>
-    </select>
-    <select id="Status">
-      <option>Active</option><option>Pending</option><option>Sold</option><option>Archived</option>
-    </select>
-    <select id="Visibility">
-      <option>Public</option><option>Internal</option>
-    </select>
+<header>
+  <div>
+    <div class="title">Tek-Pak Admin Console</div>
+    <div class="sub">Friendly inventory editor • Dropdown-powered • Auto IDs</div>
   </div>
 
-  <div style="margin-top:10px">
-    <textarea id="Description" placeholder="Description"></textarea>
-    <div class="muted">Tip: For shipping under $25, set WeightOz for accurate calculation. Free shipping auto-applies at $25+.</div>
+  <div style="margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <input id="token" placeholder="Internal token" style="max-width:240px"/>
+    <button class="btn btnGhost" onclick="loadOptions()">Reload dropdowns</button>
   </div>
+</header>
 
-  <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
-    <button onclick="save()">Save (Add/Update)</button>
-    <button onclick="archive()">Archive</button>
+<div class="wrap">
+  <div class="grid">
+
+    <!-- LEFT: EDITOR -->
+    <div class="card">
+      <div class="cardHead">
+        <b>Item Editor</b>
+        <span class="pill" id="modePill">Mode: New</span>
+      </div>
+
+      <div class="cardBody">
+
+        <div class="searchRow" style="margin-bottom:10px">
+          <input id="find" placeholder="Find by ID or SKU (press Enter)" style="flex:1;min-width:220px"
+                 onkeydown="if(event.key==='Enter'){loadItem()}">
+          <button class="btn btnGhost" onclick="loadItem()">Load</button>
+          <button class="btn btnGhost" onclick="newItem()">New</button>
+          <button class="btn btnGhost" onclick="duplicateItem()">Duplicate</button>
+          <button class="btn btnDanger" onclick="archiveItem()">Archive</button>
+          <button class="btn" onclick="saveItem()">Save</button>
+        </div>
+
+        <div class="mini">Tip: “Load” pulls the item into the editor so you can update it. “Duplicate” clones fields and creates a fresh ID.</div>
+
+        <div id="warn" class="warn"></div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label>Item ID (auto)</label>
+            <input id="ID" placeholder="(auto-generated on save if blank)"/>
+          </div>
+          <div>
+            <label>SKU</label>
+            <input id="SKU" placeholder="TP-XXXX"/>
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="Status"></select>
+          </div>
+          <div>
+            <label>Visibility</label>
+            <select id="Visibility"></select>
+          </div>
+
+          <div style="grid-column: span 2">
+            <label>Title</label>
+            <input id="Title" placeholder="Dell Latitude 5420 Laptop..."/>
+          </div>
+          <div>
+            <label>Price (USD)</label>
+            <input id="Price" inputmode="decimal" placeholder="0.00"/>
+          </div>
+          <div>
+            <label>Qty</label>
+            <input id="Qty" inputmode="numeric" placeholder="1"/>
+          </div>
+
+          <div>
+            <label>Category</label>
+            <select id="Category"></select>
+          </div>
+          <div>
+            <label>Condition</label>
+            <select id="Condition"></select>
+          </div>
+          <div>
+            <label>Brand</label>
+            <select id="Brand"></select>
+          </div>
+          <div>
+            <label>Model</label>
+            <input id="Model" placeholder="Model/Part #"/>
+          </div>
+
+          <div>
+            <label>Location</label>
+            <select id="Location"></select>
+          </div>
+          <div>
+            <label>Pickup Only</label>
+            <select id="PickupOnly">
+              <option value="">No</option>
+              <option value="TRUE">Yes</option>
+            </select>
+          </div>
+          <div>
+            <label>Weight (oz)</label>
+            <input id="WeightOz" inputmode="decimal" placeholder="0"/>
+          </div>
+          <div>
+            <label>Photo URL</label>
+            <input id="PhotoURL" placeholder="https://..."/>
+          </div>
+
+          <div style="grid-column: span 4">
+            <label>Description</label>
+            <textarea id="Description" placeholder="Testing notes, what's included, defects, etc."></textarea>
+          </div>
+
+          <div style="grid-column: span 4">
+            <label>Internal Notes</label>
+            <textarea id="Notes" placeholder="Internal-only notes…"></textarea>
+          </div>
+        </div>
+
+        <div class="hint">
+          <b>Shipping:</b> Free shipping auto-applies at <b>$25+</b>. Under $25 uses a ZIP + weight estimate (ship-from <b>27349</b>).
+          <br/>IDs are auto-generated client-side if blank, and also guaranteed server-side.
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: PREVIEW -->
+    <div class="card">
+      <div class="cardHead">
+        <b>Live Preview</b>
+        <span class="pill" id="publicPill">Public: No</span>
+      </div>
+      <div class="cardBody">
+        <div class="previewImg" id="imgBox">
+          <div style="opacity:.65">No photo</div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="kv" id="previewKv"></div>
+
+        <div class="hr"></div>
+
+        <div class="hint">
+          Tip: Paste a PhotoURL to preview it here. Keep titles short & punchy for clean store cards.
+        </div>
+      </div>
+    </div>
+
   </div>
-
-  <div id="msg" style="margin-top:10px;opacity:.85"></div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
+/** CONFIG */
 const API="https://script.google.com/macros/s/AKfycbwiY4C5DWNjOE1xSdpvn3lsOJsRrS11RJSzIWKDdIDHeqbbgbNdcS0osLo780d5VsZ6/exec";
 
-function getItem(){
-  const fields = ["ID","SKU","Title","Description","Category","Brand","Model","Condition","PhotoURL","Location","Status","Visibility","Price","Qty","PickupOnly","WeightOz","LengthIn","WidthIn","HeightIn"];
-  const item = {};
-  fields.forEach(f => item[f] = document.getElementById(f).value);
-  item.Price = Number(item.Price||0);
-  item.Qty = Number(item.Qty||0);
-  item.WeightOz = Number(item.WeightOz||0);
-  item.LengthIn = Number(item.LengthIn||0);
-  item.WidthIn  = Number(item.WidthIn||0);
-  item.HeightIn = Number(item.HeightIn||0);
+/** State */
+let OPTIONS=null;
+let INTERNAL_CACHE=null; // stores internal items after load (for searching by ID/SKU)
+let LOADED_EXISTING=false;
+
+const FIELDS=[
+  "ID","SKU","Title","Description","Category","Brand","Model","Condition","PhotoURL","Location",
+  "Status","Visibility","Price","Qty","PickupOnly","WeightOz","LengthIn","WidthIn","HeightIn","UpdatedAt","Notes"
+];
+
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+function setWarn(msg){
+  const w=document.getElementById("warn");
+  if(!msg){ w.style.display="none"; w.textContent=""; return; }
+  w.style.display="block"; w.textContent=msg;
+}
+
+function esc(s){
+  return String(s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+}
+
+function getToken(){ return document.getElementById("token").value.trim(); }
+
+function uuidLike(){
+  const bytes = crypto?.getRandomValues ? crypto.getRandomValues(new Uint8Array(16)) : Array.from({length:16},()=>Math.floor(Math.random()*256));
+  const hex=[...bytes].map(b=>b.toString(16).padStart(2,"0")).join("");
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+}
+
+function populateSelect(id, arr){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const current=el.value;
+  el.innerHTML="";
+  arr.forEach(v=>{
+    const o=document.createElement("option");
+    o.value=v; o.textContent=v;
+    el.appendChild(o);
+  });
+  if(current && arr.includes(current)) el.value=current;
+}
+
+async function loadOptions(){
+  try{
+    const res=await fetch(`${API}?action=listOptions`);
+    const data=await res.json();
+    if(!data.ok) throw new Error(data.error||"Failed to load options");
+    OPTIONS=data.options||{};
+
+    populateSelect("Status", OPTIONS.Status || ["Active","Pending","Sold","Archived"]);
+    populateSelect("Visibility", OPTIONS.Visibility || ["Public","Internal"]);
+    populateSelect("Category", ["", ...(OPTIONS.Category || [])]);
+    populateSelect("Condition", ["", ...(OPTIONS.Condition || [])]);
+    populateSelect("Brand", ["", ...(OPTIONS.Brand || [])]);
+    populateSelect("Location", ["", ...(OPTIONS.Location || [])]);
+
+    if(!document.getElementById("Status").value) document.getElementById("Status").value="Active";
+    if(!document.getElementById("Visibility").value) document.getElementById("Visibility").value="Internal";
+
+    toast("Dropdowns loaded.");
+  } catch(err){
+    console.error(err);
+    toast("Dropdowns failed — using defaults.");
+    populateSelect("Status", ["Active","Pending","Sold","Archived"]);
+    populateSelect("Visibility", ["Public","Internal"]);
+    populateSelect("Category", ["","Laptops","Desktops","Monitors","Networking","Accessories","Adapters","Parts","Other"]);
+    populateSelect("Condition", ["","New","Open Box","Used - Good","Used - Fair","Untested","For Parts/Not Working"]);
+    populateSelect("Brand", ["","Dell","HP","Lenovo","Apple","Microsoft","Acer","ASUS","Samsung","LG","Other"]);
+    populateSelect("Location", ["","Front Shelf","Back Shelf","Bin A","Bin B","Bin C","Repair Bench","Warehouse","Other"]);
+  }
+  updatePreview();
+}
+
+function gatherItem(){
+  const item={};
+  FIELDS.forEach(f=>{
+    const el=document.getElementById(f);
+    if(el) item[f]=el.value;
+  });
+  item.Price=Number(item.Price||0);
+  item.Qty=Number(item.Qty||0);
+  item.WeightOz=Number(item.WeightOz||0);
+  item.LengthIn=Number(item.LengthIn||0);
+  item.WidthIn=Number(item.WidthIn||0);
+  item.HeightIn=Number(item.HeightIn||0);
   return item;
 }
 
-async function save(){
-  const token = document.getElementById("token").value.trim();
-  const item = getItem();
-  const action = item.ID ? "updateItem" : "addItem";
+function validateItem(item){
+  if(!item.Title || item.Title.trim().length<3) return "Title is required.";
+  if(isNaN(item.Price) || item.Price<0) return "Price must be a valid number.";
+  if(isNaN(item.Qty) || item.Qty<0) return "Qty must be 0 or higher.";
+  // recommend weight for < $25 items unless pickup-only
+  if(item.PickupOnly !== "TRUE" && Number(item.Price||0) < 25 && (!item.WeightOz || item.WeightOz<=0))
+    return "WeightOz is recommended for items under $25 (shipping estimate uses weight).";
+  return "";
+}
 
-  const res = await fetch(API, {
+function updateModePill(){
+  const id=document.getElementById("ID").value.trim();
+  const pill=document.getElementById("modePill");
+  if(!id){ pill.textContent="Mode: New"; return; }
+  pill.textContent=LOADED_EXISTING ? "Mode: Edit" : "Mode: New (unsaved)";
+}
+
+function newItem(){
+  LOADED_EXISTING=false;
+  // clear fields
+  ["ID","SKU","Title","Description","Model","PhotoURL","WeightOz","LengthIn","WidthIn","HeightIn","Notes"].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value="";
+  });
+  document.getElementById("Qty").value="1";
+  document.getElementById("Price").value="";
+  document.getElementById("PickupOnly").value="";
+  // selects default
+  document.getElementById("Status").value="Active";
+  document.getElementById("Visibility").value="Internal";
+  if(document.getElementById("Category")) document.getElementById("Category").value="";
+  if(document.getElementById("Condition")) document.getElementById("Condition").value="";
+  if(document.getElementById("Brand")) document.getElementById("Brand").value="";
+  if(document.getElementById("Location")) document.getElementById("Location").value="";
+  setWarn("");
+  updateModePill();
+  updatePreview();
+  toast("New item ready.");
+}
+
+function duplicateItem(){
+  const idEl=document.getElementById("ID");
+  if(!idEl.value.trim()){ toast("Nothing to duplicate yet."); return; }
+  // keep fields, but new ID + blank SKU
+  idEl.value=uuidLike();
+  document.getElementById("SKU").value="";
+  LOADED_EXISTING=false;
+  updateModePill();
+  updatePreview();
+  toast("Duplicated (new ID created).");
+}
+
+async function loadInternalCache(){
+  const token=getToken();
+  if(!token){ toast("Enter internal token first."); return null; }
+
+  if(INTERNAL_CACHE) return INTERNAL_CACHE;
+
+  const res=await fetch(`${API}?action=listInternal&token=${encodeURIComponent(token)}`);
+  const data=await res.json();
+  if(!data.ok){ toast("Internal load failed: " + (data.error||"")); return null; }
+  INTERNAL_CACHE = data.items || [];
+  return INTERNAL_CACHE;
+}
+
+async function loadItem(){
+  const q=document.getElementById("find").value.trim();
+  if(!q){ toast("Enter an ID or SKU."); return; }
+
+  const items = await loadInternalCache();
+  if(!items) return;
+
+  const found = items.find(x => String(x.ID||"")===q) || items.find(x => String(x.SKU||"")===q);
+  if(!found){ toast("Not found."); return; }
+
+  // populate fields (only those that exist)
+  FIELDS.forEach(f=>{
+    const el=document.getElementById(f);
+    if(!el) return;
+    el.value = (found[f] !== undefined && found[f] !== null) ? String(found[f]) : "";
+  });
+
+  LOADED_EXISTING=true;
+  updateModePill();
+  updatePreview();
+  setWarn("");
+  toast("Item loaded.");
+}
+
+async function saveItem(){
+  const token=getToken();
+  if(!token){ toast("Enter internal token first."); return; }
+
+  // ensure an ID exists client-side
+  const idEl=document.getElementById("ID");
+  if(!idEl.value.trim()) idEl.value = uuidLike();
+
+  const item=gatherItem();
+  const warn=validateItem(item);
+  setWarn(warn);
+
+  const action = LOADED_EXISTING ? "updateItem" : "addItem";
+
+  const res=await fetch(API,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({ action, token, item })
   });
-  const d = await res.json();
-  document.getElementById("msg").textContent = d.ok ? "Saved." : ("Error: " + (d.error||""));
-  if (d.ok && d.id) document.getElementById("ID").value = d.id;
+  const d=await res.json();
+  if(!d.ok){ toast("Save failed: " + (d.error||"")); return; }
+
+  if(d.id) document.getElementById("ID").value = d.id;
+  LOADED_EXISTING=true;
+  INTERNAL_CACHE=null; // refresh cache next time
+  updateModePill();
+  updatePreview();
+  toast("Saved.");
 }
 
-async function archive(){
-  const token = document.getElementById("token").value.trim();
-  const itemId = document.getElementById("ID").value.trim();
-  if(!itemId) return alert("Enter an ID first.");
+async function archiveItem(){
+  const token=getToken();
+  const itemId=document.getElementById("ID").value.trim();
+  if(!token){ toast("Enter internal token first."); return; }
+  if(!itemId){ toast("Enter/load an ID first."); return; }
 
-  const res = await fetch(API, {
+  const res=await fetch(API,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({ action:"archiveItem", token, itemId })
   });
-  const d = await res.json();
-  document.getElementById("msg").textContent = d.ok ? "Archived." : ("Error: " + (d.error||""));
+  const d=await res.json();
+  if(!d.ok){ toast("Archive failed: " + (d.error||"")); return; }
+
+  document.getElementById("Status").value="Archived";
+  LOADED_EXISTING=true;
+  INTERNAL_CACHE=null;
+  updateModePill();
+  updatePreview();
+  toast("Archived.");
 }
+
+function updatePreview(){
+  const item=gatherItem();
+  const publicYes = (item.Visibility==="Public" && item.Status==="Active" && Number(item.Qty||0)>0);
+  document.getElementById("publicPill").textContent = "Public: " + (publicYes ? "Yes" : "No");
+
+  const imgBox=document.getElementById("imgBox");
+  imgBox.innerHTML="";
+  if(item.PhotoURL && item.PhotoURL.trim()){
+    const img=document.createElement("img");
+    img.src=item.PhotoURL.trim();
+    img.alt="Item photo";
+    img.onerror=()=>{ imgBox.innerHTML=`<div style="opacity:.65">Bad/blocked image URL</div>`; };
+    imgBox.appendChild(img);
+  } else {
+    imgBox.innerHTML=`<div style="opacity:.65">No photo</div>`;
+  }
+
+  document.getElementById("previewKv").innerHTML = `
+    <div><b>${esc(item.Title || "Untitled item")}</b></div>
+    <div>${esc(item.SKU || item.ID || "(no ID yet)")}</div>
+    <div style="margin-top:8px"><b>$${Number(item.Price||0).toFixed(2)}</b> • Qty: <b>${Number(item.Qty||0)}</b></div>
+    <div>Status: <b>${esc(item.Status||"")}</b> • Visibility: <b>${esc(item.Visibility||"")}</b></div>
+    <div>Category: <b>${esc(item.Category||"")}</b> • Condition: <b>${esc(item.Condition||"")}</b></div>
+    <div>Brand: <b>${esc(item.Brand||"")}</b> • Location: <b>${esc(item.Location||"")}</b></div>
+    <div>PickupOnly: <b>${esc(item.PickupOnly==="TRUE" ? "Yes" : "No")}</b> • WeightOz: <b>${esc(String(item.WeightOz||0))}</b></div>
+    <div style="margin-top:10px;color:#111;opacity:.92">${esc((item.Description||"").slice(0,240))}${(item.Description||"").length>240?"…":""}</div>
+  `;
+}
+
+// Live preview hooks
+[
+  "ID","SKU","Title","Price","Qty","Category","Condition","Brand","Model","PhotoURL","Location",
+  "PickupOnly","WeightOz","LengthIn","WidthIn","HeightIn","Status","Visibility","Description","Notes"
+].forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.addEventListener("input", ()=>{ updateModePill(); updatePreview(); });
+  el.addEventListener("change", ()=>{ updateModePill(); updatePreview(); });
+});
+
+// Boot
+loadOptions();
+newItem();
 </script>
 </body>
 </html>
