@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tek-Pak Admin</title>
+<style>
+  body{font-family:system-ui;margin:18px;background:#f6f7fb}
+  .card{background:#fff;border:1px solid #e6e9f2;border-radius:12px;padding:14px;max-width:900px}
+  .row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d7dbe7;border-radius:10px}
+  textarea{min-height:90px}
+  button{padding:10px 12px;border:0;border-radius:10px;background:#111;color:#fff;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h2>Admin Console</h2>
+
+<div class="card">
+  <div class="row">
+    <input id="token" placeholder="Internal token">
+    <input id="ID" placeholder="ID (blank = new item)">
+    <input id="SKU" placeholder="SKU">
+    <input id="Title" placeholder="Title">
+    <input id="Price" placeholder="Price">
+    <input id="Qty" placeholder="Qty">
+    <select id="Status">
+      <option>Active</option><option>Pending</option><option>Sold</option><option>Archived</option>
+    </select>
+    <select id="Visibility">
+      <option>Public</option><option>Internal</option>
+    </select>
+    <input id="Category" placeholder="Category">
+    <input id="Condition" placeholder="Condition">
+    <input id="PhotoURL" placeholder="PhotoURL">
+    <input id="Location" placeholder="Location">
+    <input id="WeightOz" placeholder="WeightOz">
+  </div>
+  <div style="margin-top:10px">
+    <textarea id="Description" placeholder="Description"></textarea>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+    <button onclick="save()">Save (Add/Update)</button>
+    <button onclick="archive()">Archive</button>
+  </div>
+
+  <div id="msg" style="margin-top:10px;opacity:.85"></div>
+</div>
+
+<script>
+const API="YOUR_WEB_APP_URL_HERE";
+
+function getItem(){
+  const fields = ["ID","SKU","Title","Description","Category","Condition","PhotoURL","Location","Status","Visibility","Price","Qty","WeightOz"];
+  const item = {};
+  fields.forEach(f => item[f] = document.getElementById(f).value);
+  item.Price = Number(item.Price||0);
+  item.Qty = Number(item.Qty||0);
+  item.WeightOz = Number(item.WeightOz||0);
+  return item;
+}
+
+async function save(){
+  const token = document.getElementById("token").value.trim();
+  const item = getItem();
+  const action = item.ID ? "updateItem" : "addItem";
+
+  const res = await fetch(API, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ action, token, item })
+  });
+  const d = await res.json();
+  document.getElementById("msg").textContent = d.ok ? "Saved." : ("Error: " + (d.error||""));
+  if (d.ok && d.id) document.getElementById("ID").value = d.id;
+}
+
+async function archive(){
+  const token = document.getElementById("token").value.trim();
+  const itemId = document.getElementById("ID").value.trim();
+  if(!itemId) return alert("Enter an ID first.");
+
+  const res = await fetch(API, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ action:"archiveItem", token, itemId })
+  });
+  const d = await res.json();
+  document.getElementById("msg").textContent = d.ok ? "Archived." : ("Error: " + (d.error||""));
+}
+</script>
+</body>
+</html>
