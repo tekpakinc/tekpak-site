@@ -1,247 +1,159 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tek-Pak Surplus Store</title>
-  <meta name="description" content="Tek-Pak Inc. Surplus Tech Store" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tek-Pak Store</title>
   <style>
-    :root{
-      --tp-lime:#8CC63F;
-      --tp-blue:#1f4e79;
-      --tp-dark:#0f172a;
-      --tp-muted:#64748b;
-      --tp-bg:#f8fafc;
-      --tp-white:#ffffff;
-      --tp-border:#e2e8f0;
-      --radius:14px;
-      --shadow:0 8px 24px rgba(2,6,23,.08);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background:var(--tp-bg);
-      color:var(--tp-dark);
-    }
-    a{text-decoration:none;color:inherit}
-    .container{max-width:1200px;margin:0 auto;padding:0 16px}
-
-    /* Header */
-    header{
-      background:var(--tp-white);
-      border-bottom:1px solid var(--tp-border);
-      position:sticky; top:0; z-index:20;
-    }
-    .nav{
-      display:flex; align-items:center; justify-content:space-between;
-      min-height:72px;
-      gap:12px;
-    }
-    .brand{
-      display:flex;align-items:center;gap:12px;font-weight:800;
-    }
-    .logo{
-      width:44px;height:44px;border-radius:10px;
-      background:linear-gradient(135deg,var(--tp-lime),#b8e56f);
-      display:grid;place-items:center;color:#102100;font-weight:900;
-      box-shadow:var(--shadow);
-    }
-    .brand small{display:block;font-size:.76rem;color:var(--tp-muted);font-weight:600}
-    .actions{
-      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
-    }
-    .search{
-      min-width:260px; max-width:420px; width:42vw;
-      border:1px solid var(--tp-border);
-      border-radius:12px;
-      padding:10px 12px;
-      outline:none;
-      background:#fff;
-    }
-    .btn{
-      border:0; cursor:pointer;
-      border-radius:12px;
-      padding:10px 14px;
-      font-weight:700;
-    }
-    .btn-primary{background:var(--tp-blue);color:#fff}
-    .btn-ghost{background:#fff;border:1px solid var(--tp-border)}
-    .hero{
-      margin:18px 0;
-      background:linear-gradient(120deg,#ffffff, #f1f5f9);
-      border:1px solid var(--tp-border);
-      border-radius:var(--radius);
-      padding:22px;
-      box-shadow:var(--shadow);
-    }
-    .hero h1{margin:0 0 8px;font-size:1.5rem}
-    .hero p{margin:0;color:var(--tp-muted)}
-
-    .filters{
-      display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 18px;
-    }
-    .chip{
-      background:#fff;
-      border:1px solid var(--tp-border);
-      border-radius:999px;
-      padding:8px 12px;
-      cursor:pointer;
-      font-weight:600;
-      color:#334155;
-    }
-    .chip.active{border-color:var(--tp-lime);box-shadow:0 0 0 3px rgba(140,198,63,.15)}
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
-      gap:14px;
-      margin-bottom:30px;
-    }
-    .card{
-      background:#fff; border:1px solid var(--tp-border);
-      border-radius:14px; overflow:hidden; box-shadow:var(--shadow);
-      display:flex; flex-direction:column;
-    }
-    .thumb{
-      height:160px; background:#f1f5f9; display:grid; place-items:center;
-      color:#94a3b8; font-weight:700;
-    }
-    .body{padding:12px}
-    .title{font-weight:800; line-height:1.25; margin-bottom:6px}
-    .meta{font-size:.86rem;color:var(--tp-muted);margin-bottom:8px}
-    .price{font-size:1.1rem;font-weight:900;color:#0f172a}
-    .pill{
-      display:inline-block; font-size:.74rem; padding:4px 8px;
-      border-radius:999px; background:rgba(140,198,63,.15); color:#2f4d10;
-      margin-left:6px;
-    }
-    .empty{
-      text-align:center; padding:36px; color:var(--tp-muted);
-      border:1px dashed var(--tp-border); border-radius:12px; background:#fff;
-    }
-    footer{
-      border-top:1px solid var(--tp-border);
-      color:#64748b; background:#fff;
-      padding:22px 0; margin-top:28px;
-      font-size:.9rem;
-    }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f6f7fb;color:#111}
+    header{background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:14px 18px;position:sticky;top:0;z-index:10;display:flex;gap:14px;align-items:center}
+    header img{height:44px}
+    .wrap{max-width:1100px;margin:18px auto;padding:0 16px}
+    .tools{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+    input,select{padding:10px 12px;border:1px solid #d7dbe7;border-radius:10px;background:#fff}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+    .card{background:#fff;border:1px solid #e6e9f2;border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);overflow:hidden;display:flex;flex-direction:column}
+    .img{height:170px;background:#eef1f8;display:flex;align-items:center;justify-content:center}
+    .img img{max-height:100%;max-width:100%;object-fit:contain}
+    .pad{padding:12px 14px}
+    .title{font-weight:750;margin:0 0 6px}
+    .meta{opacity:.8;font-size:13px;margin:0 0 10px}
+    .price{font-size:18px;font-weight:800;margin:0 0 10px}
+    .note{font-size:12px;opacity:.8;margin:8px 0 0}
+    .pp{padding:0 14px 14px}
+    .badge{display:inline-block;font-size:12px;padding:4px 8px;border-radius:999px;background:#eef7ff;border:1px solid #cfe7ff;margin-left:8px}
   </style>
+
+  <!-- PayPal JS SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID_HERE&currency=USD&intent=capture"></script>
 </head>
 <body>
   <header>
-    <div class="container nav">
-      <a class="brand" href="/">
-        <div class="logo">TP</div>
-        <div>
-          Tek-Pak Inc. Surplus
-          <small>Raising your signal at fair prices</small>
-        </div>
-      </a>
-      <div class="actions">
-        <input id="search" class="search" type="search" placeholder="Search surplus tech..." />
-        <a class="btn btn-ghost" href="/admin.html">Admin</a>
-        <a class="btn btn-primary" href="https://www.tekpakinc.store" target="_blank" rel="noopener">Main Store</a>
-      </div>
+    <img src="assets/tekpak-logo.png" alt="Tek-Pak">
+    <div style="flex:1">
+      <div style="font-weight:850">Tek-Pak Store</div>
+      <div style="font-size:13px;opacity:.8">Free shipping over $25 • Secure PayPal checkout</div>
     </div>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <h1>Surplus Electronics, Refurb Gear, and Tech Lots</h1>
-      <p>Fresh pulls, tested hardware, and value-focused listings from Tek-Pak inventory.</p>
-    </section>
-
-    <div id="categoryFilters" class="filters"></div>
-    <section id="productGrid" class="grid"></section>
-    <div id="emptyState" class="empty" style="display:none;">No products found. Try a different search or category.</div>
-  </main>
-
-  <footer>
-    <div class="container">
-      © <span id="year"></span> Tek-Pak Inc. · Surplus Tech Store
+  <div class="wrap">
+    <div class="tools">
+      <input id="q" placeholder="Search…" oninput="render()">
+      <select id="cat" onchange="render()"><option value="">All categories</option></select>
     </div>
-  </footer>
 
-  <script>
-    const API_BASE = ''; // same origin
-    let allProducts = [];
-    let activeCategory = 'All';
+    <div id="grid" class="grid"></div>
+  </div>
 
-    const productGrid = document.getElementById('productGrid');
-    const searchInput = document.getElementById('search');
-    const categoryFilters = document.getElementById('categoryFilters');
-    const emptyState = document.getElementById('emptyState');
-    document.getElementById('year').textContent = new Date().getFullYear();
+<script>
+const API = "https://script.google.com/macros/s/AKfycbwiY4C5DWNjOE1xSdpvn3lsOJsRrS11RJSzIWKDdIDHeqbbgbNdcS0osLo780d5VsZ6/exec";
+let ITEMS = [];
 
-    async function fetchProducts() {
-      const res = await fetch(`${API_BASE}/api/products`);
-      if (!res.ok) throw new Error('Failed to load products');
-      allProducts = await res.json();
-      renderFilters();
-      renderProducts();
-    }
+async function load() {
+  const res = await fetch(`${API}?action=listPublic`);
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || "Failed to load");
+  ITEMS = data.items || [];
+  fillCategories();
+  render();
+}
 
-    function renderFilters() {
-      const categories = ['All', ...new Set(allProducts.map(p => p.category || 'Other'))];
-      categoryFilters.innerHTML = '';
-      categories.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = `chip ${cat === activeCategory ? 'active' : ''}`;
-        btn.textContent = cat;
-        btn.addEventListener('click', () => {
-          activeCategory = cat;
-          renderFilters();
-          renderProducts();
+function fillCategories(){
+  const cats = [...new Set(ITEMS.map(x => x.Category).filter(Boolean))].sort();
+  const sel = document.getElementById("cat");
+  cats.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+}
+
+function money(n){ return `$${Number(n||0).toFixed(2)}`; }
+
+function render(){
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const cat = document.getElementById("cat").value;
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  const filtered = ITEMS.filter(it => {
+    if (cat && it.Category !== cat) return false;
+    if (!q) return true;
+    const blob = `${it.Title||""} ${it.Description||""} ${it.SKU||""} ${it.Condition||""}`.toLowerCase();
+    return blob.includes(q);
+  });
+
+  filtered.forEach(it => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const img = document.createElement("div");
+    img.className = "img";
+    img.innerHTML = it.PhotoURL ? `<img src="${it.PhotoURL}" alt="">` : `<div style="opacity:.6">No photo</div>`;
+
+    const pad = document.createElement("div");
+    pad.className = "pad";
+    pad.innerHTML = `
+      <p class="title">${escapeHtml(it.Title || "Item")} <span class="badge">${escapeHtml(it.Condition || "Surplus")}</span></p>
+      <p class="meta">${escapeHtml(it.SKU || it.ID)} • ${escapeHtml(it.Category || "Misc")}</p>
+      <p class="price">${money(it.Price)} <span style="font-size:12px;opacity:.7;font-weight:650">+ shipping if under $25</span></p>
+      <div style="font-size:13px;opacity:.9">${escapeHtml((it.Description||"").slice(0,140))}${(it.Description||"").length>140?"…":""}</div>
+      <div class="note">Qty available: ${Number(it.Qty||0)}</div>
+    `;
+
+    const pp = document.createElement("div");
+    pp.className = "pp";
+    const btnId = `pp_${it.ID.replace(/[^a-zA-Z0-9_]/g,"_")}`;
+    pp.innerHTML = `<div id="${btnId}"></div>`;
+
+    card.appendChild(img);
+    card.appendChild(pad);
+    card.appendChild(pp);
+    grid.appendChild(card);
+
+    // Render PayPal button for this item
+    paypal.Buttons({
+      style: { layout: 'vertical', label: 'paypal' },
+      createOrder: async () => {
+        const r = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify({ action:"createOrder", itemId: it.ID, qty: 1 })
         });
-        categoryFilters.appendChild(btn);
-      });
-    }
-
-    function renderProducts() {
-      const q = searchInput.value.trim().toLowerCase();
-      const filtered = allProducts.filter(p => {
-        const matchesCategory = activeCategory === 'All' || (p.category || 'Other') === activeCategory;
-        const matchesSearch =
-          !q ||
-          p.title.toLowerCase().includes(q) ||
-          (p.sku || '').toLowerCase().includes(q) ||
-          (p.description || '').toLowerCase().includes(q);
-        return matchesCategory && matchesSearch;
-      });
-
-      productGrid.innerHTML = '';
-      if (!filtered.length) {
-        emptyState.style.display = 'block';
-        return;
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.error || "Order create failed");
+        return d.orderId;
+      },
+      onApprove: async (data) => {
+        const r = await fetch(API, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ action:"captureOrder", orderId: data.orderID, itemId: it.ID })
+        });
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.error || "Capture failed");
+        alert("Payment received! We’ll email you shipping updates. ❤️");
+        await load(); // refresh qty/status
       }
-      emptyState.style.display = 'none';
+    }).render(`#${btnId}`);
+  });
 
-      filtered.forEach(p => {
-        const card = document.createElement('article');
-        card.className = 'card';
-        card.innerHTML = `
-          <div class="thumb">${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.title)}" style="max-width:100%;max-height:100%;object-fit:cover;width:100%;height:100%;" />` : 'No Image'}</div>
-          <div class="body">
-            <div class="title">${escapeHtml(p.title)}</div>
-            <div class="meta">SKU: ${escapeHtml(p.sku || 'N/A')} · ${escapeHtml(p.condition || 'Used')}</div>
-            <div class="meta">${escapeHtml(p.category || 'Other')}</div>
-            <div class="price">$${Number(p.price || 0).toFixed(2)} ${p.inStock ? '<span class="pill">In Stock</span>' : '<span class="pill" style="background:#fee2e2;color:#7f1d1d;">Out</span>'}</div>
-          </div>
-        `;
-        productGrid.appendChild(card);
-      });
-    }
+  if (!filtered.length) {
+    grid.innerHTML = `<div style="opacity:.75">No items match your search.</div>`;
+  }
+}
 
-    function escapeHtml(str='') {
-      return str.replace(/[&<>"']/g, s => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-      }[s]));
-    }
+function escapeHtml(s){
+  return String(s||"").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+}
 
-    searchInput.addEventListener('input', renderProducts);
-    fetchProducts().catch(err => {
-      productGrid.innerHTML = `<div class="empty">Could not load products (${err.message}).</div>`;
-    });
-  </script>
+load().catch(err => {
+  console.error(err);
+  document.getElementById("grid").innerHTML = `<div style="padding:12px;background:#fff;border:1px solid #e6e9f2;border-radius:12px">
+    <b>Couldn’t load store.</b><div style="opacity:.8;margin-top:6px">${escapeHtml(err.message)}</div>
+  </div>`;
+});
+</script>
 </body>
 </html>
