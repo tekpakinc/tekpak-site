@@ -4,11 +4,12 @@
 <title>Tek-Pak Admin</title>
 <style>
   body{font-family:system-ui;margin:18px;background:#f6f7fb}
-  .card{background:#fff;border:1px solid #e6e9f2;border-radius:12px;padding:14px;max-width:900px}
-  .row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .card{background:#fff;border:1px solid #e6e9f2;border-radius:12px;padding:14px;max-width:980px}
+  .row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
   input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d7dbe7;border-radius:10px}
   textarea{min-height:90px}
   button{padding:10px 12px;border:0;border-radius:10px;background:#111;color:#fff;font-weight:800;cursor:pointer}
+  .muted{opacity:.75;font-size:12px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -17,25 +18,36 @@
 <div class="card">
   <div class="row">
     <input id="token" placeholder="Internal token">
-    <input id="ID" placeholder="ID (blank = new item)">
+    <input id="ID" placeholder="ID (blank = new)">
     <input id="SKU" placeholder="SKU">
     <input id="Title" placeholder="Title">
     <input id="Price" placeholder="Price">
     <input id="Qty" placeholder="Qty">
+    <input id="Category" placeholder="Category">
+    <input id="Condition" placeholder="Condition">
+    <input id="Brand" placeholder="Brand">
+    <input id="Model" placeholder="Model">
+    <input id="PhotoURL" placeholder="PhotoURL">
+    <input id="Location" placeholder="Location">
+    <input id="WeightOz" placeholder="WeightOz">
+    <input id="LengthIn" placeholder="LengthIn">
+    <input id="WidthIn" placeholder="WidthIn">
+    <input id="HeightIn" placeholder="HeightIn">
+    <select id="PickupOnly">
+      <option value="">PickupOnly: No</option>
+      <option value="TRUE">PickupOnly: YES</option>
+    </select>
     <select id="Status">
       <option>Active</option><option>Pending</option><option>Sold</option><option>Archived</option>
     </select>
     <select id="Visibility">
       <option>Public</option><option>Internal</option>
     </select>
-    <input id="Category" placeholder="Category">
-    <input id="Condition" placeholder="Condition">
-    <input id="PhotoURL" placeholder="PhotoURL">
-    <input id="Location" placeholder="Location">
-    <input id="WeightOz" placeholder="WeightOz">
   </div>
+
   <div style="margin-top:10px">
     <textarea id="Description" placeholder="Description"></textarea>
+    <div class="muted">Tip: For shipping under $25, set WeightOz for accurate calculation. Free shipping auto-applies at $25+.</div>
   </div>
 
   <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
@@ -47,15 +59,18 @@
 </div>
 
 <script>
-const API="YOUR_WEB_APP_URL_HERE";
+const API="https://script.google.com/macros/s/AKfycbwiY4C5DWNjOE1xSdpvn3lsOJsRrS11RJSzIWKDdIDHeqbbgbNdcS0osLo780d5VsZ6/exec";
 
 function getItem(){
-  const fields = ["ID","SKU","Title","Description","Category","Condition","PhotoURL","Location","Status","Visibility","Price","Qty","WeightOz"];
+  const fields = ["ID","SKU","Title","Description","Category","Brand","Model","Condition","PhotoURL","Location","Status","Visibility","Price","Qty","PickupOnly","WeightOz","LengthIn","WidthIn","HeightIn"];
   const item = {};
   fields.forEach(f => item[f] = document.getElementById(f).value);
   item.Price = Number(item.Price||0);
   item.Qty = Number(item.Qty||0);
   item.WeightOz = Number(item.WeightOz||0);
+  item.LengthIn = Number(item.LengthIn||0);
+  item.WidthIn  = Number(item.WidthIn||0);
+  item.HeightIn = Number(item.HeightIn||0);
   return item;
 }
 
