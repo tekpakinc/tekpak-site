@@ -22,10 +22,21 @@
     .note{font-size:12px;opacity:.8;margin:8px 0 0}
     .pp{padding:0 14px 14px}
     .badge{display:inline-block;font-size:12px;padding:4px 8px;border-radius:999px;background:#eef7ff;border:1px solid #cfe7ff;margin-left:8px}
+    .pill{display:inline-block;font-size:12px;padding:4px 8px;border-radius:999px;background:#f3fff0;border:1px solid #d7f3cf}
+    /* modal */
+    .modalBack{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+    .modal{background:#fff;border-radius:16px;max-width:420px;width:100%;padding:14px;border:1px solid #e6e9f2;box-shadow:0 22px 60px rgba(0,0,0,.25)}
+    .modal h3{margin:0 0 8px}
+    .modal p{margin:0 0 10px;opacity:.85}
+    .modal .row{display:flex;gap:10px}
+    .btn{padding:10px 12px;border-radius:10px;border:0;font-weight:800;cursor:pointer}
+    .btnPrimary{background:#111;color:#fff}
+    .btnGhost{background:#f4f6fb}
+    .err{color:#b00020;font-size:12px;display:none;margin-top:8px}
   </style>
 
   <!-- PayPal JS SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID_HERE&currency=USD&intent=capture"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=AcxyZvGvLed2b1AVcDAzcBBhhlv-2HeCZeJzQV6zacPXMDghy9g0GcS8V4tOkM7E0Zsr-JSBMA0RQLvF&currency=USD&intent=capture"></script>
 </head>
 <body>
   <header>
@@ -45,9 +56,26 @@
     <div id="grid" class="grid"></div>
   </div>
 
+  <!-- ZIP modal -->
+  <div id="zipBack" class="modalBack">
+    <div class="modal">
+      <h3>Calculate shipping</h3>
+      <p>Orders under <b>$25</b> need a ZIP code to calculate shipping.</p>
+      <div class="row">
+        <input id="zipInput" inputmode="numeric" placeholder="ZIP (5 digits)" maxlength="5">
+        <button class="btn btnPrimary" onclick="zipConfirm()">Continue</button>
+      </div>
+      <div id="zipErr" class="err">Please enter a valid 5-digit ZIP.</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+        <button class="btn btnGhost" onclick="zipCancel()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 const API = "https://script.google.com/macros/s/AKfycbwiY4C5DWNjOE1xSdpvn3lsOJsRrS11RJSzIWKDdIDHeqbbgbNdcS0osLo780d5VsZ6/exec";
 let ITEMS = [];
+let pendingZipResolve = null;
 
 async function load() {
   const res = await fetch(`${API}?action=listPublic`);
@@ -69,6 +97,38 @@ function fillCategories(){
 }
 
 function money(n){ return `$${Number(n||0).toFixed(2)}`; }
+function isValidZip(z){ return /^\d{5}$/.test(String(z||"").trim()); }
+
+function openZipModal(){
+  document.getElementById("zipInput").value = "";
+  document.getElementById("zipErr").style.display = "none";
+  document.getElementById("zipBack").style.display = "flex";
+  document.getElementById("zipInput").focus();
+}
+function closeZipModal(){
+  document.getElementById("zipBack").style.display = "none";
+}
+function zipConfirm(){
+  const zip = document.getElementById("zipInput").value.trim();
+  if (!isValidZip(zip)) {
+    document.getElementById("zipErr").style.display = "block";
+    return;
+  }
+  closeZipModal();
+  if (pendingZipResolve) pendingZipResolve(zip);
+  pendingZipResolve = null;
+}
+function zipCancel(){
+  closeZipModal();
+  if (pendingZipResolve) pendingZipResolve(null);
+  pendingZipResolve = null;
+}
+function askZip(){
+  return new Promise(resolve => {
+    pendingZipResolve = resolve;
+    openZipModal();
+  });
+}
 
 function render(){
   const q = document.getElementById("q").value.trim().toLowerCase();
@@ -94,10 +154,15 @@ function render(){
 
     const pad = document.createElement("div");
     pad.className = "pad";
+
+    const shipLabel = it.PickupOnly
+      ? `<span class="pill">Pickup only</span>`
+      : `<span class="pill">Free ship $25+</span>`;
+
     pad.innerHTML = `
       <p class="title">${escapeHtml(it.Title || "Item")} <span class="badge">${escapeHtml(it.Condition || "Surplus")}</span></p>
-      <p class="meta">${escapeHtml(it.SKU || it.ID)} • ${escapeHtml(it.Category || "Misc")}</p>
-      <p class="price">${money(it.Price)} <span style="font-size:12px;opacity:.7;font-weight:650">+ shipping if under $25</span></p>
+      <p class="meta">${escapeHtml(it.SKU || it.ID)} • ${escapeHtml(it.Category || "Misc")} • ${shipLabel}</p>
+      <p class="price">${money(it.Price)}</p>
       <div style="font-size:13px;opacity:.9">${escapeHtml((it.Description||"").slice(0,140))}${(it.Description||"").length>140?"…":""}</div>
       <div class="note">Qty available: ${Number(it.Qty||0)}</div>
     `;
@@ -112,19 +177,43 @@ function render(){
     card.appendChild(pp);
     grid.appendChild(card);
 
-    // Render PayPal button for this item
     paypal.Buttons({
       style: { layout: 'vertical', label: 'paypal' },
+
       createOrder: async () => {
+        // If pickup only OR price >= 25, ZIP not needed.
+        let buyerZip = "";
+
+        if (!it.PickupOnly && Number(it.Price||0) < 25) {
+          buyerZip = await askZip();
+          if (!buyerZip) throw new Error("Checkout cancelled.");
+        }
+
         const r = await fetch(API, {
           method: "POST",
           headers: { "Content-Type":"application/json" },
-          body: JSON.stringify({ action:"createOrder", itemId: it.ID, qty: 1 })
+          body: JSON.stringify({ action:"createOrder", itemId: it.ID, qty: 1, buyerZip })
         });
         const d = await r.json();
+
+        // Backend can explicitly ask for ZIP
+        if (!d.ok && d.error === "ZIP_REQUIRED") {
+          const zip2 = await askZip();
+          if (!zip2) throw new Error("Checkout cancelled.");
+          const r2 = await fetch(API, {
+            method: "POST",
+            headers: { "Content-Type":"application/json" },
+            body: JSON.stringify({ action:"createOrder", itemId: it.ID, qty: 1, buyerZip: zip2 })
+          });
+          const d2 = await r2.json();
+          if (!d2.ok) throw new Error(d2.error || "Order create failed");
+          return d2.orderId;
+        }
+
         if (!d.ok) throw new Error(d.error || "Order create failed");
         return d.orderId;
       },
+
       onApprove: async (data) => {
         const r = await fetch(API, {
           method:"POST",
@@ -133,8 +222,8 @@ function render(){
         });
         const d = await r.json();
         if (!d.ok) throw new Error(d.error || "Capture failed");
-        alert("Payment received! We’ll email you shipping updates. ❤️");
-        await load(); // refresh qty/status
+        alert("Payment received! We’ll email shipping updates.");
+        await load();
       }
     }).render(`#${btnId}`);
   });
