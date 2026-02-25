@@ -1,466 +1,366 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tek-Pak Inventory Intake</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tek-Pak Inventory Input</title>
   <style>
     :root{
-      --bg:#f5f7fb;
+      --bg:#f6f7fb;
       --card:#ffffff;
-      --line:#dfe5ef;
+      --line:#e4e8f0;
       --text:#111827;
       --muted:#6b7280;
-      --brand:#84cc16;   /* lime green */
-      --brand2:#2563eb;  /* medium blue */
-      --danger:#dc2626;
-      --ok:#16a34a;
+      --accent:#84cc16;
+      --accent-dark:#65a30d;
+      --danger:#b91c1c;
+      --ok:#166534;
       --shadow:0 12px 30px rgba(0,0,0,.08);
-      --radius:16px;
+      --radius:14px;
     }
-
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background:linear-gradient(180deg,#f8fafc,#eef3fb);
-      color:var(--text);
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:16px;}
+    h1{margin:0 0 6px;font-size:1.35rem}
+    .sub{color:var(--muted);margin-bottom:14px}
+    .grid{display:grid;gap:12px}
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    @media (max-width:900px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+    label{display:block;font-size:.86rem;font-weight:700;margin-bottom:6px}
+    input,select,textarea,button{font:inherit}
+    input,select,textarea{
+      width:100%;border:1px solid #d2d8e4;border-radius:10px;padding:10px 12px;background:#fff;
     }
-
-    .wrap{
-      max-width:1100px;
-      margin:24px auto;
-      padding:0 16px;
+    textarea{min-height:95px;resize:vertical}
+    .row-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
+    .btn{background:#111827;color:#fff}
+    .btn-accent{background:var(--accent);color:#111}
+    .btn-accent:hover{background:var(--accent-dark);color:#fff}
+    .btn-ghost{background:#eef2f7;color:#111827;border:1px solid var(--line)}
+    .small{font-size:.82rem;color:var(--muted)}
+    .status{padding:10px 12px;border-radius:10px;margin-top:12px;display:none;font-weight:600}
+    .status.ok{display:block;background:#ecfdf3;border:1px solid #bbf7d0;color:var(--ok)}
+    .status.err{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--danger)}
+    pre{
+      background:#0f172a;color:#e2e8f0;border-radius:10px;padding:12px;overflow:auto;font-size:.82rem;margin:8px 0 0;
     }
-
-    .hero{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      padding:18px 18px 14px;
-      margin-bottom:16px;
-    }
-
-    .hero-top{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .badge{
-      width:42px;
-      height:42px;
-      border-radius:12px;
-      background:linear-gradient(135deg,var(--brand),var(--brand2));
-      box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);
-      flex:0 0 auto;
-    }
-
-    h1{
-      font-size:1.15rem;
-      margin:0;
-      line-height:1.2;
-    }
-
-    .sub{
-      margin:6px 0 0;
-      color:var(--muted);
-      font-size:.92rem;
-    }
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-
-    .toolbar{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      padding:12px 14px;
-      border-bottom:1px solid var(--line);
-      background:#fbfdff;
-      flex-wrap:wrap;
-    }
-
-    .toolbar .left{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
     .pill{
-      padding:6px 10px;
-      border:1px solid var(--line);
+      display:inline-block;
+      padding:4px 8px;
       border-radius:999px;
-      font-size:.82rem;
-      color:#334155;
-      background:#fff;
-    }
-
-    .search{
-      min-width:220px;
-      flex:1 1 260px;
-      max-width:360px;
-      position:relative;
-    }
-
-    .search input{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:10px;
-      padding:9px 12px;
-      outline:none;
-      background:#fff;
-    }
-
-    .search input:focus{
-      border-color:#93c5fd;
-      box-shadow:0 0 0 3px rgba(59,130,246,.15);
-    }
-
-    form{
-      padding:14px;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0,1fr));
-      gap:12px;
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    .field.full{
-      grid-column:1 / -1;
-    }
-
-    label{
-      font-size:.86rem;
-      font-weight:700;
-      color:#1f2937;
-    }
-
-    .hint{
+      border:1px solid #dbeafe;
+      background:#eff6ff;
+      color:#1d4ed8;
       font-size:.75rem;
-      color:var(--muted);
-      margin-top:-2px;
-    }
-
-    input, select, textarea{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px 12px;
-      font-size:.92rem;
-      background:#fff;
-      color:var(--text);
-      outline:none;
-      transition:.15s ease;
-    }
-
-    textarea{
-      min-height:96px;
-      resize:vertical;
-    }
-
-    input:focus, select:focus, textarea:focus{
-      border-color:#93c5fd;
-      box-shadow:0 0 0 3px rgba(59,130,246,.15);
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      margin-top:14px;
-      border-top:1px solid var(--line);
-      padding-top:14px;
-      flex-wrap:wrap;
-    }
-
-    .btns{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    button{
-      border:0;
-      border-radius:12px;
-      padding:10px 14px;
       font-weight:700;
-      cursor:pointer;
-      transition:.15s ease;
-    }
-
-    .btn-primary{
-      background:linear-gradient(135deg,var(--brand),#65a30d);
-      color:#111827;
-    }
-
-    .btn-primary:hover{ transform:translateY(-1px); }
-
-    .btn-secondary{
-      background:#fff;
-      color:#111827;
-      border:1px solid var(--line);
-    }
-
-    .btn-secondary:hover{ background:#f8fafc; }
-
-    .status{
-      font-size:.9rem;
-      min-height:1.2em;
-    }
-
-    .status.ok{ color:var(--ok); }
-    .status.err{ color:var(--danger); }
-    .status.muted{ color:var(--muted); }
-
-    .loading{
-      opacity:.65;
-      pointer-events:none;
-    }
-
-    @media (max-width: 900px){
-      .grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-    }
-
-    @media (max-width: 620px){
-      .grid{ grid-template-columns:1fr; }
-      .search{ max-width:none; width:100%; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="hero">
-      <div class="hero-top">
-        <div class="badge" aria-hidden="true"></div>
+    <h1>Tek-Pak Inventory Input</h1>
+    <div class="sub">Uses your <strong>Inventory</strong> and <strong>Dropdowns</strong> sheets.</div>
+
+    <!-- Connection -->
+    <div class="card">
+      <h2 style="margin:0 0 8px;font-size:1rem;">1) Connection</h2>
+      <div class="grid grid-2">
         <div>
-          <h1>Tek-Pak Inventory Intake</h1>
-          <p class="sub" id="sheetLabel">Loading your sheet schema...</p>
+          <label for="sheetName">Target Sheet Name</label>
+          <input id="sheetName" type="text" value="Inventory" />
+          <div class="small">Default is <code>Inventory</code>.</div>
         </div>
+        <div>
+          <label>Apps Script Status</label>
+          <div class="small" style="padding:10px 12px;border:1px solid #d2d8e4;border-radius:10px;background:#f8fafc;">
+            ✅ Apps Script URL is baked in
+          </div>
+          <div class="small" style="margin-top:6px;">No need to paste it each time.</div>
+        </div>
+      </div>
+
+      <div class="row-actions">
+        <button class="btn" type="button" id="loadDropdownsBtn">Load Dropdowns</button>
+      </div>
+
+      <div id="dropdownStatus" class="small" style="margin-top:8px;">
+        Dropdowns not loaded yet.
       </div>
     </div>
 
-    <div class="card" id="appCard">
-      <div class="toolbar">
-        <div class="left">
-          <span class="pill" id="fieldCountPill">Fields: --</span>
-          <span class="pill" id="dropdownCountPill">Dropdowns: --</span>
-        </div>
-        <div class="search">
-          <input id="fieldSearch" type="text" placeholder="Filter fields by header name..." />
-        </div>
-      </div>
+    <!-- Form -->
+    <div class="card">
+      <h2 style="margin:0 0 8px;font-size:1rem;">2) Inventory Item</h2>
 
       <form id="inventoryForm">
-        <div class="grid" id="formGrid"></div>
-
-        <div class="actions">
-          <div class="btns">
-            <button type="submit" class="btn-primary">Add Item</button>
-            <button type="button" class="btn-secondary" id="clearBtn">Clear Form</button>
-            <button type="button" class="btn-secondary" id="reloadBtn">Reload Headers</button>
+        <div class="grid grid-4">
+          <div>
+            <label for="itemNumber">Item Number</label>
+            <input id="itemNumber" name="itemNumber" type="text" placeholder="TP-0001" />
           </div>
-          <div class="status muted" id="status">Ready.</div>
+          <div>
+            <label for="serialNumber">Serial Number</label>
+            <input id="serialNumber" name="serialNumber" type="text" placeholder="ABC123XYZ" />
+          </div>
+          <div>
+            <label for="manufacturer">Manufacturer</label>
+            <select id="manufacturer" name="manufacturer">
+              <option value="">Select manufacturer</option>
+            </select>
+          </div>
+          <div>
+            <label for="model">Model</label>
+            <input id="model" name="model" type="text" placeholder="OptiPlex 7070" />
+          </div>
+        </div>
+
+        <div class="grid grid-3" style="margin-top:12px;">
+          <div>
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" placeholder="Dell OptiPlex 7070 Desktop" />
+          </div>
+          <div>
+            <label for="condition">Condition</label>
+            <select id="condition" name="condition">
+              <option value="">Select condition</option>
+            </select>
+          </div>
+          <div>
+            <label for="availability">Availability</label>
+            <select id="availability" name="availability">
+              <option value="">Select availability</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label>Image URLs</label>
+          <div class="grid grid-3">
+            <input name="image1" type="url" placeholder="Image 1 URL" />
+            <input name="image2" type="url" placeholder="Image 2 URL" />
+            <input name="image3" type="url" placeholder="Image 3 URL" />
+            <input name="image4" type="url" placeholder="Image 4 URL" />
+            <input name="image5" type="url" placeholder="Image 5 URL" />
+            <input name="image6" type="url" placeholder="Image 6 URL" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="details">Details</label>
+          <textarea id="details" name="details" placeholder="Specs, included accessories, test notes, etc."></textarea>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" placeholder="Internal notes, defects, shelf notes, missing parts, etc."></textarea>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn-ghost" type="button" id="previewBtn">Preview Payload</button>
+          <button class="btn-accent" type="submit">Submit to Sheet</button>
+          <button class="btn" type="reset">Clear Form</button>
         </div>
       </form>
+
+      <div id="statusBox" class="status"></div>
+
+      <div style="margin-top:10px;">
+        <label>Payload Preview</label>
+        <pre id="payloadPreview">{}</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px;font-size:1rem;">3) Header Mapping Used</h2>
+      <div class="small">Submits using your exact Inventory headers:</div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;">
+        <span class="pill">Item Number</span>
+        <span class="pill">Serial Number</span>
+        <span class="pill">Title</span>
+        <span class="pill">Manufacturer</span>
+        <span class="pill">Model</span>
+        <span class="pill">Condition</span>
+        <span class="pill">Availability</span>
+        <span class="pill">Image 1</span>
+        <span class="pill">Image 2</span>
+        <span class="pill">Image 3</span>
+        <span class="pill">Image 4</span>
+        <span class="pill">Image 5</span>
+        <span class="pill">Image 6</span>
+        <span class="pill">Details</span>
+        <span class="pill">Notes</span>
+      </div>
     </div>
   </div>
 
   <script>
-    const state = {
-      schema: null,
-      filteredFields: []
+    // ✅ Your Apps Script URL is baked in here:
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZDY3EmjCLDEqcdd7Dcbbn5L2k-cP6XI3DKbhGL1g9-UnIPHONPl8E5HjpiB2C5uXF3w/exec";
+
+    const els = {
+      sheetName: document.getElementById("sheetName"),
+      form: document.getElementById("inventoryForm"),
+      preview: document.getElementById("payloadPreview"),
+      statusBox: document.getElementById("statusBox"),
+      dropdownStatus: document.getElementById("dropdownStatus"),
+
+      manufacturer: document.getElementById("manufacturer"),
+      condition: document.getElementById("condition"),
+      availability: document.getElementById("availability")
     };
 
-    const el = {
-      appCard: document.getElementById('appCard'),
-      form: document.getElementById('inventoryForm'),
-      formGrid: document.getElementById('formGrid'),
-      status: document.getElementById('status'),
-      sheetLabel: document.getElementById('sheetLabel'),
-      fieldSearch: document.getElementById('fieldSearch'),
-      clearBtn: document.getElementById('clearBtn'),
-      reloadBtn: document.getElementById('reloadBtn'),
-      fieldCountPill: document.getElementById('fieldCountPill'),
-      dropdownCountPill: document.getElementById('dropdownCountPill')
-    };
-
-    function setStatus(msg, type = 'muted') {
-      el.status.textContent = msg;
-      el.status.className = 'status ' + type;
+    function showStatus(msg, type="ok"){
+      els.statusBox.className = "status " + (type === "err" ? "err" : "ok");
+      els.statusBox.textContent = msg;
+    }
+    function clearStatus(){
+      els.statusBox.className = "status";
+      els.statusBox.textContent = "";
     }
 
-    function setLoading(on) {
-      el.appCard.classList.toggle('loading', !!on);
-    }
+    function setSelectOptions(selectEl, items, placeholder) {
+      const current = selectEl.value;
+      selectEl.innerHTML = "";
+      const first = document.createElement("option");
+      first.value = "";
+      first.textContent = placeholder;
+      selectEl.appendChild(first);
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
+      (items || []).forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item;
+        opt.textContent = item;
+        selectEl.appendChild(opt);
+      });
 
-    function isLikelyLongField(field) {
-      if (field.isTextarea) return true;
-      const n = field.label.toLowerCase();
-      return ['description','notes','details','specs','comments'].some(k => n.includes(k));
-    }
-
-    function renderFields(fields) {
-      const html = fields.map(field => {
-        const full = isLikelyLongField(field) ? ' full' : '';
-        const id = 'f_' + field.key.replace(/\W+/g, '_');
-
-        const label = `
-          <label for="${id}">${escapeHtml(field.label)}</label>
-          ${field.options && field.options.length ? `<div class="hint">Dropdown from sheet validation</div>` : ''}
-        `;
-
-        let control = '';
-
-        if (field.options && field.options.length) {
-          const opts = ['<option value=""></option>']
-            .concat(field.options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`))
-            .join('');
-          control = `<select id="${id}" name="${escapeHtml(field.key)}">${opts}</select>`;
-        } else if (field.isTextarea) {
-          control = `<textarea id="${id}" name="${escapeHtml(field.key)}" placeholder="${escapeHtml(field.label)}"></textarea>`;
-        } else {
-          const type = field.inputType || 'text';
-          const step = type === 'number' ? ' step="any"' : '';
-          control = `<input id="${id}" name="${escapeHtml(field.key)}" type="${type}"${step} placeholder="${escapeHtml(field.label)}" />`;
-        }
-
-        return `<div class="field${full}" data-label="${escapeHtml(field.label.toLowerCase())}">${label}${control}</div>`;
-      }).join('');
-
-      el.formGrid.innerHTML = html || `<div class="field full"><div class="hint">No fields match your filter.</div></div>`;
-    }
-
-    function updatePills() {
-      const total = state.schema?.fields?.length || 0;
-      const dd = (state.schema?.fields || []).filter(f => f.options && f.options.length).length;
-      el.fieldCountPill.textContent = `Fields: ${total}`;
-      el.dropdownCountPill.textContent = `Dropdowns: ${dd}`;
-    }
-
-    function applyFilter() {
-      const q = el.fieldSearch.value.trim().toLowerCase();
-      if (!state.schema) return;
-
-      if (!q) {
-        state.filteredFields = [...state.schema.fields];
-      } else {
-        state.filteredFields = state.schema.fields.filter(f =>
-          f.label.toLowerCase().includes(q)
-        );
+      if ([...selectEl.options].some(o => o.value === current)) {
+        selectEl.value = current;
       }
-      renderFields(state.filteredFields);
     }
 
-    function loadSchema() {
-      setLoading(true);
-      setStatus('Loading headers and dropdowns from your sheet...', 'muted');
+    async function loadDropdowns() {
+      clearStatus();
+      els.dropdownStatus.textContent = "Loading dropdowns from sheet...";
 
-      google.script.run
-        .withSuccessHandler((schema) => {
-          state.schema = schema;
-          state.filteredFields = [...schema.fields];
+      try {
+        const joiner = APPS_SCRIPT_URL.includes("?") ? "&" : "?";
+        const url = APPS_SCRIPT_URL + joiner + "action=dropdowns";
 
-          el.sheetLabel.textContent = `Connected to sheet tab: ${schema.sheetName}`;
-          updatePills();
-          renderFields(state.filteredFields);
+        const res = await fetch(url);
+        const text = await res.text();
+        let data = null;
+        try { data = JSON.parse(text); } catch (e) {}
 
-          setLoading(false);
-          setStatus('Ready.', 'ok');
-        })
-        .withFailureHandler((err) => {
-          console.error(err);
-          setLoading(false);
-          setStatus('Could not load sheet schema: ' + (err.message || err), 'err');
-        })
-        .getFormSchema();
-    }
-
-    function clearForm() {
-      const controls = el.form.querySelectorAll('input, select, textarea');
-      controls.forEach(c => {
-        if (c.type === 'checkbox' || c.type === 'radio') {
-          c.checked = false;
-        } else {
-          c.value = '';
+        if (!res.ok) {
+          els.dropdownStatus.textContent = "Failed to load dropdowns.";
+          showStatus(`GET failed (${res.status}): ${text}`, "err");
+          return;
         }
-      });
-      setStatus('Form cleared.', 'muted');
+        if (!data || !data.ok) {
+          els.dropdownStatus.textContent = "Dropdown load failed.";
+          showStatus((data && data.error) ? data.error : "Invalid dropdown response.", "err");
+          return;
+        }
+
+        setSelectOptions(els.manufacturer, data.dropdowns.Manufacturer || [], "Select manufacturer");
+        setSelectOptions(els.condition, data.dropdowns.Condition || [], "Select condition");
+        setSelectOptions(els.availability, data.dropdowns.Availability || [], "Select availability");
+
+        const counts = [
+          `Manufacturer: ${(data.dropdowns.Manufacturer || []).length}`,
+          `Condition: ${(data.dropdowns.Condition || []).length}`,
+          `Availability: ${(data.dropdowns.Availability || []).length}`
+        ];
+        els.dropdownStatus.textContent = "Loaded dropdowns ✅ (" + counts.join(" | ") + ")";
+        showStatus("Dropdowns loaded from your 'Dropdowns' sheet.");
+      } catch (err) {
+        els.dropdownStatus.textContent = "Error loading dropdowns.";
+        showStatus("Dropdown error: " + err.message, "err");
+      }
     }
 
-    function collectFormData() {
-      const payload = {};
-      const controls = el.form.querySelectorAll('[name]');
-      controls.forEach(c => {
-        let val = c.value;
-        // Keep date values as text (YYYY-MM-DD) so sheet handles it predictably
-        payload[c.name] = val;
-      });
-      return payload;
+    function buildPayload() {
+      const fd = new FormData(els.form);
+
+      return {
+        sheetName: (els.sheetName.value || "Inventory").trim(),
+        data: {
+          "Item Number": fd.get("itemNumber") || "",
+          "Serial Number": fd.get("serialNumber") || "",
+          "Title": fd.get("title") || "",
+          "Manufacturer": fd.get("manufacturer") || "",
+          "Model": fd.get("model") || "",
+          "Condition": fd.get("condition") || "",
+          "Availability": fd.get("availability") || "",
+          "Image 1": fd.get("image1") || "",
+          "Image 2": fd.get("image2") || "",
+          "Image 3": fd.get("image3") || "",
+          "Image 4": fd.get("image4") || "",
+          "Image 5": fd.get("image5") || "",
+          "Image 6": fd.get("image6") || "",
+          "Details": fd.get("details") || "",
+          "Notes": fd.get("notes") || ""
+        }
+      };
     }
 
-    function submitForm(e) {
+    function previewPayload() {
+      const payload = buildPayload();
+      els.preview.textContent = JSON.stringify(payload, null, 2);
+    }
+
+    async function submitToSheet(e) {
       e.preventDefault();
-      if (!state.schema) return;
+      clearStatus();
 
-      const payload = collectFormData();
+      const payload = buildPayload();
+      els.preview.textContent = JSON.stringify(payload, null, 2);
 
-      setLoading(true);
-      setStatus('Saving item to sheet...', 'muted');
+      if (!payload.data["Item Number"] && !payload.data["Title"]) {
+        showStatus("Please enter at least an Item Number or Title before submitting.", "err");
+        return;
+      }
 
-      google.script.run
-        .withSuccessHandler((res) => {
-          setLoading(false);
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-          if (res && res.ok) {
-            setStatus(`${res.message} (Row ${res.rowNumber})`, 'ok');
-            clearForm();
-          } else {
-            setStatus((res && res.message) || 'Unknown error while saving.', 'err');
-          }
-        })
-        .withFailureHandler((err) => {
-          console.error(err);
-          setLoading(false);
-          setStatus('Save failed: ' + (err.message || err), 'err');
-        })
-        .submitInventoryItem(payload);
+        const text = await res.text();
+        let data = null;
+        try { data = JSON.parse(text); } catch (e) {}
+
+        if (!res.ok) {
+          showStatus(`POST failed (${res.status}): ${text}`, "err");
+          return;
+        }
+
+        if (data && data.ok) {
+          showStatus(data.message || "Saved to Inventory sheet.");
+          // Optional: reset after save
+          // els.form.reset();
+          // previewPayload();
+        } else {
+          showStatus((data && data.error) ? data.error : "Unexpected response from Apps Script.", "err");
+        }
+      } catch (err) {
+        showStatus("Network/Script error: " + err.message, "err");
+      }
     }
 
-    // Events
-    el.form.addEventListener('submit', submitForm);
-    el.clearBtn.addEventListener('click', clearForm);
-    el.reloadBtn.addEventListener('click', loadSchema);
-    el.fieldSearch.addEventListener('input', applyFilter);
+    document.getElementById("loadDropdownsBtn").addEventListener("click", loadDropdowns);
+    document.getElementById("previewBtn").addEventListener("click", previewPayload);
+    els.form.addEventListener("submit", submitToSheet);
 
-    // Init
-    loadSchema();
+    previewPayload();
+    // Auto-load dropdowns on page open:
+    loadDropdowns();
   </script>
 </body>
 </html>
