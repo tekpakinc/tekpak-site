@@ -42,6 +42,7 @@
     .mode-badge.new{background:#ecfdf3;color:#166534;border-color:#bbf7d0}
     .mode-badge.edit{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
     .lookup-row{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+    .small{font-size:.8rem;color:var(--muted)}
     iframe{display:none}
   </style>
 </head>
@@ -65,17 +66,17 @@
             <label for="lookupItemId">Find Item (Item Number)</label>
             <input id="lookupItemId" type="text" placeholder="TP-MMDDYY-XXXX" />
           </div>
-          <div style="display:flex;align-items:end;gap:8px;">
+          <div style="display:flex;align-items:end;gap:8px;flex-wrap:wrap;">
             <button type="button" class="btn" id="loadItemBtn">Load Item</button>
+            <button type="button" class="btn-ghost" id="cloneBtn" title="Clone current item into a new record">Clone Item</button>
             <button type="button" class="btn-ghost" id="newModeBtn">New Item</button>
           </div>
           <div style="display:flex;align-items:end;color:#6b7280;font-size:.85rem;">
-            Load to edit. New Item clears the form.
+            Load to edit. Clone makes a new record with a new ID.
           </div>
         </div>
       </div>
 
-      <!-- FORM POSTS DIRECTLY TO APPS SCRIPT (no fetch/CORS). -->
       <form id="inventoryForm" method="POST" target="saveFrame">
         <input type="hidden" name="sheetName" value="Inventory" />
         <input type="hidden" name="mode" id="modeField" value="create" />
@@ -88,10 +89,12 @@
               <input id="itemNumber" name="itemNumber" type="text" placeholder="TP-MMDDYY-XXXX" />
               <button type="button" class="btn-ghost" id="genIdBtn">Auto ID</button>
             </div>
+            <div class="small">TP-MMDDYY-XXXX (XXXX = 4 capital letters)</div>
           </div>
           <div>
             <label for="serialNumber">Serial Number</label>
             <input id="serialNumber" name="serialNumber" type="text" />
+            <div class="small">Tip: press Enter to jump to the next field.</div>
           </div>
           <div>
             <label for="manufacturer">Manufacturer</label>
@@ -121,12 +124,12 @@
         <div style="margin-top:12px;">
           <label>Image URLs</label>
           <div class="grid grid-3">
-            <input name="image1" type="url" placeholder="Image 1 URL" />
-            <input name="image2" type="url" placeholder="Image 2 URL" />
-            <input name="image3" type="url" placeholder="Image 3 URL" />
-            <input name="image4" type="url" placeholder="Image 4 URL" />
-            <input name="image5" type="url" placeholder="Image 5 URL" />
-            <input name="image6" type="url" placeholder="Image 6 URL" />
+            <input name="image1" id="image1" type="url" placeholder="Image 1 URL" />
+            <input name="image2" id="image2" type="url" placeholder="Image 2 URL" />
+            <input name="image3" id="image3" type="url" placeholder="Image 3 URL" />
+            <input name="image4" id="image4" type="url" placeholder="Image 4 URL" />
+            <input name="image5" id="image5" type="url" placeholder="Image 5 URL" />
+            <input name="image6" id="image6" type="url" placeholder="Image 6 URL" />
           </div>
         </div>
 
@@ -153,10 +156,15 @@
   </div>
 
   <script>
-    // Your Apps Script URL
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFxhPq9Kg7BGTZan_V2LBiHhNt1fZOWwrIrBmI65Srges7t_UJAY0GPtPrkqlH5WdKNA/exec";
 
-    const state = { mode:"new", originalItemNumber:"", loadedRowNumber:0, saveAndNew:false };
+    const state = {
+      mode: "new",                 // new | edit
+      originalItemNumber: "",      // the ID we loaded (primary key)
+      loadedRowNumber: 0,          // used to exclude row in duplicate checks
+      saveAndNew: false,
+      dropdownsReady: false
+    };
 
     const els = {
       statusPill: document.getElementById("statusPill"),
@@ -177,6 +185,12 @@
       availability: document.getElementById("availability"),
       details: document.getElementById("details"),
       notes: document.getElementById("notes"),
+      image1: document.getElementById("image1"),
+      image2: document.getElementById("image2"),
+      image3: document.getElementById("image3"),
+      image4: document.getElementById("image4"),
+      image5: document.getElementById("image5"),
+      image6: document.getElementById("image6")
     };
 
     function setPill(text, type="info"){
@@ -186,7 +200,7 @@
 
     function setMode(mode){
       state.mode = mode;
-      if (mode === "edit") {
+      if (mode === "edit"){
         els.modeBadge.textContent = "Edit Mode";
         els.modeBadge.className = "mode-badge edit";
         els.saveBtn.textContent = "Save Changes";
@@ -199,7 +213,7 @@
       }
     }
 
-    // JSONP loader (no CORS)
+    // --- JSONP (no CORS) ---
     function loadJSONP(url, callbackName){
       return new Promise((resolve, reject) => {
         const script = document.createElement("script");
@@ -258,19 +272,24 @@
 
     async function loadDropdowns(){
       setPill("Loading dropdowns…", "info");
-      try {
+      try{
         const data = await apiGet({ action:"dropdowns" });
         if (!data || !data.ok) throw new Error(data?.error || "Dropdowns failed");
+
         setSelectOptions(els.manufacturer, data.dropdowns.Manufacturer || [], "Select manufacturer");
         setSelectOptions(els.condition, data.dropdowns.Condition || [], "Select condition");
         setSelectOptions(els.availability, data.dropdowns.Availability || [], "Select availability");
+
+        state.dropdownsReady = true;
         setPill("Connected", "ok");
       } catch (e){
         console.error(e);
+        state.dropdownsReady = false;
         setPill("Connection error", "err");
       }
     }
 
+    // --- ID generation ---
     function randomLetters4(){
       const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       let out = "";
@@ -294,16 +313,19 @@
           if (v && v.ok && !v.duplicateId){
             els.itemNumber.value = candidate;
             setPill("Unique ID generated", "ok");
-            return;
+            return true;
           }
         }
         setPill("ID generation failed", "err");
+        return false;
       } catch(e){
         console.error(e);
         setPill("ID generation failed", "err");
+        return false;
       }
     }
 
+    // --- Load / New / Clone ---
     async function loadItem(){
       const id = els.lookupItemId.value.trim().toUpperCase();
       if (!id){ setPill("Enter Item Number", "warn"); return; }
@@ -315,7 +337,9 @@
         const item = data.item || {};
         state.loadedRowNumber = Number(data.rowNumber || 0);
         state.originalItemNumber = String(item["Item Number"] || id).trim();
+        els.originalItemNumberField.value = state.originalItemNumber;
 
+        // fill
         els.itemNumber.value = item["Item Number"] || "";
         els.serialNumber.value = item["Serial Number"] || "";
         els.title.value = item["Title"] || "";
@@ -323,16 +347,15 @@
         els.model.value = item["Model"] || "";
         els.condition.value = item["Condition"] || "";
         els.availability.value = item["Availability"] || "";
-        document.querySelector('[name="image1"]').value = item["Image 1"] || "";
-        document.querySelector('[name="image2"]').value = item["Image 2"] || "";
-        document.querySelector('[name="image3"]').value = item["Image 3"] || "";
-        document.querySelector('[name="image4"]').value = item["Image 4"] || "";
-        document.querySelector('[name="image5"]').value = item["Image 5"] || "";
-        document.querySelector('[name="image6"]').value = item["Image 6"] || "";
+        els.image1.value = item["Image 1"] || "";
+        els.image2.value = item["Image 2"] || "";
+        els.image3.value = item["Image 3"] || "";
+        els.image4.value = item["Image 4"] || "";
+        els.image5.value = item["Image 5"] || "";
+        els.image6.value = item["Image 6"] || "";
         els.details.value = item["Details"] || "";
         els.notes.value = item["Notes"] || "";
 
-        els.originalItemNumberField.value = state.originalItemNumber;
         setMode("edit");
         setPill("Item loaded", "ok");
       } catch(e){
@@ -341,16 +364,69 @@
       }
     }
 
-    function newItem(){
+    async function newItem({ generateId = true } = {}){
       els.form.reset();
       state.originalItemNumber = "";
       state.loadedRowNumber = 0;
       els.originalItemNumberField.value = "";
       setMode("new");
       setPill("Ready", "ok");
-      els.itemNumber.focus();
+
+      // Auto-ID on new item (requested)
+      if (generateId){
+        const ok = await autoId();
+        // put cursor into Serial for scan flow
+        if (ok) els.serialNumber.focus();
+        else els.itemNumber.focus();
+      } else {
+        els.itemNumber.focus();
+      }
     }
 
+    async function cloneItem(){
+      // Clone means: keep current form values, generate new ID, clear serial, switch to New mode.
+      setPill("Cloning…", "info");
+
+      // snapshot current values
+      const snapshot = {
+        title: els.title.value,
+        manufacturer: els.manufacturer.value,
+        model: els.model.value,
+        condition: els.condition.value,
+        availability: els.availability.value,
+        image1: els.image1.value,
+        image2: els.image2.value,
+        image3: els.image3.value,
+        image4: els.image4.value,
+        image5: els.image5.value,
+        image6: els.image6.value,
+        details: els.details.value,
+        notes: els.notes.value
+      };
+
+      await newItem({ generateId: true });
+
+      // restore snapshot (but keep serial blank)
+      els.title.value = snapshot.title;
+      els.manufacturer.value = snapshot.manufacturer;
+      els.model.value = snapshot.model;
+      els.condition.value = snapshot.condition;
+      els.availability.value = snapshot.availability;
+      els.image1.value = snapshot.image1;
+      els.image2.value = snapshot.image2;
+      els.image3.value = snapshot.image3;
+      els.image4.value = snapshot.image4;
+      els.image5.value = snapshot.image5;
+      els.image6.value = snapshot.image6;
+      els.details.value = snapshot.details;
+      els.notes.value = snapshot.notes;
+
+      els.serialNumber.value = "";
+      els.serialNumber.focus();
+      setPill("Cloned (new ID created)", "ok");
+    }
+
+    // --- Duplicate prevention before save ---
     async function validateBeforeSave(){
       const id = els.itemNumber.value.trim().toUpperCase();
       els.itemNumber.value = id;
@@ -365,7 +441,15 @@
       return true;
     }
 
-    // Form submits to iframe (no CORS). Apps Script replies with postMessage.
+    // --- Edit guardrail: warn/confirm if ID changed in Edit Mode ---
+    function itemIdChangedInEditMode(){
+      if (state.mode !== "edit") return false;
+      const current = els.itemNumber.value.trim().toUpperCase();
+      const original = String(state.originalItemNumber || "").trim().toUpperCase();
+      return !!(original && current && current !== original);
+    }
+
+    // --- Save (POST via iframe) ---
     els.form.action = APPS_SCRIPT_URL;
 
     window.addEventListener("message", (event) => {
@@ -374,15 +458,19 @@
 
       if (data.ok){
         setPill(data.message || "Saved", "ok");
+
+        // After save, update original ID to current returned ID
         if (data.itemNumber){
           els.lookupItemId.value = data.itemNumber;
           state.originalItemNumber = data.itemNumber;
           els.originalItemNumberField.value = data.itemNumber;
           setMode("edit");
         }
+
         if (state.saveAndNew){
           state.saveAndNew = false;
-          newItem();
+          // Auto-ID on Save+New (requested)
+          newItem({ generateId: true });
         }
       } else {
         if (data.duplicateId) setPill("Duplicate Item Number", "err");
@@ -395,6 +483,14 @@
       state.saveAndNew = saveAndNew;
 
       const id = els.itemNumber.value.trim().toUpperCase();
+      const title = els.title.value.trim();
+
+      if (!id && !title){
+        setPill("Add Item Number or Title", "err");
+        state.saveAndNew = false;
+        return;
+      }
+
       if (id){
         const re = /^TP-\d{6}-[A-Z]{4}$/;
         if (!re.test(id)){
@@ -402,16 +498,28 @@
           state.saveAndNew = false;
           return;
         }
-      } else if (!els.title.value.trim()){
-        setPill("Add Item Number or Title", "err");
-        state.saveAndNew = false;
-        return;
+      }
+
+      // Guardrail confirm if editing and ID changed
+      if (itemIdChangedInEditMode()){
+        setPill("Item ID changed (confirming)…", "warn");
+        const ok = confirm(
+          "You changed the Item Number while editing.\n\n" +
+          "This is allowed, but it can confuse tracking if done accidentally.\n\n" +
+          "Continue saving changes with the NEW Item Number?"
+        );
+        if (!ok){
+          setPill("Save cancelled", "warn");
+          state.saveAndNew = false;
+          return;
+        }
       }
 
       setPill("Checking duplicates…", "info");
       try{
         const ok = await validateBeforeSave();
         if (!ok){ state.saveAndNew = false; return; }
+
         setPill(state.mode==="edit" ? "Saving changes…" : "Saving…", "info");
         els.form.submit();
       } catch(e){
@@ -421,17 +529,83 @@
       }
     }
 
-    // events
-    document.getElementById("reloadDropdownsBtn").addEventListener("click", loadDropdowns);
-    document.getElementById("genIdBtn").addEventListener("click", autoId);
-    document.getElementById("loadItemBtn").addEventListener("click", loadItem);
-    document.getElementById("newModeBtn").addEventListener("click", newItem);
-    document.getElementById("saveNewBtn").addEventListener("click", () => save(true));
-    els.form.addEventListener("submit", (e) => { e.preventDefault(); save(false); });
+    // --- Enter-to-next-field flow (scanner-friendly) ---
+    function wireEnterFlow(){
+      const order = [
+        els.serialNumber,
+        els.title,
+        els.manufacturer,
+        els.model,
+        els.condition,
+        els.availability,
+        els.image1,
+        els.image2,
+        els.image3,
+        els.image4,
+        els.image5,
+        els.image6,
+        els.details,
+        els.notes
+      ];
 
-    // init
+      order.forEach((el, idx) => {
+        el.addEventListener("keydown", (e) => {
+          if (e.key !== "Enter") return;
+
+          // In textareas, Enter should create a newline (except with Ctrl+Enter)
+          if (el.tagName === "TEXTAREA" && !e.ctrlKey) return;
+
+          e.preventDefault();
+          const next = order[idx + 1];
+          if (next) next.focus();
+          else document.getElementById("saveBtn").focus();
+        });
+      });
+
+      // Also: Enter in lookup box loads item
+      els.lookupItemId.addEventListener("keydown", (e) => {
+        if (e.key === "Enter"){
+          e.preventDefault();
+          loadItem();
+        }
+      });
+    }
+
+    // --- live ID uppercase ---
+    els.itemNumber.addEventListener("input", () => {
+      const start = els.itemNumber.selectionStart;
+      const end = els.itemNumber.selectionEnd;
+      els.itemNumber.value = els.itemNumber.value.toUpperCase();
+      try { els.itemNumber.setSelectionRange(start, end); } catch {}
+      // gentle warning in edit mode if changed
+      if (itemIdChangedInEditMode()){
+        setPill("Warning: Item ID changed in Edit Mode", "warn");
+      }
+    });
+
+    // --- buttons ---
+    document.getElementById("reloadDropdownsBtn").addEventListener("click", loadDropdowns);
+    document.getElementById("genIdBtn").addEventListener("click", async () => {
+      const ok = await autoId();
+      if (ok) els.serialNumber.focus();
+    });
+    document.getElementById("loadItemBtn").addEventListener("click", loadItem);
+    document.getElementById("newModeBtn").addEventListener("click", () => newItem({ generateId: true }));
+    document.getElementById("cloneBtn").addEventListener("click", cloneItem);
+    document.getElementById("saveNewBtn").addEventListener("click", () => save(true));
+
+    els.form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      save(false);
+    });
+
+    // --- init ---
     setMode("new");
-    loadDropdowns();
+    wireEnterFlow();
+    loadDropdowns().finally(() => {
+      // Auto-ID on first open (requested)
+      newItem({ generateId: true });
+    });
     setPill("Ready", "ok");
   </script>
 </body>
