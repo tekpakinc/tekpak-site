@@ -6,101 +6,91 @@
   <title>Tek-Pak Inventory Input</title>
   <style>
     :root{
-      --bg:#f6f7fb;
-      --card:#ffffff;
-      --line:#e4e8f0;
-      --text:#111827;
-      --muted:#6b7280;
-      --accent:#84cc16;
-      --accent-dark:#65a30d;
-      --danger:#b91c1c;
-      --ok:#166534;
-      --shadow:0 12px 30px rgba(0,0,0,.08);
-      --radius:14px;
+      --bg:#f6f7fb; --card:#fff; --line:#e4e8f0; --text:#111827; --muted:#6b7280;
+      --accent:#84cc16; --accent-dark:#65a30d; --danger:#b91c1c; --ok:#166534; --info:#1d4ed8;
+      --shadow:0 12px 30px rgba(0,0,0,.08); --radius:14px;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px;}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:16px;}
-    h1{margin:0 0 6px;font-size:1.35rem}
-    .sub{color:var(--muted);margin-bottom:14px}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    h1{margin:0;font-size:1.25rem}
+    .subtitle{margin:2px 0 0;color:var(--muted);font-size:.88rem}
+    .status-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-size:.82rem;font-weight:700;border:1px solid transparent;white-space:nowrap}
+    .status-pill.info{background:#eff6ff;color:var(--info);border-color:#bfdbfe}
+    .status-pill.ok{background:#ecfdf3;color:var(--ok);border-color:#bbf7d0}
+    .status-pill.err{background:#fef2f2;color:var(--danger);border-color:#fecaca}
+    .status-pill.warn{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
+
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
     .grid{display:grid;gap:12px}
     .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
     .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
     .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
-    @media (max-width:900px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+    @media (max-width:900px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
+
     label{display:block;font-size:.86rem;font-weight:700;margin-bottom:6px}
     input,select,textarea,button{font:inherit}
-    input,select,textarea{
-      width:100%;border:1px solid #d2d8e4;border-radius:10px;padding:10px 12px;background:#fff;
-    }
+    input,select,textarea{width:100%;border:1px solid #d2d8e4;border-radius:10px;padding:10px 12px;background:#fff}
     textarea{min-height:95px;resize:vertical}
-    .row-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .row-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
     button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
     .btn{background:#111827;color:#fff}
     .btn-accent{background:var(--accent);color:#111}
     .btn-accent:hover{background:var(--accent-dark);color:#fff}
     .btn-ghost{background:#eef2f7;color:#111827;border:1px solid var(--line)}
-    .small{font-size:.82rem;color:var(--muted)}
-    .status{padding:10px 12px;border-radius:10px;margin-top:12px;display:none;font-weight:600}
-    .status.ok{display:block;background:#ecfdf3;border:1px solid #bbf7d0;color:var(--ok)}
-    .status.err{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--danger)}
-    pre{
-      background:#0f172a;color:#e2e8f0;border-radius:10px;padding:12px;overflow:auto;font-size:.82rem;margin:8px 0 0;
-    }
-    .pill{
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid #dbeafe;
-      background:#eff6ff;
-      color:#1d4ed8;
-      font-size:.75rem;
-      font-weight:700;
-    }
+    .btn-warn{background:#f97316;color:#fff}
+
+    .small{font-size:.8rem;color:var(--muted)}
+    .mode-badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:.75rem;font-weight:700;border:1px solid #ddd}
+    .mode-badge.new{background:#ecfdf3;color:#166534;border-color:#bbf7d0}
+    .mode-badge.edit{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+    .lookup-row{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+    .preview-thumb{width:100%;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;background:#f8fafc}
+    .thumb-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:8px}
+    @media (max-width:900px){.thumb-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Tek-Pak Inventory Input</h1>
-    <div class="sub">Uses your <strong>Inventory</strong> and <strong>Dropdowns</strong> sheets.</div>
-
-    <!-- Connection -->
-    <div class="card">
-      <h2 style="margin:0 0 8px;font-size:1rem;">1) Connection</h2>
-      <div class="grid grid-2">
-        <div>
-          <label for="sheetName">Target Sheet Name</label>
-          <input id="sheetName" type="text" value="Inventory" />
-          <div class="small">Default is <code>Inventory</code>.</div>
-        </div>
-        <div>
-          <label>Apps Script Status</label>
-          <div class="small" style="padding:10px 12px;border:1px solid #d2d8e4;border-radius:10px;background:#f8fafc;">
-            ✅ Apps Script URL is baked in
-          </div>
-          <div class="small" style="margin-top:6px;">No need to paste it each time.</div>
+    <div class="topbar">
+      <div>
+        <h1>Tek-Pak Inventory</h1>
+        <div class="subtitle">
+          <span id="modeBadge" class="mode-badge new">New Item Mode</span>
+          &nbsp; Add items or load/edit existing ones
         </div>
       </div>
-
-      <div class="row-actions">
-        <button class="btn" type="button" id="loadDropdownsBtn">Load Dropdowns</button>
-      </div>
-
-      <div id="dropdownStatus" class="small" style="margin-top:8px;">
-        Dropdowns not loaded yet.
-      </div>
+      <div id="statusPill" class="status-pill info">● Connecting…</div>
     </div>
 
-    <!-- Form -->
     <div class="card">
-      <h2 style="margin:0 0 8px;font-size:1rem;">2) Inventory Item</h2>
+      <!-- Lookup/Edit -->
+      <div class="lookup-row">
+        <div class="grid grid-3">
+          <div>
+            <label for="lookupItemId">Find Existing Item by Item Number</label>
+            <input id="lookupItemId" type="text" placeholder="TP-MMDDYY-XXXX" />
+          </div>
+          <div style="display:flex;align-items:end;gap:8px;">
+            <button type="button" class="btn" id="loadItemBtn">Load Item</button>
+            <button type="button" class="btn-ghost" id="newModeBtn">New Item</button>
+          </div>
+          <div class="small" style="display:flex;align-items:end;">
+            Load an item to edit it. “New Item” resets the form for a new entry.
+          </div>
+        </div>
+      </div>
 
       <form id="inventoryForm">
         <div class="grid grid-4">
           <div>
             <label for="itemNumber">Item Number</label>
-            <input id="itemNumber" name="itemNumber" type="text" placeholder="TP-0001" />
+            <div style="display:flex;gap:8px;">
+              <input id="itemNumber" name="itemNumber" type="text" placeholder="TP-MMDDYY-XXXX" />
+              <button type="button" class="btn-ghost" id="genIdBtn">Auto ID</button>
+            </div>
+            <div class="small">Format: TP-MMDDYY-XXXX</div>
           </div>
           <div>
             <label for="serialNumber">Serial Number</label>
@@ -140,12 +130,20 @@
         <div style="margin-top:12px;">
           <label>Image URLs</label>
           <div class="grid grid-3">
-            <input name="image1" type="url" placeholder="Image 1 URL" />
-            <input name="image2" type="url" placeholder="Image 2 URL" />
-            <input name="image3" type="url" placeholder="Image 3 URL" />
-            <input name="image4" type="url" placeholder="Image 4 URL" />
-            <input name="image5" type="url" placeholder="Image 5 URL" />
-            <input name="image6" type="url" placeholder="Image 6 URL" />
+            <input name="image1" id="image1" type="url" placeholder="Image 1 URL" />
+            <input name="image2" id="image2" type="url" placeholder="Image 2 URL" />
+            <input name="image3" id="image3" type="url" placeholder="Image 3 URL" />
+            <input name="image4" id="image4" type="url" placeholder="Image 4 URL" />
+            <input name="image5" id="image5" type="url" placeholder="Image 5 URL" />
+            <input name="image6" id="image6" type="url" placeholder="Image 6 URL" />
+          </div>
+          <div class="thumb-grid" id="thumbGrid">
+            <img class="preview-thumb" id="thumb1" alt="">
+            <img class="preview-thumb" id="thumb2" alt="">
+            <img class="preview-thumb" id="thumb3" alt="">
+            <img class="preview-thumb" id="thumb4" alt="">
+            <img class="preview-thumb" id="thumb5" alt="">
+            <img class="preview-thumb" id="thumb6" alt="">
           </div>
         </div>
 
@@ -160,71 +158,82 @@
         </div>
 
         <div class="row-actions">
-          <button class="btn-ghost" type="button" id="previewBtn">Preview Payload</button>
-          <button class="btn-accent" type="submit">Submit to Sheet</button>
-          <button class="btn" type="reset">Clear Form</button>
+          <button class="btn-accent" type="submit" id="saveBtn">Save to Inventory</button>
+          <button class="btn" type="button" id="saveNewBtn">Save + New</button>
+          <button class="btn-ghost" type="reset" id="clearBtn">Clear Form</button>
+          <button class="btn-ghost" type="button" id="reloadDropdownsBtn">Reload Dropdowns</button>
+          <button class="btn-warn" type="button" id="checkDupBtn">Check Duplicates</button>
         </div>
+
+        <input id="sheetName" type="hidden" value="Inventory" />
       </form>
-
-      <div id="statusBox" class="status"></div>
-
-      <div style="margin-top:10px;">
-        <label>Payload Preview</label>
-        <pre id="payloadPreview">{}</pre>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 style="margin:0 0 8px;font-size:1rem;">3) Header Mapping Used</h2>
-      <div class="small">Submits using your exact Inventory headers:</div>
-      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;">
-        <span class="pill">Item Number</span>
-        <span class="pill">Serial Number</span>
-        <span class="pill">Title</span>
-        <span class="pill">Manufacturer</span>
-        <span class="pill">Model</span>
-        <span class="pill">Condition</span>
-        <span class="pill">Availability</span>
-        <span class="pill">Image 1</span>
-        <span class="pill">Image 2</span>
-        <span class="pill">Image 3</span>
-        <span class="pill">Image 4</span>
-        <span class="pill">Image 5</span>
-        <span class="pill">Image 6</span>
-        <span class="pill">Details</span>
-        <span class="pill">Notes</span>
-      </div>
     </div>
   </div>
 
   <script>
-    // ✅ Your Apps Script URL is baked in here:
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZDY3EmjCLDEqcdd7Dcbbn5L2k-cP6XI3DKbhGL1g9-UnIPHONPl8E5HjpiB2C5uXF3w/exec";
 
-    const els = {
-      sheetName: document.getElementById("sheetName"),
-      form: document.getElementById("inventoryForm"),
-      preview: document.getElementById("payloadPreview"),
-      statusBox: document.getElementById("statusBox"),
-      dropdownStatus: document.getElementById("dropdownStatus"),
-
-      manufacturer: document.getElementById("manufacturer"),
-      condition: document.getElementById("condition"),
-      availability: document.getElementById("availability")
+    const state = {
+      mode: "new", // new | edit
+      originalItemNumber: "",
+      loadedRowNumber: 0
     };
 
-    function showStatus(msg, type="ok"){
-      els.statusBox.className = "status " + (type === "err" ? "err" : "ok");
-      els.statusBox.textContent = msg;
+    const els = {
+      form: document.getElementById("inventoryForm"),
+      statusPill: document.getElementById("statusPill"),
+      sheetName: document.getElementById("sheetName"),
+      modeBadge: document.getElementById("modeBadge"),
+      saveBtn: document.getElementById("saveBtn"),
+
+      lookupItemId: document.getElementById("lookupItemId"),
+      itemNumber: document.getElementById("itemNumber"),
+      serialNumber: document.getElementById("serialNumber"),
+      manufacturer: document.getElementById("manufacturer"),
+      model: document.getElementById("model"),
+      title: document.getElementById("title"),
+      condition: document.getElementById("condition"),
+      availability: document.getElementById("availability"),
+      details: document.getElementById("details"),
+      notes: document.getElementById("notes"),
+
+      image1: document.getElementById("image1"),
+      image2: document.getElementById("image2"),
+      image3: document.getElementById("image3"),
+      image4: document.getElementById("image4"),
+      image5: document.getElementById("image5"),
+      image6: document.getElementById("image6"),
+
+      thumb1: document.getElementById("thumb1"),
+      thumb2: document.getElementById("thumb2"),
+      thumb3: document.getElementById("thumb3"),
+      thumb4: document.getElementById("thumb4"),
+      thumb5: document.getElementById("thumb5"),
+      thumb6: document.getElementById("thumb6")
+    };
+
+    function setPill(text, type = "info") {
+      els.statusPill.className = "status-pill " + type;
+      els.statusPill.textContent = "● " + text;
     }
-    function clearStatus(){
-      els.statusBox.className = "status";
-      els.statusBox.textContent = "";
+
+    function setMode(mode) {
+      state.mode = mode;
+      if (mode === "edit") {
+        els.modeBadge.textContent = "Edit Mode";
+        els.modeBadge.className = "mode-badge edit";
+        els.saveBtn.textContent = "Save Changes";
+      } else {
+        els.modeBadge.textContent = "New Item Mode";
+        els.modeBadge.className = "mode-badge new";
+        els.saveBtn.textContent = "Save to Inventory";
+      }
     }
 
     function setSelectOptions(selectEl, items, placeholder) {
       const current = selectEl.value;
       selectEl.innerHTML = "";
+
       const first = document.createElement("option");
       first.value = "";
       first.textContent = placeholder;
@@ -242,125 +251,341 @@
       }
     }
 
+    async function apiGet(params) {
+      const url = new URL(APPS_SCRIPT_URL);
+      Object.keys(params).forEach(k => {
+        if (params[k] !== undefined && params[k] !== null && params[k] !== "") {
+          url.searchParams.set(k, params[k]);
+        }
+      });
+      const res = await fetch(url.toString());
+      const text = await res.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch {}
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
+      if (!data) throw new Error("Invalid JSON response");
+      return data;
+    }
+
+    async function apiPost(payload) {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const text = await res.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch {}
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
+      if (!data) throw new Error("Invalid JSON response");
+      return data;
+    }
+
     async function loadDropdowns() {
-      clearStatus();
-      els.dropdownStatus.textContent = "Loading dropdowns from sheet...";
-
+      setPill("Connecting...", "info");
       try {
-        const joiner = APPS_SCRIPT_URL.includes("?") ? "&" : "?";
-        const url = APPS_SCRIPT_URL + joiner + "action=dropdowns";
-
-        const res = await fetch(url);
-        const text = await res.text();
-        let data = null;
-        try { data = JSON.parse(text); } catch (e) {}
-
-        if (!res.ok) {
-          els.dropdownStatus.textContent = "Failed to load dropdowns.";
-          showStatus(`GET failed (${res.status}): ${text}`, "err");
-          return;
-        }
-        if (!data || !data.ok) {
-          els.dropdownStatus.textContent = "Dropdown load failed.";
-          showStatus((data && data.error) ? data.error : "Invalid dropdown response.", "err");
-          return;
-        }
+        const data = await apiGet({ action: "dropdowns" });
+        if (!data.ok) throw new Error(data.error || "Dropdown load failed");
 
         setSelectOptions(els.manufacturer, data.dropdowns.Manufacturer || [], "Select manufacturer");
         setSelectOptions(els.condition, data.dropdowns.Condition || [], "Select condition");
         setSelectOptions(els.availability, data.dropdowns.Availability || [], "Select availability");
 
-        const counts = [
-          `Manufacturer: ${(data.dropdowns.Manufacturer || []).length}`,
-          `Condition: ${(data.dropdowns.Condition || []).length}`,
-          `Availability: ${(data.dropdowns.Availability || []).length}`
-        ];
-        els.dropdownStatus.textContent = "Loaded dropdowns ✅ (" + counts.join(" | ") + ")";
-        showStatus("Dropdowns loaded from your 'Dropdowns' sheet.");
+        setPill("Connected to sheet", "ok");
       } catch (err) {
-        els.dropdownStatus.textContent = "Error loading dropdowns.";
-        showStatus("Dropdown error: " + err.message, "err");
+        console.error(err);
+        setPill("Connection error", "err");
       }
+    }
+
+    function randomLetters4() {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      let out = "";
+      for (let i = 0; i < 4; i++) {
+        out += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return out;
+    }
+
+    function todayMMDDYY() {
+      const d = new Date();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      const yy = String(d.getFullYear()).slice(-2);
+      return `${mm}${dd}${yy}`;
+    }
+
+    function generateItemId() {
+      return `TP-${todayMMDDYY()}-${randomLetters4()}`;
+    }
+
+    async function generateUniqueItemId(maxTries = 15) {
+      for (let i = 0; i < maxTries; i++) {
+        const candidate = generateItemId();
+        const val = await apiGet({ action: "validate", id: candidate });
+        if (val.ok && !val.duplicateId) return candidate;
+      }
+      throw new Error("Couldn't generate a unique ID after several tries.");
     }
 
     function buildPayload() {
       const fd = new FormData(els.form);
-
       return {
         sheetName: (els.sheetName.value || "Inventory").trim(),
+        mode: state.mode === "edit" ? "update" : "create",
+        originalItemNumber: state.originalItemNumber || "",
         data: {
-          "Item Number": fd.get("itemNumber") || "",
-          "Serial Number": fd.get("serialNumber") || "",
-          "Title": fd.get("title") || "",
-          "Manufacturer": fd.get("manufacturer") || "",
-          "Model": fd.get("model") || "",
-          "Condition": fd.get("condition") || "",
-          "Availability": fd.get("availability") || "",
-          "Image 1": fd.get("image1") || "",
-          "Image 2": fd.get("image2") || "",
-          "Image 3": fd.get("image3") || "",
-          "Image 4": fd.get("image4") || "",
-          "Image 5": fd.get("image5") || "",
-          "Image 6": fd.get("image6") || "",
-          "Details": fd.get("details") || "",
-          "Notes": fd.get("notes") || ""
+          "Item Number": String(fd.get("itemNumber") || "").trim(),
+          "Serial Number": String(fd.get("serialNumber") || "").trim(),
+          "Title": String(fd.get("title") || "").trim(),
+          "Manufacturer": String(fd.get("manufacturer") || "").trim(),
+          "Model": String(fd.get("model") || "").trim(),
+          "Condition": String(fd.get("condition") || "").trim(),
+          "Availability": String(fd.get("availability") || "").trim(),
+          "Image 1": String(fd.get("image1") || "").trim(),
+          "Image 2": String(fd.get("image2") || "").trim(),
+          "Image 3": String(fd.get("image3") || "").trim(),
+          "Image 4": String(fd.get("image4") || "").trim(),
+          "Image 5": String(fd.get("image5") || "").trim(),
+          "Image 6": String(fd.get("image6") || "").trim(),
+          "Details": String(fd.get("details") || "").trim(),
+          "Notes": String(fd.get("notes") || "").trim()
         }
       };
     }
 
-    function previewPayload() {
-      const payload = buildPayload();
-      els.preview.textContent = JSON.stringify(payload, null, 2);
+    function fillFormFromItem(item) {
+      els.itemNumber.value = item["Item Number"] || "";
+      els.serialNumber.value = item["Serial Number"] || "";
+      els.title.value = item["Title"] || "";
+      els.manufacturer.value = item["Manufacturer"] || "";
+      els.model.value = item["Model"] || "";
+      els.condition.value = item["Condition"] || "";
+      els.availability.value = item["Availability"] || "";
+      els.image1.value = item["Image 1"] || "";
+      els.image2.value = item["Image 2"] || "";
+      els.image3.value = item["Image 3"] || "";
+      els.image4.value = item["Image 4"] || "";
+      els.image5.value = item["Image 5"] || "";
+      els.image6.value = item["Image 6"] || "";
+      els.details.value = item["Details"] || "";
+      els.notes.value = item["Notes"] || "";
+      refreshThumbs();
     }
 
-    async function submitToSheet(e) {
-      e.preventDefault();
-      clearStatus();
+    function clearToNewMode() {
+      els.form.reset();
+      state.originalItemNumber = "";
+      state.loadedRowNumber = 0;
+      setMode("new");
+      refreshThumbs();
+      els.itemNumber.focus();
+      setPill("Ready", "ok");
+    }
 
-      const payload = buildPayload();
-      els.preview.textContent = JSON.stringify(payload, null, 2);
-
-      if (!payload.data["Item Number"] && !payload.data["Title"]) {
-        showStatus("Please enter at least an Item Number or Title before submitting.", "err");
+    async function loadItemForEdit() {
+      const id = els.lookupItemId.value.trim().toUpperCase();
+      if (!id) {
+        setPill("Enter Item Number to load", "warn");
         return;
       }
 
+      setPill("Loading item...", "info");
       try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const text = await res.text();
-        let data = null;
-        try { data = JSON.parse(text); } catch (e) {}
-
-        if (!res.ok) {
-          showStatus(`POST failed (${res.status}): ${text}`, "err");
+        const data = await apiGet({ action: "getItem", id });
+        if (!data.ok) {
+          setPill(data.error || "Item not found", "err");
           return;
         }
 
-        if (data && data.ok) {
-          showStatus(data.message || "Saved to Inventory sheet.");
-          // Optional: reset after save
-          // els.form.reset();
-          // previewPayload();
-        } else {
-          showStatus((data && data.error) ? data.error : "Unexpected response from Apps Script.", "err");
-        }
+        fillFormFromItem(data.item || {});
+        state.originalItemNumber = (data.item && data.item["Item Number"]) ? String(data.item["Item Number"]).trim() : id;
+        state.loadedRowNumber = Number(data.rowNumber || 0);
+        setMode("edit");
+        setPill("Item loaded for editing", "ok");
       } catch (err) {
-        showStatus("Network/Script error: " + err.message, "err");
+        console.error(err);
+        setPill("Load error", "err");
       }
     }
 
-    document.getElementById("loadDropdownsBtn").addEventListener("click", loadDropdowns);
-    document.getElementById("previewBtn").addEventListener("click", previewPayload);
-    els.form.addEventListener("submit", submitToSheet);
+    async function checkDuplicates(showGoodMessage = true) {
+      const id = els.itemNumber.value.trim();
+      const serial = els.serialNumber.value.trim();
 
-    previewPayload();
-    // Auto-load dropdowns on page open:
+      if (!id && !serial) {
+        setPill("Enter Item ID or Serial to check", "warn");
+        return { duplicateId: false, duplicateSerial: false };
+      }
+
+      try {
+        const params = {
+          action: "validate",
+          id,
+          serial
+        };
+
+        // Exclude current row while editing
+        if (state.mode === "edit" && state.loadedRowNumber) {
+          params.excludeRow = state.loadedRowNumber;
+        }
+
+        const data = await apiGet(params);
+        if (!data.ok) throw new Error(data.error || "Validation failed");
+
+        if (data.duplicateId && data.duplicateSerial) {
+          setPill("Duplicate Item ID and Serial", "err");
+        } else if (data.duplicateId) {
+          setPill("Duplicate Item ID", "err");
+        } else if (data.duplicateSerial) {
+          setPill("Duplicate Serial Number", "warn");
+        } else if (showGoodMessage) {
+          setPill("No duplicates found", "ok");
+        }
+
+        return data;
+      } catch (err) {
+        console.error(err);
+        setPill("Duplicate check error", "err");
+        return { duplicateId: false, duplicateSerial: false, error: true };
+      }
+    }
+
+    async function handleAutoId() {
+      setPill("Generating ID...", "info");
+      try {
+        const id = await generateUniqueItemId();
+        els.itemNumber.value = id;
+        setPill("Unique Item ID generated", "ok");
+        if (!els.title.value.trim()) els.title.focus();
+      } catch (err) {
+        console.error(err);
+        setPill("ID generation failed", "err");
+      }
+    }
+
+    async function submitToSheet(saveAndNew = false) {
+      const payload = buildPayload();
+
+      if (!payload.data["Item Number"] && !payload.data["Title"]) {
+        setPill("Add Item Number or Title", "err");
+        return;
+      }
+
+      // Enforce Item Number format if present
+      if (payload.data["Item Number"]) {
+        const re = /^TP-\d{6}-[A-Z]{4}$/;
+        if (!re.test(payload.data["Item Number"])) {
+          setPill("ID format must be TP-MMDDYY-XXXX", "err");
+          return;
+        }
+      }
+
+      // Duplicate check before save
+      const dup = await checkDuplicates(false);
+      if (dup.error) return;
+      if (dup.duplicateId) return; // hard stop
+      // duplicateSerial warning should also stop save (safer)
+      if (dup.duplicateSerial) return;
+
+      setPill(state.mode === "edit" ? "Saving changes..." : "Saving...", "info");
+
+      try {
+        const data = await apiPost(payload);
+
+        if (!data.ok) {
+          if (data.duplicateId && data.duplicateSerial) setPill("Duplicate ID and Serial", "err");
+          else if (data.duplicateId) setPill("Duplicate Item ID", "err");
+          else if (data.duplicateSerial) setPill("Duplicate Serial Number", "warn");
+          else setPill(data.error || "Save failed", "err");
+          return;
+        }
+
+        setPill(state.mode === "edit" ? "Changes saved" : "Saved to Inventory", "ok");
+
+        // If create mode, remember newly created ID as original in case they keep editing
+        if (state.mode === "new") {
+          state.originalItemNumber = payload.data["Item Number"];
+          els.lookupItemId.value = payload.data["Item Number"];
+        }
+
+        if (saveAndNew) {
+          clearToNewMode();
+        } else {
+          // After saving, stay in edit mode for current record
+          state.originalItemNumber = payload.data["Item Number"];
+          setMode("edit");
+        }
+      } catch (err) {
+        console.error(err);
+        setPill("Save error", "err");
+      }
+    }
+
+    function refreshThumb(imgInput, imgEl) {
+      const url = (imgInput.value || "").trim();
+      if (!url) {
+        imgEl.removeAttribute("src");
+        imgEl.style.visibility = "hidden";
+        return;
+      }
+      imgEl.style.visibility = "visible";
+      imgEl.src = url;
+      imgEl.onerror = () => {
+        imgEl.removeAttribute("src");
+        imgEl.style.visibility = "hidden";
+      };
+    }
+
+    function refreshThumbs() {
+      refreshThumb(els.image1, els.thumb1);
+      refreshThumb(els.image2, els.thumb2);
+      refreshThumb(els.image3, els.thumb3);
+      refreshThumb(els.image4, els.thumb4);
+      refreshThumb(els.image5, els.thumb5);
+      refreshThumb(els.image6, els.thumb6);
+    }
+
+    // Events
+    document.getElementById("reloadDropdownsBtn").addEventListener("click", loadDropdowns);
+    document.getElementById("genIdBtn").addEventListener("click", handleAutoId);
+    document.getElementById("loadItemBtn").addEventListener("click", loadItemForEdit);
+    document.getElementById("newModeBtn").addEventListener("click", clearToNewMode);
+    document.getElementById("checkDupBtn").addEventListener("click", () => checkDuplicates(true));
+
+    document.getElementById("saveNewBtn").addEventListener("click", () => submitToSheet(true));
+    els.form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      submitToSheet(false);
+    });
+
+    // Enter on lookup box loads item
+    els.lookupItemId.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        loadItemForEdit();
+      }
+    });
+
+    // Live normalize Item Number (uppercase)
+    els.itemNumber.addEventListener("input", () => {
+      const start = els.itemNumber.selectionStart;
+      const end = els.itemNumber.selectionEnd;
+      els.itemNumber.value = els.itemNumber.value.toUpperCase();
+      els.itemNumber.setSelectionRange(start, end);
+    });
+
+    // Thumbnail previews
+    [els.image1, els.image2, els.image3, els.image4, els.image5, els.image6].forEach(inp => {
+      inp.addEventListener("input", refreshThumbs);
+      inp.addEventListener("blur", refreshThumbs);
+    });
+
+    // Initialize
+    setMode("new");
+    refreshThumbs();
     loadDropdowns();
+    setPill("Ready", "ok");
   </script>
 </body>
 </html>
