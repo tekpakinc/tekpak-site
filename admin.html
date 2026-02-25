@@ -8,7 +8,6 @@
     :root{
       --bg:#0b1020;
       --card:#121a33;
-      --card2:#0f1730;
       --line:rgba(255,255,255,.10);
       --text:#f3f6ff;
       --muted:rgba(243,246,255,.70);
@@ -116,7 +115,6 @@
       color:#1a1200;
       background: linear-gradient(135deg, var(--warn), #ffdca0);
     }
-    button:disabled{opacity:.55; cursor:not-allowed}
 
     .note{font-size:12px; color:var(--muted); line-height:1.35;}
     .status{
@@ -152,10 +150,6 @@
       color: rgba(124,247,166,.95);
       border:1px solid rgba(124,247,166,.25);
     }
-
-    .tiny{font-size:11px; color:rgba(243,246,255,.55)}
-    .rightTools{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
-    .tokenBox{min-width:280px; max-width:420px;}
   </style>
 </head>
 
@@ -167,16 +161,11 @@
         <div class="badge" aria-hidden="true"></div>
         <div>
           <h1>Toro v1 Inventory System</h1>
-          <div class="sub">Add + Edit inventory • Dropdowns from “Dropdowns” sheet</div>
+          <div class="sub">Clean admin • Add + Edit • No token • URL hardcoded</div>
         </div>
       </div>
 
-      <div class="rightTools">
-        <div class="tokenBox">
-          <label style="margin:0 0 6px">Internal Token (TORO_TOKEN)</label>
-          <input id="token" placeholder="Enter token…" />
-          <div class="tiny" style="margin-top:6px">Saved locally in your browser. Required to Save.</div>
-        </div>
+      <div class="btns">
         <button class="secondary" id="btnReloadDropdowns" type="button">Reload Dropdowns</button>
         <button class="secondary" id="btnRefreshList" type="button">Refresh List</button>
       </div>
@@ -209,7 +198,7 @@
 
       <div style="height:10px"></div>
       <div class="note">
-        Click <b>Load</b> to pull an item into the form. Saving will update the same Item ID.
+        Click <b>Load</b> to edit. Save updates that same Item ID.
       </div>
     </div>
   </section>
@@ -224,11 +213,10 @@
     </div>
 
     <div class="bd">
-      <div class="status" id="status">Ready. Reload Dropdowns first.</div>
+      <div class="status" id="status">Ready. Click Reload Dropdowns first.</div>
 
       <div style="height:12px"></div>
 
-      <!-- FORM FIELDS -->
       <div class="row">
         <div>
           <label>Item ID</label>
@@ -342,33 +330,15 @@
         </div>
 
         <div class="row3 full">
-          <div>
-            <label>Image 1</label>
-            <input id="Image 1" placeholder="https://…" />
-          </div>
-          <div>
-            <label>Image 2</label>
-            <input id="Image 2" placeholder="https://…" />
-          </div>
-          <div>
-            <label>Image 3</label>
-            <input id="Image 3" placeholder="https://…" />
-          </div>
+          <div><label>Image 1</label><input id="Image 1" placeholder="https://…" /></div>
+          <div><label>Image 2</label><input id="Image 2" placeholder="https://…" /></div>
+          <div><label>Image 3</label><input id="Image 3" placeholder="https://…" /></div>
         </div>
 
         <div class="row3 full">
-          <div>
-            <label>Image 4</label>
-            <input id="Image 4" placeholder="https://…" />
-          </div>
-          <div>
-            <label>Image 5</label>
-            <input id="Image 5" placeholder="https://…" />
-          </div>
-          <div>
-            <label>Image 6</label>
-            <input id="Image 6" placeholder="https://…" />
-          </div>
+          <div><label>Image 4</label><input id="Image 4" placeholder="https://…" /></div>
+          <div><label>Image 5</label><input id="Image 5" placeholder="https://…" /></div>
+          <div><label>Image 6</label><input id="Image 6" placeholder="https://…" /></div>
         </div>
       </div>
 
@@ -386,16 +356,11 @@
 
 <script>
   /******************************
-   * Toro v1 Admin (Clean)
+   * Toro v1 Admin (Tokenless)
    * Apps Script URL is hardcoded
    ******************************/
 
-  // ✅ Hardcoded Apps Script Web App URL:
   const API_URL = "https://script.google.com/macros/s/AKfycbwFBC8S-nJE6OLDAUQlg-O_AGrspmSoSdIDN7zklPb0NCP_N_jree2c_e8Afv8xp8Fntw/exec";
-
-  const STORAGE_KEYS = {
-    token: "toro_v1_token"
-  };
 
   const INVENTORY_HEADERS = [
     "Item ID","Category","Manufacturer","Model","Color","Screen Size","CPU","Storage","Features","GPU",
@@ -411,13 +376,10 @@
   const el = (id) => document.getElementById(id);
 
   const ui = {
-    token: el("token"),
     status: el("status"),
-
     q: el("q"),
     list: el("list"),
     listStatus: el("listStatus"),
-
     btnReloadDropdowns: el("btnReloadDropdowns"),
     btnRefreshList: el("btnRefreshList"),
     btnNew: el("btnNew"),
@@ -434,15 +396,6 @@
     ui.listStatus.textContent = msg;
   }
 
-  function loadSettings() {
-    ui.token.value = localStorage.getItem(STORAGE_KEYS.token) || "";
-  }
-
-  function saveToken() {
-    localStorage.setItem(STORAGE_KEYS.token, ui.token.value.trim());
-  }
-
-  // JSONP helper (CORS-safe for GitHub Pages)
   function jsonp(params={}) {
     return new Promise((resolve, reject) => {
       const cb = "ToroCB_" + Math.random().toString(36).slice(2);
@@ -450,10 +403,7 @@
       const q = new URLSearchParams({ ...params, callback: cb }).toString();
       script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
 
-      const timeout = setTimeout(() => {
-        cleanup();
-        reject(new Error("JSONP timeout"));
-      }, 15000);
+      const timeout = setTimeout(() => { cleanup(); reject(new Error("JSONP timeout")); }, 15000);
 
       function cleanup() {
         clearTimeout(timeout);
@@ -468,28 +418,22 @@
     });
   }
 
-  function getToken() { return ui.token.value.trim(); }
-
   function fillSelect(id, options) {
     const s = el(id);
     if (!s) return;
     const current = s.value;
-
     const opts = Array.isArray(options) ? options.slice() : [];
     s.innerHTML = "";
-
     const empty = document.createElement("option");
     empty.value = "";
     empty.textContent = "—";
     s.appendChild(empty);
-
     opts.forEach(v => {
       const o = document.createElement("option");
       o.value = v;
       o.textContent = v;
       s.appendChild(o);
     });
-
     if ([...s.options].some(o => o.value === current)) s.value = current;
   }
 
@@ -520,7 +464,6 @@
       const node = el(h);
       if (node) payload[h] = node.value;
     });
-
     if (!String(payload["Item ID"] || "").trim()) {
       payload["Item ID"] = generateItemId();
       el("Item ID").value = payload["Item ID"];
@@ -529,15 +472,12 @@
   }
 
   async function reloadDropdowns() {
-    saveToken();
     setStatus("Loading dropdowns…");
     try {
       const res = await jsonp({ action: "getDropdowns" });
       if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
-
       const dd = res.dropdowns || {};
       DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
-
       setStatus("Dropdowns loaded.", "good");
     } catch (err) {
       setStatus("Dropdown error: " + err.message, "bad");
@@ -547,12 +487,10 @@
   function renderList(items) {
     ui.list.innerHTML = "";
     const q = ui.q.value.trim().toLowerCase();
-
     const filtered = (items || []).filter(it => {
       if (!q) return true;
-      const hay = [
-        it["Item ID"], it["Manufacturer"], it["Model"], it["Category"], it["Condition"], it["Location"]
-      ].join(" ").toLowerCase();
+      const hay = [it["Item ID"], it["Manufacturer"], it["Model"], it["Category"], it["Condition"], it["Location"]]
+        .join(" ").toLowerCase();
       return hay.includes(q);
     });
 
@@ -564,7 +502,7 @@
     filtered.forEach(it => {
       const id = (it["Item ID"] || "").toString();
       const title = `${it["Manufacturer"] || ""} ${it["Model"] || ""}`.trim() || "(No Model)";
-      const sub = `${it["Category"] || ""} • ${it["Condition"] || ""} • ${it["Location"] || ""}`.replace(/\s•\s/g," • ").trim();
+      const sub = `${it["Category"] || ""} • ${it["Condition"] || ""} • ${it["Location"] || ""}`.trim();
       const price = (it["Price"] || "").toString().trim();
 
       const div = document.createElement("div");
@@ -575,9 +513,7 @@
           <div class="b">${escapeHtml(title)}</div>
           <div class="c">${escapeHtml(sub)}${price ? " • $" + escapeHtml(price) : ""}</div>
         </div>
-        <div>
-          <button type="button" data-load="${escapeHtml(id)}">Load</button>
-        </div>
+        <div><button type="button" data-load="${escapeHtml(id)}">Load</button></div>
       `;
       ui.list.appendChild(div);
     });
@@ -588,12 +524,10 @@
   }
 
   async function refreshList() {
-    saveToken();
     setListStatus("Loading list…");
     try {
       const res = await jsonp({ action: "listItems" });
       if (!res.ok) throw new Error(res.error || "Failed to load list");
-
       window.__TORO_ITEMS__ = res.items || [];
       renderList(window.__TORO_ITEMS__);
       setListStatus(`Loaded ${window.__TORO_ITEMS__.length} items.`, "good");
@@ -603,18 +537,15 @@
   }
 
   async function loadItem(itemId) {
-    saveToken();
     setStatus("Loading item " + itemId + "…");
     try {
       const res = await jsonp({ action: "getItem", itemId });
       if (!res.ok) throw new Error(res.error || "Failed to load item");
-
       const item = res.item || {};
       INVENTORY_HEADERS.forEach(h => {
         const node = el(h);
         if (node) node.value = (item[h] !== undefined && item[h] !== null) ? String(item[h]) : "";
       });
-
       setStatus("Item loaded. Edit fields then Save to update.", "good");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
@@ -623,21 +554,11 @@
   }
 
   async function saveItem() {
-    saveToken();
     setStatus("Saving…");
     try {
-      const token = getToken();
-      if (!token) throw new Error("Enter your Internal Token first (TORO_TOKEN).");
-
       const payload = collectPayload();
-      const res = await jsonp({
-        action: "upsertItem",
-        token,
-        payload: JSON.stringify(payload)
-      });
-
+      const res = await jsonp({ action: "upsertItem", payload: JSON.stringify(payload) });
       if (!res.ok) throw new Error(res.error || "Save failed");
-
       setStatus(`Saved! (${res.mode}) • Row ${res.row} • Item ID ${res.itemId}`, "good");
       await refreshList();
     } catch (err) {
@@ -654,22 +575,13 @@
       .replaceAll("'","&#039;");
   }
 
-  // Wire up
-  ui.token.addEventListener("change", saveToken);
-
   ui.btnReloadDropdowns.addEventListener("click", reloadDropdowns);
   ui.btnRefreshList.addEventListener("click", refreshList);
-  ui.btnNew.addEventListener("click", () => {
-    clearForm();
-    setStatus("New item mode. Fill it out and Save.", "");
-  });
+  ui.btnNew.addEventListener("click", () => { clearForm(); setStatus("New item mode. Fill it out and Save.", ""); });
   ui.btnSave.addEventListener("click", saveItem);
-
   ui.q.addEventListener("input", () => renderList(window.__TORO_ITEMS__ || []));
 
-  // Boot
   (function init(){
-    loadSettings();
     DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
     setStatus("Ready. Click Reload Dropdowns, then Refresh List.", "");
   })();
