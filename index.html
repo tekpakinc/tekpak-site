@@ -14,106 +14,56 @@
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
     a{color:inherit;text-decoration:none}
     .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
-    header{
-      display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
-      margin-bottom:14px;
-    }
-    .brand{
-      display:flex;align-items:center;gap:10px;
-    }
-    .logo{
-      width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid var(--line);
-      display:grid;place-items:center;box-shadow:var(--shadow);font-weight:900;
-    }
+    header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;box-shadow:var(--shadow);font-weight:900}
     h1{margin:0;font-size:1.25rem}
     .sub{color:var(--muted);font-size:.9rem;margin-top:2px}
-
-    .status{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 12px;border-radius:999px;font-weight:700;font-size:.82rem;
-      background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent2);
-    }
+    .status{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-weight:800;font-size:.82rem;background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent2)}
 
     .controls{
       background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
       box-shadow:var(--shadow);padding:14px;margin-bottom:14px;
       display:grid;gap:12px;
-      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      grid-template-columns: 2fr 1fr 1fr auto;
       align-items:end;
     }
-    @media (max-width:980px){
-      .controls{grid-template-columns:1fr}
-    }
-    label{display:block;font-size:.82rem;font-weight:800;margin-bottom:6px;color:#0f172a}
-    input,select,button,textarea{font:inherit}
-    input,select{
-      width:100%;padding:10px 12px;border-radius:12px;border:1px solid #d2d8e4;background:#fff;
-    }
-    button{
-      border:0;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:900;
-      background:#111827;color:#fff;
-    }
-    button.secondary{
-      background:var(--accent);color:#111;
-    }
+    @media (max-width:980px){.controls{grid-template-columns:1fr}}
+    label{display:block;font-size:.82rem;font-weight:900;margin-bottom:6px;color:#0f172a}
+    input,select,button{font:inherit}
+    input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #d2d8e4;background:#fff}
+    button{border:0;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:900;background:#111827;color:#fff}
+    button.secondary{background:var(--accent);color:#111}
 
-    .grid{
-      display:grid;gap:12px;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-    }
-    @media (max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
-    @media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
-    @media (max-width:480px){.grid{grid-template-columns:1fr;}}
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(4,minmax(0,1fr))}
+    @media (max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:480px){.grid{grid-template-columns:1fr}}
 
-    .card{
-      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-      box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;
-      min-height:320px;
-    }
-    .thumb{
-      height:170px;background:#f1f5f9;border-bottom:1px solid var(--line);
-      display:flex;align-items:center;justify-content:center;overflow:hidden;
-    }
-    .thumb img{
-      width:100%;height:100%;object-fit:cover;
-    }
-    .thumb .ph{
-      color:var(--muted);font-weight:800;font-size:.85rem;padding:10px;text-align:center;
-    }
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:340px}
+    .thumb{height:170px;background:#f1f5f9;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .thumb .ph{color:var(--muted);font-weight:900;font-size:.85rem;padding:10px;text-align:center}
     .body{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
-    .title{font-weight:900;line-height:1.15}
+    .title{font-weight:1000;line-height:1.15}
     .meta{color:var(--muted);font-size:.85rem;display:flex;flex-wrap:wrap;gap:8px}
-    .pill{
-      display:inline-flex;align-items:center;gap:6px;
-      font-size:.76rem;font-weight:900;padding:4px 8px;border-radius:999px;
-      border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;
+    .pill{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:900;padding:4px 8px;border-radius:999px;border:1px solid #e5e7eb;background:#f3f4f6;color:#111827}
+    .pill.blue{border-color:#dbeafe;background:#eff6ff;color:#1d4ed8}
+    .price{font-size:1.05rem;font-weight:1000}
+    .actions{padding:12px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
+    .actions a.buy{
+      flex:1; display:inline-flex; justify-content:center; align-items:center;
+      border-radius:12px; padding:10px 14px; font-weight:1000;
+      background:var(--accent); color:#111;
     }
-    .pill.green{border-color:#bbf7d0;background:#ecfdf3;color:#166534;}
-    .pill.gray{border-color:#e5e7eb;background:#f3f4f6;color:#111827;}
-    .actions{padding:12px;border-top:1px solid var(--line);display:flex;gap:8px}
-    .actions button{flex:1}
-    .actions button.secondary{background:#eef2f7;border:1px solid var(--line);color:#111827}
+    .actions button{flex:0 0 auto;background:#eef2f7;border:1px solid var(--line);color:#111827}
 
-    .empty{
-      background:var(--card);border:1px dashed #cbd5e1;border-radius:var(--radius);
-      padding:18px;text-align:center;color:var(--muted);font-weight:800;
-    }
+    .empty{background:var(--card);border:1px dashed #cbd5e1;border-radius:var(--radius);padding:18px;text-align:center;color:var(--muted);font-weight:900}
 
     /* Modal */
-    .modalBack{
-      position:fixed;inset:0;background:rgba(15,23,42,.55);
-      display:none;align-items:center;justify-content:center;padding:16px;
-    }
-    .modal{
-      width:min(900px, 100%);
-      background:#fff;border-radius:18px;border:1px solid var(--line);
-      box-shadow:0 30px 80px rgba(0,0,0,.25);
-      overflow:hidden;
-    }
-    .modalTop{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:12px 14px;border-bottom:1px solid var(--line);
-    }
+    .modalBack{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:16px}
+    .modal{width:min(900px, 100%);background:#fff;border-radius:18px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.25);overflow:hidden}
+    .modalTop{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
     .modalTop strong{font-size:.95rem}
     .modalTop button{background:#eef2f7;border:1px solid var(--line);color:#111827}
     .modalGrid{display:grid;grid-template-columns:1.2fr 1fr;gap:0}
@@ -124,7 +74,11 @@
     .modalBody .big{font-size:1.05rem;font-weight:1000}
     .modalBody .small{color:var(--muted);font-size:.9rem;line-height:1.35}
     .modalBody .row{display:flex;flex-wrap:wrap;gap:8px}
-    .modalBody .row button{flex:0 0 auto}
+    .modalBody a.buy{
+      display:inline-flex;justify-content:center;align-items:center;
+      border-radius:12px;padding:10px 14px;font-weight:1000;
+      background:var(--accent);color:#111;text-decoration:none;
+    }
   </style>
 </head>
 <body>
@@ -134,7 +88,7 @@
         <div class="logo">TP</div>
         <div>
           <h1>Tek-Pak Store</h1>
-          <div class="sub">Live inventory pulled from your Inventory sheet</div>
+          <div class="sub">Only items marked <strong>Listed</strong> appear here.</div>
         </div>
       </div>
       <div class="status" id="statusPill">● Loading…</div>
@@ -157,17 +111,6 @@
           <option value="">All</option>
         </select>
       </div>
-      <div>
-        <label for="availability">Availability</label>
-        <select id="availability">
-          <option>Available</option>
-          <option>Listed</option>
-          <option>Processing</option>
-          <option>Sold</option>
-          <option>Hold</option>
-          <option>Scrapped</option>
-        </select>
-      </div>
       <div style="display:flex;gap:10px">
         <button class="secondary" id="applyBtn">Apply</button>
         <button id="resetBtn">Reset</button>
@@ -175,7 +118,7 @@
     </section>
 
     <section id="grid" class="grid"></section>
-    <section id="empty" class="empty" style="display:none;">No items matched your filters.</section>
+    <section id="empty" class="empty" style="display:none;">No listed items matched your filters.</section>
   </div>
 
   <!-- Modal -->
@@ -190,19 +133,19 @@
         <div class="modalBody">
           <div class="big" id="modalBig"></div>
           <div class="row" id="modalPills"></div>
+          <div class="price" id="modalPrice"></div>
           <div class="small" id="modalDetails"></div>
           <div class="row">
-            <button class="secondary" id="copyIdBtn">Copy Item Number</button>
-            <button id="copyTitleBtn">Copy Title</button>
+            <a class="buy" id="modalBuy" href="#" target="_blank" rel="noopener">Buy Now</a>
+            <button id="copyIdBtn">Copy Item Number</button>
           </div>
-          <div class="small" id="modalNote"></div>
+          <div class="small" id="modalDisclaimer">PayPal checkout opens in a new tab.</div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Your Apps Script URL
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFxhPq9Kg7BGTZan_V2LBiHhNt1fZOWwrIrBmI65Srges7t_UJAY0GPtPrkqlH5WdKNA/exec";
 
     const els = {
@@ -210,7 +153,6 @@
       q: document.getElementById("q"),
       manufacturer: document.getElementById("manufacturer"),
       condition: document.getElementById("condition"),
-      availability: document.getElementById("availability"),
       applyBtn: document.getElementById("applyBtn"),
       resetBtn: document.getElementById("resetBtn"),
       grid: document.getElementById("grid"),
@@ -222,45 +164,24 @@
       modalPills: document.getElementById("modalPills"),
       modalImg: document.getElementById("modalImg"),
       modalDetails: document.getElementById("modalDetails"),
-      modalNote: document.getElementById("modalNote"),
+      modalPrice: document.getElementById("modalPrice"),
+      modalBuy: document.getElementById("modalBuy"),
       closeModalBtn: document.getElementById("closeModalBtn"),
-      copyIdBtn: document.getElementById("copyIdBtn"),
-      copyTitleBtn: document.getElementById("copyTitleBtn"),
+      copyIdBtn: document.getElementById("copyIdBtn")
     };
 
-    let lastItems = [];
     let selected = null;
 
-    function setStatus(text){
-      els.statusPill.textContent = "● " + text;
-    }
+    function setStatus(text){ els.statusPill.textContent = "● " + text; }
 
-    // JSONP (no CORS)
+    // JSONP
     function loadJSONP(url, callbackName){
       return new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        const timeout = setTimeout(() => {
-          cleanup();
-          reject(new Error("JSONP timeout"));
-        }, 9000);
-
-        function cleanup(){
-          clearTimeout(timeout);
-          script.remove();
-        }
-
-        window[callbackName] = (data) => {
-          cleanup();
-          delete window[callbackName];
-          resolve(data);
-        };
-
-        script.onerror = () => {
-          cleanup();
-          delete window[callbackName];
-          reject(new Error("JSONP load failed"));
-        };
-
+        const timeout = setTimeout(() => { cleanup(); reject(new Error("JSONP timeout")); }, 9000);
+        function cleanup(){ clearTimeout(timeout); script.remove(); }
+        window[callbackName] = (data) => { cleanup(); delete window[callbackName]; resolve(data); };
+        script.onerror = () => { cleanup(); delete window[callbackName]; reject(new Error("JSONP load failed")); };
         script.src = url;
         document.body.appendChild(script);
       });
@@ -277,17 +198,12 @@
     }
 
     function setSelectOptions(selectEl, items){
-      const keepFirst = selectEl.querySelector("option")?.value === "";
-      const firstLabel = keepFirst ? selectEl.querySelector("option").textContent : "All";
       const current = selectEl.value;
-
       selectEl.innerHTML = "";
-      if (keepFirst){
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = firstLabel;
-        selectEl.appendChild(opt);
-      }
+      const opt0 = document.createElement("option");
+      opt0.value = "";
+      opt0.textContent = "All";
+      selectEl.appendChild(opt0);
 
       (items || []).forEach(v => {
         const opt = document.createElement("option");
@@ -296,19 +212,15 @@
         selectEl.appendChild(opt);
       });
 
-      // restore if possible
-      if ([...selectEl.options].some(o => o.value === current)){
-        selectEl.value = current;
-      }
+      if ([...selectEl.options].some(o => o.value === current)) selectEl.value = current;
     }
 
-    function escapeHtml(s){
-      return String(s || "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#39;");
+    function moneyPretty(v){
+      const s = String(v || "").trim();
+      if (!s) return "";
+      const n = Number(s.replace(/[^0-9.]/g,""));
+      if (!isFinite(n)) return s;
+      return n.toLocaleString(undefined, { style:"currency", currency:"USD" });
     }
 
     function render(items){
@@ -347,49 +259,52 @@
         pillRow.style.flexWrap = "wrap";
         pillRow.style.gap = "8px";
 
-        const p1 = document.createElement("span");
-        p1.className = "pill gray";
-        p1.textContent = item.itemNumber || "No ID";
-        pillRow.appendChild(p1);
+        const idP = document.createElement("span");
+        idP.className = "pill blue";
+        idP.textContent = item.itemNumber || "No ID";
+        pillRow.appendChild(idP);
 
         if (item.condition){
-          const p2 = document.createElement("span");
-          p2.className = "pill";
-          p2.textContent = item.condition;
-          pillRow.appendChild(p2);
+          const cP = document.createElement("span");
+          cP.className = "pill";
+          cP.textContent = item.condition;
+          pillRow.appendChild(cP);
         }
 
-        const p3 = document.createElement("span");
-        p3.className = "pill green";
-        p3.textContent = item.availability || "Available";
-        pillRow.appendChild(p3);
+        const priceTxt = moneyPretty(item.price);
+        const price = document.createElement("div");
+        price.className = "price";
+        price.textContent = priceTxt ? priceTxt : "";
 
         body.appendChild(t);
         body.appendChild(meta);
         body.appendChild(pillRow);
+        if (priceTxt) body.appendChild(price);
 
         const actions = document.createElement("div");
         actions.className = "actions";
 
         const viewBtn = document.createElement("button");
-        viewBtn.className = "secondary";
         viewBtn.textContent = "View";
         viewBtn.onclick = () => openModal(item);
 
-        const copyBtn = document.createElement("button");
-        copyBtn.className = "secondary";
-        copyBtn.style.background = "#eef2f7";
-        copyBtn.style.border = "1px solid var(--line)";
-        copyBtn.style.color = "#111827";
-        copyBtn.textContent = "Copy ID";
-        copyBtn.onclick = async () => {
-          await navigator.clipboard.writeText(item.itemNumber || "");
-          setStatus("Copied Item Number");
-          setTimeout(()=>setStatus(`Showing ${items.length} items`), 900);
-        };
+        if (item.buyLink){
+          const buy = document.createElement("a");
+          buy.className = "buy";
+          buy.href = item.buyLink;
+          buy.target = "_blank";
+          buy.rel = "noopener";
+          buy.textContent = "Buy Now";
+          actions.appendChild(buy);
+        } else {
+          const buyDisabled = document.createElement("button");
+          buyDisabled.textContent = "No Buy Link";
+          buyDisabled.disabled = true;
+          buyDisabled.style.opacity = "0.55";
+          actions.appendChild(buyDisabled);
+        }
 
         actions.appendChild(viewBtn);
-        actions.appendChild(copyBtn);
 
         card.appendChild(thumb);
         card.appendChild(body);
@@ -406,16 +321,15 @@
 
       els.modalPills.innerHTML = "";
       const pills = [
-        item.manufacturer ? ["pill", item.manufacturer] : null,
-        item.model ? ["pill", item.model] : null,
-        item.condition ? ["pill", item.condition] : null,
-        item.availability ? ["pill green", item.availability] : ["pill green", "Available"],
-        item.itemNumber ? ["pill gray", item.itemNumber] : null
+        item.manufacturer ? item.manufacturer : null,
+        item.model ? item.model : null,
+        item.condition ? item.condition : null,
+        item.itemNumber ? item.itemNumber : null
       ].filter(Boolean);
 
-      pills.forEach(([cls, txt]) => {
+      pills.forEach((txt, i) => {
         const s = document.createElement("span");
-        s.className = cls;
+        s.className = i === pills.length - 1 ? "pill blue" : "pill";
         s.textContent = txt;
         els.modalPills.appendChild(s);
       });
@@ -429,11 +343,18 @@
         els.modalImg.appendChild(img);
       }
 
-      const det = item.details || "";
-      els.modalDetails.textContent = det ? det : "No details provided.";
+      els.modalDetails.textContent = item.details ? item.details : "No details provided.";
 
-      // store note (optional)
-      els.modalNote.textContent = item.notes ? `Internal note: ${item.notes}` : "";
+      const priceTxt = moneyPretty(item.price);
+      els.modalPrice.textContent = priceTxt ? priceTxt : "";
+
+      if (item.buyLink){
+        els.modalBuy.style.display = "inline-flex";
+        els.modalBuy.href = item.buyLink;
+      } else {
+        els.modalBuy.style.display = "none";
+        els.modalBuy.href = "#";
+      }
 
       els.modalBack.style.display = "flex";
     }
@@ -444,40 +365,34 @@
     }
 
     async function loadFilters(){
-      // we can reuse Dropdowns sheet for manufacturer/condition/availability if you keep it updated
+      // Reuse Dropdowns for manufacturer/condition
       try{
         const d = await apiGet({ action:"dropdowns" });
         if (d && d.ok){
           setSelectOptions(els.manufacturer, d.dropdowns.Manufacturer || []);
           setSelectOptions(els.condition, d.dropdowns.Condition || []);
-          // availability dropdown we keep explicit so it matches your workflow, but you *can* populate it too if you want
         }
-      } catch (e) {
-        // silent: store still works without filters
-      }
+      } catch (e) { /* store still works without these */ }
     }
 
     async function loadItems(){
-      setStatus("Loading inventory…");
+      setStatus("Loading listed items…");
 
       const params = {
         action: "storeItems",
         q: els.q.value.trim(),
         manufacturer: els.manufacturer.value,
         condition: els.condition.value,
-        availability: els.availability.value || "Available",
-        limit: 60
+        limit: 80
       };
 
       try{
         const res = await apiGet(params);
         if (!res || !res.ok) throw new Error(res?.error || "Load failed");
-        lastItems = res.items || [];
-        render(lastItems);
-        setStatus(`Showing ${lastItems.length} items`);
+        render(res.items || []);
+        setStatus(`Showing ${(res.items || []).length} items`);
       } catch (e){
         console.error(e);
-        lastItems = [];
         render([]);
         setStatus("Connection error");
       }
@@ -488,35 +403,23 @@
       els.q.value = "";
       els.manufacturer.value = "";
       els.condition.value = "";
-      els.availability.value = "Available";
       loadItems();
     });
 
     els.q.addEventListener("keydown", (e) => {
-      if (e.key === "Enter"){
-        e.preventDefault();
-        loadItems();
-      }
+      if (e.key === "Enter"){ e.preventDefault(); loadItems(); }
     });
 
     els.closeModalBtn.addEventListener("click", closeModal);
-    els.modalBack.addEventListener("click", (e) => {
-      if (e.target === els.modalBack) closeModal();
-    });
+    els.modalBack.addEventListener("click", (e) => { if (e.target === els.modalBack) closeModal(); });
 
     els.copyIdBtn.addEventListener("click", async () => {
       if (!selected) return;
       await navigator.clipboard.writeText(selected.itemNumber || "");
       setStatus("Copied Item Number");
+      setTimeout(()=>setStatus("Ready"), 900);
     });
 
-    els.copyTitleBtn.addEventListener("click", async () => {
-      if (!selected) return;
-      await navigator.clipboard.writeText(selected.title || "");
-      setStatus("Copied Title");
-    });
-
-    // Init
     (async () => {
       await loadFilters();
       await loadItems();
