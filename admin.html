@@ -3,610 +3,676 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tek-Pak Inventory</title>
+  <title>Toro v1 Inventory System</title>
   <style>
     :root{
-      --bg:#f6f7fb; --card:#fff; --line:#e4e8f0; --text:#111827; --muted:#6b7280;
-      --accent:#84cc16; --accent-dark:#65a30d; --danger:#b91c1c; --ok:#166534; --info:#1d4ed8;
-      --shadow:0 12px 30px rgba(0,0,0,.08); --radius:14px;
+      --bg:#0b1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --line:rgba(255,255,255,.10);
+      --text:#f3f6ff;
+      --muted:rgba(243,246,255,.70);
+      --accent:#7cf7a6;
+      --accent2:#7aa7ff;
+      --warn:#ffcc66;
+      --bad:#ff6b7a;
+      --good:#7cf7a6;
+      --shadow:0 18px 60px rgba(0,0,0,.45);
+      --radius:16px;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-    h1{margin:0;font-size:1.25rem}
-    .subtitle{margin:2px 0 0;color:var(--muted);font-size:.88rem}
-    .status-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-size:.82rem;font-weight:700;border:1px solid transparent;white-space:nowrap}
-    .status-pill.info{background:#eff6ff;color:var(--info);border-color:#bfdbfe}
-    .status-pill.ok{background:#ecfdf3;color:var(--ok);border-color:#bbf7d0}
-    .status-pill.err{background:#fef2f2;color:var(--danger);border-color:#fecaca}
-    .status-pill.warn{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 500px at 20% -10%, rgba(122,167,255,.25), transparent 60%),
+        radial-gradient(900px 450px at 90% 10%, rgba(124,247,166,.20), transparent 55%),
+        radial-gradient(700px 400px at 30% 110%, rgba(255,204,102,.12), transparent 60%),
+        var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(to bottom, rgba(11,16,32,.86), rgba(11,16,32,.55));
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:14px 16px;}
+    .top{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+    .brand{display:flex; gap:12px; align-items:center;}
+    .badge{
+      width:42px; height:42px; border-radius:14px;
+      background: radial-gradient(circle at 30% 30%, rgba(124,247,166,.9), rgba(122,167,255,.85));
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    h1{font-size:18px; margin:0; letter-spacing:.2px}
+    .sub{font-size:12px; color:var(--muted); margin-top:2px}
 
-    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-    .grid{display:grid;gap:12px}
-    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
-    @media (max-width:900px){.grid-4,.grid-3{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
+    .grid{
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:14px;
+      padding:14px 16px 24px;
+      max-width:1200px;
+      margin:0 auto;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
 
-    label{display:block;font-size:.86rem;font-weight:700;margin-bottom:6px}
-    input,select,textarea,button{font:inherit}
-    input,select,textarea{width:100%;border:1px solid #d2d8e4;border-radius:10px;padding:10px 12px;background:#fff}
-    textarea{min-height:95px;resize:vertical}
-    .row-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-    button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
-    .btn{background:#111827;color:#fff}
-    .btn-accent{background:var(--accent);color:#111}
-    .btn-accent:hover{background:var(--accent-dark);color:#fff}
-    .btn-ghost{background:#eef2f7;color:#111827;border:1px solid var(--line)}
-    .mode-badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:.75rem;font-weight:700;border:1px solid #ddd}
-    .mode-badge.new{background:#ecfdf3;color:#166534;border-color:#bbf7d0}
-    .mode-badge.edit{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
-    .lookup-row{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
-    .small{font-size:.8rem;color:var(--muted)}
-    iframe{display:none}
+    .card{
+      background: linear-gradient(180deg, rgba(18,26,51,.92), rgba(15,23,48,.92));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      flex-wrap:wrap;
+    }
+    .card .hd strong{font-size:14px}
+    .card .bd{padding:14px}
+
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+    .full{grid-column:1/-1}
+
+    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
+    input, select, textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(6,10,22,.55);
+      color: var(--text);
+      outline:none;
+    }
+    textarea{min-height:110px; resize:vertical}
+    input::placeholder, textarea::placeholder{color:rgba(243,246,255,.45)}
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(124,247,166,.55);
+      box-shadow: 0 0 0 3px rgba(124,247,166,.15);
+    }
+
+    .btns{display:flex; gap:10px; flex-wrap:wrap}
+    button{
+      border:0;
+      border-radius: 14px;
+      padding:10px 12px;
+      font-weight:800;
+      cursor:pointer;
+      color:#061016;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+    button.secondary{
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    button.warn{
+      color:#1a1200;
+      background: linear-gradient(135deg, var(--warn), #ffdca0);
+    }
+    button:disabled{opacity:.55; cursor:not-allowed}
+
+    .note{font-size:12px; color:var(--muted); line-height:1.35;}
+    .status{
+      font-size:12px;
+      padding:8px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      color: var(--muted);
+    }
+    .status.good{border-color: rgba(124,247,166,.35); color: rgba(124,247,166,.95)}
+    .status.bad{border-color: rgba(255,107,122,.35); color: rgba(255,107,122,.95)}
+
+    .list{
+      display:flex; flex-direction:column; gap:8px;
+      max-height: 540px;
+      overflow:auto;
+      padding-right: 6px;
+    }
+    .item{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      background: rgba(6,10,22,.35);
+      padding:10px 10px;
+      display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+    }
+    .item .a{font-weight:900; font-size:12px}
+    .item .b{font-size:12px; color:var(--muted); margin-top:2px}
+    .item .c{font-size:12px; color:rgba(122,167,255,.9); margin-top:6px}
+    .item button{
+      padding:8px 10px; border-radius: 12px; font-weight:900;
+      background: rgba(124,247,166,.18);
+      color: rgba(124,247,166,.95);
+      border:1px solid rgba(124,247,166,.25);
+    }
+
+    .tiny{font-size:11px; color:rgba(243,246,255,.55)}
+    .rightTools{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
+    .tokenBox{min-width:280px; max-width:420px;}
   </style>
 </head>
+
 <body>
+<header>
   <div class="wrap">
-    <div class="topbar">
-      <div>
-        <h1>Tek-Pak Inventory</h1>
-        <div class="subtitle">
-          <span id="modeBadge" class="mode-badge new">New Item Mode</span>
-          &nbsp;Add or edit items
-        </div>
-      </div>
-      <div id="statusPill" class="status-pill info">● Connecting…</div>
-    </div>
-
-    <div class="card">
-      <div class="lookup-row">
-        <div class="grid grid-3">
-          <div>
-            <label for="lookupItemId">Find Item (Item Number)</label>
-            <input id="lookupItemId" type="text" placeholder="TP-MMDDYY-XXXX" />
-          </div>
-          <div style="display:flex;align-items:end;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="btn" id="loadItemBtn">Load Item</button>
-            <button type="button" class="btn-ghost" id="cloneBtn" title="Clone current item into a new record">Clone Item</button>
-            <button type="button" class="btn-ghost" id="newModeBtn">New Item</button>
-          </div>
-          <div style="display:flex;align-items:end;color:#6b7280;font-size:.85rem;">
-            Load to edit. Clone makes a new record with a new ID.
-          </div>
+    <div class="top">
+      <div class="brand">
+        <div class="badge" aria-hidden="true"></div>
+        <div>
+          <h1>Toro v1 Inventory System</h1>
+          <div class="sub">Add + Edit inventory • Dropdowns from “Dropdowns” sheet</div>
         </div>
       </div>
 
-      <form id="inventoryForm" method="POST" target="saveFrame">
-        <input type="hidden" name="sheetName" value="Inventory" />
-        <input type="hidden" name="mode" id="modeField" value="create" />
-        <input type="hidden" name="originalItemNumber" id="originalItemNumberField" value="" />
-
-        <div class="grid grid-4">
-          <div>
-            <label for="itemNumber">Item Number</label>
-            <div style="display:flex;gap:8px;">
-              <input id="itemNumber" name="itemNumber" type="text" placeholder="TP-MMDDYY-XXXX" />
-              <button type="button" class="btn-ghost" id="genIdBtn">Auto ID</button>
-            </div>
-            <div class="small">TP-MMDDYY-XXXX (XXXX = 4 capital letters)</div>
-          </div>
-          <div>
-            <label for="serialNumber">Serial Number</label>
-            <input id="serialNumber" name="serialNumber" type="text" />
-            <div class="small">Tip: press Enter to jump to the next field.</div>
-          </div>
-          <div>
-            <label for="manufacturer">Manufacturer</label>
-            <select id="manufacturer" name="manufacturer"><option value="">Select manufacturer</option></select>
-          </div>
-          <div>
-            <label for="model">Model</label>
-            <input id="model" name="model" type="text" />
-          </div>
+      <div class="rightTools">
+        <div class="tokenBox">
+          <label style="margin:0 0 6px">Internal Token (TORO_TOKEN)</label>
+          <input id="token" placeholder="Enter token…" />
+          <div class="tiny" style="margin-top:6px">Saved locally in your browser. Required to Save.</div>
         </div>
-
-        <div class="grid grid-3" style="margin-top:12px;">
-          <div>
-            <label for="title">Title</label>
-            <input id="title" name="title" type="text" />
-          </div>
-          <div>
-            <label for="condition">Condition</label>
-            <select id="condition" name="condition"><option value="">Select condition</option></select>
-          </div>
-          <div>
-            <label for="availability">Availability</label>
-            <select id="availability" name="availability"><option value="">Select availability</option></select>
-          </div>
-        </div>
-
-        <div style="margin-top:12px;">
-          <label>Image URLs</label>
-          <div class="grid grid-3">
-            <input name="image1" id="image1" type="url" placeholder="Image 1 URL" />
-            <input name="image2" id="image2" type="url" placeholder="Image 2 URL" />
-            <input name="image3" id="image3" type="url" placeholder="Image 3 URL" />
-            <input name="image4" id="image4" type="url" placeholder="Image 4 URL" />
-            <input name="image5" id="image5" type="url" placeholder="Image 5 URL" />
-            <input name="image6" id="image6" type="url" placeholder="Image 6 URL" />
-          </div>
-        </div>
-
-        <div style="margin-top:12px;">
-          <label for="details">Details</label>
-          <textarea id="details" name="details"></textarea>
-        </div>
-
-        <div style="margin-top:12px;">
-          <label for="notes">Notes</label>
-          <textarea id="notes" name="notes"></textarea>
-        </div>
-
-        <div class="row-actions">
-          <button class="btn-accent" type="submit" id="saveBtn">Save</button>
-          <button class="btn" type="button" id="saveNewBtn">Save + New</button>
-          <button class="btn-ghost" type="reset">Clear</button>
-          <button class="btn-ghost" type="button" id="reloadDropdownsBtn">Reload Dropdowns</button>
-        </div>
-      </form>
-
-      <iframe name="saveFrame" id="saveFrame"></iframe>
+        <button class="secondary" id="btnReloadDropdowns" type="button">Reload Dropdowns</button>
+        <button class="secondary" id="btnRefreshList" type="button">Refresh List</button>
+      </div>
     </div>
   </div>
+</header>
 
-  <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFxhPq9Kg7BGTZan_V2LBiHhNt1fZOWwrIrBmI65Srges7t_UJAY0GPtPrkqlH5WdKNA/exec";
+<div class="grid">
+  <!-- LEFT: Search + List -->
+  <section class="card">
+    <div class="hd">
+      <strong>Find & Edit Existing Items</strong>
+      <button class="secondary" id="btnNew" type="button">New Item</button>
+    </div>
+    <div class="bd">
+      <div class="row">
+        <div class="full">
+          <label>Search (Item ID / Manufacturer / Model / Category)</label>
+          <input id="q" placeholder="Type to filter…" />
+        </div>
+      </div>
 
-    const state = {
-      mode: "new",                 // new | edit
-      originalItemNumber: "",      // the ID we loaded (primary key)
-      loadedRowNumber: 0,          // used to exclude row in duplicate checks
-      saveAndNew: false,
-      dropdownsReady: false
-    };
+      <div style="height:10px"></div>
 
-    const els = {
-      statusPill: document.getElementById("statusPill"),
-      modeBadge: document.getElementById("modeBadge"),
-      saveBtn: document.getElementById("saveBtn"),
-      form: document.getElementById("inventoryForm"),
+      <div class="status" id="listStatus">List not loaded yet.</div>
 
-      modeField: document.getElementById("modeField"),
-      originalItemNumberField: document.getElementById("originalItemNumberField"),
+      <div style="height:10px"></div>
 
-      lookupItemId: document.getElementById("lookupItemId"),
-      itemNumber: document.getElementById("itemNumber"),
-      serialNumber: document.getElementById("serialNumber"),
-      manufacturer: document.getElementById("manufacturer"),
-      model: document.getElementById("model"),
-      title: document.getElementById("title"),
-      condition: document.getElementById("condition"),
-      availability: document.getElementById("availability"),
-      details: document.getElementById("details"),
-      notes: document.getElementById("notes"),
-      image1: document.getElementById("image1"),
-      image2: document.getElementById("image2"),
-      image3: document.getElementById("image3"),
-      image4: document.getElementById("image4"),
-      image5: document.getElementById("image5"),
-      image6: document.getElementById("image6")
-    };
+      <div class="list" id="list"></div>
 
-    function setPill(text, type="info"){
-      els.statusPill.className = "status-pill " + type;
-      els.statusPill.textContent = "● " + text;
-    }
+      <div style="height:10px"></div>
+      <div class="note">
+        Click <b>Load</b> to pull an item into the form. Saving will update the same Item ID.
+      </div>
+    </div>
+  </section>
 
-    function setMode(mode){
-      state.mode = mode;
-      if (mode === "edit"){
-        els.modeBadge.textContent = "Edit Mode";
-        els.modeBadge.className = "mode-badge edit";
-        els.saveBtn.textContent = "Save Changes";
-        els.modeField.value = "update";
-      } else {
-        els.modeBadge.textContent = "New Item Mode";
-        els.modeBadge.className = "mode-badge new";
-        els.saveBtn.textContent = "Save";
-        els.modeField.value = "create";
+  <!-- RIGHT: Form -->
+  <section class="card">
+    <div class="hd">
+      <strong>Add / Edit Item</strong>
+      <div class="btns">
+        <button class="warn" id="btnSave" type="button">Save (Create/Update)</button>
+      </div>
+    </div>
+
+    <div class="bd">
+      <div class="status" id="status">Ready. Reload Dropdowns first.</div>
+
+      <div style="height:12px"></div>
+
+      <!-- FORM FIELDS -->
+      <div class="row">
+        <div>
+          <label>Item ID</label>
+          <input id="Item ID" placeholder="Leave blank to auto-generate" />
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="Category"></select>
+        </div>
+
+        <div>
+          <label>Manufacturer</label>
+          <select id="Manufacturer"></select>
+        </div>
+        <div>
+          <label>Model</label>
+          <input id="Model" placeholder="e.g., Latitude 5420" />
+        </div>
+
+        <div>
+          <label>Color</label>
+          <select id="Color"></select>
+        </div>
+        <div>
+          <label>Screen Size</label>
+          <select id="Screen Size"></select>
+        </div>
+
+        <div>
+          <label>CPU</label>
+          <select id="CPU"></select>
+        </div>
+        <div>
+          <label>Storage</label>
+          <select id="Storage"></select>
+        </div>
+
+        <div class="full">
+          <label>Features</label>
+          <input id="Features" placeholder="e.g., Touchscreen, Backlit keyboard, USB-C…" />
+        </div>
+
+        <div>
+          <label>GPU</label>
+          <select id="GPU"></select>
+        </div>
+        <div>
+          <label>Series</label>
+          <input id="Series" placeholder="e.g., ThinkPad T-series" />
+        </div>
+
+        <div>
+          <label>Memory</label>
+          <select id="Memory"></select>
+        </div>
+        <div>
+          <label>Connectivity</label>
+          <input id="Connectivity" placeholder="Wi-Fi, BT, LTE, Ethernet…" />
+        </div>
+
+        <div>
+          <label>Condition</label>
+          <select id="Condition"></select>
+        </div>
+        <div>
+          <label>Operating System</label>
+          <select id="Operating System"></select>
+        </div>
+
+        <div>
+          <label>Warranty</label>
+          <select id="Warranty"></select>
+        </div>
+        <div>
+          <label>Shipping</label>
+          <select id="Shipping"></select>
+        </div>
+
+        <div>
+          <label>Location</label>
+          <select id="Location"></select>
+        </div>
+        <div>
+          <label>Price</label>
+          <input id="Price" placeholder="e.g., 199.99" />
+        </div>
+
+        <div class="row3 full">
+          <div>
+            <label>LengthIn</label>
+            <input id="LengthIn" placeholder="inches" />
+          </div>
+          <div>
+            <label>WidthIn</label>
+            <input id="WidthIn" placeholder="inches" />
+          </div>
+          <div>
+            <label>HeightIn</label>
+            <input id="HeightIn" placeholder="inches" />
+          </div>
+        </div>
+
+        <div>
+          <label>Weight</label>
+          <input id="Weight" placeholder="lbs" />
+        </div>
+
+        <div class="full">
+          <label>Description</label>
+          <textarea id="Description" placeholder="Clean, buyer-friendly description…"></textarea>
+        </div>
+
+        <div class="row3 full">
+          <div>
+            <label>Image 1</label>
+            <input id="Image 1" placeholder="https://…" />
+          </div>
+          <div>
+            <label>Image 2</label>
+            <input id="Image 2" placeholder="https://…" />
+          </div>
+          <div>
+            <label>Image 3</label>
+            <input id="Image 3" placeholder="https://…" />
+          </div>
+        </div>
+
+        <div class="row3 full">
+          <div>
+            <label>Image 4</label>
+            <input id="Image 4" placeholder="https://…" />
+          </div>
+          <div>
+            <label>Image 5</label>
+            <input id="Image 5" placeholder="https://…" />
+          </div>
+          <div>
+            <label>Image 6</label>
+            <input id="Image 6" placeholder="https://…" />
+          </div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="note">
+        Save uses <b>Item ID</b> as the key:
+        <ul>
+          <li>If it exists in Inventory → it updates that row.</li>
+          <li>If it doesn’t → it appends a new row.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  /******************************
+   * Toro v1 Admin (Clean)
+   * Apps Script URL is hardcoded
+   ******************************/
+
+  // ✅ Hardcoded Apps Script Web App URL:
+  const API_URL = "https://script.google.com/macros/s/AKfycbwFBC8S-nJE6OLDAUQlg-O_AGrspmSoSdIDN7zklPb0NCP_N_jree2c_e8Afv8xp8Fntw/exec";
+
+  const STORAGE_KEYS = {
+    token: "toro_v1_token"
+  };
+
+  const INVENTORY_HEADERS = [
+    "Item ID","Category","Manufacturer","Model","Color","Screen Size","CPU","Storage","Features","GPU",
+    "Series","Memory","Connectivity","Condition","Image 1","Image 2","Image 3","Image 4","Image 5","Image 6",
+    "Operating System","Warranty","Description","Price","Shipping","LengthIn","WidthIn","HeightIn","Weight","Location"
+  ];
+
+  const DROPDOWN_HEADERS = [
+    "Category","Manufacturer","Color","Screen Size","CPU","Storage","GPU","Memory","Condition",
+    "Operating System","Warranty","Shipping","Location"
+  ];
+
+  const el = (id) => document.getElementById(id);
+
+  const ui = {
+    token: el("token"),
+    status: el("status"),
+
+    q: el("q"),
+    list: el("list"),
+    listStatus: el("listStatus"),
+
+    btnReloadDropdowns: el("btnReloadDropdowns"),
+    btnRefreshList: el("btnRefreshList"),
+    btnNew: el("btnNew"),
+    btnSave: el("btnSave"),
+  };
+
+  function setStatus(msg, kind="") {
+    ui.status.className = "status" + (kind ? (" " + kind) : "");
+    ui.status.textContent = msg;
+  }
+
+  function setListStatus(msg, kind="") {
+    ui.listStatus.className = "status" + (kind ? (" " + kind) : "");
+    ui.listStatus.textContent = msg;
+  }
+
+  function loadSettings() {
+    ui.token.value = localStorage.getItem(STORAGE_KEYS.token) || "";
+  }
+
+  function saveToken() {
+    localStorage.setItem(STORAGE_KEYS.token, ui.token.value.trim());
+  }
+
+  // JSONP helper (CORS-safe for GitHub Pages)
+  function jsonp(params={}) {
+    return new Promise((resolve, reject) => {
+      const cb = "ToroCB_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+      const q = new URLSearchParams({ ...params, callback: cb }).toString();
+      script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
+
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error("JSONP timeout"));
+      }, 15000);
+
+      function cleanup() {
+        clearTimeout(timeout);
+        script.remove();
+        try { delete window[cb]; } catch(e) { window[cb] = undefined; }
       }
-    }
 
-    // --- JSONP (no CORS) ---
-    function loadJSONP(url, callbackName){
-      return new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        const timeout = setTimeout(() => {
-          cleanup();
-          reject(new Error("JSONP timeout"));
-        }, 8000);
+      window[cb] = (data) => { cleanup(); resolve(data); };
+      script.onerror = () => { cleanup(); reject(new Error("JSONP load error (deployment/URL issue?)")); };
 
-        function cleanup(){
-          clearTimeout(timeout);
-          script.remove();
-        }
+      document.body.appendChild(script);
+    });
+  }
 
-        window[callbackName] = (data) => {
-          cleanup();
-          delete window[callbackName];
-          resolve(data);
-        };
+  function getToken() { return ui.token.value.trim(); }
 
-        script.onerror = () => {
-          cleanup();
-          delete window[callbackName];
-          reject(new Error("JSONP load failed"));
-        };
+  function fillSelect(id, options) {
+    const s = el(id);
+    if (!s) return;
+    const current = s.value;
 
-        script.src = url;
-        document.body.appendChild(script);
-      });
-    }
+    const opts = Array.isArray(options) ? options.slice() : [];
+    s.innerHTML = "";
 
-    async function apiGet(params){
-      const cb = "tp_cb_" + Math.random().toString(16).slice(2);
-      const url = new URL(APPS_SCRIPT_URL);
-      Object.entries(params).forEach(([k,v]) => {
-        if (v !== undefined && v !== null && String(v).trim() !== "") url.searchParams.set(k, v);
-      });
-      url.searchParams.set("callback", cb);
-      return await loadJSONP(url.toString(), cb);
-    }
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "—";
+    s.appendChild(empty);
 
-    function setSelectOptions(selectEl, items, placeholder){
-      const current = selectEl.value;
-      selectEl.innerHTML = "";
-      const first = document.createElement("option");
-      first.value = "";
-      first.textContent = placeholder;
-      selectEl.appendChild(first);
-      (items || []).forEach(item => {
-        const opt = document.createElement("option");
-        opt.value = item;
-        opt.textContent = item;
-        selectEl.appendChild(opt);
-      });
-      if ([...selectEl.options].some(o => o.value === current)) selectEl.value = current;
-    }
-
-    async function loadDropdowns(){
-      setPill("Loading dropdowns…", "info");
-      try{
-        const data = await apiGet({ action:"dropdowns" });
-        if (!data || !data.ok) throw new Error(data?.error || "Dropdowns failed");
-
-        setSelectOptions(els.manufacturer, data.dropdowns.Manufacturer || [], "Select manufacturer");
-        setSelectOptions(els.condition, data.dropdowns.Condition || [], "Select condition");
-        setSelectOptions(els.availability, data.dropdowns.Availability || [], "Select availability");
-
-        state.dropdownsReady = true;
-        setPill("Connected", "ok");
-      } catch (e){
-        console.error(e);
-        state.dropdownsReady = false;
-        setPill("Connection error", "err");
-      }
-    }
-
-    // --- ID generation ---
-    function randomLetters4(){
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      let out = "";
-      for (let i=0;i<4;i++) out += chars[Math.floor(Math.random()*chars.length)];
-      return out;
-    }
-    function todayMMDDYY(){
-      const d = new Date();
-      const mm = String(d.getMonth()+1).padStart(2,"0");
-      const dd = String(d.getDate()).padStart(2,"0");
-      const yy = String(d.getFullYear()).slice(-2);
-      return `${mm}${dd}${yy}`;
-    }
-
-    async function autoId(){
-      setPill("Generating ID…", "info");
-      try{
-        for (let i=0;i<20;i++){
-          const candidate = `TP-${todayMMDDYY()}-${randomLetters4()}`;
-          const v = await apiGet({ action:"validate", id:candidate });
-          if (v && v.ok && !v.duplicateId){
-            els.itemNumber.value = candidate;
-            setPill("Unique ID generated", "ok");
-            return true;
-          }
-        }
-        setPill("ID generation failed", "err");
-        return false;
-      } catch(e){
-        console.error(e);
-        setPill("ID generation failed", "err");
-        return false;
-      }
-    }
-
-    // --- Load / New / Clone ---
-    async function loadItem(){
-      const id = els.lookupItemId.value.trim().toUpperCase();
-      if (!id){ setPill("Enter Item Number", "warn"); return; }
-      setPill("Loading item…", "info");
-      try{
-        const data = await apiGet({ action:"getItem", id });
-        if (!data || !data.ok){ setPill(data?.error || "Not found", "err"); return; }
-
-        const item = data.item || {};
-        state.loadedRowNumber = Number(data.rowNumber || 0);
-        state.originalItemNumber = String(item["Item Number"] || id).trim();
-        els.originalItemNumberField.value = state.originalItemNumber;
-
-        // fill
-        els.itemNumber.value = item["Item Number"] || "";
-        els.serialNumber.value = item["Serial Number"] || "";
-        els.title.value = item["Title"] || "";
-        els.manufacturer.value = item["Manufacturer"] || "";
-        els.model.value = item["Model"] || "";
-        els.condition.value = item["Condition"] || "";
-        els.availability.value = item["Availability"] || "";
-        els.image1.value = item["Image 1"] || "";
-        els.image2.value = item["Image 2"] || "";
-        els.image3.value = item["Image 3"] || "";
-        els.image4.value = item["Image 4"] || "";
-        els.image5.value = item["Image 5"] || "";
-        els.image6.value = item["Image 6"] || "";
-        els.details.value = item["Details"] || "";
-        els.notes.value = item["Notes"] || "";
-
-        setMode("edit");
-        setPill("Item loaded", "ok");
-      } catch(e){
-        console.error(e);
-        setPill("Load error", "err");
-      }
-    }
-
-    async function newItem({ generateId = true } = {}){
-      els.form.reset();
-      state.originalItemNumber = "";
-      state.loadedRowNumber = 0;
-      els.originalItemNumberField.value = "";
-      setMode("new");
-      setPill("Ready", "ok");
-
-      // Auto-ID on new item (requested)
-      if (generateId){
-        const ok = await autoId();
-        // put cursor into Serial for scan flow
-        if (ok) els.serialNumber.focus();
-        else els.itemNumber.focus();
-      } else {
-        els.itemNumber.focus();
-      }
-    }
-
-    async function cloneItem(){
-      // Clone means: keep current form values, generate new ID, clear serial, switch to New mode.
-      setPill("Cloning…", "info");
-
-      // snapshot current values
-      const snapshot = {
-        title: els.title.value,
-        manufacturer: els.manufacturer.value,
-        model: els.model.value,
-        condition: els.condition.value,
-        availability: els.availability.value,
-        image1: els.image1.value,
-        image2: els.image2.value,
-        image3: els.image3.value,
-        image4: els.image4.value,
-        image5: els.image5.value,
-        image6: els.image6.value,
-        details: els.details.value,
-        notes: els.notes.value
-      };
-
-      await newItem({ generateId: true });
-
-      // restore snapshot (but keep serial blank)
-      els.title.value = snapshot.title;
-      els.manufacturer.value = snapshot.manufacturer;
-      els.model.value = snapshot.model;
-      els.condition.value = snapshot.condition;
-      els.availability.value = snapshot.availability;
-      els.image1.value = snapshot.image1;
-      els.image2.value = snapshot.image2;
-      els.image3.value = snapshot.image3;
-      els.image4.value = snapshot.image4;
-      els.image5.value = snapshot.image5;
-      els.image6.value = snapshot.image6;
-      els.details.value = snapshot.details;
-      els.notes.value = snapshot.notes;
-
-      els.serialNumber.value = "";
-      els.serialNumber.focus();
-      setPill("Cloned (new ID created)", "ok");
-    }
-
-    // --- Duplicate prevention before save ---
-    async function validateBeforeSave(){
-      const id = els.itemNumber.value.trim().toUpperCase();
-      els.itemNumber.value = id;
-      const serial = els.serialNumber.value.trim();
-      const params = { action:"validate", id, serial };
-      if (state.mode === "edit" && state.loadedRowNumber) params.excludeRow = state.loadedRowNumber;
-
-      const v = await apiGet(params);
-      if (!v || !v.ok) throw new Error(v?.error || "Validate failed");
-      if (v.duplicateId){ setPill("Duplicate Item Number", "err"); return false; }
-      if (v.duplicateSerial){ setPill("Duplicate Serial", "warn"); return false; }
-      return true;
-    }
-
-    // --- Edit guardrail: warn/confirm if ID changed in Edit Mode ---
-    function itemIdChangedInEditMode(){
-      if (state.mode !== "edit") return false;
-      const current = els.itemNumber.value.trim().toUpperCase();
-      const original = String(state.originalItemNumber || "").trim().toUpperCase();
-      return !!(original && current && current !== original);
-    }
-
-    // --- Save (POST via iframe) ---
-    els.form.action = APPS_SCRIPT_URL;
-
-    window.addEventListener("message", (event) => {
-      const data = event.data;
-      if (!data || typeof data !== "object" || data.ok === undefined) return;
-
-      if (data.ok){
-        setPill(data.message || "Saved", "ok");
-
-        // After save, update original ID to current returned ID
-        if (data.itemNumber){
-          els.lookupItemId.value = data.itemNumber;
-          state.originalItemNumber = data.itemNumber;
-          els.originalItemNumberField.value = data.itemNumber;
-          setMode("edit");
-        }
-
-        if (state.saveAndNew){
-          state.saveAndNew = false;
-          // Auto-ID on Save+New (requested)
-          newItem({ generateId: true });
-        }
-      } else {
-        if (data.duplicateId) setPill("Duplicate Item Number", "err");
-        else if (data.duplicateSerial) setPill("Duplicate Serial", "warn");
-        else setPill(data.error || "Save failed", "err");
-      }
+    opts.forEach(v => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v;
+      s.appendChild(o);
     });
 
-    async function save(saveAndNew=false){
-      state.saveAndNew = saveAndNew;
+    if ([...s.options].some(o => o.value === current)) s.value = current;
+  }
 
-      const id = els.itemNumber.value.trim().toUpperCase();
-      const title = els.title.value.trim();
+  function clearForm() {
+    INVENTORY_HEADERS.forEach(h => {
+      const node = el(h);
+      if (node) node.value = "";
+    });
+  }
 
-      if (!id && !title){
-        setPill("Add Item Number or Title", "err");
-        state.saveAndNew = false;
-        return;
-      }
+  function generateItemId() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const stamp =
+      d.getFullYear() +
+      pad(d.getMonth()+1) +
+      pad(d.getDate()) + "-" +
+      pad(d.getHours()) +
+      pad(d.getMinutes()) +
+      pad(d.getSeconds());
+    const rand = Math.random().toString(36).slice(2,6).toUpperCase();
+    return `TORO-${stamp}-${rand}`;
+  }
 
-      if (id){
-        const re = /^TP-\d{6}-[A-Z]{4}$/;
-        if (!re.test(id)){
-          setPill("ID must be TP-MMDDYY-XXXX", "err");
-          state.saveAndNew = false;
-          return;
-        }
-      }
+  function collectPayload() {
+    const payload = {};
+    INVENTORY_HEADERS.forEach(h => {
+      const node = el(h);
+      if (node) payload[h] = node.value;
+    });
 
-      // Guardrail confirm if editing and ID changed
-      if (itemIdChangedInEditMode()){
-        setPill("Item ID changed (confirming)…", "warn");
-        const ok = confirm(
-          "You changed the Item Number while editing.\n\n" +
-          "This is allowed, but it can confuse tracking if done accidentally.\n\n" +
-          "Continue saving changes with the NEW Item Number?"
-        );
-        if (!ok){
-          setPill("Save cancelled", "warn");
-          state.saveAndNew = false;
-          return;
-        }
-      }
+    if (!String(payload["Item ID"] || "").trim()) {
+      payload["Item ID"] = generateItemId();
+      el("Item ID").value = payload["Item ID"];
+    }
+    return payload;
+  }
 
-      setPill("Checking duplicates…", "info");
-      try{
-        const ok = await validateBeforeSave();
-        if (!ok){ state.saveAndNew = false; return; }
+  async function reloadDropdowns() {
+    saveToken();
+    setStatus("Loading dropdowns…");
+    try {
+      const res = await jsonp({ action: "getDropdowns" });
+      if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
 
-        setPill(state.mode==="edit" ? "Saving changes…" : "Saving…", "info");
-        els.form.submit();
-      } catch(e){
-        console.error(e);
-        setPill("Save error", "err");
-        state.saveAndNew = false;
-      }
+      const dd = res.dropdowns || {};
+      DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
+
+      setStatus("Dropdowns loaded.", "good");
+    } catch (err) {
+      setStatus("Dropdown error: " + err.message, "bad");
+    }
+  }
+
+  function renderList(items) {
+    ui.list.innerHTML = "";
+    const q = ui.q.value.trim().toLowerCase();
+
+    const filtered = (items || []).filter(it => {
+      if (!q) return true;
+      const hay = [
+        it["Item ID"], it["Manufacturer"], it["Model"], it["Category"], it["Condition"], it["Location"]
+      ].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+
+    if (!filtered.length) {
+      ui.list.innerHTML = `<div class="note">No matches.</div>`;
+      return;
     }
 
-    // --- Enter-to-next-field flow (scanner-friendly) ---
-    function wireEnterFlow(){
-      const order = [
-        els.serialNumber,
-        els.title,
-        els.manufacturer,
-        els.model,
-        els.condition,
-        els.availability,
-        els.image1,
-        els.image2,
-        els.image3,
-        els.image4,
-        els.image5,
-        els.image6,
-        els.details,
-        els.notes
-      ];
+    filtered.forEach(it => {
+      const id = (it["Item ID"] || "").toString();
+      const title = `${it["Manufacturer"] || ""} ${it["Model"] || ""}`.trim() || "(No Model)";
+      const sub = `${it["Category"] || ""} • ${it["Condition"] || ""} • ${it["Location"] || ""}`.replace(/\s•\s/g," • ").trim();
+      const price = (it["Price"] || "").toString().trim();
 
-      order.forEach((el, idx) => {
-        el.addEventListener("keydown", (e) => {
-          if (e.key !== "Enter") return;
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div style="min-width:0">
+          <div class="a">${escapeHtml(id)}</div>
+          <div class="b">${escapeHtml(title)}</div>
+          <div class="c">${escapeHtml(sub)}${price ? " • $" + escapeHtml(price) : ""}</div>
+        </div>
+        <div>
+          <button type="button" data-load="${escapeHtml(id)}">Load</button>
+        </div>
+      `;
+      ui.list.appendChild(div);
+    });
 
-          // In textareas, Enter should create a newline (except with Ctrl+Enter)
-          if (el.tagName === "TEXTAREA" && !e.ctrlKey) return;
+    ui.list.querySelectorAll("button[data-load]").forEach(btn => {
+      btn.addEventListener("click", () => loadItem(btn.getAttribute("data-load")));
+    });
+  }
 
-          e.preventDefault();
-          const next = order[idx + 1];
-          if (next) next.focus();
-          else document.getElementById("saveBtn").focus();
-        });
-      });
+  async function refreshList() {
+    saveToken();
+    setListStatus("Loading list…");
+    try {
+      const res = await jsonp({ action: "listItems" });
+      if (!res.ok) throw new Error(res.error || "Failed to load list");
 
-      // Also: Enter in lookup box loads item
-      els.lookupItemId.addEventListener("keydown", (e) => {
-        if (e.key === "Enter"){
-          e.preventDefault();
-          loadItem();
-        }
-      });
+      window.__TORO_ITEMS__ = res.items || [];
+      renderList(window.__TORO_ITEMS__);
+      setListStatus(`Loaded ${window.__TORO_ITEMS__.length} items.`, "good");
+    } catch (err) {
+      setListStatus("List error: " + err.message, "bad");
     }
+  }
 
-    // --- live ID uppercase ---
-    els.itemNumber.addEventListener("input", () => {
-      const start = els.itemNumber.selectionStart;
-      const end = els.itemNumber.selectionEnd;
-      els.itemNumber.value = els.itemNumber.value.toUpperCase();
-      try { els.itemNumber.setSelectionRange(start, end); } catch {}
-      // gentle warning in edit mode if changed
-      if (itemIdChangedInEditMode()){
-        setPill("Warning: Item ID changed in Edit Mode", "warn");
-      }
-    });
+  async function loadItem(itemId) {
+    saveToken();
+    setStatus("Loading item " + itemId + "…");
+    try {
+      const res = await jsonp({ action: "getItem", itemId });
+      if (!res.ok) throw new Error(res.error || "Failed to load item");
 
-    // --- buttons ---
-    document.getElementById("reloadDropdownsBtn").addEventListener("click", loadDropdowns);
-    document.getElementById("genIdBtn").addEventListener("click", async () => {
-      const ok = await autoId();
-      if (ok) els.serialNumber.focus();
-    });
-    document.getElementById("loadItemBtn").addEventListener("click", loadItem);
-    document.getElementById("newModeBtn").addEventListener("click", () => newItem({ generateId: true }));
-    document.getElementById("cloneBtn").addEventListener("click", cloneItem);
-    document.getElementById("saveNewBtn").addEventListener("click", () => save(true));
+      const item = res.item || {};
+      INVENTORY_HEADERS.forEach(h => {
+        const node = el(h);
+        if (node) node.value = (item[h] !== undefined && item[h] !== null) ? String(item[h]) : "";
+      });
 
-    els.form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      save(false);
-    });
+      setStatus("Item loaded. Edit fields then Save to update.", "good");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      setStatus("Load error: " + err.message, "bad");
+    }
+  }
 
-    // --- init ---
-    setMode("new");
-    wireEnterFlow();
-    loadDropdowns().finally(() => {
-      // Auto-ID on first open (requested)
-      newItem({ generateId: true });
-    });
-    setPill("Ready", "ok");
-  </script>
+  async function saveItem() {
+    saveToken();
+    setStatus("Saving…");
+    try {
+      const token = getToken();
+      if (!token) throw new Error("Enter your Internal Token first (TORO_TOKEN).");
+
+      const payload = collectPayload();
+      const res = await jsonp({
+        action: "upsertItem",
+        token,
+        payload: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error(res.error || "Save failed");
+
+      setStatus(`Saved! (${res.mode}) • Row ${res.row} • Item ID ${res.itemId}`, "good");
+      await refreshList();
+    } catch (err) {
+      setStatus("Save error: " + err.message, "bad");
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // Wire up
+  ui.token.addEventListener("change", saveToken);
+
+  ui.btnReloadDropdowns.addEventListener("click", reloadDropdowns);
+  ui.btnRefreshList.addEventListener("click", refreshList);
+  ui.btnNew.addEventListener("click", () => {
+    clearForm();
+    setStatus("New item mode. Fill it out and Save.", "");
+  });
+  ui.btnSave.addEventListener("click", saveItem);
+
+  ui.q.addEventListener("input", () => renderList(window.__TORO_ITEMS__ || []));
+
+  // Boot
+  (function init(){
+    loadSettings();
+    DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
+    setStatus("Ready. Click Reload Dropdowns, then Refresh List.", "");
+  })();
+</script>
 </body>
 </html>
