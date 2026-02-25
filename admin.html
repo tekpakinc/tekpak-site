@@ -1,575 +1,466 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Tek-Pak Admin Console</title>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tek-Pak Inventory Intake</title>
   <style>
     :root{
-      --bg:#f6f7fb; --card:#fff; --line:#e6e9f2; --muted:#6b7280; --text:#111;
-      --shadow:0 18px 50px rgba(0,0,0,.10);
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --line:#dfe5ef;
+      --text:#111827;
+      --muted:#6b7280;
+      --brand:#84cc16;   /* lime green */
+      --brand2:#2563eb;  /* medium blue */
+      --danger:#dc2626;
+      --ok:#16a34a;
+      --shadow:0 12px 30px rgba(0,0,0,.08);
       --radius:16px;
     }
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
-    header{
-      position:sticky;top:0;z-index:10;background:var(--card);
-      border-bottom:1px solid var(--line); box-shadow:0 2px 14px rgba(0,0,0,.06);
-      padding:14px 18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:linear-gradient(180deg,#f8fafc,#eef3fb);
+      color:var(--text);
     }
-    header .title{font-weight:900}
-    header .sub{font-size:13px;color:var(--muted)}
-    .wrap{max-width:1200px;margin:18px auto;padding:0 16px;}
-    .grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:start}
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr;} }
+
+    .wrap{
+      max-width:1100px;
+      margin:24px auto;
+      padding:0 16px;
+    }
+
+    .hero{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:18px 18px 14px;
+      margin-bottom:16px;
+    }
+
+    .hero-top{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .badge{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);
+      flex:0 0 auto;
+    }
+
+    h1{
+      font-size:1.15rem;
+      margin:0;
+      line-height:1.2;
+    }
+
+    .sub{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:.92rem;
+    }
 
     .card{
-      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-      box-shadow:var(--shadow); overflow:hidden;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
     }
-    .cardHead{padding:14px 14px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-    .cardHead b{font-size:15px}
-    .pill{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#fbfcff;color:#111}
-    .cardBody{padding:14px}
-    .row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-    @media (max-width: 980px){ .row{grid-template-columns:repeat(2,minmax(0,1fr));} }
-    @media (max-width: 520px){ .row{grid-template-columns:1fr;} }
 
-    label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px}
-    input,select,textarea{
-      width:100%; box-sizing:border-box; padding:10px 12px;
-      border:1px solid #d7dbe7; border-radius:12px; background:#fff; outline:none;
+    .toolbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+      background:#fbfdff;
+      flex-wrap:wrap;
     }
-    textarea{min-height:110px;resize:vertical}
 
-    .btn{
-      border:0;border-radius:12px;padding:10px 12px;font-weight:850;cursor:pointer;
-      background:#111;color:#fff;
+    .toolbar .left{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
     }
-    .btn[disabled]{opacity:.45;cursor:not-allowed}
-    .btnGhost{background:#f3f5fb;color:#111;border:1px solid #e0e4f2}
-    .btnDanger{background:#b00020}
-    .btnRow{display:flex;gap:10px;flex-wrap:wrap}
-    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.35}
 
-    .toast{
-      position:fixed; right:16px; bottom:16px; z-index:9999;
-      background:#111;color:#fff;padding:12px 14px;border-radius:14px;opacity:0;transform:translateY(8px);
-      transition:all .2s ease;
+    .pill{
+      padding:6px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      font-size:.82rem;
+      color:#334155;
+      background:#fff;
     }
-    .toast.show{opacity:1;transform:translateY(0)}
 
-    .previewImg{
-      height:240px;border-radius:14px;border:1px solid var(--line);background:#eef1f8;
-      display:flex;align-items:center;justify-content:center;overflow:hidden;
+    .search{
+      min-width:220px;
+      flex:1 1 260px;
+      max-width:360px;
+      position:relative;
     }
-    .previewImg img{max-width:100%;max-height:100%;object-fit:contain}
-    .kv{font-size:13px;color:var(--muted);line-height:1.45}
-    .kv b{color:#111}
-    .hr{height:1px;background:var(--line);margin:12px 0}
-    .warn{font-size:12px;color:#b00020;display:none;margin-top:8px}
-    .mini{font-size:12px;color:var(--muted)}
-    .searchRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
-    .tokenRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .tokenMeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .chip{
-      font-size:12px; border:1px solid var(--line); border-radius:999px; padding:6px 10px;
-      background:#fbfcff; color:#111;
+    .search input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:9px 12px;
+      outline:none;
+      background:#fff;
+    }
+
+    .search input:focus{
+      border-color:#93c5fd;
+      box-shadow:0 0 0 3px rgba(59,130,246,.15);
+    }
+
+    form{
+      padding:14px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      font-size:.86rem;
+      font-weight:700;
+      color:#1f2937;
+    }
+
+    .hint{
+      font-size:.75rem;
+      color:var(--muted);
+      margin-top:-2px;
+    }
+
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:.92rem;
+      background:#fff;
+      color:var(--text);
+      outline:none;
+      transition:.15s ease;
+    }
+
+    textarea{
+      min-height:96px;
+      resize:vertical;
+    }
+
+    input:focus, select:focus, textarea:focus{
+      border-color:#93c5fd;
+      box-shadow:0 0 0 3px rgba(59,130,246,.15);
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:14px;
+      border-top:1px solid var(--line);
+      padding-top:14px;
+      flex-wrap:wrap;
+    }
+
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:0;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--brand),#65a30d);
+      color:#111827;
+    }
+
+    .btn-primary:hover{ transform:translateY(-1px); }
+
+    .btn-secondary{
+      background:#fff;
+      color:#111827;
+      border:1px solid var(--line);
+    }
+
+    .btn-secondary:hover{ background:#f8fafc; }
+
+    .status{
+      font-size:.9rem;
+      min-height:1.2em;
+    }
+
+    .status.ok{ color:var(--ok); }
+    .status.err{ color:var(--danger); }
+    .status.muted{ color:var(--muted); }
+
+    .loading{
+      opacity:.65;
+      pointer-events:none;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+    }
+
+    @media (max-width: 620px){
+      .grid{ grid-template-columns:1fr; }
+      .search{ max-width:none; width:100%; }
     }
   </style>
 </head>
 <body>
-
-<header>
-  <div>
-    <div class="title">Tek-Pak Admin Console</div>
-    <div class="sub">Friendly inventory editor • Dropdown-powered • Auto IDs</div>
-  </div>
-
-  <div style="margin-left:auto" class="tokenMeta">
-    <span class="chip" id="tokenStatus">Token: Not set</span>
-    <div class="tokenRow">
-      <input id="token" placeholder="Internal token" style="max-width:240px" autocomplete="off" />
-      <button class="btn btnGhost" id="btnClearToken" type="button">Clear</button>
-      <button class="btn btnGhost" id="btnReloadDropdowns" type="button">Reload dropdowns</button>
-    </div>
-  </div>
-</header>
-
-<div class="wrap">
-  <div class="grid">
-
-    <!-- LEFT: EDITOR -->
-    <div class="card">
-      <div class="cardHead">
-        <b>Item Editor</b>
-        <span class="pill" id="modePill">Mode: New</span>
-      </div>
-
-      <div class="cardBody">
-
-        <div class="searchRow" style="margin-bottom:10px">
-          <input id="find" placeholder="Find by ID or SKU (press Enter)" style="flex:1;min-width:220px"
-                 onkeydown="if(event.key==='Enter'){loadItem()}">
-          <button class="btn btnGhost" id="btnLoad" type="button">Load</button>
-          <button class="btn btnGhost" id="btnNew" type="button">New</button>
-          <button class="btn btnGhost" id="btnDuplicate" type="button">Duplicate</button>
-          <button class="btn btnDanger" id="btnArchive" type="button">Archive</button>
-          <button class="btn" id="btnSave" type="button">Save</button>
-        </div>
-
-        <div class="mini">Tip: “Load” pulls the item into the editor so you can update it. “Duplicate” clones fields and creates a fresh ID.</div>
-
-        <div id="warn" class="warn"></div>
-
-        <div class="row" style="margin-top:10px">
-          <div>
-            <label>Item ID (auto)</label>
-            <input id="ID" placeholder="(auto-generated on save if blank)"/>
-          </div>
-          <div>
-            <label>SKU</label>
-            <input id="SKU" placeholder="TP-XXXX"/>
-          </div>
-          <div>
-            <label>Status</label>
-            <select id="Status"></select>
-          </div>
-          <div>
-            <label>Visibility</label>
-            <select id="Visibility"></select>
-          </div>
-
-          <div style="grid-column: span 2">
-            <label>Title</label>
-            <input id="Title" placeholder="Dell Latitude 5420 Laptop..."/>
-          </div>
-          <div>
-            <label>Price (USD)</label>
-            <input id="Price" inputmode="decimal" placeholder="0.00"/>
-          </div>
-          <div>
-            <label>Qty</label>
-            <input id="Qty" inputmode="numeric" placeholder="1"/>
-          </div>
-
-          <div>
-            <label>Category</label>
-            <select id="Category"></select>
-          </div>
-          <div>
-            <label>Condition</label>
-            <select id="Condition"></select>
-          </div>
-          <div>
-            <label>Brand</label>
-            <select id="Brand"></select>
-          </div>
-          <div>
-            <label>Model</label>
-            <input id="Model" placeholder="Model/Part #"/>
-          </div>
-
-          <div>
-            <label>Location</label>
-            <select id="Location"></select>
-          </div>
-          <div>
-            <label>Pickup Only</label>
-            <select id="PickupOnly">
-              <option value="">No</option>
-              <option value="TRUE">Yes</option>
-            </select>
-          </div>
-          <div>
-            <label>Weight (oz)</label>
-            <input id="WeightOz" inputmode="decimal" placeholder="0"/>
-          </div>
-          <div>
-            <label>Photo URL</label>
-            <input id="PhotoURL" placeholder="https://..."/>
-          </div>
-
-          <div style="grid-column: span 4">
-            <label>Description</label>
-            <textarea id="Description" placeholder="Testing notes, what's included, defects, etc."></textarea>
-          </div>
-
-          <div style="grid-column: span 4">
-            <label>Internal Notes</label>
-            <textarea id="Notes" placeholder="Internal-only notes…"></textarea>
-          </div>
-        </div>
-
-        <div class="hint">
-          <b>Shipping:</b> Free shipping auto-applies at <b>$25+</b>. Under $25 uses a ZIP + weight estimate (ship-from <b>27349</b>).
-          <br/>IDs are auto-generated client-side if blank, and also guaranteed server-side.
+  <div class="wrap">
+    <div class="hero">
+      <div class="hero-top">
+        <div class="badge" aria-hidden="true"></div>
+        <div>
+          <h1>Tek-Pak Inventory Intake</h1>
+          <p class="sub" id="sheetLabel">Loading your sheet schema...</p>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: PREVIEW -->
-    <div class="card">
-      <div class="cardHead">
-        <b>Live Preview</b>
-        <span class="pill" id="publicPill">Public: No</span>
-      </div>
-      <div class="cardBody">
-        <div class="previewImg" id="imgBox">
-          <div style="opacity:.65">No photo</div>
+    <div class="card" id="appCard">
+      <div class="toolbar">
+        <div class="left">
+          <span class="pill" id="fieldCountPill">Fields: --</span>
+          <span class="pill" id="dropdownCountPill">Dropdowns: --</span>
         </div>
-
-        <div class="hr"></div>
-
-        <div class="kv" id="previewKv"></div>
-
-        <div class="hr"></div>
-
-        <div class="hint">
-          Tip: Paste a PhotoURL to preview it here. Keep titles short & punchy for clean store cards.
+        <div class="search">
+          <input id="fieldSearch" type="text" placeholder="Filter fields by header name..." />
         </div>
       </div>
+
+      <form id="inventoryForm">
+        <div class="grid" id="formGrid"></div>
+
+        <div class="actions">
+          <div class="btns">
+            <button type="submit" class="btn-primary">Add Item</button>
+            <button type="button" class="btn-secondary" id="clearBtn">Clear Form</button>
+            <button type="button" class="btn-secondary" id="reloadBtn">Reload Headers</button>
+          </div>
+          <div class="status muted" id="status">Ready.</div>
+        </div>
+      </form>
     </div>
-
   </div>
-</div>
 
-<div class="toast" id="toast"></div>
+  <script>
+    const state = {
+      schema: null,
+      filteredFields: []
+    };
 
-<script>
-/** CONFIG */
-const API="https://script.google.com/macros/s/AKfycbwiY4C5DWNjOE1xSdpvn3lsOJsRrS11RJSzIWKDdIDHeqbbgbNdcS0osLo780d5VsZ6/exec";
-const TOKEN_KEY="tp_internal_token_v1";
+    const el = {
+      appCard: document.getElementById('appCard'),
+      form: document.getElementById('inventoryForm'),
+      formGrid: document.getElementById('formGrid'),
+      status: document.getElementById('status'),
+      sheetLabel: document.getElementById('sheetLabel'),
+      fieldSearch: document.getElementById('fieldSearch'),
+      clearBtn: document.getElementById('clearBtn'),
+      reloadBtn: document.getElementById('reloadBtn'),
+      fieldCountPill: document.getElementById('fieldCountPill'),
+      dropdownCountPill: document.getElementById('dropdownCountPill')
+    };
 
-/** State */
-let OPTIONS=null;
-let INTERNAL_CACHE=null; // stores internal items after load (for searching by ID/SKU)
-let LOADED_EXISTING=false;
+    function setStatus(msg, type = 'muted') {
+      el.status.textContent = msg;
+      el.status.className = 'status ' + type;
+    }
 
-const FIELDS=[
-  "ID","SKU","Title","Description","Category","Brand","Model","Condition","PhotoURL","Location",
-  "Status","Visibility","Price","Qty","PickupOnly","WeightOz","LengthIn","WidthIn","HeightIn","UpdatedAt","Notes"
-];
+    function setLoading(on) {
+      el.appCard.classList.toggle('loading', !!on);
+    }
 
-function toast(msg){
-  const t=document.getElementById("toast");
-  t.textContent=msg;
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2200);
-}
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
 
-function setWarn(msg){
-  const w=document.getElementById("warn");
-  if(!msg){ w.style.display="none"; w.textContent=""; return; }
-  w.style.display="block"; w.textContent=msg;
-}
+    function isLikelyLongField(field) {
+      if (field.isTextarea) return true;
+      const n = field.label.toLowerCase();
+      return ['description','notes','details','specs','comments'].some(k => n.includes(k));
+    }
 
-function esc(s){
-  return String(s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
-}
+    function renderFields(fields) {
+      const html = fields.map(field => {
+        const full = isLikelyLongField(field) ? ' full' : '';
+        const id = 'f_' + field.key.replace(/\W+/g, '_');
 
-function getToken(){ return document.getElementById("token").value.trim(); }
+        const label = `
+          <label for="${id}">${escapeHtml(field.label)}</label>
+          ${field.options && field.options.length ? `<div class="hint">Dropdown from sheet validation</div>` : ''}
+        `;
 
-function requireToken(reason){
-  // Friendly nudge + focus so it’s obvious what’s wrong (and not “PhotoURL??” confusion)
-  toast(reason || "Enter internal token first.");
-  const tok=document.getElementById("token");
-  tok.focus();
-  tok.select?.();
-  return false;
-}
+        let control = '';
 
-function setTokenStatus(){
-  const has=!!getToken();
-  const status=document.getElementById("tokenStatus");
-  status.textContent = "Token: " + (has ? "Set" : "Not set");
-  // Disable internal buttons until token exists (no more surprise nag toasts)
-  ["btnLoad","btnSave","btnArchive"].forEach(id=>{
-    const b=document.getElementById(id);
-    if(b) b.disabled = !has;
-  });
-}
+        if (field.options && field.options.length) {
+          const opts = ['<option value=""></option>']
+            .concat(field.options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`))
+            .join('');
+          control = `<select id="${id}" name="${escapeHtml(field.key)}">${opts}</select>`;
+        } else if (field.isTextarea) {
+          control = `<textarea id="${id}" name="${escapeHtml(field.key)}" placeholder="${escapeHtml(field.label)}"></textarea>`;
+        } else {
+          const type = field.inputType || 'text';
+          const step = type === 'number' ? ' step="any"' : '';
+          control = `<input id="${id}" name="${escapeHtml(field.key)}" type="${type}"${step} placeholder="${escapeHtml(field.label)}" />`;
+        }
 
-function uuidLike(){
-  const bytes = crypto?.getRandomValues ? crypto.getRandomValues(new Uint8Array(16)) : Array.from({length:16},()=>Math.floor(Math.random()*256));
-  const hex=[...bytes].map(b=>b.toString(16).padStart(2,"0")).join("");
-  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
-}
+        return `<div class="field${full}" data-label="${escapeHtml(field.label.toLowerCase())}">${label}${control}</div>`;
+      }).join('');
 
-function populateSelect(id, arr){
-  const el=document.getElementById(id);
-  if(!el) return;
-  const current=el.value;
-  el.innerHTML="";
-  arr.forEach(v=>{
-    const o=document.createElement("option");
-    o.value=v; o.textContent=v;
-    el.appendChild(o);
-  });
-  if(current && arr.includes(current)) el.value=current;
-}
+      el.formGrid.innerHTML = html || `<div class="field full"><div class="hint">No fields match your filter.</div></div>`;
+    }
 
-async function loadOptions(){
-  try{
-    const res=await fetch(`${API}?action=listOptions`);
-    const data=await res.json();
-    if(!data.ok) throw new Error(data.error||"Failed to load options");
-    OPTIONS=data.options||{};
+    function updatePills() {
+      const total = state.schema?.fields?.length || 0;
+      const dd = (state.schema?.fields || []).filter(f => f.options && f.options.length).length;
+      el.fieldCountPill.textContent = `Fields: ${total}`;
+      el.dropdownCountPill.textContent = `Dropdowns: ${dd}`;
+    }
 
-    populateSelect("Status", OPTIONS.Status || ["Active","Pending","Sold","Archived"]);
-    populateSelect("Visibility", OPTIONS.Visibility || ["Public","Internal"]);
-    populateSelect("Category", ["", ...(OPTIONS.Category || [])]);
-    populateSelect("Condition", ["", ...(OPTIONS.Condition || [])]);
-    populateSelect("Brand", ["", ...(OPTIONS.Brand || [])]);
-    populateSelect("Location", ["", ...(OPTIONS.Location || [])]);
+    function applyFilter() {
+      const q = el.fieldSearch.value.trim().toLowerCase();
+      if (!state.schema) return;
 
-    if(!document.getElementById("Status").value) document.getElementById("Status").value="Active";
-    if(!document.getElementById("Visibility").value) document.getElementById("Visibility").value="Internal";
+      if (!q) {
+        state.filteredFields = [...state.schema.fields];
+      } else {
+        state.filteredFields = state.schema.fields.filter(f =>
+          f.label.toLowerCase().includes(q)
+        );
+      }
+      renderFields(state.filteredFields);
+    }
 
-    toast("Dropdowns loaded.");
-  } catch(err){
-    console.error(err);
-    toast("Dropdowns failed — using defaults.");
-    populateSelect("Status", ["Active","Pending","Sold","Archived"]);
-    populateSelect("Visibility", ["Public","Internal"]);
-    populateSelect("Category", ["","Laptops","Desktops","Monitors","Networking","Accessories","Adapters","Parts","Other"]);
-    populateSelect("Condition", ["","New","Open Box","Used - Good","Used - Fair","Untested","For Parts/Not Working"]);
-    populateSelect("Brand", ["","Dell","HP","Lenovo","Apple","Microsoft","Acer","ASUS","Samsung","LG","Other"]);
-    populateSelect("Location", ["","Front Shelf","Back Shelf","Bin A","Bin B","Bin C","Repair Bench","Warehouse","Other"]);
-  }
-  updatePreview();
-}
+    function loadSchema() {
+      setLoading(true);
+      setStatus('Loading headers and dropdowns from your sheet...', 'muted');
 
-function gatherItem(){
-  const item={};
-  FIELDS.forEach(f=>{
-    const el=document.getElementById(f);
-    if(el) item[f]=el.value;
-  });
-  item.Price=Number(item.Price||0);
-  item.Qty=Number(item.Qty||0);
-  item.WeightOz=Number(item.WeightOz||0);
-  item.LengthIn=Number(item.LengthIn||0);
-  item.WidthIn=Number(item.WidthIn||0);
-  item.HeightIn=Number(item.HeightIn||0);
-  return item;
-}
+      google.script.run
+        .withSuccessHandler((schema) => {
+          state.schema = schema;
+          state.filteredFields = [...schema.fields];
 
-function validateItem(item){
-  if(!item.Title || item.Title.trim().length<3) return "Title is required.";
-  if(isNaN(item.Price) || item.Price<0) return "Price must be a valid number.";
-  if(isNaN(item.Qty) || item.Qty<0) return "Qty must be 0 or higher.";
-  // recommend weight for < $25 items unless pickup-only
-  if(item.PickupOnly !== "TRUE" && Number(item.Price||0) < 25 && (!item.WeightOz || item.WeightOz<=0))
-    return "WeightOz is recommended for items under $25 (shipping estimate uses weight).";
-  return "";
-}
+          el.sheetLabel.textContent = `Connected to sheet tab: ${schema.sheetName}`;
+          updatePills();
+          renderFields(state.filteredFields);
 
-function updateModePill(){
-  const id=document.getElementById("ID").value.trim();
-  const pill=document.getElementById("modePill");
-  if(!id){ pill.textContent="Mode: New"; return; }
-  pill.textContent=LOADED_EXISTING ? "Mode: Edit" : "Mode: New (unsaved)";
-}
+          setLoading(false);
+          setStatus('Ready.', 'ok');
+        })
+        .withFailureHandler((err) => {
+          console.error(err);
+          setLoading(false);
+          setStatus('Could not load sheet schema: ' + (err.message || err), 'err');
+        })
+        .getFormSchema();
+    }
 
-function newItem(){
-  LOADED_EXISTING=false;
-  ["ID","SKU","Title","Description","Model","PhotoURL","WeightOz","LengthIn","WidthIn","HeightIn","Notes"].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value="";
-  });
-  document.getElementById("Qty").value="1";
-  document.getElementById("Price").value="";
-  document.getElementById("PickupOnly").value="";
-  document.getElementById("Status").value="Active";
-  document.getElementById("Visibility").value="Internal";
-  if(document.getElementById("Category")) document.getElementById("Category").value="";
-  if(document.getElementById("Condition")) document.getElementById("Condition").value="";
-  if(document.getElementById("Brand")) document.getElementById("Brand").value="";
-  if(document.getElementById("Location")) document.getElementById("Location").value="";
-  setWarn("");
-  updateModePill();
-  updatePreview();
-  toast("New item ready.");
-}
+    function clearForm() {
+      const controls = el.form.querySelectorAll('input, select, textarea');
+      controls.forEach(c => {
+        if (c.type === 'checkbox' || c.type === 'radio') {
+          c.checked = false;
+        } else {
+          c.value = '';
+        }
+      });
+      setStatus('Form cleared.', 'muted');
+    }
 
-function duplicateItem(){
-  const idEl=document.getElementById("ID");
-  if(!idEl.value.trim()){ toast("Nothing to duplicate yet."); return; }
-  idEl.value=uuidLike();
-  document.getElementById("SKU").value="";
-  LOADED_EXISTING=false;
-  updateModePill();
-  updatePreview();
-  toast("Duplicated (new ID created).");
-}
+    function collectFormData() {
+      const payload = {};
+      const controls = el.form.querySelectorAll('[name]');
+      controls.forEach(c => {
+        let val = c.value;
+        // Keep date values as text (YYYY-MM-DD) so sheet handles it predictably
+        payload[c.name] = val;
+      });
+      return payload;
+    }
 
-async function loadInternalCache(){
-  const token=getToken();
-  if(!token) return requireToken("Token is required to load internal items.");
+    function submitForm(e) {
+      e.preventDefault();
+      if (!state.schema) return;
 
-  if(INTERNAL_CACHE) return INTERNAL_CACHE;
+      const payload = collectFormData();
 
-  const res=await fetch(`${API}?action=listInternal&token=${encodeURIComponent(token)}`);
-  const data=await res.json();
-  if(!data.ok){ toast("Internal load failed: " + (data.error||"")); return null; }
-  INTERNAL_CACHE = data.items || [];
-  return INTERNAL_CACHE;
-}
+      setLoading(true);
+      setStatus('Saving item to sheet...', 'muted');
 
-async function loadItem(){
-  const q=document.getElementById("find").value.trim();
-  if(!q){ toast("Enter an ID or SKU."); return; }
+      google.script.run
+        .withSuccessHandler((res) => {
+          setLoading(false);
 
-  const items = await loadInternalCache();
-  if(!items) return;
+          if (res && res.ok) {
+            setStatus(`${res.message} (Row ${res.rowNumber})`, 'ok');
+            clearForm();
+          } else {
+            setStatus((res && res.message) || 'Unknown error while saving.', 'err');
+          }
+        })
+        .withFailureHandler((err) => {
+          console.error(err);
+          setLoading(false);
+          setStatus('Save failed: ' + (err.message || err), 'err');
+        })
+        .submitInventoryItem(payload);
+    }
 
-  const found = items.find(x => String(x.ID||"")===q) || items.find(x => String(x.SKU||"")===q);
-  if(!found){ toast("Not found."); return; }
+    // Events
+    el.form.addEventListener('submit', submitForm);
+    el.clearBtn.addEventListener('click', clearForm);
+    el.reloadBtn.addEventListener('click', loadSchema);
+    el.fieldSearch.addEventListener('input', applyFilter);
 
-  FIELDS.forEach(f=>{
-    const el=document.getElementById(f);
-    if(!el) return;
-    el.value = (found[f] !== undefined && found[f] !== null) ? String(found[f]) : "";
-  });
-
-  LOADED_EXISTING=true;
-  updateModePill();
-  updatePreview();
-  setWarn("");
-  toast("Item loaded.");
-}
-
-async function saveItem(){
-  const token=getToken();
-  if(!token) return requireToken("Token is required to save items.");
-
-  const idEl=document.getElementById("ID");
-  if(!idEl.value.trim()) idEl.value = uuidLike();
-
-  const item=gatherItem();
-  const warn=validateItem(item);
-  setWarn(warn);
-
-  const action = LOADED_EXISTING ? "updateItem" : "addItem";
-
-  const res=await fetch(API,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ action, token, item })
-  });
-  const d=await res.json();
-  if(!d.ok){ toast("Save failed: " + (d.error||"")); return; }
-
-  if(d.id) document.getElementById("ID").value = d.id;
-  LOADED_EXISTING=true;
-  INTERNAL_CACHE=null; // refresh cache next time
-  updateModePill();
-  updatePreview();
-  toast("Saved.");
-}
-
-async function archiveItem(){
-  const token=getToken();
-  const itemId=document.getElementById("ID").value.trim();
-  if(!token) return requireToken("Token is required to archive items.");
-  if(!itemId){ toast("Enter/load an ID first."); return; }
-
-  const res=await fetch(API,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ action:"archiveItem", token, itemId })
-  });
-  const d=await res.json();
-  if(!d.ok){ toast("Archive failed: " + (d.error||"")); return; }
-
-  document.getElementById("Status").value="Archived";
-  LOADED_EXISTING=true;
-  INTERNAL_CACHE=null;
-  updateModePill();
-  updatePreview();
-  toast("Archived.");
-}
-
-function updatePreview(){
-  const item=gatherItem();
-  const publicYes = (item.Visibility==="Public" && item.Status==="Active" && Number(item.Qty||0)>0);
-  document.getElementById("publicPill").textContent = "Public: " + (publicYes ? "Yes" : "No");
-
-  const imgBox=document.getElementById("imgBox");
-  imgBox.innerHTML="";
-  if(item.PhotoURL && item.PhotoURL.trim()){
-    const img=document.createElement("img");
-    img.src=item.PhotoURL.trim();
-    img.alt="Item photo";
-    img.onerror=()=>{ imgBox.innerHTML=`<div style="opacity:.65">Bad/blocked image URL</div>`; };
-    imgBox.appendChild(img);
-  } else {
-    imgBox.innerHTML=`<div style="opacity:.65">No photo</div>`;
-  }
-
-  document.getElementById("previewKv").innerHTML = `
-    <div><b>${esc(item.Title || "Untitled item")}</b></div>
-    <div>${esc(item.SKU || item.ID || "(no ID yet)")}</div>
-    <div style="margin-top:8px"><b>$${Number(item.Price||0).toFixed(2)}</b> • Qty: <b>${Number(item.Qty||0)}</b></div>
-    <div>Status: <b>${esc(item.Status||"")}</b> • Visibility: <b>${esc(item.Visibility||"")}</b></div>
-    <div>Category: <b>${esc(item.Category||"")}</b> • Condition: <b>${esc(item.Condition||"")}</b></div>
-    <div>Brand: <b>${esc(item.Brand||"")}</b> • Location: <b>${esc(item.Location||"")}</b></div>
-    <div>PickupOnly: <b>${esc(item.PickupOnly==="TRUE" ? "Yes" : "No")}</b> • WeightOz: <b>${esc(String(item.WeightOz||0))}</b></div>
-    <div style="margin-top:10px;color:#111;opacity:.92">${esc((item.Description||"").slice(0,240))}${(item.Description||"").length>240?"…":""}</div>
-  `;
-}
-
-// Live preview hooks
-[
-  "ID","SKU","Title","Price","Qty","Category","Condition","Brand","Model","PhotoURL","Location",
-  "PickupOnly","WeightOz","LengthIn","WidthIn","HeightIn","Status","Visibility","Description","Notes"
-].forEach(id=>{
-  const el=document.getElementById(id);
-  if(!el) return;
-  el.addEventListener("input", ()=>{ updateModePill(); updatePreview(); });
-  el.addEventListener("change", ()=>{ updateModePill(); updatePreview(); });
-});
-
-/** Button wiring (so disabling works) */
-document.getElementById("btnReloadDropdowns").onclick = loadOptions;
-document.getElementById("btnLoad").onclick = loadItem;
-document.getElementById("btnNew").onclick = newItem;
-document.getElementById("btnDuplicate").onclick = duplicateItem;
-document.getElementById("btnArchive").onclick = archiveItem;
-document.getElementById("btnSave").onclick = saveItem;
-
-/** Token persistence + UX */
-const tokenEl=document.getElementById("token");
-const savedToken = localStorage.getItem(TOKEN_KEY) || "";
-if(savedToken) tokenEl.value = savedToken;
-
-tokenEl.addEventListener("input", ()=>{
-  const t=getToken();
-  if(t) localStorage.setItem(TOKEN_KEY, t);
-  else localStorage.removeItem(TOKEN_KEY);
-  INTERNAL_CACHE=null;
-  setTokenStatus();
-});
-
-document.getElementById("btnClearToken").onclick = ()=>{
-  tokenEl.value="";
-  localStorage.removeItem(TOKEN_KEY);
-  INTERNAL_CACHE=null;
-  setTokenStatus();
-  toast("Token cleared.");
-  tokenEl.focus();
-};
-
-function bootTokenStatus(){
-  setTokenStatus();
-  // If no token, gently focus it (but don’t be annoying if they just want to browse UI)
-  if(!getToken()) setTimeout(()=>tokenEl.focus(), 150);
-}
-
-// Boot
-loadOptions();
-newItem();
-bootTokenStatus();
-</script>
+    // Init
+    loadSchema();
+  </script>
 </body>
 </html>
