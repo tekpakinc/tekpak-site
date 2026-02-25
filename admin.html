@@ -42,7 +42,6 @@
     .mode-badge.new{background:#ecfdf3;color:#166534;border-color:#bbf7d0}
     .mode-badge.edit{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
     .lookup-row{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
-    .small{font-size:.8rem;color:var(--muted)}
     iframe{display:none}
   </style>
 </head>
@@ -53,7 +52,7 @@
         <h1>Tek-Pak Inventory</h1>
         <div class="subtitle">
           <span id="modeBadge" class="mode-badge new">New Item Mode</span>
-          &nbsp;Add or edit inventory items
+          &nbsp;Add or edit items
         </div>
       </div>
       <div id="statusPill" class="status-pill info">● Connecting…</div>
@@ -70,15 +69,14 @@
             <button type="button" class="btn" id="loadItemBtn">Load Item</button>
             <button type="button" class="btn-ghost" id="newModeBtn">New Item</button>
           </div>
-          <div class="small" style="display:flex;align-items:end;">
+          <div style="display:flex;align-items:end;color:#6b7280;font-size:.85rem;">
             Load to edit. New Item clears the form.
           </div>
         </div>
       </div>
 
-      <!-- IMPORTANT: this form POSTs to Apps Script via hidden iframe (no CORS). -->
+      <!-- FORM POSTS DIRECTLY TO APPS SCRIPT (no fetch/CORS). -->
       <form id="inventoryForm" method="POST" target="saveFrame">
-        <!-- these hidden fields control create/update -->
         <input type="hidden" name="sheetName" value="Inventory" />
         <input type="hidden" name="mode" id="modeField" value="create" />
         <input type="hidden" name="originalItemNumber" id="originalItemNumberField" value="" />
@@ -90,40 +88,33 @@
               <input id="itemNumber" name="itemNumber" type="text" placeholder="TP-MMDDYY-XXXX" />
               <button type="button" class="btn-ghost" id="genIdBtn">Auto ID</button>
             </div>
-            <div class="small">Format: TP-MMDDYY-XXXX (XXXX = 4 capital letters)</div>
           </div>
           <div>
             <label for="serialNumber">Serial Number</label>
-            <input id="serialNumber" name="serialNumber" type="text" placeholder="ABC123XYZ" />
+            <input id="serialNumber" name="serialNumber" type="text" />
           </div>
           <div>
             <label for="manufacturer">Manufacturer</label>
-            <select id="manufacturer" name="manufacturer">
-              <option value="">Select manufacturer</option>
-            </select>
+            <select id="manufacturer" name="manufacturer"><option value="">Select manufacturer</option></select>
           </div>
           <div>
             <label for="model">Model</label>
-            <input id="model" name="model" type="text" placeholder="OptiPlex 7070" />
+            <input id="model" name="model" type="text" />
           </div>
         </div>
 
         <div class="grid grid-3" style="margin-top:12px;">
           <div>
             <label for="title">Title</label>
-            <input id="title" name="title" type="text" placeholder="Dell OptiPlex 7070 Desktop" />
+            <input id="title" name="title" type="text" />
           </div>
           <div>
             <label for="condition">Condition</label>
-            <select id="condition" name="condition">
-              <option value="">Select condition</option>
-            </select>
+            <select id="condition" name="condition"><option value="">Select condition</option></select>
           </div>
           <div>
             <label for="availability">Availability</label>
-            <select id="availability" name="availability">
-              <option value="">Select availability</option>
-            </select>
+            <select id="availability" name="availability"><option value="">Select availability</option></select>
           </div>
         </div>
 
@@ -150,9 +141,9 @@
         </div>
 
         <div class="row-actions">
-          <button class="btn-accent" type="submit" id="saveBtn">Save to Inventory</button>
+          <button class="btn-accent" type="submit" id="saveBtn">Save</button>
           <button class="btn" type="button" id="saveNewBtn">Save + New</button>
-          <button class="btn-ghost" type="reset" id="clearBtn">Clear Form</button>
+          <button class="btn-ghost" type="reset">Clear</button>
           <button class="btn-ghost" type="button" id="reloadDropdownsBtn">Reload Dropdowns</button>
         </div>
       </form>
@@ -162,20 +153,16 @@
   </div>
 
   <script>
+    // Your Apps Script URL
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZDY3EmjCLDEqcdd7Dcbbn5L2k-cP6XI3DKbhGL1g9-UnIPHONPl8E5HjpiB2C5uXF3w/exec";
 
-    const state = {
-      mode: "new", // new | edit
-      originalItemNumber: "",
-      saveAndNew: false,
-      loadedRowNumber: 0
-    };
+    const state = { mode:"new", originalItemNumber:"", loadedRowNumber:0, saveAndNew:false };
 
     const els = {
-      form: document.getElementById("inventoryForm"),
       statusPill: document.getElementById("statusPill"),
       modeBadge: document.getElementById("modeBadge"),
       saveBtn: document.getElementById("saveBtn"),
+      form: document.getElementById("inventoryForm"),
 
       modeField: document.getElementById("modeField"),
       originalItemNumberField: document.getElementById("originalItemNumberField"),
@@ -189,7 +176,7 @@
       condition: document.getElementById("condition"),
       availability: document.getElementById("availability"),
       details: document.getElementById("details"),
-      notes: document.getElementById("notes")
+      notes: document.getElementById("notes"),
     };
 
     function setPill(text, type="info"){
@@ -207,12 +194,12 @@
       } else {
         els.modeBadge.textContent = "New Item Mode";
         els.modeBadge.className = "mode-badge new";
-        els.saveBtn.textContent = "Save to Inventory";
+        els.saveBtn.textContent = "Save";
         els.modeField.value = "create";
       }
     }
 
-    // -------- JSONP (no CORS) --------
+    // JSONP loader (no CORS)
     function loadJSONP(url, callbackName){
       return new Promise((resolve, reject) => {
         const script = document.createElement("script");
@@ -243,7 +230,7 @@
       });
     }
 
-    async function apiGetJSONP(params){
+    async function apiGet(params){
       const cb = "tp_cb_" + Math.random().toString(16).slice(2);
       const url = new URL(APPS_SCRIPT_URL);
       Object.entries(params).forEach(([k,v]) => {
@@ -270,21 +257,20 @@
     }
 
     async function loadDropdowns(){
-      setPill("Connecting…", "info");
-      try{
-        const data = await apiGetJSONP({ action: "dropdowns" });
+      setPill("Loading dropdowns…", "info");
+      try {
+        const data = await apiGet({ action:"dropdowns" });
         if (!data || !data.ok) throw new Error(data?.error || "Dropdowns failed");
         setSelectOptions(els.manufacturer, data.dropdowns.Manufacturer || [], "Select manufacturer");
         setSelectOptions(els.condition, data.dropdowns.Condition || [], "Select condition");
         setSelectOptions(els.availability, data.dropdowns.Availability || [], "Select availability");
-        setPill("Connected to sheet", "ok");
+        setPill("Connected", "ok");
       } catch (e){
         console.error(e);
         setPill("Connection error", "err");
       }
     }
 
-    // -------- ID generation + validation --------
     function randomLetters4(){
       const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       let out = "";
@@ -298,67 +284,38 @@
       const yy = String(d.getFullYear()).slice(-2);
       return `${mm}${dd}${yy}`;
     }
-    function generateItemIdCandidate(){
-      return `TP-${todayMMDDYY()}-${randomLetters4()}`;
-    }
-    async function generateUniqueItemId(maxTries=20){
-      for (let i=0;i<maxTries;i++){
-        const candidate = generateItemIdCandidate();
-        const v = await apiGetJSONP({ action:"validate", id:candidate });
-        if (v && v.ok && !v.duplicateId) return candidate;
-      }
-      throw new Error("Could not generate a unique ID after several tries.");
-    }
 
-    async function handleAutoId(){
+    async function autoId(){
       setPill("Generating ID…", "info");
       try{
-        const id = await generateUniqueItemId();
-        els.itemNumber.value = id;
-        setPill("Unique ID generated", "ok");
-        if (!els.title.value.trim()) els.title.focus();
-      } catch (e){
+        for (let i=0;i<20;i++){
+          const candidate = `TP-${todayMMDDYY()}-${randomLetters4()}`;
+          const v = await apiGet({ action:"validate", id:candidate });
+          if (v && v.ok && !v.duplicateId){
+            els.itemNumber.value = candidate;
+            setPill("Unique ID generated", "ok");
+            return;
+          }
+        }
+        setPill("ID generation failed", "err");
+      } catch(e){
         console.error(e);
         setPill("ID generation failed", "err");
       }
     }
 
-    async function validateBeforeSave(){
-      const id = els.itemNumber.value.trim();
-      const serial = els.serialNumber.value.trim();
-      const params = { action:"validate", id, serial };
-
-      // In edit mode, exclude current row to avoid false duplicate on itself
-      if (state.mode === "edit" && state.loadedRowNumber) params.excludeRow = state.loadedRowNumber;
-
-      const v = await apiGetJSONP(params);
-      if (!v || !v.ok) throw new Error(v?.error || "Validate failed");
-
-      if (v.duplicateId) {
-        setPill("Duplicate Item Number", "err");
-        return false;
-      }
-      if (v.duplicateSerial) {
-        setPill("Duplicate Serial Number", "warn");
-        return false;
-      }
-      return true;
-    }
-
-    // -------- Load existing item for edit (JSONP) --------
-    async function loadItemForEdit(){
+    async function loadItem(){
       const id = els.lookupItemId.value.trim().toUpperCase();
-      if (!id) { setPill("Enter Item Number to load", "warn"); return; }
-
+      if (!id){ setPill("Enter Item Number", "warn"); return; }
       setPill("Loading item…", "info");
       try{
-        const data = await apiGetJSONP({ action:"getItem", id });
-        if (!data || !data.ok) { setPill(data?.error || "Item not found", "err"); return; }
+        const data = await apiGet({ action:"getItem", id });
+        if (!data || !data.ok){ setPill(data?.error || "Not found", "err"); return; }
 
         const item = data.item || {};
         state.loadedRowNumber = Number(data.rowNumber || 0);
+        state.originalItemNumber = String(item["Item Number"] || id).trim();
 
-        // Fill form
         els.itemNumber.value = item["Item Number"] || "";
         els.serialNumber.value = item["Serial Number"] || "";
         els.title.value = item["Title"] || "";
@@ -375,110 +332,104 @@
         els.details.value = item["Details"] || "";
         els.notes.value = item["Notes"] || "";
 
-        state.originalItemNumber = String(item["Item Number"] || id).trim();
         els.originalItemNumberField.value = state.originalItemNumber;
-
         setMode("edit");
         setPill("Item loaded", "ok");
-      } catch (e){
+      } catch(e){
         console.error(e);
         setPill("Load error", "err");
       }
     }
 
-    function newItemMode(){
+    function newItem(){
       els.form.reset();
       state.originalItemNumber = "";
       state.loadedRowNumber = 0;
       els.originalItemNumberField.value = "";
       setMode("new");
-      els.itemNumber.focus();
       setPill("Ready", "ok");
+      els.itemNumber.focus();
     }
 
-    // -------- Save via iframe form submit + postMessage --------
-    // We set the action URL dynamically so you can keep the form clean.
+    async function validateBeforeSave(){
+      const id = els.itemNumber.value.trim().toUpperCase();
+      els.itemNumber.value = id;
+      const serial = els.serialNumber.value.trim();
+      const params = { action:"validate", id, serial };
+      if (state.mode === "edit" && state.loadedRowNumber) params.excludeRow = state.loadedRowNumber;
+
+      const v = await apiGet(params);
+      if (!v || !v.ok) throw new Error(v?.error || "Validate failed");
+      if (v.duplicateId){ setPill("Duplicate Item Number", "err"); return false; }
+      if (v.duplicateSerial){ setPill("Duplicate Serial", "warn"); return false; }
+      return true;
+    }
+
+    // Form submits to iframe (no CORS). Apps Script replies with postMessage.
     els.form.action = APPS_SCRIPT_URL;
 
     window.addEventListener("message", (event) => {
-      // We accept "*" because we control the script. If you later host this on a domain,
-      // we can restrict the origin.
       const data = event.data;
       if (!data || typeof data !== "object" || data.ok === undefined) return;
 
-      if (data.ok) {
+      if (data.ok){
         setPill(data.message || "Saved", "ok");
-        // After create, flip into edit mode on that new record
-        if (data.itemNumber) {
+        if (data.itemNumber){
+          els.lookupItemId.value = data.itemNumber;
           state.originalItemNumber = data.itemNumber;
           els.originalItemNumberField.value = data.itemNumber;
-          els.lookupItemId.value = data.itemNumber;
           setMode("edit");
         }
-        if (state.saveAndNew) {
+        if (state.saveAndNew){
           state.saveAndNew = false;
-          newItemMode();
+          newItem();
         }
       } else {
         if (data.duplicateId) setPill("Duplicate Item Number", "err");
-        else if (data.duplicateSerial) setPill("Duplicate Serial Number", "warn");
-        else setPill(data.error || data.message || "Save failed", "err");
+        else if (data.duplicateSerial) setPill("Duplicate Serial", "warn");
+        else setPill(data.error || "Save failed", "err");
       }
     });
 
     async function save(saveAndNew=false){
-      try{
-        state.saveAndNew = saveAndNew;
+      state.saveAndNew = saveAndNew;
 
-        const id = els.itemNumber.value.trim().toUpperCase();
-        els.itemNumber.value = id;
-
-        if (id) {
-          const re = /^TP-\d{6}-[A-Z]{4}$/;
-          if (!re.test(id)) {
-            setPill("ID must be TP-MMDDYY-XXXX", "err");
-            state.saveAndNew = false;
-            return;
-          }
-        } else if (!els.title.value.trim()) {
-          setPill("Add Item Number or Title", "err");
+      const id = els.itemNumber.value.trim().toUpperCase();
+      if (id){
+        const re = /^TP-\d{6}-[A-Z]{4}$/;
+        if (!re.test(id)){
+          setPill("ID must be TP-MMDDYY-XXXX", "err");
           state.saveAndNew = false;
           return;
         }
+      } else if (!els.title.value.trim()){
+        setPill("Add Item Number or Title", "err");
+        state.saveAndNew = false;
+        return;
+      }
 
-        setPill("Checking duplicates…", "info");
+      setPill("Checking duplicates…", "info");
+      try{
         const ok = await validateBeforeSave();
-        if (!ok) { state.saveAndNew = false; return; }
-
-        setPill(state.mode === "edit" ? "Saving changes…" : "Saving…", "info");
-        els.form.submit(); // goes to iframe
-      } catch (e){
+        if (!ok){ state.saveAndNew = false; return; }
+        setPill(state.mode==="edit" ? "Saving changes…" : "Saving…", "info");
+        els.form.submit();
+      } catch(e){
         console.error(e);
         setPill("Save error", "err");
         state.saveAndNew = false;
       }
     }
 
-    // UI hookups
+    // events
     document.getElementById("reloadDropdownsBtn").addEventListener("click", loadDropdowns);
-    document.getElementById("genIdBtn").addEventListener("click", handleAutoId);
-    document.getElementById("loadItemBtn").addEventListener("click", loadItemForEdit);
-    document.getElementById("newModeBtn").addEventListener("click", newItemMode);
-
-    // Override submit button to run validation first (then submit)
-    els.form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      save(false);
-    });
-
+    document.getElementById("genIdBtn").addEventListener("click", autoId);
+    document.getElementById("loadItemBtn").addEventListener("click", loadItem);
+    document.getElementById("newModeBtn").addEventListener("click", newItem);
     document.getElementById("saveNewBtn").addEventListener("click", () => save(true));
+    els.form.addEventListener("submit", (e) => { e.preventDefault(); save(false); });
 
-    // Enter key on lookup loads item
-    els.lookupItemId.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); loadItemForEdit(); }
-    });
-
-    // Init
+    // init
     setMode("new");
     loadDropdowns();
     setPill("Ready", "ok");
