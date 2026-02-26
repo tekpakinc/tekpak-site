@@ -934,203 +934,202 @@ document.addEventListener("DOMContentLoaded", () => {
 </html>
 
 <!-- =========================
-TEK-PAK MATCHING FOOTER (NO HEADER/NO NAV)
+TEK-PAK CONDENSED FOOTER (MATCHES HEADER STYLE)
 Drop this near bottom of <body>
 ========================= -->
 <footer class="tp-footer" aria-label="Tek-Pak Footer">
-  <div class="tp-footer-glow tp-footer-glow-1" aria-hidden="true"></div>
-  <div class="tp-footer-glow tp-footer-glow-2" aria-hidden="true"></div>
+  <div class="tp-footer-accent" aria-hidden="true"></div>
+  <div class="tp-footer-sheen" aria-hidden="true"></div>
 
   <div class="tp-footer-inner">
-    <!-- Left: Brand / Message -->
-    <section class="tp-footer-brand">
-      <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-footer-main-logo">
-      <p class="tp-footer-tagline">Your tech go-to, for all tech.</p>
-      <p class="tp-footer-copy">
-        Enterprise-grade IT services with real human support, fast response, and practical solutions for modern businesses.
-      </p>
-    </section>
-
-    <!-- Middle: Links -->
-    <section class="tp-footer-links-wrap" aria-label="Footer Links">
-      <h3>Quick Links</h3>
-      <div class="tp-footer-links-grid">
-        <a href="/it-services">IT Services</a>
-        <a href="https://www.ncelectronicrecycling.com">Electronic Recycling</a>
-        <a href="/it-services/help-desk">Help Desk</a>
-        <a href="/development.html">Software</a>
-        <a href="/policies.html">Policies</a>
-        <a href="/careers.html">Careers</a>
-        <a href="/contact">Contact</a>
-        <a href="/support">Support Request</a>
+    <div class="tp-footer-left">
+      <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-footer-logo">
+      <div class="tp-footer-text">
+        <div class="tp-footer-tagline">Your tech go-to, for all tech.</div>
+        <div class="tp-footer-small">Enterprise-grade IT services • Real human support • Fast response</div>
       </div>
-    </section>
+    </div>
 
-    <!-- Right: Partner / Compliance Logos -->
-    <section class="tp-footer-badges" aria-label="Affiliations and Compliance">
-      <h3>Affiliations & Compliance</h3>
-      <div class="tp-badge-row">
-        <img src="tekpak-logo.png" alt="Tek-Pak Brand Logo" class="tp-badge">
-        <img src="dorlogo.png" alt="DOR Logo" class="tp-badge">
-        <img src="compliant.png" alt="Compliance Logo" class="tp-badge">
-      </div>
-      <p class="tp-footer-note">
-        Trusted service practices, responsible operations, and standards-focused delivery.
-      </p>
-    </section>
+    <div class="tp-footer-links" aria-label="Footer links">
+      <a href="/it-services">IT Services</a>
+      <a href="https://www.ncelectronicrecycling.com">Electronic Recycling</a>
+      <a href="/development.html">Software</a>
+      <a href="/policies.html">Policies</a>
+      <a href="/contact">Contact</a>
+      <a href="/support">Support</a>
+    </div>
+
+    <div class="tp-footer-right" aria-label="Affiliations and compliance">
+      <img src="dorlogo.png" alt="DOR Logo" class="tp-footer-badge">
+      <img src="compliant.png" alt="Compliance Logo" class="tp-footer-badge">
+    </div>
   </div>
 
-  <!-- Bottom Bar -->
   <div class="tp-footer-bottom">
-    <span>© <span id="tpYear"></span> Tek-Pak Inc. All rights reserved.</span>
+    <span>© <span id="tpYear"></span> Tek-Pak Inc.</span>
     <span class="tp-sep">•</span>
     <span>Built for secure, reliable business IT operations.</span>
   </div>
 </footer>
 
 <style>
+  /* Uses the same spirit as your header: white base, lime accent, subtle sheen, soft shadows */
   :root{
-    --tp-blue-900:#0b1733;
-    --tp-blue-800:#10224a;
-    --tp-blue-700:#163066;
-    --tp-lime-500:#9BFF2E;
-    --tp-lime-400:#b7ff67;
-    --tp-white:#ffffff;
-    --tp-ink:#eaf1ff;
-    --tp-muted:#b8c5e3;
-    --tp-line:rgba(255,255,255,.14);
-    --tp-glass:rgba(255,255,255,.06);
-    --tp-shadow:0 18px 45px rgba(0,0,0,.34);
+    --tp-bg:#ffffff;
+    --tp-text:#0f172a;
+    --tp-muted:#64748b;
+    --tp-line:#e5eaf1;
+    --tp-lime:#97ff3f;
+    --tp-lime-deep:#69d020;
+    --tp-shadow-soft:0 8px 24px rgba(15,23,42,.10);
+    --tp-shadow-3d:0 18px 38px rgba(15,23,42,.14), 0 4px 14px rgba(15,23,42,.08);
   }
+
+  *{box-sizing:border-box}
 
   .tp-footer{
     position:relative;
     overflow:hidden;
-    margin-top:clamp(28px,4vw,56px);
-    color:var(--tp-ink);
-    background:
-      radial-gradient(900px 380px at 0% 0%, rgba(155,255,46,.11), transparent 60%),
-      radial-gradient(1000px 500px at 100% 0%, rgba(36,99,214,.18), transparent 60%),
-      linear-gradient(180deg, #0a1430 0%, #091127 100%);
-    border:1px solid rgba(255,255,255,.10);
+    margin-top:clamp(22px,3vw,40px);
+    background:var(--tp-bg);
+    border:1px solid var(--tp-line);
     border-radius:24px;
-    box-shadow:var(--tp-shadow);
-    font-family:"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    box-shadow:var(--tp-shadow-soft);
   }
 
-  .tp-footer-glow{
+  .tp-footer-accent{
     position:absolute;
-    width:360px;height:360px;border-radius:999px;filter:blur(56px);pointer-events:none;
+    left:0; right:0; top:0;
+    height:4px;
+    background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime),var(--tp-lime-deep));
+    filter:saturate(1.1);
+    pointer-events:none;
   }
-  .tp-footer-glow-1{left:-120px;bottom:-120px;background:rgba(155,255,46,.18);}
-  .tp-footer-glow-2{right:-100px;top:-120px;background:rgba(36,99,214,.24);}
+
+  .tp-footer-sheen{
+    position:absolute;
+    top:0; left:-40%;
+    width:35%;
+    height:100%;
+    background:linear-gradient(100deg,transparent 0%, rgba(255,255,255,.95) 48%, transparent 100%);
+    transform:skewX(-20deg);
+    animation:tpFooterSheen 9s linear infinite;
+    pointer-events:none;
+    opacity:.28;
+  }
+
+  @keyframes tpFooterSheen{
+    0%{left:-40%}
+    100%{left:140%}
+  }
 
   .tp-footer-inner{
     position:relative;
     z-index:1;
-    width:min(1180px, 94%);
-    margin-inline:auto;
-    padding:clamp(24px, 4.2vw, 42px) 0;
-    display:grid;
-    grid-template-columns:1.1fr .95fr .95fr;
-    gap:20px;
+    max-width:1240px;
+    margin:0 auto;
+    padding:16px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
   }
 
-  .tp-footer-brand,
-  .tp-footer-links-wrap,
-  .tp-footer-badges{
-    border:1px solid var(--tp-line);
-    background:linear-gradient(170deg, rgba(255,255,255,.11), rgba(255,255,255,.03) 70%);
-    border-radius:18px;
-    padding:18px;
-    backdrop-filter:blur(8px);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
+  .tp-footer-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:240px;
   }
 
-  .tp-footer-main-logo{
-    width:min(220px, 100%);
-    height:auto;
-    display:block;
-    margin-bottom:10px;
-    filter:drop-shadow(0 6px 18px rgba(0,0,0,.32));
+  .tp-footer-logo{
+    width:78px;
+    height:78px;
+    object-fit:contain;
+    filter:
+      drop-shadow(0 6px 10px rgba(15,23,42,.16))
+      drop-shadow(0 0 10px rgba(151,255,63,.18));
   }
+
+  .tp-footer-text{display:flex;flex-direction:column;gap:3px}
 
   .tp-footer-tagline{
-    margin:0 0 8px;
-    color:var(--tp-lime-500);
-    font-weight:800;
-    letter-spacing:.01em;
+    font-weight:900;
+    letter-spacing:.2px;
+    color:var(--tp-text);
   }
 
-  .tp-footer-copy{
-    margin:0;
+  .tp-footer-small{
+    font-size:12px;
     color:var(--tp-muted);
-    line-height:1.65;
-    font-size:.96rem;
+    line-height:1.3;
   }
 
-  .tp-footer-links-wrap h3,
-  .tp-footer-badges h3{
-    margin:0 0 12px;
-    font-size:1.02rem;
-    color:#f4f8ff;
-    letter-spacing:.01em;
-  }
-
-  .tp-footer-links-grid{
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0,1fr));
-    gap:8px 12px;
-  }
-
-  .tp-footer-links-grid a{
-    text-decoration:none;
-    color:#d8e6ff;
-    padding:8px 10px;
-    border:1px solid transparent;
-    border-radius:10px;
-    transition:all .18s ease;
-    font-size:.94rem;
-  }
-
-  .tp-footer-links-grid a:hover{
-    color:#0f2200;
-    background:linear-gradient(180deg, var(--tp-lime-400), var(--tp-lime-500));
-    border-color:rgba(155,255,46,.55);
-    transform:translateY(-1px);
-  }
-
-  .tp-badge-row{
+  .tp-footer-links{
     display:flex;
     flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+    min-width:260px;
+  }
+
+  .tp-footer-links a{
+    text-decoration:none;
+    color:var(--tp-text);
+    font-weight:800;
+    font-size:.92rem;
+    letter-spacing:.15px;
+    padding:9px 12px;
+    border-radius:12px;
+    border:1px solid #dbe2ec;
+    background:linear-gradient(180deg,#ffffff 0%, #f4f7fb 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.95),
+      0 2px 0 rgba(15,23,42,.05),
+      0 8px 16px rgba(91,102,120,.10);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    white-space:nowrap;
+  }
+
+  .tp-footer-links a:hover{
+    transform:translateY(-1px);
+    border-color:#c9d3e2;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.98),
+      0 4px 0 rgba(15,23,42,.06),
+      0 12px 22px rgba(91,102,120,.14);
+  }
+
+  .tp-footer-right{
+    display:flex;
     gap:10px;
     align-items:center;
+    justify-content:flex-end;
+    min-width:180px;
   }
 
-  .tp-badge{
-    height:52px;
+  .tp-footer-badge{
+    height:44px;
     width:auto;
-    max-width:100%;
     object-fit:contain;
     padding:6px 10px;
-    border:1px solid var(--tp-line);
-    border-radius:12px;
-    background:rgba(255,255,255,.06);
-    box-shadow:0 8px 18px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.18);
-  }
-
-  .tp-footer-note{
-    margin:12px 0 0;
-    color:var(--tp-muted);
-    font-size:.9rem;
-    line-height:1.5;
+    border:1px solid #dbe2ec;
+    border-radius:14px;
+    background:#fff;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.95),
+      0 2px 0 rgba(15,23,42,.05),
+      0 10px 18px rgba(91,102,120,.12);
   }
 
   .tp-footer-bottom{
     position:relative;
     z-index:1;
-    border-top:1px solid rgba(255,255,255,.12);
-    background:rgba(0,0,0,.20);
+    border-top:1px solid var(--tp-line);
+    background:rgba(0,0,0,.02);
     padding:12px 16px;
     display:flex;
     flex-wrap:wrap;
@@ -1138,24 +1137,24 @@ Drop this near bottom of <body>
     align-items:center;
     justify-content:center;
     font-size:.88rem;
-    color:#d0dcf5;
+    color:var(--tp-muted);
+    border-bottom-left-radius:24px;
+    border-bottom-right-radius:24px;
   }
 
-  .tp-sep{ opacity:.65; }
+  .tp-sep{opacity:.65}
 
-  @media (max-width: 980px){
-    .tp-footer-inner{
-      grid-template-columns:1fr;
-    }
+  @media (max-width:980px){
+    .tp-footer-inner{justify-content:center;text-align:center}
+    .tp-footer-left{justify-content:center}
+    .tp-footer-right{justify-content:center}
   }
 
-  @media (max-width: 560px){
-    .tp-footer-links-grid{
-      grid-template-columns:1fr;
-    }
-    .tp-badge{
-      height:46px;
-    }
+  @media (max-width:560px){
+    .tp-footer-logo{width:64px;height:64px}
+    .tp-footer-badge{height:40px}
+    .tp-footer-links a{width:100%; text-align:center}
+    .tp-footer-links{min-width:100%}
   }
 </style>
 
