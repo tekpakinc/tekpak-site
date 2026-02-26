@@ -150,6 +150,8 @@
       color: rgba(124,247,166,.95);
       border:1px solid rgba(124,247,166,.25);
     }
+    .tiny{font-size:11px; color:rgba(243,246,255,.55); margin-top:6px}
+    code.k{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11px; color:rgba(243,246,255,.75)}
   </style>
 </head>
 
@@ -161,7 +163,8 @@
         <div class="badge" aria-hidden="true"></div>
         <div>
           <h1>Toro v1 Inventory System</h1>
-          <div class="sub">Clean admin • Add + Edit • No token • URL hardcoded</div>
+          <div class="sub">Clean admin • Add + Edit • Tokenless • JSONP</div>
+          <div class="tiny">Backend: <code class="k" id="backendSig">not connected</code></div>
         </div>
       </div>
 
@@ -357,9 +360,10 @@
 <script>
   /******************************
    * Toro v1 Admin (Tokenless)
-   * Apps Script URL is hardcoded
+   * Adds backend signature + cache busting
    ******************************/
 
+  // IMPORTANT: This URL must be the CURRENT deployed Web App URL
   const API_URL = "https://script.google.com/macros/s/AKfycbwFBC8S-nJE6OLDAUQlg-O_AGrspmSoSdIDN7zklPb0NCP_N_jree2c_e8Afv8xp8Fntw/exec";
 
   const INVENTORY_HEADERS = [
@@ -380,6 +384,7 @@
     q: el("q"),
     list: el("list"),
     listStatus: el("listStatus"),
+    backendSig: el("backendSig"),
     btnReloadDropdowns: el("btnReloadDropdowns"),
     btnRefreshList: el("btnRefreshList"),
     btnNew: el("btnNew"),
@@ -396,14 +401,22 @@
     ui.listStatus.textContent = msg;
   }
 
+  function setBackendSig(text){
+    ui.backendSig.textContent = text || "unknown";
+  }
+
   function jsonp(params={}) {
     return new Promise((resolve, reject) => {
       const cb = "ToroCB_" + Math.random().toString(36).slice(2);
       const script = document.createElement("script");
-      const q = new URLSearchParams({ ...params, callback: cb }).toString();
+
+      // cache buster prevents stale/cached script responses
+      const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
+
+      const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
       script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
 
-      const timeout = setTimeout(() => { cleanup(); reject(new Error("JSONP timeout")); }, 15000);
+      const timeout = setTimeout(() => { cleanup(); reject(new Error("JSONP timeout (15s). Check deployment + URL.")); }, 15000);
 
       function cleanup() {
         clearTimeout(timeout);
@@ -412,7 +425,7 @@
       }
 
       window[cb] = (data) => { cleanup(); resolve(data); };
-      script.onerror = () => { cleanup(); reject(new Error("JSONP load error (deployment/URL issue?)")); };
+      script.onerror = () => { cleanup(); reject(new Error("JSONP load error (wrong URL / not deployed / permissions)")); };
 
       document.body.appendChild(script);
     });
@@ -469,6 +482,22 @@
       el("Item ID").value = payload["Item ID"];
     }
     return payload;
+  }
+
+  async function pingBackend(){
+    try{
+      const res = await jsonp({ action: "ping" });
+      if (!res || !res.ok) throw new Error(res?.error || "Ping failed");
+      const sig = `${res.system || "Unknown"} • ${res.version || "no-version"} • ${res.ts || ""}`.trim();
+      setBackendSig(sig);
+
+      // If you ever see a different system here (or a blank), you're hitting the wrong deployment.
+      return res;
+    } catch(err){
+      setBackendSig("NOT CONNECTED");
+      setStatus("Backend ping failed: " + err.message, "bad");
+      throw err;
+    }
   }
 
   async function reloadDropdowns() {
@@ -557,7 +586,11 @@
     setStatus("Saving…");
     try {
       const payload = collectPayload();
+
+      // Debug tip: if Description is gigantic, JSONP can hit URL length limits.
+      // If you ever see weird failures on big descriptions, we can implement a chunk-save strategy.
       const res = await jsonp({ action: "upsertItem", payload: JSON.stringify(payload) });
+
       if (!res.ok) throw new Error(res.error || "Save failed");
       setStatus(`Saved! (${res.mode}) • Row ${res.row} • Item ID ${res.itemId}`, "good");
       await refreshList();
@@ -581,8 +614,10 @@
   ui.btnSave.addEventListener("click", saveItem);
   ui.q.addEventListener("input", () => renderList(window.__TORO_ITEMS__ || []));
 
-  (function init(){
+  (async function init(){
     DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
+    setStatus("Connecting to backend…");
+    await pingBackend();                 // <— THIS will expose wrong deployment instantly
     setStatus("Ready. Click Reload Dropdowns, then Refresh List.", "");
   })();
 </script>
