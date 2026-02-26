@@ -111,7 +111,11 @@
     }
     @media (max-width:1100px){ .grid{grid-template-columns:repeat(3, minmax(0,1fr));} }
     @media (max-width:820px){ .grid{grid-template-columns:repeat(2, minmax(0,1fr));} }
-    @media (max-width:520px){ .grid{grid-template-columns:1fr;} input{min-width:unset;width:100%} select{min-width:unset;width:100%} }
+    @media (max-width:520px){
+      .grid{grid-template-columns:1fr;}
+      input{min-width:unset;width:100%}
+      select{min-width:unset;width:100%}
+    }
 
     .card{
       background: linear-gradient(180deg, rgba(18,26,51,.92), rgba(15,23,48,.92));
@@ -148,7 +152,8 @@
       border-top:1px solid rgba(255,255,255,.10);
     }
     .price{font-weight:1000}
-    .buySlot{display:flex;gap:8px;align-items:center}
+    .buySlot{display:flex;gap:8px;align-items:center;flex-wrap:wrap; justify-content:flex-end}
+
     a.btnlink{
       display:inline-flex; align-items:center; justify-content:center;
       text-decoration:none;
@@ -165,6 +170,13 @@
       background: rgba(255,255,255,.08);
       border:1px solid rgba(255,255,255,.12);
     }
+
+    /* PayPal snippet helpers */
+    .ppwrap{display:flex; align-items:center; justify-content:flex-end}
+    .ppwrap form{margin:0}
+    .ppwrap input[type="image"]{max-width:170px; height:auto}
+    .ppwrap button, .ppwrap input[type="submit"]{border-radius:14px}
+
     .foot{
       max-width:1200px;margin:0 auto;padding:0 16px 22px;
       color:rgba(243,246,255,.55);
@@ -180,8 +192,8 @@
     <div class="top">
       <div class="brand">
         <div class="logoBox" title="Tek-Pak">
-          <!-- If you have a logo file in the same folder, rename to tekpaklogo.png -->
-          <img src="tekpaklogo.png" alt="Tek-Pak" onerror="this.remove(); this.parentElement.textContent='TP'; this.parentElement.style.color='rgba(243,246,255,.9)'; this.parentElement.style.fontWeight='1000';">
+          <img src="tekpaklogo.png" alt="Tek-Pak"
+               onerror="this.remove(); this.parentElement.textContent='TP'; this.parentElement.style.color='rgba(243,246,255,.9)'; this.parentElement.style.fontWeight='1000';">
         </div>
         <div>
           <h1>Tek-Pak Surplus Store</h1>
@@ -233,12 +245,12 @@
 </main>
 
 <div class="foot">
-  Tip: If you update an item to Availability = <b>Listed</b> in the admin panel, it will show up here after Reload (or after cache bust).
+  Tip: Set an item’s <b>Availability</b> to <b>Listed</b> in the admin panel and it will show up here after Reload.
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // IMPORTANT: use your CURRENT deployed Apps Script web app URL (must end with /exec)
+  // ✅ PASTE YOUR CURRENT DEPLOYED /exec URL HERE:
   const API_URL = "https://script.google.com/macros/s/AKfycbwrvaYOGKqFNJTqfHFKSrb5FrdqELjXZiI1HoeQG8n7Yomvtej7C-l8jtIKKpke7bji_g/exec";
 
   const el = (id) => document.getElementById(id);
@@ -256,8 +268,22 @@ document.addEventListener("DOMContentLoaded", () => {
     btnReload: el("btnReload"),
   };
 
-  function setStatus(msg){ ui.status.querySelector("div").innerHTML = "<b>Status:</b> " + escapeHtml(msg); }
-  function setCount(n){ ui.count.textContent = `${n} item${n===1?"":"s"}`; }
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function setStatus(msg){
+    ui.status.querySelector("div").innerHTML = "<b>Status:</b> " + escapeHtml(msg);
+  }
+
+  function setCount(n){
+    ui.count.textContent = `${n} item${n===1?"":"s"}`;
+  }
 
   function jsonp(params={}) {
     return new Promise((resolve, reject) => {
@@ -287,15 +313,6 @@ document.addEventListener("DOMContentLoaded", () => {
       script.src = fullUrl;
       document.body.appendChild(script);
     });
-  }
-
-  function escapeHtml(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
   }
 
   function firstImage(item){
@@ -371,16 +388,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return ta.localeCompare(tb);
       });
     } else {
-      // newest-ish by Item ID string (your IDs include a timestamp)
+      // newest-ish by Item ID (your IDs include timestamp)
       copy.sort((a,b)=> String(b["Item ID"]||"").localeCompare(String(a["Item ID"]||"")));
     }
     return copy;
   }
 
+  function isHtmlSnippet(s){
+    const t = String(s || "").trim();
+    return t.includes("<") && t.includes(">");
+  }
+
+  function looksLikePayPalSnippet(s){
+    const t = String(s || "").toLowerCase();
+    return t.includes("paypal");
+  }
+
   function render(items){
     ui.grid.innerHTML = "";
     const filtered = sortItems(items.filter(matches));
-
     setCount(filtered.length);
 
     if (!filtered.length){
@@ -400,7 +426,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const desc = String(it["Description"]||"").trim();
       const priceRaw = String(it["Price"]||"").trim();
       const img = firstImage(it);
-      const buy = String(it["Buy Link"]||"").trim();
+
+      const paypalBtn = String(it["PayPal Button"]||"").trim();
+      const buyLink = String(it["Buy Link"]||"").trim();
 
       const card = document.createElement("div");
       card.className = "card";
@@ -426,22 +454,43 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       const slot = card.querySelector(".buySlot");
-      if (buy.includes("<") && buy.includes(">")){
-        // If you store a PayPal button HTML snippet in the sheet, it will render here
-        slot.innerHTML = buy;
-      } else if (buy){
-        const a = document.createElement("a");
-        a.className = "btnlink";
-        a.href = buy;
-        a.target = "_blank";
-        a.rel = "noopener";
-        a.textContent = "Buy";
-        slot.appendChild(a);
-      } else {
+
+      // Prefer PayPal Button snippet if present
+      if (paypalBtn && isHtmlSnippet(paypalBtn) && looksLikePayPalSnippet(paypalBtn)) {
+        const wrap = document.createElement("div");
+        wrap.className = "ppwrap";
+        wrap.innerHTML = paypalBtn;
+        slot.appendChild(wrap);
+      }
+      // If PayPal Button is not HTML, show preset badge (in case you want to diagnose)
+      else if (paypalBtn && !isHtmlSnippet(paypalBtn)) {
         const a = document.createElement("a");
         a.className = "btnlink secondary";
         a.href = "#";
-        a.onclick = (e)=>{ e.preventDefault(); alert("No Buy Link set for this item yet."); };
+        a.onclick = (e)=>{ e.preventDefault(); alert("PayPal Button preset key is present but was not expanded into HTML. Key: " + paypalBtn); };
+        a.textContent = "PayPal Preset";
+        slot.appendChild(a);
+      }
+      // Fallback: Buy Link
+      else if (buyLink) {
+        if (isHtmlSnippet(buyLink)) {
+          slot.innerHTML = buyLink;
+        } else {
+          const a = document.createElement("a");
+          a.className = "btnlink";
+          a.href = buyLink;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.textContent = "Buy";
+          slot.appendChild(a);
+        }
+      }
+      // No button configured
+      else {
+        const a = document.createElement("a");
+        a.className = "btnlink secondary";
+        a.href = "#";
+        a.onclick = (e)=>{ e.preventDefault(); alert("No PayPal button or Buy Link set for this item yet."); };
         a.textContent = "Unavailable";
         slot.appendChild(a);
       }
@@ -460,15 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await jsonp({ action: "storeItems" });
       if (!res?.ok) throw new Error("storeItems failed: " + (res?.error || "unknown"));
 
-      let items = Array.isArray(res.items) ? res.items : [];
-
-      // Your backend should already filter to Availability=Listed.
-      // But we also fail-safe here in case anything changes later.
-      items = items.filter(it => {
-        const a = String(it["Availability"] ?? "").trim().toLowerCase();
-        return !a || a === "listed";
-      });
-
+      const items = Array.isArray(res.items) ? res.items : [];
       window.__STORE_ITEMS__ = items;
 
       buildFilters(items);
