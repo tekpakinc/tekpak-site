@@ -3,427 +3,458 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Tek-Pak Store</title>
+  <title>Tek-Pak Surplus Store (Toro)</title>
   <style>
     :root{
-      --bg:#f6f7fb; --card:#fff; --line:#e4e8f0; --text:#111827; --muted:#6b7280;
-      --accent:#84cc16; --accent2:#1d4ed8;
-      --shadow:0 12px 30px rgba(0,0,0,.08); --radius:16px;
+      --bg:#0b1020;
+      --card:#121a33;
+      --line:rgba(255,255,255,.10);
+      --text:#f3f6ff;
+      --muted:rgba(243,246,255,.70);
+      --accent:#7cf7a6;
+      --accent2:#7aa7ff;
+      --shadow:0 18px 60px rgba(0,0,0,.45);
+      --radius:18px;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    a{color:inherit;text-decoration:none}
-    .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
-    .brand{display:flex;align-items:center;gap:10px}
-    .logo{width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;box-shadow:var(--shadow);font-weight:900}
-    h1{margin:0;font-size:1.25rem}
-    .sub{color:var(--muted);font-size:.9rem;margin-top:2px}
-    .status{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-weight:800;font-size:.82rem;background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent2)}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 500px at 20% -10%, rgba(122,167,255,.25), transparent 60%),
+        radial-gradient(900px 450px at 90% 10%, rgba(124,247,166,.20), transparent 55%),
+        radial-gradient(700px 400px at 30% 110%, rgba(255,204,102,.10), transparent 60%),
+        var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:30;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(to bottom, rgba(11,16,32,.86), rgba(11,16,32,.55));
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:14px 16px}
+    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .brand{display:flex;gap:12px;align-items:center}
+    .badge{
+      width:44px;height:44px;border-radius:16px;
+      background: radial-gradient(circle at 30% 30%, rgba(124,247,166,.9), rgba(122,167,255,.85));
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      flex:0 0 auto;
+    }
+    h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .pill{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      border-radius: 999px;
+      padding:8px 10px;
+      font-size:12px;
+      color: var(--muted);
+    }
 
     .controls{
-      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-      box-shadow:var(--shadow);padding:14px;margin-bottom:14px;
-      display:grid;gap:12px;
-      grid-template-columns: 2fr 1fr 1fr auto;
-      align-items:end;
+      display:grid;
+      grid-template-columns: 1.4fr .8fr .8fr .8fr;
+      gap:10px;
+      padding:14px 16px 0;
+      max-width:1200px;
+      margin:0 auto;
     }
-    @media (max-width:980px){.controls{grid-template-columns:1fr}}
-    label{display:block;font-size:.82rem;font-weight:900;margin-bottom:6px;color:#0f172a}
-    input,select,button{font:inherit}
-    input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #d2d8e4;background:#fff}
-    button{border:0;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:900;background:#111827;color:#fff}
-    button.secondary{background:var(--accent);color:#111}
-
-    .grid{display:grid;gap:12px;grid-template-columns:repeat(4,minmax(0,1fr))}
-    @media (max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media (max-width:480px){.grid{grid-template-columns:1fr}}
-
-    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:340px}
-    .thumb{height:170px;background:#f1f5f9;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .thumb img{width:100%;height:100%;object-fit:cover}
-    .thumb .ph{color:var(--muted);font-weight:900;font-size:.85rem;padding:10px;text-align:center}
-    .body{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
-    .title{font-weight:1000;line-height:1.15}
-    .meta{color:var(--muted);font-size:.85rem;display:flex;flex-wrap:wrap;gap:8px}
-    .pill{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:900;padding:4px 8px;border-radius:999px;border:1px solid #e5e7eb;background:#f3f4f6;color:#111827}
-    .pill.blue{border-color:#dbeafe;background:#eff6ff;color:#1d4ed8}
-    .price{font-size:1.05rem;font-weight:1000}
-    .actions{padding:12px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
-    .actions a.buy{
-      flex:1; display:inline-flex; justify-content:center; align-items:center;
-      border-radius:12px; padding:10px 14px; font-weight:1000;
-      background:var(--accent); color:#111;
+    @media (max-width: 980px){
+      .controls{grid-template-columns:1fr 1fr}
     }
-    .actions button{flex:0 0 auto;background:#eef2f7;border:1px solid var(--line);color:#111827}
-
-    .empty{background:var(--card);border:1px dashed #cbd5e1;border-radius:var(--radius);padding:18px;text-align:center;color:var(--muted);font-weight:900}
-
-    /* Modal */
-    .modalBack{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:16px}
-    .modal{width:min(900px, 100%);background:#fff;border-radius:18px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.25);overflow:hidden}
-    .modalTop{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
-    .modalTop strong{font-size:.95rem}
-    .modalTop button{background:#eef2f7;border:1px solid var(--line);color:#111827}
-    .modalGrid{display:grid;grid-template-columns:1.2fr 1fr;gap:0}
-    @media (max-width:860px){.modalGrid{grid-template-columns:1fr}}
-    .modalImg{background:#f1f5f9;min-height:260px}
-    .modalImg img{width:100%;height:100%;object-fit:cover;display:block}
-    .modalBody{padding:14px;display:flex;flex-direction:column;gap:10px}
-    .modalBody .big{font-size:1.05rem;font-weight:1000}
-    .modalBody .small{color:var(--muted);font-size:.9rem;line-height:1.35}
-    .modalBody .row{display:flex;flex-wrap:wrap;gap:8px}
-    .modalBody a.buy{
-      display:inline-flex;justify-content:center;align-items:center;
-      border-radius:12px;padding:10px 14px;font-weight:1000;
-      background:var(--accent);color:#111;text-decoration:none;
+    @media (max-width: 560px){
+      .controls{grid-template-columns:1fr}
     }
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+    input,select{
+      width:100%;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(6,10,22,.55);
+      color: var(--text);
+      outline:none;
+    }
+    input:focus,select:focus{
+      border-color: rgba(124,247,166,.55);
+      box-shadow: 0 0 0 3px rgba(124,247,166,.15);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:14px;
+      padding:14px 16px 28px;
+      max-width:1200px;
+      margin:0 auto;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns: repeat(2, minmax(0,1fr));}
+    }
+    @media (max-width: 560px){
+      .grid{grid-template-columns: 1fr;}
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(18,26,51,.92), rgba(15,23,48,.92));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 320px;
+    }
+    .img{
+      background: rgba(6,10,22,.55);
+      border-bottom:1px solid var(--line);
+      aspect-ratio: 4 / 3;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .img img{width:100%;height:100%;object-fit:cover;display:block}
+    .img .ph{
+      color: rgba(243,246,255,.55);
+      font-size:12px;
+    }
+    .bd{padding:12px 12px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
+    .title{font-weight:900;font-size:14px;line-height:1.2}
+    .meta{font-size:12px;color:var(--muted);line-height:1.25}
+    .priceRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto}
+    .price{font-weight:950;font-size:16px;letter-spacing:.2px}
+    .btn{
+      border:0;
+      border-radius: 14px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      color:#061016;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+    }
+    .btn.secondary{
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      color: var(--text);
+    }
+    .status{
+      max-width:1200px;
+      margin:12px auto 0;
+      padding:10px 14px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      color: var(--muted);
+      font-size:12px;
+    }
+    footer{
+      max-width:1200px;
+      margin: 0 auto;
+      padding: 0 16px 24px;
+      color: rgba(243,246,255,.55);
+      font-size:12px;
+      line-height:1.4;
+    }
+    .buySlot form{margin:0}
   </style>
 </head>
 <body>
+
+<header>
   <div class="wrap">
-    <header>
+    <div class="top">
       <div class="brand">
-        <div class="logo">TP</div>
+        <div class="badge" aria-hidden="true"></div>
         <div>
-          <h1>Tek-Pak Store</h1>
-          <div class="sub">Only items marked <strong>Listed</strong> appear here.</div>
+          <h1>Tek-Pak Surplus Store</h1>
+          <div class="sub">Live inventory • Only “Listed” items show • Powered by Toro</div>
         </div>
       </div>
-      <div class="status" id="statusPill">● Loading…</div>
-    </header>
-
-    <section class="controls">
-      <div>
-        <label for="q">Search</label>
-        <input id="q" placeholder="Search title, model, item number, details…" />
-      </div>
-      <div>
-        <label for="manufacturer">Manufacturer</label>
-        <select id="manufacturer">
-          <option value="">All</option>
-        </select>
-      </div>
-      <div>
-        <label for="condition">Condition</label>
-        <select id="condition">
-          <option value="">All</option>
-        </select>
-      </div>
-      <div style="display:flex;gap:10px">
-        <button class="secondary" id="applyBtn">Apply</button>
-        <button id="resetBtn">Reset</button>
-      </div>
-    </section>
-
-    <section id="grid" class="grid"></section>
-    <section id="empty" class="empty" style="display:none;">No listed items matched your filters.</section>
-  </div>
-
-  <!-- Modal -->
-  <div class="modalBack" id="modalBack">
-    <div class="modal">
-      <div class="modalTop">
-        <strong id="modalTitle">Item</strong>
-        <button id="closeModalBtn">Close</button>
-      </div>
-      <div class="modalGrid">
-        <div class="modalImg" id="modalImg"></div>
-        <div class="modalBody">
-          <div class="big" id="modalBig"></div>
-          <div class="row" id="modalPills"></div>
-          <div class="price" id="modalPrice"></div>
-          <div class="small" id="modalDetails"></div>
-          <div class="row">
-            <a class="buy" id="modalBuy" href="#" target="_blank" rel="noopener">Buy Now</a>
-            <button id="copyIdBtn">Copy Item Number</button>
-          </div>
-          <div class="small" id="modalDisclaimer">PayPal checkout opens in a new tab.</div>
-        </div>
-      </div>
+      <div class="pill" id="sig">Backend: not connected</div>
     </div>
   </div>
+</header>
 
-  <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFxhPq9Kg7BGTZan_V2LBiHhNt1fZOWwrIrBmI65Srges7t_UJAY0GPtPrkqlH5WdKNA/exec";
+<div class="controls">
+  <div>
+    <label>Search</label>
+    <input id="q" placeholder="Search manufacturer, model, category, condition..." />
+  </div>
+  <div>
+    <label>Category</label>
+    <select id="cat"><option value="">All</option></select>
+  </div>
+  <div>
+    <label>Manufacturer</label>
+    <select id="mfg"><option value="">All</option></select>
+  </div>
+  <div>
+    <label>Sort</label>
+    <select id="sort">
+      <option value="new">Newest</option>
+      <option value="priceAsc">Price: Low → High</option>
+      <option value="priceDesc">Price: High → Low</option>
+      <option value="az">A → Z</option>
+    </select>
+  </div>
+</div>
 
-    const els = {
-      statusPill: document.getElementById("statusPill"),
-      q: document.getElementById("q"),
-      manufacturer: document.getElementById("manufacturer"),
-      condition: document.getElementById("condition"),
-      applyBtn: document.getElementById("applyBtn"),
-      resetBtn: document.getElementById("resetBtn"),
-      grid: document.getElementById("grid"),
-      empty: document.getElementById("empty"),
+<div class="status" id="status">Loading items…</div>
+<div class="grid" id="grid"></div>
 
-      modalBack: document.getElementById("modalBack"),
-      modalTitle: document.getElementById("modalTitle"),
-      modalBig: document.getElementById("modalBig"),
-      modalPills: document.getElementById("modalPills"),
-      modalImg: document.getElementById("modalImg"),
-      modalDetails: document.getElementById("modalDetails"),
-      modalPrice: document.getElementById("modalPrice"),
-      modalBuy: document.getElementById("modalBuy"),
-      closeModalBtn: document.getElementById("closeModalBtn"),
-      copyIdBtn: document.getElementById("copyIdBtn")
+<footer>
+  <div><b>Heads up:</b> Inventory is live. Items are shown only when the sheet column <b>Listed</b> equals <b>Listed</b>.</div>
+  <div>Notes / Availability are internal and not displayed.</div>
+</footer>
+
+<script>
+  // ✅ Paste your CURRENT deployed Apps Script Web App URL here:
+  const API_URL = "https://script.google.com/macros/s/AKfycbwLO1T1DAxzQ78qzMGnCcgypwZNUYTgrKw-mWduc88ZvczyxD1pAyYuBS17iR2KsG-duA/exec";
+
+  const el = (id) => document.getElementById(id);
+  const ui = {
+    sig: el("sig"),
+    status: el("status"),
+    grid: el("grid"),
+    q: el("q"),
+    cat: el("cat"),
+    mfg: el("mfg"),
+    sort: el("sort"),
+  };
+
+  function setStatus(msg){ ui.status.textContent = msg; }
+
+  function jsonp(params={}) {
+    return new Promise((resolve, reject) => {
+      const cb = "ToroStoreCB_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+      const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
+
+      const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
+      script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
+
+      const timeout = setTimeout(() => { cleanup(); reject(new Error("JSONP timeout (15s)")); }, 15000);
+
+      function cleanup(){
+        clearTimeout(timeout);
+        script.remove();
+        try { delete window[cb]; } catch(e){ window[cb] = undefined; }
+      }
+
+      window[cb] = (data) => { cleanup(); resolve(data); };
+      script.onerror = () => { cleanup(); reject(new Error("JSONP load error (URL / deployment / permissions)")); };
+
+      document.body.appendChild(script);
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function firstImage(item){
+    for (let i=1;i<=6;i++){
+      const v = String(item[`Image ${i}`] || "").trim();
+      if (v) return v;
+    }
+    return "";
+  }
+
+  function priceNumber(p){
+    const s = String(p ?? "").replace(/[^0-9.]/g,"").trim();
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : NaN;
+  }
+
+  function buildFilters(items){
+    const cats = new Set();
+    const mfgs = new Set();
+    items.forEach(it => {
+      const c = String(it["Category"]||"").trim();
+      const m = String(it["Manufacturer"]||"").trim();
+      if (c) cats.add(c);
+      if (m) mfgs.add(m);
+    });
+
+    const fill = (sel, values) => {
+      const current = sel.value;
+      sel.innerHTML = `<option value="">All</option>`;
+      [...values].sort((a,b)=>a.localeCompare(b)).forEach(v=>{
+        const o = document.createElement("option");
+        o.value = v;
+        o.textContent = v;
+        sel.appendChild(o);
+      });
+      if ([...sel.options].some(o=>o.value===current)) sel.value = current;
     };
 
-    let selected = null;
+    fill(ui.cat, cats);
+    fill(ui.mfg, mfgs);
+  }
 
-    function setStatus(text){ els.statusPill.textContent = "● " + text; }
+  function matches(item){
+    const q = ui.q.value.trim().toLowerCase();
+    const cat = ui.cat.value.trim().toLowerCase();
+    const mfg = ui.mfg.value.trim().toLowerCase();
 
-    // JSONP
-    function loadJSONP(url, callbackName){
-      return new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        const timeout = setTimeout(() => { cleanup(); reject(new Error("JSONP timeout")); }, 9000);
-        function cleanup(){ clearTimeout(timeout); script.remove(); }
-        window[callbackName] = (data) => { cleanup(); delete window[callbackName]; resolve(data); };
-        script.onerror = () => { cleanup(); delete window[callbackName]; reject(new Error("JSONP load failed")); };
-        script.src = url;
-        document.body.appendChild(script);
+    if (cat && String(item["Category"]||"").trim().toLowerCase() !== cat) return false;
+    if (mfg && String(item["Manufacturer"]||"").trim().toLowerCase() !== mfg) return false;
+
+    if (q){
+      const hay = [
+        item["Item ID"], item["Category"], item["Manufacturer"], item["Model"],
+        item["Condition"], item["Description"], item["Location"]
+      ].join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }
+
+  function sortItems(items){
+    const mode = ui.sort.value;
+    const copy = items.slice();
+
+    if (mode === "priceAsc"){
+      copy.sort((a,b)=> (priceNumber(a["Price"])||Infinity) - (priceNumber(b["Price"])||Infinity));
+    } else if (mode === "priceDesc"){
+      copy.sort((a,b)=> (priceNumber(b["Price"])||-Infinity) - (priceNumber(a["Price"])||-Infinity));
+    } else if (mode === "az"){
+      copy.sort((a,b)=> {
+        const ta = `${a["Manufacturer"]||""} ${a["Model"]||""}`.trim();
+        const tb = `${b["Manufacturer"]||""} ${b["Model"]||""}`.trim();
+        return ta.localeCompare(tb);
       });
+    } else {
+      // "Newest" — best effort: if Item ID includes timestamp like TORO-YYYYMMDD-HHMMSS
+      copy.sort((a,b)=> String(b["Item ID"]||"").localeCompare(String(a["Item ID"]||"")));
+    }
+    return copy;
+  }
+
+  function render(items){
+    ui.grid.innerHTML = "";
+    const filtered = sortItems(items.filter(matches));
+
+    if (!filtered.length){
+      ui.grid.innerHTML = `<div style="grid-column:1/-1;color:rgba(243,246,255,.7);font-size:12px">No matches.</div>`;
+      setStatus("No matches. Try clearing filters.");
+      return;
     }
 
-    async function apiGet(params){
-      const cb = "tp_cb_" + Math.random().toString(16).slice(2);
-      const url = new URL(APPS_SCRIPT_URL);
-      Object.entries(params).forEach(([k,v]) => {
-        if (v !== undefined && v !== null && String(v).trim() !== "") url.searchParams.set(k, v);
-      });
-      url.searchParams.set("callback", cb);
-      return await loadJSONP(url.toString(), cb);
-    }
+    setStatus(`Showing ${filtered.length} item(s).`);
 
-    function setSelectOptions(selectEl, items){
-      const current = selectEl.value;
-      selectEl.innerHTML = "";
-      const opt0 = document.createElement("option");
-      opt0.value = "";
-      opt0.textContent = "All";
-      selectEl.appendChild(opt0);
+    filtered.forEach(it=>{
+      const id = String(it["Item ID"]||"").trim();
+      const title = `${it["Manufacturer"]||""} ${it["Model"]||""}`.trim() || "(Item)";
+      const cat = String(it["Category"]||"").trim();
+      const cond = String(it["Condition"]||"").trim();
+      const loc = String(it["Location"]||"").trim();
+      const desc = String(it["Description"]||"").trim();
+      const priceRaw = String(it["Price"]||"").trim();
+      const img = firstImage(it);
 
-      (items || []).forEach(v => {
-        const opt = document.createElement("option");
-        opt.value = v;
-        opt.textContent = v;
-        selectEl.appendChild(opt);
-      });
+      const buy = String(it["Buy Link"]||"").trim();
 
-      if ([...selectEl.options].some(o => o.value === current)) selectEl.value = current;
-    }
+      const card = document.createElement("div");
+      card.className = "card";
 
-    function moneyPretty(v){
-      const s = String(v || "").trim();
-      if (!s) return "";
-      const n = Number(s.replace(/[^0-9.]/g,""));
-      if (!isFinite(n)) return s;
-      return n.toLocaleString(undefined, { style:"currency", currency:"USD" });
-    }
+      const imgHtml = img
+        ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(title)}" loading="lazy" referrerpolicy="no-referrer" />`
+        : `<div class="ph">No image</div>`;
 
-    function render(items){
-      els.grid.innerHTML = "";
-      els.empty.style.display = items.length ? "none" : "block";
+      card.innerHTML = `
+        <div class="img">${imgHtml}</div>
+        <div class="bd">
+          <div>
+            <div class="title">${escapeHtml(title)}</div>
+            <div class="meta">${escapeHtml([cat, cond, loc].filter(Boolean).join(" • "))}</div>
+            ${desc ? `<div class="meta" style="margin-top:8px">${escapeHtml(desc).slice(0,240)}${desc.length>240?"…":""}</div>` : ""}
+            <div class="meta" style="margin-top:8px;opacity:.8">Item ID: ${escapeHtml(id)}</div>
+          </div>
 
-      items.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "card";
+          <div class="priceRow">
+            <div class="price">${priceRaw ? "$" + escapeHtml(priceRaw) : "—"}</div>
+            <div class="buySlot" id="buy_${escapeHtml(id)}"></div>
+          </div>
+        </div>
+      `;
 
-        const thumb = document.createElement("div");
-        thumb.className = "thumb";
-        if (item.image1){
-          const img = document.createElement("img");
-          img.src = item.image1;
-          img.alt = item.title || item.itemNumber || "Item";
-          img.onerror = () => { thumb.innerHTML = `<div class="ph">No Image</div>`; };
-          thumb.appendChild(img);
+      ui.grid.appendChild(card);
+
+      // Buy link handling:
+      // - If it's HTML (PayPal form/button), render it.
+      // - If it's a URL, render a Buy button.
+      const slot = card.querySelector(`#buy_${CSS.escape(id)}`);
+      if (slot){
+        if (buy.includes("<") && buy.includes(">")){
+          slot.innerHTML = buy; // trusted because it's from your own sheet
+        } else if (buy){
+          const a = document.createElement("a");
+          a.className = "btn";
+          a.href = buy;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.textContent = "Buy";
+          slot.appendChild(a);
         } else {
-          thumb.innerHTML = `<div class="ph">No Image</div>`;
+          const a = document.createElement("a");
+          a.className = "btn secondary";
+          a.href = "#";
+          a.onclick = (e)=>{ e.preventDefault(); alert("No Buy Link set for this item yet."); };
+          a.textContent = "Unavailable";
+          slot.appendChild(a);
         }
-
-        const body = document.createElement("div");
-        body.className = "body";
-
-        const t = document.createElement("div");
-        t.className = "title";
-        t.textContent = item.title || "(No Title)";
-
-        const meta = document.createElement("div");
-        meta.className = "meta";
-        meta.textContent = [item.manufacturer, item.model].filter(Boolean).join(" • ");
-
-        const pillRow = document.createElement("div");
-        pillRow.style.display = "flex";
-        pillRow.style.flexWrap = "wrap";
-        pillRow.style.gap = "8px";
-
-        const idP = document.createElement("span");
-        idP.className = "pill blue";
-        idP.textContent = item.itemNumber || "No ID";
-        pillRow.appendChild(idP);
-
-        if (item.condition){
-          const cP = document.createElement("span");
-          cP.className = "pill";
-          cP.textContent = item.condition;
-          pillRow.appendChild(cP);
-        }
-
-        const priceTxt = moneyPretty(item.price);
-        const price = document.createElement("div");
-        price.className = "price";
-        price.textContent = priceTxt ? priceTxt : "";
-
-        body.appendChild(t);
-        body.appendChild(meta);
-        body.appendChild(pillRow);
-        if (priceTxt) body.appendChild(price);
-
-        const actions = document.createElement("div");
-        actions.className = "actions";
-
-        const viewBtn = document.createElement("button");
-        viewBtn.textContent = "View";
-        viewBtn.onclick = () => openModal(item);
-
-        if (item.buyLink){
-          const buy = document.createElement("a");
-          buy.className = "buy";
-          buy.href = item.buyLink;
-          buy.target = "_blank";
-          buy.rel = "noopener";
-          buy.textContent = "Buy Now";
-          actions.appendChild(buy);
-        } else {
-          const buyDisabled = document.createElement("button");
-          buyDisabled.textContent = "No Buy Link";
-          buyDisabled.disabled = true;
-          buyDisabled.style.opacity = "0.55";
-          actions.appendChild(buyDisabled);
-        }
-
-        actions.appendChild(viewBtn);
-
-        card.appendChild(thumb);
-        card.appendChild(body);
-        card.appendChild(actions);
-
-        els.grid.appendChild(card);
-      });
-    }
-
-    function openModal(item){
-      selected = item;
-      els.modalTitle.textContent = item.itemNumber || "Item";
-      els.modalBig.textContent = item.title || "(No Title)";
-
-      els.modalPills.innerHTML = "";
-      const pills = [
-        item.manufacturer ? item.manufacturer : null,
-        item.model ? item.model : null,
-        item.condition ? item.condition : null,
-        item.itemNumber ? item.itemNumber : null
-      ].filter(Boolean);
-
-      pills.forEach((txt, i) => {
-        const s = document.createElement("span");
-        s.className = i === pills.length - 1 ? "pill blue" : "pill";
-        s.textContent = txt;
-        els.modalPills.appendChild(s);
-      });
-
-      els.modalImg.innerHTML = "";
-      if (item.image1){
-        const img = document.createElement("img");
-        img.src = item.image1;
-        img.alt = item.title || item.itemNumber || "Item";
-        img.onerror = () => { els.modalImg.innerHTML = ""; };
-        els.modalImg.appendChild(img);
       }
+    });
+  }
 
-      els.modalDetails.textContent = item.details ? item.details : "No details provided.";
-
-      const priceTxt = moneyPretty(item.price);
-      els.modalPrice.textContent = priceTxt ? priceTxt : "";
-
-      if (item.buyLink){
-        els.modalBuy.style.display = "inline-flex";
-        els.modalBuy.href = item.buyLink;
+  async function load(){
+    setStatus("Loading items…");
+    try{
+      const ping = await jsonp({ action: "ping" });
+      if (ping?.ok){
+        ui.sig.textContent = `Backend: ${ping.system || "Toro"} • ${ping.version || ""}`;
       } else {
-        els.modalBuy.style.display = "none";
-        els.modalBuy.href = "#";
+        ui.sig.textContent = "Backend: unknown";
       }
 
-      els.modalBack.style.display = "flex";
+      const res = await jsonp({ action: "storeItems" });
+      if (!res.ok) throw new Error(res.error || "Failed to load store items");
+
+      const items = Array.isArray(res.items) ? res.items : [];
+      window.__STORE_ITEMS__ = items;
+
+      buildFilters(items);
+      render(items);
+    }catch(err){
+      setStatus("Store error: " + err.message);
+      ui.grid.innerHTML = `<div style="grid-column:1/-1;color:rgba(255,107,122,.95);font-size:12px">
+        Failed to load items. Check the API_URL (deployment) and that the script is deployed as a Web App.
+      </div>`;
     }
+  }
 
-    function closeModal(){
-      els.modalBack.style.display = "none";
-      selected = null;
-    }
+  // events
+  ui.q.addEventListener("input", ()=> render(window.__STORE_ITEMS__ || []));
+  ui.cat.addEventListener("change", ()=> render(window.__STORE_ITEMS__ || []));
+  ui.mfg.addEventListener("change", ()=> render(window.__STORE_ITEMS__ || []));
+  ui.sort.addEventListener("change", ()=> render(window.__STORE_ITEMS__ || []));
 
-    async function loadFilters(){
-      // Reuse Dropdowns for manufacturer/condition
-      try{
-        const d = await apiGet({ action:"dropdowns" });
-        if (d && d.ok){
-          setSelectOptions(els.manufacturer, d.dropdowns.Manufacturer || []);
-          setSelectOptions(els.condition, d.dropdowns.Condition || []);
-        }
-      } catch (e) { /* store still works without these */ }
-    }
-
-    async function loadItems(){
-      setStatus("Loading listed items…");
-
-      const params = {
-        action: "storeItems",
-        q: els.q.value.trim(),
-        manufacturer: els.manufacturer.value,
-        condition: els.condition.value,
-        limit: 80
-      };
-
-      try{
-        const res = await apiGet(params);
-        if (!res || !res.ok) throw new Error(res?.error || "Load failed");
-        render(res.items || []);
-        setStatus(`Showing ${(res.items || []).length} items`);
-      } catch (e){
-        console.error(e);
-        render([]);
-        setStatus("Connection error");
-      }
-    }
-
-    els.applyBtn.addEventListener("click", loadItems);
-    els.resetBtn.addEventListener("click", () => {
-      els.q.value = "";
-      els.manufacturer.value = "";
-      els.condition.value = "";
-      loadItems();
-    });
-
-    els.q.addEventListener("keydown", (e) => {
-      if (e.key === "Enter"){ e.preventDefault(); loadItems(); }
-    });
-
-    els.closeModalBtn.addEventListener("click", closeModal);
-    els.modalBack.addEventListener("click", (e) => { if (e.target === els.modalBack) closeModal(); });
-
-    els.copyIdBtn.addEventListener("click", async () => {
-      if (!selected) return;
-      await navigator.clipboard.writeText(selected.itemNumber || "");
-      setStatus("Copied Item Number");
-      setTimeout(()=>setStatus("Ready"), 900);
-    });
-
-    (async () => {
-      await loadFilters();
-      await loadItems();
-    })();
-  </script>
+  load();
+</script>
 </body>
 </html>
