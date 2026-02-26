@@ -46,6 +46,8 @@
     }
     h1{font-size:18px; margin:0; letter-spacing:.2px}
     .sub{font-size:12px; color:var(--muted); margin-top:2px}
+    .tiny{font-size:11px; color:rgba(243,246,255,.55); margin-top:6px}
+    code.k{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11px; color:rgba(243,246,255,.75)}
 
     .grid{
       display:grid;
@@ -151,8 +153,6 @@
       color: rgba(124,247,166,.95);
       border:1px solid rgba(124,247,166,.25);
     }
-    .tiny{font-size:11px; color:rgba(243,246,255,.55); margin-top:6px}
-    code.k{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11px; color:rgba(243,246,255,.75)}
   </style>
 </head>
 
@@ -164,7 +164,7 @@
         <div class="badge" aria-hidden="true"></div>
         <div>
           <h1>Toro v1 Inventory System</h1>
-          <div class="sub">Clean admin • Add + Edit • Tokenless • JSONP</div>
+          <div class="sub">Clean admin • Add + Edit • Tokenless • JSONP • Image Upload</div>
           <div class="tiny">Backend: <code class="k" id="backendSig">not connected</code></div>
         </div>
       </div>
@@ -317,6 +317,15 @@
           <input id="Buy Link" placeholder="PayPal link or button URL…" />
         </div>
 
+        <div>
+          <label>PayPal Button</label>
+          <select id="PayPal Button"></select>
+        </div>
+        <div>
+          <label>Weight</label>
+          <input id="Weight" placeholder="lbs" />
+        </div>
+
         <div class="row3 full">
           <div>
             <label>LengthIn</label>
@@ -330,11 +339,6 @@
             <label>HeightIn</label>
             <input id="HeightIn" placeholder="inches" />
           </div>
-        </div>
-
-        <div>
-          <label>Weight</label>
-          <input id="Weight" placeholder="lbs" />
         </div>
 
         <div class="full">
@@ -358,6 +362,20 @@
           <div><label>Image 5</label><input id="Image 5" placeholder="https://…" /></div>
           <div><label>Image 6</label><input id="Image 6" placeholder="https://…" /></div>
         </div>
+
+        <!-- ✅ Upload Images Button + embedded uploader -->
+        <div class="full" style="margin-top:6px">
+          <button class="secondary" id="btnUploadImages" type="button">Upload Images</button>
+          <div class="note" style="margin-top:8px">
+            Uploads to Drive via Apps Script (no CORS). Returned URLs auto-fill Image 1–6.
+          </div>
+        </div>
+
+        <div class="full" id="uploaderWrap" style="display:none;margin-top:10px">
+          <iframe id="uploaderFrame"
+                  title="Image uploader"
+                  style="width:100%;height:280px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:#fff"></iframe>
+        </div>
       </div>
 
       <div style="height:12px"></div>
@@ -375,10 +393,11 @@
 <script>
   /******************************
    * Toro v1 Admin (Tokenless)
-   * ✅ Auto-load dropdowns + list on page load
+   * + Auto-load dropdowns/list
+   * + Embedded Apps Script uploader (no CORS)
    ******************************/
 
-  // IMPORTANT: This URL must be the CURRENT deployed Web App URL
+  // IMPORTANT: This URL must be your CURRENT deployed Web App URL (ends with /exec)
   const API_URL = "https://script.google.com/macros/s/AKfycbwrvaYOGKqFNJTqfHFKSrb5FrdqELjXZiI1HoeQG8n7Yomvtej7C-l8jtIKKpke7bji_g/exec";
 
   const INVENTORY_HEADERS = [
@@ -387,14 +406,15 @@
     "Series","Memory","Connectivity","Condition",
     "Image 1","Image 2","Image 3","Image 4","Image 5","Image 6",
     "Operating System","Warranty","Description","Notes",
-    "Price","Buy Link",
+    "Price","Buy Link","PayPal Button",
     "Shipping","LengthIn","WidthIn","HeightIn","Weight","Location"
   ];
 
   const DROPDOWN_HEADERS = [
     "Availability",
     "Category","Manufacturer","Color","Screen Size","CPU","Storage","GPU","Memory","Condition",
-    "Operating System","Warranty","Shipping","Location"
+    "Operating System","Warranty","Shipping","Location",
+    "PayPal Button"
   ];
 
   const el = (id) => document.getElementById(id);
@@ -409,10 +429,15 @@
     btnRefreshList: el("btnRefreshList"),
     btnNew: el("btnNew"),
     btnSave: el("btnSave"),
+    btnUploadImages: el("btnUploadImages"),
+    uploaderWrap: el("uploaderWrap"),
+    uploaderFrame: el("uploaderFrame"),
   };
 
+  const UPLOADER_URL = API_URL + (API_URL.includes("?") ? "&" : "?") + "view=uploader";
+
   function setBusy(isBusy){
-    const btns = [ui.btnReloadDropdowns, ui.btnRefreshList, ui.btnSave, ui.btnNew];
+    const btns = [ui.btnReloadDropdowns, ui.btnRefreshList, ui.btnSave, ui.btnNew, ui.btnUploadImages];
     btns.forEach(b => { if (b) b.disabled = !!isBusy; });
     if (ui.q) ui.q.disabled = !!isBusy;
   }
@@ -534,11 +559,23 @@
     if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
     const dd = res.dropdowns || {};
     DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
+
+    // seed availability if dropdowns is empty
     if (el("Availability") && el("Availability").options.length <= 1) {
       fillSelect("Availability", ["Listed","Unlisted","Pending","Hold"]);
     }
+
     setStatus("Dropdowns loaded.", "good");
     return true;
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
   }
 
   function renderList(items) {
@@ -601,6 +638,12 @@
         if (node) node.value = (item[h] !== undefined && item[h] !== null) ? String(item[h]) : "";
       });
       setStatus("Item loaded. Edit fields then Save to update.", "good");
+
+      // If uploader is open, keep it in sync with current Item ID
+      if (ui.uploaderFrame && ui.uploaderFrame.contentWindow) {
+        ui.uploaderFrame.contentWindow.postMessage({ type:"TP_SET_ITEM_ID", itemId: String(itemId||"") }, "*");
+      }
+
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setStatus("Load error: " + err.message, "bad");
@@ -623,14 +666,33 @@
     }
   }
 
-  function escapeHtml(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+  // ✅ Upload panel toggle
+  ui.btnUploadImages.addEventListener("click", () => {
+    ui.uploaderWrap.style.display = (ui.uploaderWrap.style.display === "none" ? "block" : "none");
+    if (!ui.uploaderFrame.src) ui.uploaderFrame.src = UPLOADER_URL;
+
+    const itemId = (el("Item ID").value || "").trim();
+    if (itemId && ui.uploaderFrame.contentWindow) {
+      ui.uploaderFrame.contentWindow.postMessage({ type:"TP_SET_ITEM_ID", itemId }, "*");
+    }
+  });
+
+  // ✅ Receive uploaded URLs and auto-fill Image 1..6
+  window.addEventListener("message", (e) => {
+    const data = e.data;
+    if (!data || data.type !== "TP_IMAGE_UPLOAD_RESULT") return;
+    if (!data.ok) return;
+
+    const urls = (data.images || []).map(x => x.url).filter(Boolean);
+    for (let i=0;i<Math.min(6, urls.length); i++){
+      const input = el(`Image ${i+1}`);
+      if (input) input.value = urls[i];
+    }
+
+    alert(`Uploaded ${urls.length} image(s) and filled Image 1–${Math.min(6, urls.length)}.`);
+    // Optional: auto-save immediately after upload:
+    // saveItem();
+  });
 
   // Buttons
   ui.btnReloadDropdowns.addEventListener("click", async () => {
@@ -654,13 +716,8 @@
     setBusy(true);
     try{
       await pingBackend();
-
-      try { await reloadDropdowns(); }
-      catch(e){ console.warn("Dropdown autoload failed:", e); }
-
-      try { await refreshList(); }
-      catch(e){ console.warn("List autoload failed:", e); }
-
+      try { await reloadDropdowns(); } catch(e){ console.warn("Dropdown autoload failed:", e); }
+      try { await refreshList(); } catch(e){ console.warn("List autoload failed:", e); }
       setStatus("Ready.", "good");
     } catch(e){
       // pingBackend already set status
