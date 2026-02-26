@@ -226,35 +226,71 @@
           <input id="Item ID" placeholder="Leave blank to auto-generate" />
         </div>
         <div>
+          <label>Availability</label>
+          <select id="Availability"></select>
+        </div>
+
+        <div>
           <label>Category</label>
           <select id="Category"></select>
         </div>
-
         <div>
           <label>Manufacturer</label>
           <select id="Manufacturer"></select>
         </div>
+
         <div>
           <label>Model</label>
           <input id="Model" placeholder="e.g., Latitude 5420" />
         </div>
-
         <div>
           <label>Color</label>
           <select id="Color"></select>
         </div>
+
         <div>
           <label>Screen Size</label>
           <select id="Screen Size"></select>
         </div>
-
         <div>
           <label>CPU</label>
           <select id="CPU"></select>
         </div>
+
         <div>
           <label>Storage</label>
           <select id="Storage"></select>
+        </div>
+        <div>
+          <label>GPU</label>
+          <select id="GPU"></select>
+        </div>
+
+        <div>
+          <label>Memory</label>
+          <select id="Memory"></select>
+        </div>
+        <div>
+          <label>Condition</label>
+          <select id="Condition"></select>
+        </div>
+
+        <div>
+          <label>Operating System</label>
+          <select id="Operating System"></select>
+        </div>
+        <div>
+          <label>Warranty</label>
+          <select id="Warranty"></select>
+        </div>
+
+        <div>
+          <label>Shipping</label>
+          <select id="Shipping"></select>
+        </div>
+        <div>
+          <label>Location</label>
+          <select id="Location"></select>
         </div>
 
         <div class="full">
@@ -263,17 +299,8 @@
         </div>
 
         <div>
-          <label>GPU</label>
-          <select id="GPU"></select>
-        </div>
-        <div>
           <label>Series</label>
           <input id="Series" placeholder="e.g., ThinkPad T-series" />
-        </div>
-
-        <div>
-          <label>Memory</label>
-          <select id="Memory"></select>
         </div>
         <div>
           <label>Connectivity</label>
@@ -281,30 +308,12 @@
         </div>
 
         <div>
-          <label>Condition</label>
-          <select id="Condition"></select>
-        </div>
-        <div>
-          <label>Operating System</label>
-          <select id="Operating System"></select>
-        </div>
-
-        <div>
-          <label>Warranty</label>
-          <select id="Warranty"></select>
-        </div>
-        <div>
-          <label>Shipping</label>
-          <select id="Shipping"></select>
-        </div>
-
-        <div>
-          <label>Location</label>
-          <select id="Location"></select>
-        </div>
-        <div>
           <label>Price</label>
           <input id="Price" placeholder="e.g., 199.99" />
+        </div>
+        <div>
+          <label>Buy Link</label>
+          <input id="Buy Link" placeholder="PayPal link or button URL…" />
         </div>
 
         <div class="row3 full">
@@ -328,8 +337,13 @@
         </div>
 
         <div class="full">
-          <label>Description</label>
+          <label>Description (public)</label>
           <textarea id="Description" placeholder="Clean, buyer-friendly description…"></textarea>
+        </div>
+
+        <div class="full">
+          <label>Notes (internal only)</label>
+          <textarea id="Notes" placeholder="Internal notes — not shown on store…"></textarea>
         </div>
 
         <div class="row3 full">
@@ -360,19 +374,24 @@
 <script>
   /******************************
    * Toro v1 Admin (Tokenless)
-   * Adds backend signature + cache busting
    ******************************/
 
-  // IMPORTANT: This URL must be the CURRENT deployed Web App URL
   const API_URL = "https://script.google.com/macros/s/AKfycbwLO1T1DAxzQ78qzMGnCcgypwZNUYTgrKw-mWduc88ZvczyxD1pAyYuBS17iR2KsG-duA/exec";
 
+  // ✅ UPDATED: includes Availability + Notes + Buy Link
   const INVENTORY_HEADERS = [
-    "Item ID","Category","Manufacturer","Model","Color","Screen Size","CPU","Storage","Features","GPU",
-    "Series","Memory","Connectivity","Condition","Image 1","Image 2","Image 3","Image 4","Image 5","Image 6",
-    "Operating System","Warranty","Description","Price","Shipping","LengthIn","WidthIn","HeightIn","Weight","Location"
+    "Item ID","Availability",
+    "Category","Manufacturer","Model","Color","Screen Size","CPU","Storage","Features","GPU",
+    "Series","Memory","Connectivity","Condition",
+    "Image 1","Image 2","Image 3","Image 4","Image 5","Image 6",
+    "Operating System","Warranty","Description","Notes",
+    "Price","Buy Link",
+    "Shipping","LengthIn","WidthIn","HeightIn","Weight","Location"
   ];
 
+  // ✅ UPDATED: includes Availability
   const DROPDOWN_HEADERS = [
+    "Availability",
     "Category","Manufacturer","Color","Screen Size","CPU","Storage","GPU","Memory","Condition",
     "Operating System","Warranty","Shipping","Location"
   ];
@@ -409,10 +428,7 @@
     return new Promise((resolve, reject) => {
       const cb = "ToroCB_" + Math.random().toString(36).slice(2);
       const script = document.createElement("script");
-
-      // cache buster prevents stale/cached script responses
       const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
-
       const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
       script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
 
@@ -455,6 +471,8 @@
       const node = el(h);
       if (node) node.value = "";
     });
+    // nice default so you don't forget
+    if (el("Availability")) el("Availability").value = "Unlisted";
   }
 
   function generateItemId() {
@@ -477,6 +495,10 @@
       const node = el(h);
       if (node) payload[h] = node.value;
     });
+
+    // default availability if blank
+    if (!String(payload["Availability"] || "").trim()) payload["Availability"] = "Unlisted";
+
     if (!String(payload["Item ID"] || "").trim()) {
       payload["Item ID"] = generateItemId();
       el("Item ID").value = payload["Item ID"];
@@ -490,8 +512,6 @@
       if (!res || !res.ok) throw new Error(res?.error || "Ping failed");
       const sig = `${res.system || "Unknown"} • ${res.version || "no-version"} • ${res.ts || ""}`.trim();
       setBackendSig(sig);
-
-      // If you ever see a different system here (or a blank), you're hitting the wrong deployment.
       return res;
     } catch(err){
       setBackendSig("NOT CONNECTED");
@@ -507,6 +527,10 @@
       if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
       const dd = res.dropdowns || {};
       DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
+      // if dropdown sheet doesn't have values yet, seed friendly defaults:
+      if (el("Availability") && el("Availability").options.length <= 1) {
+        fillSelect("Availability", ["Listed","Unlisted","Pending","Hold"]);
+      }
       setStatus("Dropdowns loaded.", "good");
     } catch (err) {
       setStatus("Dropdown error: " + err.message, "bad");
@@ -586,11 +610,7 @@
     setStatus("Saving…");
     try {
       const payload = collectPayload();
-
-      // Debug tip: if Description is gigantic, JSONP can hit URL length limits.
-      // If you ever see weird failures on big descriptions, we can implement a chunk-save strategy.
       const res = await jsonp({ action: "upsertItem", payload: JSON.stringify(payload) });
-
       if (!res.ok) throw new Error(res.error || "Save failed");
       setStatus(`Saved! (${res.mode}) • Row ${res.row} • Item ID ${res.itemId}`, "good");
       await refreshList();
@@ -617,7 +637,7 @@
   (async function init(){
     DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
     setStatus("Connecting to backend…");
-    await pingBackend();                 // <— THIS will expose wrong deployment instantly
+    await pingBackend();
     setStatus("Ready. Click Reload Dropdowns, then Refresh List.", "");
   })();
 </script>
