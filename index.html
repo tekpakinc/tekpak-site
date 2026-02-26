@@ -1,224 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Tek-Pak Surplus Store (Toro)</title>
-  <style>
-    :root{
-      --bg:#0b1020;
-      --card:#121a33;
-      --line:rgba(255,255,255,.10);
-      --text:#f3f6ff;
-      --muted:rgba(243,246,255,.70);
-      --accent:#7cf7a6;
-      --accent2:#7aa7ff;
-      --shadow:0 18px 60px rgba(0,0,0,.45);
-      --radius:18px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:
-        radial-gradient(1200px 500px at 20% -10%, rgba(122,167,255,.25), transparent 60%),
-        radial-gradient(900px 450px at 90% 10%, rgba(124,247,166,.20), transparent 55%),
-        radial-gradient(700px 400px at 30% 110%, rgba(255,204,102,.10), transparent 60%),
-        var(--bg);
-      color:var(--text);
-    }
-    header{
-      position:sticky; top:0; z-index:30;
-      backdrop-filter: blur(10px);
-      background: linear-gradient(to bottom, rgba(11,16,32,.86), rgba(11,16,32,.55));
-      border-bottom:1px solid var(--line);
-    }
-    .wrap{max-width:1200px;margin:0 auto;padding:14px 16px}
-    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .brand{display:flex;gap:12px;align-items:center}
-    .badge{
-      width:44px;height:44px;border-radius:16px;
-      background: radial-gradient(circle at 30% 30%, rgba(124,247,166,.9), rgba(122,167,255,.85));
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      flex:0 0 auto;
-    }
-    h1{margin:0;font-size:18px;letter-spacing:.2px}
-    .sub{font-size:12px;color:var(--muted);margin-top:2px}
-    .pill{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.25);
-      border-radius: 999px;
-      padding:8px 10px;
-      font-size:12px;
-      color: var(--muted);
-    }
-
-    .controls{
-      display:grid;
-      grid-template-columns: 1.4fr .8fr .8fr .8fr;
-      gap:10px;
-      padding:14px 16px 0;
-      max-width:1200px;
-      margin:0 auto;
-    }
-    @media (max-width: 980px){
-      .controls{grid-template-columns:1fr 1fr}
-    }
-    @media (max-width: 560px){
-      .controls{grid-template-columns:1fr}
-    }
-    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
-    input,select{
-      width:100%;
-      padding:10px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(6,10,22,.55);
-      color: var(--text);
-      outline:none;
-    }
-    input:focus,select:focus{
-      border-color: rgba(124,247,166,.55);
-      box-shadow: 0 0 0 3px rgba(124,247,166,.15);
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:14px;
-      padding:14px 16px 28px;
-      max-width:1200px;
-      margin:0 auto;
-    }
-    @media (max-width: 980px){
-      .grid{grid-template-columns: repeat(2, minmax(0,1fr));}
-    }
-    @media (max-width: 560px){
-      .grid{grid-template-columns: 1fr;}
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(18,26,51,.92), rgba(15,23,48,.92));
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-height: 320px;
-    }
-    .img{
-      background: rgba(6,10,22,.55);
-      border-bottom:1px solid var(--line);
-      aspect-ratio: 4 / 3;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      overflow:hidden;
-    }
-    .img img{width:100%;height:100%;object-fit:cover;display:block}
-    .img .ph{
-      color: rgba(243,246,255,.55);
-      font-size:12px;
-    }
-    .bd{padding:12px 12px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
-    .title{font-weight:900;font-size:14px;line-height:1.2}
-    .meta{font-size:12px;color:var(--muted);line-height:1.25}
-    .priceRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto}
-    .price{font-weight:950;font-size:16px;letter-spacing:.2px}
-    .btn{
-      border:0;
-      border-radius: 14px;
-      padding:10px 12px;
-      font-weight:900;
-      cursor:pointer;
-      color:#061016;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      white-space:nowrap;
-    }
-    .btn.secondary{
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
-      color: var(--text);
-    }
-    .status{
-      max-width:1200px;
-      margin:12px auto 0;
-      padding:10px 14px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-      color: var(--muted);
-      font-size:12px;
-    }
-    footer{
-      max-width:1200px;
-      margin: 0 auto;
-      padding: 0 16px 24px;
-      color: rgba(243,246,255,.55);
-      font-size:12px;
-      line-height:1.4;
-    }
-    .buySlot form{margin:0}
-  </style>
-</head>
-<body>
-
-<header>
-  <div class="wrap">
-    <div class="top">
-      <div class="brand">
-        <div class="badge" aria-hidden="true"></div>
-        <div>
-          <h1>Tek-Pak Surplus Store</h1>
-          <div class="sub">Live inventory • Only “Listed” items show • Powered by Toro</div>
-        </div>
-      </div>
-      <div class="pill" id="sig">Backend: not connected</div>
-    </div>
-  </div>
-</header>
-
-<div class="controls">
-  <div>
-    <label>Search</label>
-    <input id="q" placeholder="Search manufacturer, model, category, condition..." />
-  </div>
-  <div>
-    <label>Category</label>
-    <select id="cat"><option value="">All</option></select>
-  </div>
-  <div>
-    <label>Manufacturer</label>
-    <select id="mfg"><option value="">All</option></select>
-  </div>
-  <div>
-    <label>Sort</label>
-    <select id="sort">
-      <option value="new">Newest</option>
-      <option value="priceAsc">Price: Low → High</option>
-      <option value="priceDesc">Price: High → Low</option>
-      <option value="az">A → Z</option>
-    </select>
-  </div>
-</div>
-
-<div class="status" id="status">Loading items…</div>
-<div class="grid" id="grid"></div>
-
-<footer>
-  <div><b>Heads up:</b> Inventory is live. Items are shown only when the sheet column <b>Listed</b> equals <b>Listed</b>.</div>
-  <div>Notes / Availability are internal and not displayed.</div>
-</footer>
-
 <script>
-  // ✅ Paste your CURRENT deployed Apps Script Web App URL here:
-  const API_URL = "https://script.google.com/macros/s/AKfycbwLO1T1DAxzQ78qzMGnCcgypwZNUYTgrKw-mWduc88ZvczyxD1pAyYuBS17iR2KsG-duA/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwLO1T1DAxzQ78qzMGnCcgypwZNUYTgrKw-mWduc88ZvczyxD1pAyYuBS17iR2KsG-duA/exec"; // must end with /exec
 
   const el = (id) => document.getElementById(id);
   const ui = {
@@ -240,9 +21,15 @@
       const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
 
       const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
-      script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
+      const fullUrl = API_URL.trim() + (API_URL.includes("?") ? "&" : "?") + q;
 
-      const timeout = setTimeout(() => { cleanup(); reject(new Error("JSONP timeout (15s)")); }, 15000);
+      // Helpful diagnostics
+      ui.sig.textContent = "Backend request: " + fullUrl;
+
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error("JSONP timeout (15s). Likely permissions or wrong deployment."));
+      }, 15000);
 
       function cleanup(){
         clearTimeout(timeout);
@@ -251,8 +38,9 @@
       }
 
       window[cb] = (data) => { cleanup(); resolve(data); };
-      script.onerror = () => { cleanup(); reject(new Error("JSONP load error (URL / deployment / permissions)")); };
+      script.onerror = () => { cleanup(); reject(new Error("JSONP load error. Usually bad URL or blocked/unauthorized web app.")); };
 
+      script.src = fullUrl;
       document.body.appendChild(script);
     });
   }
@@ -339,7 +127,6 @@
         return ta.localeCompare(tb);
       });
     } else {
-      // "Newest" — best effort: if Item ID includes timestamp like TORO-YYYYMMDD-HHMMSS
       copy.sort((a,b)=> String(b["Item ID"]||"").localeCompare(String(a["Item ID"]||"")));
     }
     return copy;
@@ -366,7 +153,6 @@
       const desc = String(it["Description"]||"").trim();
       const priceRaw = String(it["Price"]||"").trim();
       const img = firstImage(it);
-
       const buy = String(it["Buy Link"]||"").trim();
 
       const card = document.createElement("div");
@@ -385,40 +171,34 @@
             ${desc ? `<div class="meta" style="margin-top:8px">${escapeHtml(desc).slice(0,240)}${desc.length>240?"…":""}</div>` : ""}
             <div class="meta" style="margin-top:8px;opacity:.8">Item ID: ${escapeHtml(id)}</div>
           </div>
-
           <div class="priceRow">
             <div class="price">${priceRaw ? "$" + escapeHtml(priceRaw) : "—"}</div>
-            <div class="buySlot" id="buy_${escapeHtml(id)}"></div>
+            <div class="buySlot"></div>
           </div>
         </div>
       `;
 
-      ui.grid.appendChild(card);
-
-      // Buy link handling:
-      // - If it's HTML (PayPal form/button), render it.
-      // - If it's a URL, render a Buy button.
-      const slot = card.querySelector(`#buy_${CSS.escape(id)}`);
-      if (slot){
-        if (buy.includes("<") && buy.includes(">")){
-          slot.innerHTML = buy; // trusted because it's from your own sheet
-        } else if (buy){
-          const a = document.createElement("a");
-          a.className = "btn";
-          a.href = buy;
-          a.target = "_blank";
-          a.rel = "noopener";
-          a.textContent = "Buy";
-          slot.appendChild(a);
-        } else {
-          const a = document.createElement("a");
-          a.className = "btn secondary";
-          a.href = "#";
-          a.onclick = (e)=>{ e.preventDefault(); alert("No Buy Link set for this item yet."); };
-          a.textContent = "Unavailable";
-          slot.appendChild(a);
-        }
+      const slot = card.querySelector(".buySlot");
+      if (buy.includes("<") && buy.includes(">")){
+        slot.innerHTML = buy;
+      } else if (buy){
+        const a = document.createElement("a");
+        a.className = "btn";
+        a.href = buy;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Buy";
+        slot.appendChild(a);
+      } else {
+        const a = document.createElement("a");
+        a.className = "btn secondary";
+        a.href = "#";
+        a.onclick = (e)=>{ e.preventDefault(); alert("No Buy Link set for this item yet."); };
+        a.textContent = "Unavailable";
+        slot.appendChild(a);
       }
+
+      ui.grid.appendChild(card);
     });
   }
 
@@ -426,14 +206,12 @@
     setStatus("Loading items…");
     try{
       const ping = await jsonp({ action: "ping" });
-      if (ping?.ok){
-        ui.sig.textContent = `Backend: ${ping.system || "Toro"} • ${ping.version || ""}`;
-      } else {
-        ui.sig.textContent = "Backend: unknown";
-      }
+      if (!ping?.ok) throw new Error("Ping failed: " + (ping?.error || "unknown"));
+      // show a short signature after we know it works
+      ui.sig.textContent = `Backend: ${ping.system || "Toro"} • ${ping.version || ""}`;
 
       const res = await jsonp({ action: "storeItems" });
-      if (!res.ok) throw new Error(res.error || "Failed to load store items");
+      if (!res?.ok) throw new Error("storeItems failed: " + (res?.error || "unknown"));
 
       const items = Array.isArray(res.items) ? res.items : [];
       window.__STORE_ITEMS__ = items;
@@ -443,12 +221,12 @@
     }catch(err){
       setStatus("Store error: " + err.message);
       ui.grid.innerHTML = `<div style="grid-column:1/-1;color:rgba(255,107,122,.95);font-size:12px">
-        Failed to load items. Check the API_URL (deployment) and that the script is deployed as a Web App.
+        <b>Load failed:</b> ${escapeHtml(err.message)}<br/>
+        <div style="margin-top:6px;opacity:.8">Open your API URL in a new tab with <code>?action=ping</code> and <code>?action=storeItems</code> to confirm public access.</div>
       </div>`;
     }
   }
 
-  // events
   ui.q.addEventListener("input", ()=> render(window.__STORE_ITEMS__ || []));
   ui.cat.addEventListener("change", ()=> render(window.__STORE_ITEMS__ || []));
   ui.mfg.addEventListener("change", ()=> render(window.__STORE_ITEMS__ || []));
@@ -456,5 +234,3 @@
 
   load();
 </script>
-</body>
-</html>
