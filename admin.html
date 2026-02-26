@@ -115,6 +115,7 @@
       color:#1a1200;
       background: linear-gradient(135deg, var(--warn), #ffdca0);
     }
+    button:disabled{opacity:.6; cursor:not-allowed}
 
     .note{font-size:12px; color:var(--muted); line-height:1.35;}
     .status{
@@ -216,7 +217,7 @@
     </div>
 
     <div class="bd">
-      <div class="status" id="status">Ready. Click Reload Dropdowns first.</div>
+      <div class="status" id="status">Connecting…</div>
 
       <div style="height:12px"></div>
 
@@ -374,11 +375,12 @@
 <script>
   /******************************
    * Toro v1 Admin (Tokenless)
+   * ✅ Auto-load dropdowns + list on page load
    ******************************/
 
+  // IMPORTANT: This URL must be the CURRENT deployed Web App URL
   const API_URL = "https://script.google.com/macros/s/AKfycbwLO1T1DAxzQ78qzMGnCcgypwZNUYTgrKw-mWduc88ZvczyxD1pAyYuBS17iR2KsG-duA/exec";
 
-  // ✅ UPDATED: includes Availability + Notes + Buy Link
   const INVENTORY_HEADERS = [
     "Item ID","Availability",
     "Category","Manufacturer","Model","Color","Screen Size","CPU","Storage","Features","GPU",
@@ -389,7 +391,6 @@
     "Shipping","LengthIn","WidthIn","HeightIn","Weight","Location"
   ];
 
-  // ✅ UPDATED: includes Availability
   const DROPDOWN_HEADERS = [
     "Availability",
     "Category","Manufacturer","Color","Screen Size","CPU","Storage","GPU","Memory","Condition",
@@ -409,6 +410,12 @@
     btnNew: el("btnNew"),
     btnSave: el("btnSave"),
   };
+
+  function setBusy(isBusy){
+    const btns = [ui.btnReloadDropdowns, ui.btnRefreshList, ui.btnSave, ui.btnNew];
+    btns.forEach(b => { if (b) b.disabled = !!isBusy; });
+    if (ui.q) ui.q.disabled = !!isBusy;
+  }
 
   function setStatus(msg, kind="") {
     ui.status.className = "status" + (kind ? (" " + kind) : "");
@@ -432,7 +439,10 @@
       const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
       script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
 
-      const timeout = setTimeout(() => { cleanup(); reject(new Error("JSONP timeout (15s). Check deployment + URL.")); }, 15000);
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error("JSONP timeout (15s). Check deployment + URL."));
+      }, 15000);
 
       function cleanup() {
         clearTimeout(timeout);
@@ -471,7 +481,6 @@
       const node = el(h);
       if (node) node.value = "";
     });
-    // nice default so you don't forget
     if (el("Availability")) el("Availability").value = "Unlisted";
   }
 
@@ -496,7 +505,6 @@
       if (node) payload[h] = node.value;
     });
 
-    // default availability if blank
     if (!String(payload["Availability"] || "").trim()) payload["Availability"] = "Unlisted";
 
     if (!String(payload["Item ID"] || "").trim()) {
@@ -522,19 +530,15 @@
 
   async function reloadDropdowns() {
     setStatus("Loading dropdowns…");
-    try {
-      const res = await jsonp({ action: "getDropdowns" });
-      if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
-      const dd = res.dropdowns || {};
-      DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
-      // if dropdown sheet doesn't have values yet, seed friendly defaults:
-      if (el("Availability") && el("Availability").options.length <= 1) {
-        fillSelect("Availability", ["Listed","Unlisted","Pending","Hold"]);
-      }
-      setStatus("Dropdowns loaded.", "good");
-    } catch (err) {
-      setStatus("Dropdown error: " + err.message, "bad");
+    const res = await jsonp({ action: "getDropdowns" });
+    if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
+    const dd = res.dropdowns || {};
+    DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
+    if (el("Availability") && el("Availability").options.length <= 1) {
+      fillSelect("Availability", ["Listed","Unlisted","Pending","Hold"]);
     }
+    setStatus("Dropdowns loaded.", "good");
+    return true;
   }
 
   function renderList(items) {
@@ -578,15 +582,12 @@
 
   async function refreshList() {
     setListStatus("Loading list…");
-    try {
-      const res = await jsonp({ action: "listItems" });
-      if (!res.ok) throw new Error(res.error || "Failed to load list");
-      window.__TORO_ITEMS__ = res.items || [];
-      renderList(window.__TORO_ITEMS__);
-      setListStatus(`Loaded ${window.__TORO_ITEMS__.length} items.`, "good");
-    } catch (err) {
-      setListStatus("List error: " + err.message, "bad");
-    }
+    const res = await jsonp({ action: "listItems" });
+    if (!res.ok) throw new Error(res.error || "Failed to load list");
+    window.__TORO_ITEMS__ = res.items || [];
+    renderList(window.__TORO_ITEMS__);
+    setListStatus(`Loaded ${window.__TORO_ITEMS__.length} items.`, "good");
+    return true;
   }
 
   async function loadItem(itemId) {
@@ -608,6 +609,7 @@
 
   async function saveItem() {
     setStatus("Saving…");
+    setBusy(true);
     try {
       const payload = collectPayload();
       const res = await jsonp({ action: "upsertItem", payload: JSON.stringify(payload) });
@@ -616,6 +618,8 @@
       await refreshList();
     } catch (err) {
       setStatus("Save error: " + err.message, "bad");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -628,17 +632,41 @@
       .replaceAll("'","&#039;");
   }
 
-  ui.btnReloadDropdowns.addEventListener("click", reloadDropdowns);
-  ui.btnRefreshList.addEventListener("click", refreshList);
+  // Buttons
+  ui.btnReloadDropdowns.addEventListener("click", async () => {
+    setBusy(true);
+    try { await reloadDropdowns(); } catch(e){ setStatus("Dropdown error: " + e.message, "bad"); }
+    setBusy(false);
+  });
+  ui.btnRefreshList.addEventListener("click", async () => {
+    setBusy(true);
+    try { await refreshList(); } catch(e){ setListStatus("List error: " + e.message, "bad"); }
+    setBusy(false);
+  });
   ui.btnNew.addEventListener("click", () => { clearForm(); setStatus("New item mode. Fill it out and Save.", ""); });
   ui.btnSave.addEventListener("click", saveItem);
   ui.q.addEventListener("input", () => renderList(window.__TORO_ITEMS__ || []));
 
+  // ✅ Auto-init (ping -> dropdowns -> list)
   (async function init(){
     DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
     setStatus("Connecting to backend…");
-    await pingBackend();
-    setStatus("Ready. Click Reload Dropdowns, then Refresh List.", "");
+    setBusy(true);
+    try{
+      await pingBackend();
+
+      try { await reloadDropdowns(); }
+      catch(e){ console.warn("Dropdown autoload failed:", e); }
+
+      try { await refreshList(); }
+      catch(e){ console.warn("List autoload failed:", e); }
+
+      setStatus("Ready.", "good");
+    } catch(e){
+      // pingBackend already set status
+    } finally {
+      setBusy(false);
+    }
   })();
 </script>
 </body>
