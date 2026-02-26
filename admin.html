@@ -363,7 +363,6 @@
           <div><label>Image 6</label><input id="Image 6" placeholder="https://…" /></div>
         </div>
 
-        <!-- ✅ Upload Images Button + embedded uploader -->
         <div class="full" style="margin-top:6px">
           <button class="secondary" id="btnUploadImages" type="button">Upload Images</button>
           <div class="note" style="margin-top:8px">
@@ -391,13 +390,7 @@
 </div>
 
 <script>
-  /******************************
-   * Toro v1 Admin (Tokenless)
-   * + Auto-load dropdowns/list
-   * + Embedded Apps Script uploader (no CORS)
-   ******************************/
-
-  // IMPORTANT: This URL must be your CURRENT deployed Web App URL (ends with /exec)
+  // IMPORTANT: your CURRENT deployed Web App URL (ends with /exec)
   const API_URL = "https://script.google.com/macros/s/AKfycbx2lA-z4TaUBXRjRk68Z5P_KJc1OKJdMDNgCEeYhIWpkleKrLkNtdLd9Nrm07Dd4dtOAg/exec";
 
   const INVENTORY_HEADERS = [
@@ -432,6 +425,7 @@
     btnUploadImages: el("btnUploadImages"),
     uploaderWrap: el("uploaderWrap"),
     uploaderFrame: el("uploaderFrame"),
+    itemId: el("Item ID"),
   };
 
   const UPLOADER_URL = API_URL + (API_URL.includes("?") ? "&" : "?") + "view=uploader";
@@ -454,6 +448,17 @@
 
   function setBackendSig(text){
     ui.backendSig.textContent = text || "unknown";
+  }
+
+  // ✅ This is the magic: always keep uploader Item ID synced
+  function syncUploaderItemId(){
+    try{
+      const id = (ui.itemId.value || "").trim();
+      if (!id) return;
+      if (!ui.uploaderFrame) return;
+      if (!ui.uploaderFrame.contentWindow) return;
+      ui.uploaderFrame.contentWindow.postMessage({ type:"TP_SET_ITEM_ID", itemId: id }, "*");
+    }catch(e){}
   }
 
   function jsonp(params={}) {
@@ -507,6 +512,7 @@
       if (node) node.value = "";
     });
     if (el("Availability")) el("Availability").value = "Unlisted";
+    syncUploaderItemId();
   }
 
   function generateItemId() {
@@ -534,7 +540,9 @@
 
     if (!String(payload["Item ID"] || "").trim()) {
       payload["Item ID"] = generateItemId();
-      el("Item ID").value = payload["Item ID"];
+      ui.itemId.value = payload["Item ID"];
+      // ✅ sync immediately after generating
+      syncUploaderItemId();
     }
     return payload;
   }
@@ -559,12 +567,9 @@
     if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
     const dd = res.dropdowns || {};
     DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
-
-    // seed availability if dropdowns is empty
     if (el("Availability") && el("Availability").options.length <= 1) {
       fillSelect("Availability", ["Listed","Unlisted","Pending","Hold"]);
     }
-
     setStatus("Dropdowns loaded.", "good");
     return true;
   }
@@ -638,12 +643,8 @@
         if (node) node.value = (item[h] !== undefined && item[h] !== null) ? String(item[h]) : "";
       });
       setStatus("Item loaded. Edit fields then Save to update.", "good");
-
-      // If uploader is open, keep it in sync with current Item ID
-      if (ui.uploaderFrame && ui.uploaderFrame.contentWindow) {
-        ui.uploaderFrame.contentWindow.postMessage({ type:"TP_SET_ITEM_ID", itemId: String(itemId||"") }, "*");
-      }
-
+      // ✅ sync after loading any item
+      syncUploaderItemId();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setStatus("Load error: " + err.message, "bad");
@@ -659,6 +660,8 @@
       if (!res.ok) throw new Error(res.error || "Save failed");
       setStatus(`Saved! (${res.mode}) • Row ${res.row} • Item ID ${res.itemId}`, "good");
       await refreshList();
+      // ✅ keep uploader synced with whatever ID ended up saved
+      syncUploaderItemId();
     } catch (err) {
       setStatus("Save error: " + err.message, "bad");
     } finally {
@@ -670,11 +673,16 @@
   ui.btnUploadImages.addEventListener("click", () => {
     ui.uploaderWrap.style.display = (ui.uploaderWrap.style.display === "none" ? "block" : "none");
     if (!ui.uploaderFrame.src) ui.uploaderFrame.src = UPLOADER_URL;
+    // ✅ sync immediately when opened
+    setTimeout(syncUploaderItemId, 200);
+  });
 
-    const itemId = (el("Item ID").value || "").trim();
-    if (itemId && ui.uploaderFrame.contentWindow) {
-      ui.uploaderFrame.contentWindow.postMessage({ type:"TP_SET_ITEM_ID", itemId }, "*");
-    }
+  // ✅ ALWAYS sync uploader as you type/edit Item ID
+  ["input","change","blur"].forEach(evt=>{
+    ui.itemId.addEventListener(evt, () => {
+      // Only sync if uploader has been opened at least once or is visible
+      if (ui.uploaderFrame && ui.uploaderFrame.src) syncUploaderItemId();
+    });
   });
 
   // ✅ Receive uploaded URLs and auto-fill Image 1..6
@@ -690,7 +698,7 @@
     }
 
     alert(`Uploaded ${urls.length} image(s) and filled Image 1–${Math.min(6, urls.length)}.`);
-    // Optional: auto-save immediately after upload:
+    // Optional auto-save:
     // saveItem();
   });
 
@@ -709,7 +717,7 @@
   ui.btnSave.addEventListener("click", saveItem);
   ui.q.addEventListener("input", () => renderList(window.__TORO_ITEMS__ || []));
 
-  // ✅ Auto-init (ping -> dropdowns -> list)
+  // Auto-init (ping -> dropdowns -> list)
   (async function init(){
     DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
     setStatus("Connecting to backend…");
@@ -720,7 +728,6 @@
       try { await refreshList(); } catch(e){ console.warn("List autoload failed:", e); }
       setStatus("Ready.", "good");
     } catch(e){
-      // pingBackend already set status
     } finally {
       setBusy(false);
     }
