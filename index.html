@@ -1,107 +1,508 @@
+<!-- =========================
+TEK-PAK HEADER (UPDATED MENU)
+========================= -->
+<header class="tp-header">
+  <div class="tp-header-accent"></div>
+  <div class="tp-header-sheen"></div>
+
+  <div class="tp-header-inner">
+    <!-- Brand -->
+    <a href="/index" class="tp-brand" aria-label="Tek-Pak Home">
+      <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-logo" />
+    </a>
+
+    <!-- Mobile Toggle -->
+    <button class="tp-menu-toggle" aria-expanded="false" aria-controls="tpNav" aria-label="Toggle navigation" type="button">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Nav -->
+    <nav id="tpNav" class="tp-nav" aria-label="Primary Navigation">
+      <ul class="tp-menu">
+        <!-- Home -->
+        <li><a href="/index">Home</a></li>
+
+        <!-- Services Dropdown -->
+        <li class="tp-dropdown">
+          <button class="tp-dropdown-btn" aria-expanded="false" aria-haspopup="true" type="button">Services</button>
+          <ul class="tp-submenu" role="menu" aria-label="Services submenu">
+            <li><a href="/it-support">IT Support</a></li>
+            <li><a href="https://www.ncelectronicrecycling.com" target="_blank" rel="noopener noreferrer">Electronic Recycling</a></li>
+            <li><a href="/development">Development</a></li>
+          </ul>
+        </li>
+
+        <!-- Shop Dropdown -->
+        <li class="tp-dropdown">
+          <button class="tp-dropdown-btn" aria-expanded="false" aria-haspopup="true" type="button">Shop</button>
+          <ul class="tp-submenu" role="menu" aria-label="Shop submenu">
+            <li><a href="https://www.tekpakinc.store/surplus" target="_blank" rel="noopener noreferrer">Surplus Electronics</a></li>
+            <li><a href="https://www.tekpakinc.store/refurbished" target="_blank" rel="noopener noreferrer">Refurbished Electronics</a></li>
+            <li><a href="https://www.thercreserve.com/#shop" target="_blank" rel="noopener noreferrer">Remote Control Hobbies</a></li>
+            <li><a href="https://www.tekpak.store/software" target="_blank" rel="noopener noreferrer">Software</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  :root{
+    --tp-bg:#ffffff;
+    --tp-text:#0f172a;
+    --tp-line:#e5eaf1;
+    --tp-lime:#97ff3f;
+    --tp-lime-deep:#69d020;
+    --tp-shadow-soft:0 8px 24px rgba(15,23,42,.10);
+    --tp-shadow-3d:0 18px 38px rgba(15,23,42,.14), 0 4px 14px rgba(15,23,42,.08);
+  }
+
+  *{box-sizing:border-box}
+
+  .tp-header{
+    position:sticky;
+    top:0;
+    z-index:5000;
+    background:var(--tp-bg);
+    border-bottom:1px solid var(--tp-line);
+    box-shadow:var(--tp-shadow-soft);
+    overflow:visible; /* allows dropdowns to overlay page content */
+  }
+
+  .tp-header-accent{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:4px;
+    background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime),var(--tp-lime-deep));
+    filter:saturate(1.1);
+    pointer-events:none;
+  }
+
+  .tp-header-sheen{
+    position:absolute;
+    top:0; left:-40%;
+    width:35%;
+    height:100%;
+    background:linear-gradient(100deg,transparent 0%, rgba(255,255,255,.9) 48%, transparent 100%);
+    transform:skewX(-20deg);
+    animation:tpSheen 7s linear infinite;
+    pointer-events:none;
+    opacity:.38;
+  }
+
+  @keyframes tpSheen{
+    0%{left:-40%}
+    100%{left:140%}
+  }
+
+  .tp-header-inner{
+    max-width:1240px;
+    margin:0 auto;
+    padding:10px 18px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    min-height:86px;
+    position:relative;
+    overflow:visible;
+  }
+
+  .tp-brand{
+    display:flex;
+    align-items:center;
+    text-decoration:none;
+    flex:0 0 auto;
+  }
+
+  .tp-logo{
+    width:96px;
+    height:96px;
+    object-fit:contain;
+    filter:
+      drop-shadow(0 6px 10px rgba(15,23,42,.20))
+      drop-shadow(0 0 10px rgba(151,255,63,.20));
+    transition:transform .2s ease, filter .2s ease;
+  }
+
+  .tp-brand:hover .tp-logo{
+    transform:translateY(-1px) scale(1.02);
+    filter:
+      drop-shadow(0 8px 14px rgba(15,23,42,.24))
+      drop-shadow(0 0 14px rgba(151,255,63,.32));
+  }
+
+  .tp-nav{ margin-left:auto; overflow:visible; }
+
+  .tp-menu{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    overflow:visible;
+  }
+
+  .tp-menu > li{ position:relative; }
+
+  .tp-menu a,
+  .tp-dropdown-btn{
+    position:relative;
+    isolation:isolate;
+    overflow:hidden;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:var(--tp-text);
+    font-weight:800;
+    font-size:.95rem;
+    letter-spacing:.2px;
+    padding:10px 14px;
+    border-radius:12px;
+    border:1px solid #dbe2ec;
+    background:linear-gradient(180deg,#ffffff 0%, #f4f7fb 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.95),
+      0 2px 0 rgba(15,23,42,.05),
+      0 8px 16px rgba(91,102,120,.12);
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    cursor:pointer;
+    font-family:inherit;
+    white-space:nowrap;
+  }
+
+  .tp-menu a::before,
+  .tp-dropdown-btn::before{
+    content:"";
+    position:absolute;
+    left:-120%;
+    top:0;
+    width:80%;
+    height:100%;
+    background:linear-gradient(100deg,transparent 0%, rgba(151,255,63,.55) 50%, transparent 100%);
+    transform:skewX(-24deg);
+    transition:left .45s ease;
+    z-index:-1;
+  }
+
+  .tp-menu a:hover,
+  .tp-dropdown-btn:hover{
+    transform:translateY(-1px);
+    border-color:#c9d3e2;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.98),
+      0 4px 0 rgba(15,23,42,.06),
+      0 12px 22px rgba(91,102,120,.16);
+  }
+
+  .tp-menu a:hover::before,
+  .tp-dropdown-btn:hover::before{ left:140%; }
+
+  .tp-menu a:active,
+  .tp-dropdown-btn:active{
+    transform:translateY(1px);
+    box-shadow:
+      inset 0 2px 7px rgba(15,23,42,.10),
+      0 1px 0 rgba(15,23,42,.05);
+  }
+
+  .tp-menu a.active{
+    border-color:#83e92f;
+    color:#0b1304;
+    background:linear-gradient(180deg,#eaffd7 0%, #bbff79 35%, #97ff3f 70%, #79dc29 100%);
+    text-shadow:0 1px 0 rgba(255,255,255,.55);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.8),
+      0 3px 0 rgba(66,125,19,.30),
+      0 12px 20px rgba(121,220,41,.35);
+  }
+
+  .tp-dropdown{ position:relative; overflow:visible; }
+
+  .tp-submenu{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    min-width:270px;
+    list-style:none;
+    margin:0;
+    padding:8px;
+    background:#fff;
+    border:1px solid #dbe2ec;
+    border-radius:14px;
+    box-shadow:var(--tp-shadow-3d);
+    display:none;
+    z-index:6000;
+  }
+
+  .tp-dropdown.open .tp-submenu{ display:block; }
+
+  .tp-submenu a{
+    display:block;
+    border-radius:10px;
+    padding:9px 10px;
+    border:1px solid transparent;
+    background:transparent;
+    box-shadow:none;
+    font-weight:700;
+    color:#0f172a;
+  }
+
+  .tp-submenu a:hover{
+    background:#f6fbf1;
+    border-color:#d7f2bf;
+    transform:none;
+  }
+
+  .tp-menu-toggle{
+    display:none;
+    margin-left:auto;
+    width:46px;
+    height:40px;
+    border-radius:12px;
+    border:1px solid #dbe2ec;
+    background:linear-gradient(180deg,#fff,#f3f6fb);
+    box-shadow:0 5px 12px rgba(15,23,42,.10);
+    padding:8px;
+    cursor:pointer;
+  }
+
+  .tp-menu-toggle span{
+    display:block;
+    height:2px;
+    margin:5px 0;
+    background:#4b5563;
+    border-radius:2px;
+  }
+
+  @media (max-width:980px){
+    .tp-logo{width:72px;height:72px}
+    .tp-header-inner{min-height:78px}
+    .tp-menu-toggle{display:block}
+
+    .tp-nav{
+      position:absolute;
+      left:0; right:0; top:100%;
+      background:#fff;
+      border-top:1px solid #eef2f7;
+      border-bottom:1px solid var(--tp-line);
+      box-shadow:var(--tp-shadow-3d);
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .28s ease;
+      z-index:5500;
+    }
+    .tp-nav.open{max-height:620px}
+
+    .tp-menu{
+      padding:12px;
+      flex-direction:column;
+      align-items:stretch;
+      gap:8px;
+    }
+
+    /* Keep submenu inside mobile panel for stable UX */
+    .tp-dropdown .tp-submenu{
+      position:static;
+      margin-top:8px;
+      min-width:0;
+      box-shadow:none;
+      border-color:#e6ebf2;
+      background:#fbfcfe;
+      z-index:auto;
+    }
+  }
+
+  @media (max-width:640px){
+    .tp-logo{width:58px;height:58px}
+    .tp-header-inner{padding:8px 12px}
+  }
+</style>
+
+<script>
+  (function(){
+    const nav = document.getElementById('tpNav');
+    const toggle = document.querySelector('.tp-menu-toggle');
+    const dropdowns = document.querySelectorAll('.tp-dropdown');
+
+    // Mobile nav toggle
+    if(toggle && nav){
+      toggle.addEventListener('click', () => {
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        nav.classList.toggle('open');
+      });
+    }
+
+    // Dropdown open/close
+    dropdowns.forEach((dd) => {
+      const btn = dd.querySelector('.tp-dropdown-btn');
+      if(!btn) return;
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const wasOpen = dd.classList.contains('open');
+
+        dropdowns.forEach((el) => {
+          if(el !== dd){
+            el.classList.remove('open');
+            const b = el.querySelector('.tp-dropdown-btn');
+            if(b) b.setAttribute('aria-expanded','false');
+          }
+        });
+
+        dd.classList.toggle('open', !wasOpen);
+        btn.setAttribute('aria-expanded', String(!wasOpen));
+      });
+    });
+
+    // Click outside closes dropdowns
+    document.addEventListener('click', (e) => {
+      if(!e.target.closest('.tp-dropdown')){
+        dropdowns.forEach((el) => {
+          el.classList.remove('open');
+          const b = el.querySelector('.tp-dropdown-btn');
+          if(b) b.setAttribute('aria-expanded','false');
+        });
+      }
+    });
+
+    // ESC closes dropdowns + mobile nav
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape'){
+        dropdowns.forEach((el) => {
+          el.classList.remove('open');
+          const b = el.querySelector('.tp-dropdown-btn');
+          if(b) b.setAttribute('aria-expanded','false');
+        });
+        if(nav && toggle){
+          nav.classList.remove('open');
+          toggle.setAttribute('aria-expanded','false');
+        }
+      }
+    });
+
+    // Auto-highlight current internal page
+    const current = (location.pathname.replace(/\/+$/, '') || '/').toLowerCase();
+    document.querySelectorAll('.tp-menu a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if(!href || href.startsWith('http')) return; // skip external links
+      const path = (new URL(href, location.origin).pathname.replace(/\/+$/, '') || '/').toLowerCase();
+      if(path === current) a.classList.add('active');
+    });
+
+    // Close mobile nav when link clicked
+    document.querySelectorAll('.tp-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        if(window.matchMedia('(max-width: 980px)').matches && nav && toggle){
+          nav.classList.remove('open');
+          toggle.setAttribute('aria-expanded','false');
+        }
+      });
+    });
+  })();
+</script>
+
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Tek-Pak Surplus Store</title>
+  <title>Store</title>
   <style>
     :root{
-      --bg:#070b16;
-      --card:#0f1730;
-      --line:rgba(255,255,255,.10);
-      --text:#f3f6ff;
-      --muted:rgba(243,246,255,.70);
-      --accent:#7cf7a6;
-      --accent2:#7aa7ff;
-      --shadow:0 18px 60px rgba(0,0,0,.50);
-      --radius:18px;
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --line:#e6e9f2;
+      --text:#0f172a;
+      --muted:#64748b;
+      --accent:#2563eb;
+      --accent2:#06b6d4;
+      --shadow:0 14px 40px rgba(2,6,23,.10);
+      --radius:16px;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:
-        radial-gradient(1200px 520px at 20% -10%, rgba(122,167,255,.22), transparent 60%),
-        radial-gradient(900px 460px at 90% 8%, rgba(124,247,166,.18), transparent 58%),
-        radial-gradient(700px 420px at 30% 110%, rgba(124,247,166,.10), transparent 60%),
-        var(--bg);
+      background:var(--bg);
       color:var(--text);
     }
 
-    header{
-      position:sticky; top:0; z-index:50;
-      backdrop-filter: blur(10px);
-      background: linear-gradient(to bottom, rgba(7,11,22,.92), rgba(7,11,22,.65));
-      border-bottom:1px solid var(--line);
+    /* Store-only wrapper (you can embed this inside your own layout) */
+    .store{
+      max-width:1200px;
+      margin:0 auto;
+      padding:16px;
     }
-    .wrap{max-width:1200px;margin:0 auto;padding:14px 16px;}
-    .top{
-      display:flex; align-items:center; justify-content:space-between; gap:14px;
-      flex-wrap:wrap;
-    }
-    .brand{display:flex; gap:12px; align-items:center; min-width:240px}
-    .logoBox{
-      width:46px; height:46px; border-radius:16px;
-      background: radial-gradient(circle at 30% 30%, rgba(124,247,166,.9), rgba(122,167,255,.85));
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      display:grid; place-items:center;
-      overflow:hidden;
-    }
-    .logoBox img{width:100%;height:100%;object-fit:cover}
-    h1{font-size:18px;margin:0;letter-spacing:.2px}
-    .sub{font-size:12px;color:var(--muted);margin-top:2px}
-    .tiny{font-size:11px;color:rgba(243,246,255,.55);margin-top:6px}
-    code.k{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11px; color:rgba(243,246,255,.78)}
 
-    .bar{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-      width:100%;
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:end;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
     }
-    .field{display:flex;flex-direction:column;gap:6px}
-    .field label{font-size:11px;color:var(--muted)}
+
+    .field{display:flex;flex-direction:column;gap:6px; min-width:180px}
+    .field.wide{min-width:260px; flex:1}
+    label{font-size:12px;color:var(--muted)}
     input, select{
+      width:100%;
       padding:10px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(6,10,22,.55);
-      color: var(--text);
+      border-radius: 12px;
+      border:1px solid #d7dbe7;
+      background:#fff;
+      color:var(--text);
       outline:none;
-      min-width: 190px;
     }
-    input{min-width: 240px}
-    input::placeholder{color:rgba(243,246,255,.45)}
+    input::placeholder{color:#94a3b8}
     input:focus, select:focus{
-      border-color: rgba(124,247,166,.55);
-      box-shadow: 0 0 0 3px rgba(124,247,166,.15);
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
     }
-    .btn{
+
+    .btns{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    button{
       border:0;
-      border-radius: 14px;
+      border-radius: 12px;
       padding:10px 12px;
       font-weight:900;
       cursor:pointer;
-      color:#061016;
+      color:#fff;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       white-space:nowrap;
     }
-    .btn.secondary{
+    button.secondary{
       color: var(--text);
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
+      background: #fff;
+      border:1px solid #d7dbe7;
     }
+    button:disabled{opacity:.6; cursor:not-allowed}
 
-    main{max-width:1200px;margin:0 auto;padding:16px;}
     .status{
-      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      margin-top:12px;
       padding:10px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background:#fff;
       color: var(--muted);
-      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
     }
     .status b{color:var(--text)}
-    .status .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .tiny{font-size:12px;color:var(--muted)}
+    code.k{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11px; color:#475569}
 
     .grid{
       margin-top:14px;
@@ -111,14 +512,10 @@
     }
     @media (max-width:1100px){ .grid{grid-template-columns:repeat(3, minmax(0,1fr));} }
     @media (max-width:820px){ .grid{grid-template-columns:repeat(2, minmax(0,1fr));} }
-    @media (max-width:520px){
-      .grid{grid-template-columns:1fr;}
-      input{min-width:unset;width:100%}
-      select{min-width:unset;width:100%}
-    }
+    @media (max-width:520px){ .grid{grid-template-columns:1fr;} }
 
     .card{
-      background: linear-gradient(180deg, rgba(18,26,51,.92), rgba(15,23,48,.92));
+      background: var(--card);
       border:1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -127,15 +524,17 @@
       flex-direction:column;
       min-height: 340px;
     }
+
     .img{
       aspect-ratio: 4/3;
-      background: rgba(6,10,22,.45);
+      background:#f1f5f9;
       border-bottom:1px solid var(--line);
       display:grid; place-items:center;
       overflow:hidden;
     }
     .img img{width:100%;height:100%;object-fit:cover}
-    .ph{font-size:12px;color:rgba(243,246,255,.55)}
+    .ph{font-size:12px;color:#94a3b8}
+
     .bd{
       padding:12px 12px 14px;
       display:flex;
@@ -143,114 +542,107 @@
       gap:10px;
       flex:1;
     }
-    .title{font-weight:950;font-size:13px;line-height:1.15}
+    .title{font-weight:950;font-size:14px;line-height:1.15}
     .meta{font-size:12px;color:var(--muted);line-height:1.25}
+
     .priceRow{
       margin-top:auto;
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
       padding-top:10px;
-      border-top:1px solid rgba(255,255,255,.10);
+      border-top:1px solid var(--line);
     }
-    .price{font-weight:1000}
+    .price{font-weight:1000; color:var(--text)}
     .buySlot{display:flex;gap:8px;align-items:center;flex-wrap:wrap; justify-content:flex-end}
 
     a.btnlink{
-      display:inline-flex; align-items:center; justify-content:center;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       text-decoration:none;
-      border-radius: 14px;
+      border-radius: 12px;
       padding:10px 12px;
       font-weight:900;
       cursor:pointer;
-      color:#061016;
+      color:#fff;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       white-space:nowrap;
     }
     a.btnlink.secondary{
       color: var(--text);
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
+      background: #fff;
+      border:1px solid #d7dbe7;
     }
 
     /* PayPal snippet helpers */
     .ppwrap{display:flex; align-items:center; justify-content:flex-end}
     .ppwrap form{margin:0}
     .ppwrap input[type="image"]{max-width:170px; height:auto}
-    .ppwrap button, .ppwrap input[type="submit"]{border-radius:14px}
+    .ppwrap button, .ppwrap input[type="submit"]{border-radius:12px}
 
-    .foot{
-      max-width:1200px;margin:0 auto;padding:0 16px 22px;
-      color:rgba(243,246,255,.55);
-      font-size:11px;
-      line-height:1.35;
+    .errorBox{
+      grid-column:1/-1;
+      border:1px solid #fecaca;
+      background:#fff1f2;
+      color:#9f1239;
+      border-radius: 12px;
+      padding:12px;
+      font-size:12px;
     }
   </style>
 </head>
 
 <body>
-<header>
-  <div class="wrap">
-    <div class="top">
-      <div class="brand">
-        <div class="logoBox" title="Tek-Pak">
-          <img src="tekpaklogo.png" alt="Tek-Pak"
-               onerror="this.remove(); this.parentElement.textContent='TP'; this.parentElement.style.color='rgba(243,246,255,.9)'; this.parentElement.style.fontWeight='1000';">
-        </div>
-        <div>
-          <h1>Tek-Pak Surplus Store</h1>
-          <div class="sub">Live inventory • Filter & search • Only “Listed” items show</div>
-          <div class="tiny">Backend: <code class="k" id="sig">not connected</code></div>
-        </div>
+  <div class="store" id="storeRoot">
+    <div class="toolbar">
+      <div class="field wide">
+        <label for="q">Search</label>
+        <input id="q" placeholder="Model, manufacturer, category, item ID…" />
       </div>
 
-      <div class="bar">
-        <div class="field">
-          <label for="q">Search</label>
-          <input id="q" placeholder="Model, manufacturer, category, item ID…" />
-        </div>
-        <div class="field">
-          <label for="cat">Category</label>
-          <select id="cat"><option value="">All</option></select>
-        </div>
-        <div class="field">
-          <label for="mfg">Manufacturer</label>
-          <select id="mfg"><option value="">All</option></select>
-        </div>
-        <div class="field">
-          <label for="sort">Sort</label>
-          <select id="sort">
-            <option value="newest">Newest</option>
-            <option value="az">A → Z</option>
-            <option value="priceAsc">Price: Low → High</option>
-            <option value="priceDesc">Price: High → Low</option>
-          </select>
-        </div>
+      <div class="field">
+        <label for="cat">Category</label>
+        <select id="cat"><option value="">All</option></select>
+      </div>
 
-        <button class="btn secondary" id="btnClear" type="button">Clear</button>
-        <button class="btn secondary" id="btnReload" type="button">Reload</button>
+      <div class="field">
+        <label for="mfg">Manufacturer</label>
+        <select id="mfg"><option value="">All</option></select>
+      </div>
+
+      <div class="field">
+        <label for="sort">Sort</label>
+        <select id="sort">
+          <option value="newest">Newest</option>
+          <option value="az">A → Z</option>
+          <option value="priceAsc">Price: Low → High</option>
+          <option value="priceDesc">Price: High → Low</option>
+        </select>
+      </div>
+
+      <div class="btns">
+        <button class="secondary" id="btnClear" type="button">Clear</button>
+        <button class="secondary" id="btnReload" type="button">Reload</button>
       </div>
     </div>
-  </div>
-</header>
 
-<main>
-  <div class="status" id="status">
-    <div><b>Status:</b> Loading items…</div>
-    <div class="right">
-      <span id="count">0 items</span>
-      <span class="tiny" id="lastReq"></span>
+    <div class="status" id="status">
+      <div><b>Status:</b> Loading items…</div>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+        <span id="count" class="tiny">0 items</span>
+        <span class="tiny">Backend: <code class="k" id="sig">not connected</code></span>
+        <span class="tiny" id="lastReq"></span>
+      </div>
     </div>
+
+    <div class="grid" id="grid"></div>
   </div>
-
-  <div class="grid" id="grid"></div>
-</main>
-
-<div class="foot">
-  Tip: Set an item’s <b>Availability</b> to <b>Listed</b> in the admin panel and it will show up here after Reload.
-</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ PASTE YOUR CURRENT DEPLOYED /exec URL HERE:
+  // ✅ Paste your CURRENT deployed Apps Script web app URL (must end with /exec)
   const API_URL = "https://script.google.com/macros/s/AKfycbwrvaYOGKqFNJTqfHFKSrb5FrdqELjXZiI1HoeQG8n7Yomvtej7C-l8jtIKKpke7bji_g/exec";
 
   const el = (id) => document.getElementById(id);
@@ -410,7 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setCount(filtered.length);
 
     if (!filtered.length){
-      ui.grid.innerHTML = `<div style="grid-column:1/-1;color:rgba(243,246,255,.70);font-size:12px;padding:14px 6px">No matches. Try clearing filters.</div>`;
+      ui.grid.innerHTML = `<div style="grid-column:1/-1;color:#64748b;font-size:12px;padding:10px 2px">No matches. Try clearing filters.</div>`;
       setStatus("No matches.");
       return;
     }
@@ -462,7 +854,7 @@ document.addEventListener("DOMContentLoaded", () => {
         wrap.innerHTML = paypalBtn;
         slot.appendChild(wrap);
       }
-      // If PayPal Button is not HTML, show preset badge (in case you want to diagnose)
+      // If PayPal Button is not HTML, show preset badge (helps you spot keys that didn't expand)
       else if (paypalBtn && !isHtmlSnippet(paypalBtn)) {
         const a = document.createElement("a");
         a.className = "btnlink secondary";
@@ -509,18 +901,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await jsonp({ action: "storeItems" });
       if (!res?.ok) throw new Error("storeItems failed: " + (res?.error || "unknown"));
 
-      const items = Array.isArray(res.items) ? res.items : [];
+      // Backend already filters Availability=Listed, but fail-safe anyway
+      let items = Array.isArray(res.items) ? res.items : [];
+      items = items.filter(it => String(it["Availability"] ?? "").trim().toLowerCase() === "listed" || !("Availability" in it));
       window.__STORE_ITEMS__ = items;
 
       buildFilters(items);
       render(items);
     }catch(err){
       setStatus("Store error: " + err.message);
-      ui.grid.innerHTML = `<div style="grid-column:1/-1;color:rgba(255,107,122,.95);font-size:12px;padding:14px 6px">
+      ui.grid.innerHTML = `<div class="errorBox">
         <b>Load failed:</b> ${escapeHtml(err.message)}<br/>
-        <div style="margin-top:8px;opacity:.85">
-          Try opening your API URL in a new tab with:
-          <code>?action=ping</code> and <code>?action=storeItems</code>
+        <div style="margin-top:8px;opacity:.9">
+          Try opening your API URL with <code>?action=ping</code> and <code>?action=storeItems</code>.
         </div>
       </div>`;
       setCount(0);
