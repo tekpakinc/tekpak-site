@@ -1,5 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Tek-Pak Surplus Store</title>
+  <style>
+    :root{
+      --bg:#070b16;
+      --card:#0f1730;
+      --line:rgba(255,255,255,.10);
+      --text:#f3f6ff;
+      --muted:rgba(243,246,255,.70);
+      --accent:#7cf7a6;
+      --accent2:#7aa7ff;
+      --shadow:0 18px 60px rgba(0,0,0,.50);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 520px at 20% -10%, rgba(122,167,255,.22), transparent 60%),
+        radial-gradient(900px 460px at 90% 8%, rgba(124,247,166,.18), transparent 58%),
+        radial-gradient(700px 420px at 30% 110%, rgba(124,247,166,.10), transparent 60%),
+        var(--bg);
+      color:var(--text);
+    }
+
+    header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(to bottom, rgba(7,11,22,.92), rgba(7,11,22,.65));
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:14px 16px;}
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:14px;
+      flex-wrap:wrap;
+    }
+    .brand{display:flex; gap:12px; align-items:center; min-width:240px}
+    .logoBox{
+      width:46px; height:46px; border-radius:16px;
+      background: radial-gradient(circle at 30% 30%, rgba(124,247,166,.9), rgba(122,167,255,.85));
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      display:grid; place-items:center;
+      overflow:hidden;
+    }
+    .logoBox img{width:100%;height:100%;object-fit:cover}
+    h1{font-size:18px;margin:0;letter-spacing:.2px}
+    .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .tiny{font-size:11px;color:rgba(243,246,255,.55);margin-top:6px}
+    code.k{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11px; color:rgba(243,246,255,.78)}
+
+    .bar{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      width:100%;
+    }
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:11px;color:var(--muted)}
+    input, select{
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(6,10,22,.55);
+      color: var(--text);
+      outline:none;
+      min-width: 190px;
+    }
+    input{min-width: 240px}
+    input::placeholder{color:rgba(243,246,255,.45)}
+    input:focus, select:focus{
+      border-color: rgba(124,247,166,.55);
+      box-shadow: 0 0 0 3px rgba(124,247,166,.15);
+    }
+    .btn{
+      border:0;
+      border-radius: 14px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      color:#061016;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      white-space:nowrap;
+    }
+    .btn.secondary{
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+
+    main{max-width:1200px;margin:0 auto;padding:16px;}
+    .status{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      color: var(--muted);
+      font-size:12px;
+    }
+    .status b{color:var(--text)}
+    .status .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:12px;
+    }
+    @media (max-width:1100px){ .grid{grid-template-columns:repeat(3, minmax(0,1fr));} }
+    @media (max-width:820px){ .grid{grid-template-columns:repeat(2, minmax(0,1fr));} }
+    @media (max-width:520px){ .grid{grid-template-columns:1fr;} input{min-width:unset;width:100%} select{min-width:unset;width:100%} }
+
+    .card{
+      background: linear-gradient(180deg, rgba(18,26,51,.92), rgba(15,23,48,.92));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 340px;
+    }
+    .img{
+      aspect-ratio: 4/3;
+      background: rgba(6,10,22,.45);
+      border-bottom:1px solid var(--line);
+      display:grid; place-items:center;
+      overflow:hidden;
+    }
+    .img img{width:100%;height:100%;object-fit:cover}
+    .ph{font-size:12px;color:rgba(243,246,255,.55)}
+    .bd{
+      padding:12px 12px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      flex:1;
+    }
+    .title{font-weight:950;font-size:13px;line-height:1.15}
+    .meta{font-size:12px;color:var(--muted);line-height:1.25}
+    .priceRow{
+      margin-top:auto;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding-top:10px;
+      border-top:1px solid rgba(255,255,255,.10);
+    }
+    .price{font-weight:1000}
+    .buySlot{display:flex;gap:8px;align-items:center}
+    a.btnlink{
+      display:inline-flex; align-items:center; justify-content:center;
+      text-decoration:none;
+      border-radius: 14px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      color:#061016;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      white-space:nowrap;
+    }
+    a.btnlink.secondary{
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .foot{
+      max-width:1200px;margin:0 auto;padding:0 16px 22px;
+      color:rgba(243,246,255,.55);
+      font-size:11px;
+      line-height:1.35;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="logoBox" title="Tek-Pak">
+          <!-- If you have a logo file in the same folder, rename to tekpaklogo.png -->
+          <img src="tekpaklogo.png" alt="Tek-Pak" onerror="this.remove(); this.parentElement.textContent='TP'; this.parentElement.style.color='rgba(243,246,255,.9)'; this.parentElement.style.fontWeight='1000';">
+        </div>
+        <div>
+          <h1>Tek-Pak Surplus Store</h1>
+          <div class="sub">Live inventory • Filter & search • Only “Listed” items show</div>
+          <div class="tiny">Backend: <code class="k" id="sig">not connected</code></div>
+        </div>
+      </div>
+
+      <div class="bar">
+        <div class="field">
+          <label for="q">Search</label>
+          <input id="q" placeholder="Model, manufacturer, category, item ID…" />
+        </div>
+        <div class="field">
+          <label for="cat">Category</label>
+          <select id="cat"><option value="">All</option></select>
+        </div>
+        <div class="field">
+          <label for="mfg">Manufacturer</label>
+          <select id="mfg"><option value="">All</option></select>
+        </div>
+        <div class="field">
+          <label for="sort">Sort</label>
+          <select id="sort">
+            <option value="newest">Newest</option>
+            <option value="az">A → Z</option>
+            <option value="priceAsc">Price: Low → High</option>
+            <option value="priceDesc">Price: High → Low</option>
+          </select>
+        </div>
+
+        <button class="btn secondary" id="btnClear" type="button">Clear</button>
+        <button class="btn secondary" id="btnReload" type="button">Reload</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="status" id="status">
+    <div><b>Status:</b> Loading items…</div>
+    <div class="right">
+      <span id="count">0 items</span>
+      <span class="tiny" id="lastReq"></span>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="foot">
+  Tip: If you update an item to Availability = <b>Listed</b> in the admin panel, it will show up here after Reload (or after cache bust).
+</div>
+
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbwLO1T1DAxzQ78qzMGnCcgypwZNUYTgrKw-mWduc88ZvczyxD1pAyYuBS17iR2KsG-duA/exec"; // must end with /exec
+document.addEventListener("DOMContentLoaded", () => {
+  // IMPORTANT: use your CURRENT deployed Apps Script web app URL (must end with /exec)
+  const API_URL = "https://script.google.com/macros/s/AKfycbwLO1T1DAxzQ78qzMGnCcgypwZNUYTgrKw-mWduc88ZvczyxD1pAyYuBS17iR2KsG-duA/exec";
 
   const el = (id) => document.getElementById(id);
   const ui = {
@@ -10,9 +250,14 @@
     cat: el("cat"),
     mfg: el("mfg"),
     sort: el("sort"),
+    count: el("count"),
+    lastReq: el("lastReq"),
+    btnClear: el("btnClear"),
+    btnReload: el("btnReload"),
   };
 
-  function setStatus(msg){ ui.status.textContent = msg; }
+  function setStatus(msg){ ui.status.querySelector("div").innerHTML = "<b>Status:</b> " + escapeHtml(msg); }
+  function setCount(n){ ui.count.textContent = `${n} item${n===1?"":"s"}`; }
 
   function jsonp(params={}) {
     return new Promise((resolve, reject) => {
@@ -23,8 +268,7 @@
       const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
       const fullUrl = API_URL.trim() + (API_URL.includes("?") ? "&" : "?") + q;
 
-      // Helpful diagnostics
-      ui.sig.textContent = "Backend request: " + fullUrl;
+      ui.lastReq.textContent = "req: " + fullUrl;
 
       const timeout = setTimeout(() => {
         cleanup();
@@ -119,7 +363,7 @@
     if (mode === "priceAsc"){
       copy.sort((a,b)=> (priceNumber(a["Price"])||Infinity) - (priceNumber(b["Price"])||Infinity));
     } else if (mode === "priceDesc"){
-      copy.sort((a,b)=> (priceNumber(b["Price"])||-Infinity) - (priceNumber(a["Price"])||-Infinity));
+      copy.sort((a,b)=> (priceNumber(b["Price"])||-Infinity) - (priceNumber(a["Price"])||Infinity));
     } else if (mode === "az"){
       copy.sort((a,b)=> {
         const ta = `${a["Manufacturer"]||""} ${a["Model"]||""}`.trim();
@@ -127,6 +371,7 @@
         return ta.localeCompare(tb);
       });
     } else {
+      // newest-ish by Item ID string (your IDs include a timestamp)
       copy.sort((a,b)=> String(b["Item ID"]||"").localeCompare(String(a["Item ID"]||"")));
     }
     return copy;
@@ -136,9 +381,11 @@
     ui.grid.innerHTML = "";
     const filtered = sortItems(items.filter(matches));
 
+    setCount(filtered.length);
+
     if (!filtered.length){
-      ui.grid.innerHTML = `<div style="grid-column:1/-1;color:rgba(243,246,255,.7);font-size:12px">No matches.</div>`;
-      setStatus("No matches. Try clearing filters.");
+      ui.grid.innerHTML = `<div style="grid-column:1/-1;color:rgba(243,246,255,.70);font-size:12px;padding:14px 6px">No matches. Try clearing filters.</div>`;
+      setStatus("No matches.");
       return;
     }
 
@@ -169,7 +416,7 @@
             <div class="title">${escapeHtml(title)}</div>
             <div class="meta">${escapeHtml([cat, cond, loc].filter(Boolean).join(" • "))}</div>
             ${desc ? `<div class="meta" style="margin-top:8px">${escapeHtml(desc).slice(0,240)}${desc.length>240?"…":""}</div>` : ""}
-            <div class="meta" style="margin-top:8px;opacity:.8">Item ID: ${escapeHtml(id)}</div>
+            <div class="meta" style="margin-top:8px;opacity:.85">Item ID: ${escapeHtml(id)}</div>
           </div>
           <div class="priceRow">
             <div class="price">${priceRaw ? "$" + escapeHtml(priceRaw) : "—"}</div>
@@ -180,10 +427,11 @@
 
       const slot = card.querySelector(".buySlot");
       if (buy.includes("<") && buy.includes(">")){
+        // If you store a PayPal button HTML snippet in the sheet, it will render here
         slot.innerHTML = buy;
       } else if (buy){
         const a = document.createElement("a");
-        a.className = "btn";
+        a.className = "btnlink";
         a.href = buy;
         a.target = "_blank";
         a.rel = "noopener";
@@ -191,7 +439,7 @@
         slot.appendChild(a);
       } else {
         const a = document.createElement("a");
-        a.className = "btn secondary";
+        a.className = "btnlink secondary";
         a.href = "#";
         a.onclick = (e)=>{ e.preventDefault(); alert("No Buy Link set for this item yet."); };
         a.textContent = "Unavailable";
@@ -207,24 +455,44 @@
     try{
       const ping = await jsonp({ action: "ping" });
       if (!ping?.ok) throw new Error("Ping failed: " + (ping?.error || "unknown"));
-      // show a short signature after we know it works
-      ui.sig.textContent = `Backend: ${ping.system || "Toro"} • ${ping.version || ""}`;
+      ui.sig.textContent = `${ping.system || "Toro"} • ${ping.version || ""}`.trim();
 
       const res = await jsonp({ action: "storeItems" });
       if (!res?.ok) throw new Error("storeItems failed: " + (res?.error || "unknown"));
 
-      const items = Array.isArray(res.items) ? res.items : [];
+      let items = Array.isArray(res.items) ? res.items : [];
+
+      // Your backend should already filter to Availability=Listed.
+      // But we also fail-safe here in case anything changes later.
+      items = items.filter(it => {
+        const a = String(it["Availability"] ?? "").trim().toLowerCase();
+        return !a || a === "listed";
+      });
+
       window.__STORE_ITEMS__ = items;
 
       buildFilters(items);
       render(items);
     }catch(err){
       setStatus("Store error: " + err.message);
-      ui.grid.innerHTML = `<div style="grid-column:1/-1;color:rgba(255,107,122,.95);font-size:12px">
+      ui.grid.innerHTML = `<div style="grid-column:1/-1;color:rgba(255,107,122,.95);font-size:12px;padding:14px 6px">
         <b>Load failed:</b> ${escapeHtml(err.message)}<br/>
-        <div style="margin-top:6px;opacity:.8">Open your API URL in a new tab with <code>?action=ping</code> and <code>?action=storeItems</code> to confirm public access.</div>
+        <div style="margin-top:8px;opacity:.85">
+          Try opening your API URL in a new tab with:
+          <code>?action=ping</code> and <code>?action=storeItems</code>
+        </div>
       </div>`;
+      setCount(0);
+      ui.sig.textContent = "NOT CONNECTED";
     }
+  }
+
+  function clearFilters(){
+    ui.q.value = "";
+    ui.cat.value = "";
+    ui.mfg.value = "";
+    ui.sort.value = "newest";
+    render(window.__STORE_ITEMS__ || []);
   }
 
   ui.q.addEventListener("input", ()=> render(window.__STORE_ITEMS__ || []));
@@ -232,5 +500,11 @@
   ui.mfg.addEventListener("change", ()=> render(window.__STORE_ITEMS__ || []));
   ui.sort.addEventListener("change", ()=> render(window.__STORE_ITEMS__ || []));
 
+  ui.btnClear.addEventListener("click", clearFilters);
+  ui.btnReload.addEventListener("click", load);
+
   load();
+});
 </script>
+</body>
+</html>
