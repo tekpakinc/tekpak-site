@@ -127,6 +127,7 @@
       border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.20);
       color: var(--muted);
+      word-break:break-word;
     }
     .status.good{border-color: rgba(124,247,166,.35); color: rgba(124,247,166,.95)}
     .status.bad{border-color: rgba(255,107,122,.35); color: rgba(255,107,122,.95)}
@@ -153,9 +154,23 @@
       color: rgba(124,247,166,.95);
       border:1px solid rgba(124,247,166,.25);
     }
+
+    /* Optional: a safe "View Cart" link style (NO PayPal SDK here) */
+    .cartlink{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      text-decoration:none;
+      font-weight:900;
+    }
+    .cartlink:hover{background: rgba(255,255,255,.10)}
+    .cartwrap{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
   </style>
 </head>
-  
+
 <body>
 <header>
   <div class="wrap">
@@ -169,10 +184,20 @@
         </div>
       </div>
 
-      <div class="btns">
-        <button class="secondary" id="btnReloadDropdowns" type="button">Reload Dropdowns</button>
-        <button class="secondary" id="btnRefreshList" type="button">Refresh List</button>
+      <div class="cartwrap">
+        <!-- IMPORTANT:
+          Admin should NOT run PayPal SDK/snippets.
+          If you want a "View Cart" button here, use a simple link to your store/cart page instead.
+          Replace href with your store cart URL if you have one.
+        -->
+        <!-- <a class="cartlink" href="https://www.tekpakinc.store/cart" target="_blank" rel="noopener">🛒 View Cart</a> -->
+
+        <div class="btns">
+          <button class="secondary" id="btnReloadDropdowns" type="button">Reload Dropdowns</button>
+          <button class="secondary" id="btnRefreshList" type="button">Refresh List</button>
+        </div>
       </div>
+
     </div>
   </div>
 </header>
@@ -390,29 +415,314 @@
 </div>
 
 <script>
-  // IMPORTANT: your CURRENT deployed Web App URL (ends with /exec)
-  const API_URL = "https://script.google.com/macros/s/AKfycbzZhiK0valhSBRVeYXqYg7Hvm-AhZ9yoR-x74puEZ2MbbcxWf1o1V37H4C1qroTpBzZSQ/exec";
+/* ============================================================================
+  TORO v1 Admin (Repaired / Hardened)
+  - Prevents one bad snippet (like PayPal SDK) from breaking init
+  - Stronger JSONP cleanup + better error messages
+  - Safe DOM init after load
+  - Guards all event hookups
+  - Keeps uploader ID synced
+============================================================================ */
 
-  const INVENTORY_HEADERS = [
-    "Item ID","Availability",
-    "Category","Manufacturer","Model","Color","Screen Size","CPU","Storage","Features","GPU",
-    "Series","Memory","Connectivity","Condition",
-    "Image 1","Image 2","Image 3","Image 4","Image 5","Image 6",
-    "Operating System","Warranty","Description","Notes",
-    "Price","Buy Link","PayPal Button",
-    "Shipping","LengthIn","WidthIn","HeightIn","Weight","Location"
-  ];
+/** IMPORTANT: your CURRENT deployed Web App URL (must end with /exec) */
+const API_URL = "https://script.google.com/macros/s/AKfycbzZhiK0valhSBRVeYXqYg7Hvm-AhZ9yoR-x74puEZ2MbbcxWf1o1V37H4C1qroTpBzZSQ/exec";
 
-  const DROPDOWN_HEADERS = [
-    "Availability",
-    "Category","Manufacturer","Color","Screen Size","CPU","Storage","GPU","Memory","Condition",
-    "Operating System","Warranty","Shipping","Location",
-    "PayPal Button"
-  ];
+/** Optional debug: set to true to log JSONP URLs */
+const DEBUG = false;
 
-  const el = (id) => document.getElementById(id);
+const INVENTORY_HEADERS = [
+  "Item ID","Availability",
+  "Category","Manufacturer","Model","Color","Screen Size","CPU","Storage","Features","GPU",
+  "Series","Memory","Connectivity","Condition",
+  "Image 1","Image 2","Image 3","Image 4","Image 5","Image 6",
+  "Operating System","Warranty","Description","Notes",
+  "Price","Buy Link","PayPal Button",
+  "Shipping","LengthIn","WidthIn","HeightIn","Weight","Location"
+];
 
-  const ui = {
+const DROPDOWN_HEADERS = [
+  "Availability",
+  "Category","Manufacturer","Color","Screen Size","CPU","Storage","GPU","Memory","Condition",
+  "Operating System","Warranty","Shipping","Location",
+  "PayPal Button"
+];
+
+const el = (id) => document.getElementById(id);
+const safe = (fn) => { try { return fn(); } catch(e){ console.error(e); } };
+const dbg = (...a) => { if (DEBUG) console.log("[TORO]", ...a); };
+
+function jsonp(params = {}) {
+  return new Promise((resolve, reject) => {
+    const cb = "ToroCB_" + Math.random().toString(36).slice(2);
+    const script = document.createElement("script");
+    const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
+
+    const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
+    script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
+    dbg("JSONP:", script.src);
+
+    let done = false;
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error("JSONP timeout. Backend didn’t respond. (Most often: wrong /exec URL or permissions)."));
+    }, 18000);
+
+    function cleanup() {
+      if (done) return;
+      done = true;
+      clearTimeout(timeout);
+      script.remove();
+      try { delete window[cb]; } catch(_) { window[cb] = undefined; }
+    }
+
+    window[cb] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("JSONP load error. Could not load Apps Script endpoint (wrong URL / not deployed / blocked)."));
+    };
+
+    document.body.appendChild(script);
+  });
+}
+
+function escapeHtml(s){
+  return String(s ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function fillSelect(id, options) {
+  const s = el(id);
+  if (!s) return;
+  const current = s.value;
+  const opts = Array.isArray(options) ? options.slice() : [];
+  s.innerHTML = "";
+
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = "—";
+  s.appendChild(empty);
+
+  opts.forEach(v => {
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = v;
+    s.appendChild(o);
+  });
+
+  if ([...s.options].some(o => o.value === current)) s.value = current;
+}
+
+function generateItemId() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const stamp =
+    d.getFullYear() +
+    pad(d.getMonth()+1) +
+    pad(d.getDate()) + "-" +
+    pad(d.getHours()) +
+    pad(d.getMinutes()) +
+    pad(d.getSeconds());
+  const rand = Math.random().toString(36).slice(2,6).toUpperCase();
+  return `TORO-${stamp}-${rand}`;
+}
+
+/* UI references (built on init after DOM ready) */
+let ui = null;
+let UPLOADER_URL = "";
+
+function setBusy(isBusy){
+  if (!ui) return;
+  const btns = [ui.btnReloadDropdowns, ui.btnRefreshList, ui.btnSave, ui.btnNew, ui.btnUploadImages];
+  btns.forEach(b => { if (b) b.disabled = !!isBusy; });
+  if (ui.q) ui.q.disabled = !!isBusy;
+}
+
+function setStatus(msg, kind="") {
+  if (!ui || !ui.status) return;
+  ui.status.className = "status" + (kind ? (" " + kind) : "");
+  ui.status.textContent = msg;
+}
+
+function setListStatus(msg, kind="") {
+  if (!ui || !ui.listStatus) return;
+  ui.listStatus.className = "status" + (kind ? (" " + kind) : "");
+  ui.listStatus.textContent = msg;
+}
+
+function setBackendSig(text){
+  if (!ui || !ui.backendSig) return;
+  ui.backendSig.textContent = text || "unknown";
+}
+
+/* Keep uploader Item ID synced */
+function syncUploaderItemId(){
+  safe(() => {
+    if (!ui) return;
+    const id = (ui.itemId.value || "").trim();
+    if (!id) return;
+    if (!ui.uploaderFrame || !ui.uploaderFrame.contentWindow) return;
+    ui.uploaderFrame.contentWindow.postMessage({ type:"TP_SET_ITEM_ID", itemId: id }, "*");
+  });
+}
+
+function clearForm() {
+  INVENTORY_HEADERS.forEach(h => {
+    const node = el(h);
+    if (node) node.value = "";
+  });
+  if (el("Availability")) el("Availability").value = "Unlisted";
+  syncUploaderItemId();
+}
+
+function collectPayload() {
+  const payload = {};
+  INVENTORY_HEADERS.forEach(h => {
+    const node = el(h);
+    if (node) payload[h] = node.value;
+  });
+
+  if (!String(payload["Availability"] || "").trim()) payload["Availability"] = "Unlisted";
+
+  if (!String(payload["Item ID"] || "").trim()) {
+    payload["Item ID"] = generateItemId();
+    if (ui && ui.itemId) ui.itemId.value = payload["Item ID"];
+    syncUploaderItemId();
+  }
+  return payload;
+}
+
+async function pingBackend(){
+  const res = await jsonp({ action: "ping" });
+  if (!res || !res.ok) throw new Error(res?.error || "Ping failed");
+  const sig = `${res.system || "Unknown"} • ${res.version || "no-version"} • ${res.ts || ""}`.trim();
+  setBackendSig(sig);
+  return res;
+}
+
+async function reloadDropdowns() {
+  setStatus("Loading dropdowns…");
+  const res = await jsonp({ action: "getDropdowns" });
+  if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
+  const dd = res.dropdowns || {};
+  DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
+
+  // Fallback if Availability list empty
+  if (el("Availability") && el("Availability").options.length <= 1) {
+    fillSelect("Availability", ["Listed","Unlisted","Pending","Hold"]);
+  }
+
+  setStatus("Dropdowns loaded.", "good");
+  return true;
+}
+
+function renderList(items) {
+  if (!ui) return;
+  ui.list.innerHTML = "";
+  const q = (ui.q.value || "").trim().toLowerCase();
+
+  const filtered = (items || []).filter(it => {
+    if (!q) return true;
+    const hay = [
+      it["Item ID"], it["Manufacturer"], it["Model"], it["Category"], it["Condition"], it["Location"]
+    ].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (!filtered.length) {
+    ui.list.innerHTML = `<div class="note">No matches.</div>`;
+    return;
+  }
+
+  filtered.forEach(it => {
+    const id = (it["Item ID"] || "").toString();
+    const title = `${it["Manufacturer"] || ""} ${it["Model"] || ""}`.trim() || "(No Model)";
+    const sub = `${it["Category"] || ""} • ${it["Condition"] || ""} • ${it["Location"] || ""}`.trim();
+    const price = (it["Price"] || "").toString().trim();
+
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <div style="min-width:0">
+        <div class="a">${escapeHtml(id)}</div>
+        <div class="b">${escapeHtml(title)}</div>
+        <div class="c">${escapeHtml(sub)}${price ? " • $" + escapeHtml(price) : ""}</div>
+      </div>
+      <div><button type="button" data-load="${escapeHtml(id)}">Load</button></div>
+    `;
+    ui.list.appendChild(div);
+  });
+
+  ui.list.querySelectorAll("button[data-load]").forEach(btn => {
+    btn.addEventListener("click", () => loadItem(btn.getAttribute("data-load")));
+  });
+}
+
+async function refreshList() {
+  setListStatus("Loading list…");
+  const res = await jsonp({ action: "listItems" });
+  if (!res.ok) throw new Error(res.error || "Failed to load list");
+  window.__TORO_ITEMS__ = res.items || [];
+  renderList(window.__TORO_ITEMS__);
+  setListStatus(`Loaded ${window.__TORO_ITEMS__.length} items.`, "good");
+  return true;
+}
+
+async function loadItem(itemId) {
+  setStatus("Loading item " + itemId + "…");
+  try {
+    const res = await jsonp({ action: "getItem", itemId });
+    if (!res.ok) throw new Error(res.error || "Failed to load item");
+    const item = res.item || {};
+    INVENTORY_HEADERS.forEach(h => {
+      const node = el(h);
+      if (node) node.value = (item[h] !== undefined && item[h] !== null) ? String(item[h]) : "";
+    });
+    setStatus("Item loaded. Edit fields then Save to update.", "good");
+    syncUploaderItemId();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (err) {
+    setStatus("Load error: " + err.message, "bad");
+  }
+}
+
+async function saveItem() {
+  setStatus("Saving…");
+  setBusy(true);
+  try {
+    const payload = collectPayload();
+    const res = await jsonp({ action: "upsertItem", payload: JSON.stringify(payload) });
+    if (!res.ok) throw new Error(res.error || "Save failed");
+    setStatus(`Saved! (${res.mode}) • Row ${res.row} • Item ID ${res.itemId}`, "good");
+    await refreshList();
+    syncUploaderItemId();
+  } catch (err) {
+    setStatus("Save error: " + err.message, "bad");
+  } finally {
+    setBusy(false);
+  }
+}
+
+/* Global error guards so one “bad snippet” doesn’t kill the whole app */
+window.addEventListener("error", (e) => {
+  console.error("[TORO] JS error:", e.message, e.filename, e.lineno);
+  safe(() => setStatus("JS error: " + e.message, "bad"));
+});
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("[TORO] Promise error:", e.reason);
+  safe(() => setStatus("Promise error: " + (e.reason?.message || e.reason), "bad"));
+});
+
+/* DOM Init */
+function buildUIRefs(){
+  ui = {
     status: el("status"),
     q: el("q"),
     list: el("list"),
@@ -428,264 +738,52 @@
     itemId: el("Item ID"),
   };
 
-  const UPLOADER_URL = API_URL + (API_URL.includes("?") ? "&" : "?") + "view=uploader";
+  UPLOADER_URL = API_URL + (API_URL.includes("?") ? "&" : "?") + "view=uploader";
+}
 
-  function setBusy(isBusy){
-    const btns = [ui.btnReloadDropdowns, ui.btnRefreshList, ui.btnSave, ui.btnNew, ui.btnUploadImages];
-    btns.forEach(b => { if (b) b.disabled = !!isBusy; });
-    if (ui.q) ui.q.disabled = !!isBusy;
-  }
+function wireEvents(){
+  if (!ui) return;
 
-  function setStatus(msg, kind="") {
-    ui.status.className = "status" + (kind ? (" " + kind) : "");
-    ui.status.textContent = msg;
-  }
-
-  function setListStatus(msg, kind="") {
-    ui.listStatus.className = "status" + (kind ? (" " + kind) : "");
-    ui.listStatus.textContent = msg;
-  }
-
-  function setBackendSig(text){
-    ui.backendSig.textContent = text || "unknown";
-  }
-
-  // ✅ This is the magic: always keep uploader Item ID synced
-  function syncUploaderItemId(){
-    try{
-      const id = (ui.itemId.value || "").trim();
-      if (!id) return;
-      if (!ui.uploaderFrame) return;
-      if (!ui.uploaderFrame.contentWindow) return;
-      ui.uploaderFrame.contentWindow.postMessage({ type:"TP_SET_ITEM_ID", itemId: id }, "*");
-    }catch(e){}
-  }
-
-  function jsonp(params={}) {
-    return new Promise((resolve, reject) => {
-      const cb = "ToroCB_" + Math.random().toString(36).slice(2);
-      const script = document.createElement("script");
-      const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
-      const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
-      script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
-
-      const timeout = setTimeout(() => {
-        cleanup();
-        reject(new Error("JSONP timeout (15s). Check deployment + URL."));
-      }, 15000);
-
-      function cleanup() {
-        clearTimeout(timeout);
-        script.remove();
-        try { delete window[cb]; } catch(e) { window[cb] = undefined; }
-      }
-
-      window[cb] = (data) => { cleanup(); resolve(data); };
-      script.onerror = () => { cleanup(); reject(new Error("JSONP load error (wrong URL / not deployed / permissions)")); };
-
-      document.body.appendChild(script);
-    });
-  }
-
-  function fillSelect(id, options) {
-    const s = el(id);
-    if (!s) return;
-    const current = s.value;
-    const opts = Array.isArray(options) ? options.slice() : [];
-    s.innerHTML = "";
-    const empty = document.createElement("option");
-    empty.value = "";
-    empty.textContent = "—";
-    s.appendChild(empty);
-    opts.forEach(v => {
-      const o = document.createElement("option");
-      o.value = v;
-      o.textContent = v;
-      s.appendChild(o);
-    });
-    if ([...s.options].some(o => o.value === current)) s.value = current;
-  }
-
-  function clearForm() {
-    INVENTORY_HEADERS.forEach(h => {
-      const node = el(h);
-      if (node) node.value = "";
-    });
-    if (el("Availability")) el("Availability").value = "Unlisted";
-    syncUploaderItemId();
-  }
-
-  function generateItemId() {
-    const d = new Date();
-    const pad = (n) => String(n).padStart(2, "0");
-    const stamp =
-      d.getFullYear() +
-      pad(d.getMonth()+1) +
-      pad(d.getDate()) + "-" +
-      pad(d.getHours()) +
-      pad(d.getMinutes()) +
-      pad(d.getSeconds());
-    const rand = Math.random().toString(36).slice(2,6).toUpperCase();
-    return `TORO-${stamp}-${rand}`;
-  }
-
-  function collectPayload() {
-    const payload = {};
-    INVENTORY_HEADERS.forEach(h => {
-      const node = el(h);
-      if (node) payload[h] = node.value;
-    });
-
-    if (!String(payload["Availability"] || "").trim()) payload["Availability"] = "Unlisted";
-
-    if (!String(payload["Item ID"] || "").trim()) {
-      payload["Item ID"] = generateItemId();
-      ui.itemId.value = payload["Item ID"];
-      // ✅ sync immediately after generating
-      syncUploaderItemId();
-    }
-    return payload;
-  }
-
-  async function pingBackend(){
-    try{
-      const res = await jsonp({ action: "ping" });
-      if (!res || !res.ok) throw new Error(res?.error || "Ping failed");
-      const sig = `${res.system || "Unknown"} • ${res.version || "no-version"} • ${res.ts || ""}`.trim();
-      setBackendSig(sig);
-      return res;
-    } catch(err){
-      setBackendSig("NOT CONNECTED");
-      setStatus("Backend ping failed: " + err.message, "bad");
-      throw err;
-    }
-  }
-
-  async function reloadDropdowns() {
-    setStatus("Loading dropdowns…");
-    const res = await jsonp({ action: "getDropdowns" });
-    if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
-    const dd = res.dropdowns || {};
-    DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
-    if (el("Availability") && el("Availability").options.length <= 1) {
-      fillSelect("Availability", ["Listed","Unlisted","Pending","Hold"]);
-    }
-    setStatus("Dropdowns loaded.", "good");
-    return true;
-  }
-
-  function escapeHtml(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  function renderList(items) {
-    ui.list.innerHTML = "";
-    const q = ui.q.value.trim().toLowerCase();
-    const filtered = (items || []).filter(it => {
-      if (!q) return true;
-      const hay = [it["Item ID"], it["Manufacturer"], it["Model"], it["Category"], it["Condition"], it["Location"]]
-        .join(" ").toLowerCase();
-      return hay.includes(q);
-    });
-
-    if (!filtered.length) {
-      ui.list.innerHTML = `<div class="note">No matches.</div>`;
-      return;
-    }
-
-    filtered.forEach(it => {
-      const id = (it["Item ID"] || "").toString();
-      const title = `${it["Manufacturer"] || ""} ${it["Model"] || ""}`.trim() || "(No Model)";
-      const sub = `${it["Category"] || ""} • ${it["Condition"] || ""} • ${it["Location"] || ""}`.trim();
-      const price = (it["Price"] || "").toString().trim();
-
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `
-        <div style="min-width:0">
-          <div class="a">${escapeHtml(id)}</div>
-          <div class="b">${escapeHtml(title)}</div>
-          <div class="c">${escapeHtml(sub)}${price ? " • $" + escapeHtml(price) : ""}</div>
-        </div>
-        <div><button type="button" data-load="${escapeHtml(id)}">Load</button></div>
-      `;
-      ui.list.appendChild(div);
-    });
-
-    ui.list.querySelectorAll("button[data-load]").forEach(btn => {
-      btn.addEventListener("click", () => loadItem(btn.getAttribute("data-load")));
-    });
-  }
-
-  async function refreshList() {
-    setListStatus("Loading list…");
-    const res = await jsonp({ action: "listItems" });
-    if (!res.ok) throw new Error(res.error || "Failed to load list");
-    window.__TORO_ITEMS__ = res.items || [];
-    renderList(window.__TORO_ITEMS__);
-    setListStatus(`Loaded ${window.__TORO_ITEMS__.length} items.`, "good");
-    return true;
-  }
-
-  async function loadItem(itemId) {
-    setStatus("Loading item " + itemId + "…");
-    try {
-      const res = await jsonp({ action: "getItem", itemId });
-      if (!res.ok) throw new Error(res.error || "Failed to load item");
-      const item = res.item || {};
-      INVENTORY_HEADERS.forEach(h => {
-        const node = el(h);
-        if (node) node.value = (item[h] !== undefined && item[h] !== null) ? String(item[h]) : "";
-      });
-      setStatus("Item loaded. Edit fields then Save to update.", "good");
-      // ✅ sync after loading any item
-      syncUploaderItemId();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      setStatus("Load error: " + err.message, "bad");
-    }
-  }
-
-  async function saveItem() {
-    setStatus("Saving…");
+  // Buttons
+  ui.btnReloadDropdowns?.addEventListener("click", async () => {
     setBusy(true);
-    try {
-      const payload = collectPayload();
-      const res = await jsonp({ action: "upsertItem", payload: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(res.error || "Save failed");
-      setStatus(`Saved! (${res.mode}) • Row ${res.row} • Item ID ${res.itemId}`, "good");
-      await refreshList();
-      // ✅ keep uploader synced with whatever ID ended up saved
-      syncUploaderItemId();
-    } catch (err) {
-      setStatus("Save error: " + err.message, "bad");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  // ✅ Upload panel toggle
-  ui.btnUploadImages.addEventListener("click", () => {
-    ui.uploaderWrap.style.display = (ui.uploaderWrap.style.display === "none" ? "block" : "none");
-    if (!ui.uploaderFrame.src) ui.uploaderFrame.src = UPLOADER_URL;
-    // ✅ sync immediately when opened
-    setTimeout(syncUploaderItemId, 200);
+    try { await reloadDropdowns(); }
+    catch(e){ setStatus("Dropdown error: " + e.message, "bad"); }
+    setBusy(false);
   });
 
-  // ✅ ALWAYS sync uploader as you type/edit Item ID
+  ui.btnRefreshList?.addEventListener("click", async () => {
+    setBusy(true);
+    try { await refreshList(); }
+    catch(e){ setListStatus("List error: " + e.message, "bad"); }
+    setBusy(false);
+  });
+
+  ui.btnNew?.addEventListener("click", () => {
+    clearForm();
+    setStatus("New item mode. Fill it out and Save.", "");
+  });
+
+  ui.btnSave?.addEventListener("click", saveItem);
+
+  ui.q?.addEventListener("input", () => renderList(window.__TORO_ITEMS__ || []));
+
+  // Upload panel toggle
+  ui.btnUploadImages?.addEventListener("click", () => {
+    if (!ui.uploaderWrap || !ui.uploaderFrame) return;
+    ui.uploaderWrap.style.display = (ui.uploaderWrap.style.display === "none" ? "block" : "none");
+    if (!ui.uploaderFrame.src) ui.uploaderFrame.src = UPLOADER_URL;
+    setTimeout(syncUploaderItemId, 250);
+  });
+
+  // Always sync uploader as you type
   ["input","change","blur"].forEach(evt=>{
-    ui.itemId.addEventListener(evt, () => {
-      // Only sync if uploader has been opened at least once or is visible
+    ui.itemId?.addEventListener(evt, () => {
       if (ui.uploaderFrame && ui.uploaderFrame.src) syncUploaderItemId();
     });
   });
 
-  // ✅ Receive uploaded URLs and auto-fill Image 1..6
+  // Receive uploaded URLs and auto-fill Image 1..6
   window.addEventListener("message", (e) => {
     const data = e.data;
     if (!data || data.type !== "TP_IMAGE_UPLOAD_RESULT") return;
@@ -698,40 +796,37 @@
     }
 
     alert(`Uploaded ${urls.length} image(s) and filled Image 1–${Math.min(6, urls.length)}.`);
-    // Optional auto-save:
-    // saveItem();
   });
+}
 
-  // Buttons
-  ui.btnReloadDropdowns.addEventListener("click", async () => {
-    setBusy(true);
-    try { await reloadDropdowns(); } catch(e){ setStatus("Dropdown error: " + e.message, "bad"); }
-    setBusy(false);
-  });
-  ui.btnRefreshList.addEventListener("click", async () => {
-    setBusy(true);
-    try { await refreshList(); } catch(e){ setListStatus("List error: " + e.message, "bad"); }
-    setBusy(false);
-  });
-  ui.btnNew.addEventListener("click", () => { clearForm(); setStatus("New item mode. Fill it out and Save.", ""); });
-  ui.btnSave.addEventListener("click", saveItem);
-  ui.q.addEventListener("input", () => renderList(window.__TORO_ITEMS__ || []));
+async function init(){
+  // Make empty selects show quickly
+  DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
 
-  // Auto-init (ping -> dropdowns -> list)
-  (async function init(){
-    DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
-    setStatus("Connecting to backend…");
-    setBusy(true);
-    try{
-      await pingBackend();
-      try { await reloadDropdowns(); } catch(e){ console.warn("Dropdown autoload failed:", e); }
-      try { await refreshList(); } catch(e){ console.warn("List autoload failed:", e); }
-      setStatus("Ready.", "good");
-    } catch(e){
-    } finally {
-      setBusy(false);
-    }
-  })();
+  setStatus("Connecting to backend…");
+  setListStatus("List not loaded yet.");
+  setBackendSig("not connected");
+  setBusy(true);
+
+  try{
+    await pingBackend();
+    // Dropdowns + list are allowed to fail individually (so you still get a page)
+    try { await reloadDropdowns(); } catch(e){ console.warn("Dropdown autoload failed:", e); setStatus("Dropdown autoload failed: " + e.message, "bad"); }
+    try { await refreshList(); } catch(e){ console.warn("List autoload failed:", e); setListStatus("List autoload failed: " + e.message, "bad"); }
+    setStatus("Ready.", "good");
+  } catch(e){
+    setBackendSig("NOT CONNECTED");
+    setStatus("Backend ping failed: " + e.message, "bad");
+  } finally {
+    setBusy(false);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  buildUIRefs();
+  wireEvents();
+  init();
+});
 </script>
 </body>
 </html>
