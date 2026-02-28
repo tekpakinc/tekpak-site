@@ -155,7 +155,6 @@
       border:1px solid rgba(124,247,166,.25);
     }
 
-    /* Optional: a safe "View Cart" link style (NO PayPal SDK here) */
     .cartlink{
       display:inline-flex; align-items:center; gap:8px;
       padding:10px 12px;
@@ -168,6 +167,36 @@
     }
     .cartlink:hover{background: rgba(255,255,255,.10)}
     .cartwrap{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+
+    .uploadbar{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      margin-top:6px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      font-size:12px;
+    }
+    .prog{
+      width:100%;
+      height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      margin-top:10px;
+      display:none;
+    }
+    .prog > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(124,247,166,.85), rgba(122,167,255,.85));
+      transition: width .2s ease;
+    }
   </style>
 </head>
 
@@ -179,17 +208,12 @@
         <div class="badge" aria-hidden="true"></div>
         <div>
           <h1>Toro v1 Inventory System</h1>
-          <div class="sub">Clean admin • Add + Edit • Tokenless • JSONP • Image Upload</div>
+          <div class="sub">Clean admin • Add + Edit • Tokenless • JSONP • Git-safe Image Upload</div>
           <div class="tiny">Backend: <code class="k" id="backendSig">not connected</code></div>
         </div>
       </div>
 
       <div class="cartwrap">
-        <!-- IMPORTANT:
-          Admin should NOT run PayPal SDK/snippets.
-          If you want a "View Cart" button here, use a simple link to your store/cart page instead.
-          Replace href with your store cart URL if you have one.
-        -->
         <!-- <a class="cartlink" href="https://www.tekpakinc.store/cart" target="_blank" rel="noopener">🛒 View Cart</a> -->
 
         <div class="btns">
@@ -197,7 +221,6 @@
           <button class="secondary" id="btnRefreshList" type="button">Refresh List</button>
         </div>
       </div>
-
     </div>
   </div>
 </header>
@@ -388,17 +411,21 @@
           <div><label>Image 6</label><input id="Image 6" placeholder="https://…" /></div>
         </div>
 
+        <!-- Upload Images (GitHub-safe) -->
         <div class="full" style="margin-top:6px">
-          <button class="secondary" id="btnUploadImages" type="button">Upload Images</button>
-          <div class="note" style="margin-top:8px">
-            Uploads to Drive via Apps Script (no CORS). Returned URLs auto-fill Image 1–6.
-          </div>
-        </div>
+          <div class="uploadbar">
+            <button class="secondary" id="btnUploadImages" type="button">Upload Images</button>
 
-        <div class="full" id="uploaderWrap" style="display:none;margin-top:10px">
-          <iframe id="uploaderFrame"
-                  title="Image uploader"
-                  style="width:100%;height:280px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:#fff"></iframe>
+            <span class="pill" id="uploadHint">Select up to 6 images • Auto-fills Image 1–6</span>
+          </div>
+
+          <div class="prog" id="uploadProg"><div id="uploadProgBar"></div></div>
+
+          <input id="filePicker" type="file" accept="image/*" multiple style="display:none" />
+
+          <div class="note" style="margin-top:8px">
+            Uploads to Drive via Apps Script using a GitHub-safe flow (POST trigger + JSONP status polling).
+          </div>
         </div>
       </div>
 
@@ -416,16 +443,13 @@
 
 <script>
 /* ============================================================================
-  TORO v1 Admin (Repaired / Hardened)
-  - Prevents one bad snippet (like PayPal SDK) from breaking init
-  - Stronger JSONP cleanup + better error messages
-  - Safe DOM init after load
-  - Guards all event hookups
-  - Keeps uploader ID synced
+  TORO v1 Admin (GitHub-safe)
+  - JSONP for reads (ping/list/get/upsert/dropdowns)
+  - Upload: POST (no-cors) trigger + JSONP polling => returns Drive URLs
 ============================================================================ */
 
 /** IMPORTANT: your CURRENT deployed Web App URL (must end with /exec) */
-const API_URL = "https://script.google.com/macros/s/AKfycbzZhiK0valhSBRVeYXqYg7Hvm-AhZ9yoR-x74puEZ2MbbcxWf1o1V37H4C1qroTpBzZSQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwk2wDdLCMRMk4fQBrLsNJzLql0lr02MiISiNV31sUbH8CFakLnmpUVFvp-_wFMgZeWsA/exec";
 
 /** Optional debug: set to true to log JSONP URLs */
 const DEBUG = false;
@@ -534,9 +558,8 @@ function generateItemId() {
   return `TORO-${stamp}-${rand}`;
 }
 
-/* UI references (built on init after DOM ready) */
+/* UI refs */
 let ui = null;
-let UPLOADER_URL = "";
 
 function setBusy(isBusy){
   if (!ui) return;
@@ -562,15 +585,11 @@ function setBackendSig(text){
   ui.backendSig.textContent = text || "unknown";
 }
 
-/* Keep uploader Item ID synced */
-function syncUploaderItemId(){
-  safe(() => {
-    if (!ui) return;
-    const id = (ui.itemId.value || "").trim();
-    if (!id) return;
-    if (!ui.uploaderFrame || !ui.uploaderFrame.contentWindow) return;
-    ui.uploaderFrame.contentWindow.postMessage({ type:"TP_SET_ITEM_ID", itemId: id }, "*");
-  });
+function setUploadProgress(show, pct=0){
+  if (!ui) return;
+  if (!ui.uploadProg || !ui.uploadProgBar) return;
+  ui.uploadProg.style.display = show ? "block" : "none";
+  ui.uploadProgBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
 }
 
 function clearForm() {
@@ -579,7 +598,6 @@ function clearForm() {
     if (node) node.value = "";
   });
   if (el("Availability")) el("Availability").value = "Unlisted";
-  syncUploaderItemId();
 }
 
 function collectPayload() {
@@ -594,7 +612,6 @@ function collectPayload() {
   if (!String(payload["Item ID"] || "").trim()) {
     payload["Item ID"] = generateItemId();
     if (ui && ui.itemId) ui.itemId.value = payload["Item ID"];
-    syncUploaderItemId();
   }
   return payload;
 }
@@ -602,7 +619,7 @@ function collectPayload() {
 async function pingBackend(){
   const res = await jsonp({ action: "ping" });
   if (!res || !res.ok) throw new Error(res?.error || "Ping failed");
-  const sig = `${res.system || "Unknown"} • ${res.version || "no-version"} • ${res.ts || ""}`.trim();
+  const sig = `${res.message || "pong"} • ${res.ts || ""}`.trim();
   setBackendSig(sig);
   return res;
 }
@@ -614,7 +631,6 @@ async function reloadDropdowns() {
   const dd = res.dropdowns || {};
   DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
 
-  // Fallback if Availability list empty
   if (el("Availability") && el("Availability").options.length <= 1) {
     fillSelect("Availability", ["Listed","Unlisted","Pending","Hold"]);
   }
@@ -686,7 +702,6 @@ async function loadItem(itemId) {
       if (node) node.value = (item[h] !== undefined && item[h] !== null) ? String(item[h]) : "";
     });
     setStatus("Item loaded. Edit fields then Save to update.", "good");
-    syncUploaderItemId();
     window.scrollTo({ top: 0, behavior: "smooth" });
   } catch (err) {
     setStatus("Load error: " + err.message, "bad");
@@ -702,7 +717,6 @@ async function saveItem() {
     if (!res.ok) throw new Error(res.error || "Save failed");
     setStatus(`Saved! (${res.mode}) • Row ${res.row} • Item ID ${res.itemId}`, "good");
     await refreshList();
-    syncUploaderItemId();
   } catch (err) {
     setStatus("Save error: " + err.message, "bad");
   } finally {
@@ -710,7 +724,106 @@ async function saveItem() {
   }
 }
 
-/* Global error guards so one “bad snippet” doesn’t kill the whole app */
+/* =========================
+   GitHub-safe image upload:
+   - pick files
+   - convert to dataUrl
+   - POST trigger: action=uploadImagesJob (no-cors)
+   - JSONP poll: action=uploadStatus&jobId=...
+========================= */
+
+function readFileAsDataUrl(file){
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result || ""));
+    fr.onerror = () => reject(new Error("File read error: " + (file?.name || "unknown")));
+    fr.readAsDataURL(file);
+  });
+}
+
+function makeJobId(){
+  return (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("job_" + Math.random().toString(16).slice(2));
+}
+
+async function uploadImagesFromGit(files){
+  const itemId = String(ui.itemId.value || "").trim() || generateItemId();
+  ui.itemId.value = itemId;
+
+  const picked = Array.from(files || []).slice(0, 6);
+  if (!picked.length) throw new Error("No files selected.");
+
+  setStatus(`Preparing ${picked.length} image(s)…`);
+  setUploadProgress(true, 5);
+
+  // Convert to dataUrls
+  const payloadFiles = [];
+  for (let i=0;i<picked.length;i++){
+    setUploadProgress(true, 5 + Math.round((i / picked.length) * 25));
+    const f = picked[i];
+    const dataUrl = await readFileAsDataUrl(f);
+    payloadFiles.push({
+      name: f.name,
+      mime: f.type || "image/jpeg",
+      dataUrl
+    });
+  }
+
+  const jobId = makeJobId();
+
+  // Fire-and-forget POST (GitHub cannot read response due to CORS)
+  setStatus("Uploading to Drive…");
+  setUploadProgress(true, 35);
+
+  await fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      action: "uploadImagesJob",
+      jobId,
+      payload: { itemId, files: payloadFiles, makePublic: true }
+    })
+  });
+
+  // Poll
+  const start = Date.now();
+  const maxWaitMs = 120000;
+
+  while (true){
+    setUploadProgress(true, 55);
+
+    const res = await jsonp({ action: "uploadStatus", jobId });
+
+    if (res && res.status === "done" && res.result && res.result.ok){
+      const images = (res.result.images || []);
+      const urls = images.map(x => x.url).filter(Boolean);
+
+      // Fill Image 1..6
+      for (let i=0;i<6;i++){
+        const input = el(`Image ${i+1}`);
+        if (input) input.value = urls[i] || "";
+      }
+
+      setUploadProgress(true, 100);
+      setTimeout(() => setUploadProgress(false, 0), 700);
+
+      setStatus(`Uploaded ${urls.length} image(s). Filled Image 1–${Math.min(6, urls.length)}.`, "good");
+      return;
+    }
+
+    if (res && res.status === "error"){
+      throw new Error(res.error || "Upload failed");
+    }
+
+    if (Date.now() - start > maxWaitMs){
+      throw new Error("Upload timed out. (Job took too long or status endpoint missing.)");
+    }
+
+    await new Promise(r => setTimeout(r, 1200));
+  }
+}
+
+/* Global error guards */
 window.addEventListener("error", (e) => {
   console.error("[TORO] JS error:", e.message, e.filename, e.lineno);
   safe(() => setStatus("JS error: " + e.message, "bad"));
@@ -733,18 +846,16 @@ function buildUIRefs(){
     btnNew: el("btnNew"),
     btnSave: el("btnSave"),
     btnUploadImages: el("btnUploadImages"),
-    uploaderWrap: el("uploaderWrap"),
-    uploaderFrame: el("uploaderFrame"),
+    filePicker: el("filePicker"),
+    uploadProg: el("uploadProg"),
+    uploadProgBar: el("uploadProgBar"),
     itemId: el("Item ID"),
   };
-
-  UPLOADER_URL = API_URL + (API_URL.includes("?") ? "&" : "?") + "view=uploader";
 }
 
 function wireEvents(){
   if (!ui) return;
 
-  // Buttons
   ui.btnReloadDropdowns?.addEventListener("click", async () => {
     setBusy(true);
     try { await reloadDropdowns(); }
@@ -768,39 +879,28 @@ function wireEvents(){
 
   ui.q?.addEventListener("input", () => renderList(window.__TORO_ITEMS__ || []));
 
-  // Upload panel toggle
+  // Upload button triggers file picker
   ui.btnUploadImages?.addEventListener("click", () => {
-    if (!ui.uploaderWrap || !ui.uploaderFrame) return;
-    ui.uploaderWrap.style.display = (ui.uploaderWrap.style.display === "none" ? "block" : "none");
-    if (!ui.uploaderFrame.src) ui.uploaderFrame.src = UPLOADER_URL;
-    setTimeout(syncUploaderItemId, 250);
+    ui.filePicker.value = "";
+    ui.filePicker.click();
   });
 
-  // Always sync uploader as you type
-  ["input","change","blur"].forEach(evt=>{
-    ui.itemId?.addEventListener(evt, () => {
-      if (ui.uploaderFrame && ui.uploaderFrame.src) syncUploaderItemId();
-    });
-  });
-
-  // Receive uploaded URLs and auto-fill Image 1..6
-  window.addEventListener("message", (e) => {
-    const data = e.data;
-    if (!data || data.type !== "TP_IMAGE_UPLOAD_RESULT") return;
-    if (!data.ok) return;
-
-    const urls = (data.images || []).map(x => x.url).filter(Boolean);
-    for (let i=0;i<Math.min(6, urls.length); i++){
-      const input = el(`Image ${i+1}`);
-      if (input) input.value = urls[i];
+  // File picker selection => upload
+  ui.filePicker?.addEventListener("change", async () => {
+    if (!ui.filePicker.files || !ui.filePicker.files.length) return;
+    setBusy(true);
+    try {
+      await uploadImagesFromGit(ui.filePicker.files);
+    } catch (e) {
+      setUploadProgress(false, 0);
+      setStatus("Upload error: " + e.message, "bad");
+    } finally {
+      setBusy(false);
     }
-
-    alert(`Uploaded ${urls.length} image(s) and filled Image 1–${Math.min(6, urls.length)}.`);
   });
 }
 
 async function init(){
-  // Make empty selects show quickly
   DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
 
   setStatus("Connecting to backend…");
@@ -810,9 +910,13 @@ async function init(){
 
   try{
     await pingBackend();
-    // Dropdowns + list are allowed to fail individually (so you still get a page)
-    try { await reloadDropdowns(); } catch(e){ console.warn("Dropdown autoload failed:", e); setStatus("Dropdown autoload failed: " + e.message, "bad"); }
-    try { await refreshList(); } catch(e){ console.warn("List autoload failed:", e); setListStatus("List autoload failed: " + e.message, "bad"); }
+
+    try { await reloadDropdowns(); }
+    catch(e){ console.warn("Dropdown autoload failed:", e); setStatus("Dropdown autoload failed: " + e.message, "bad"); }
+
+    try { await refreshList(); }
+    catch(e){ console.warn("List autoload failed:", e); setListStatus("List autoload failed: " + e.message, "bad"); }
+
     setStatus("Ready.", "good");
   } catch(e){
     setBackendSig("NOT CONNECTED");
