@@ -1,87 +1,116 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Toro v1 Inventory System</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Toro Admin (Fresh)</title>
   <style>
     :root{
       --bg:#0b1020;
       --card:#121a33;
-      --line:rgba(255,255,255,.10);
+      --line:rgba(255,255,255,.12);
       --text:#f3f6ff;
-      --muted:rgba(243,246,255,.70);
+      --muted:rgba(243,246,255,.68);
       --accent:#7cf7a6;
       --accent2:#7aa7ff;
-      --warn:#ffcc66;
       --bad:#ff6b7a;
-      --good:#7cf7a6;
-      --shadow:0 18px 60px rgba(0,0,0,.45);
+      --warn:#ffcc66;
       --radius:16px;
+      --shadow:0 18px 60px rgba(0,0,0,.45);
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       background:
-        radial-gradient(1200px 500px at 20% -10%, rgba(122,167,255,.25), transparent 60%),
-        radial-gradient(900px 450px at 90% 10%, rgba(124,247,166,.20), transparent 55%),
-        radial-gradient(700px 400px at 30% 110%, rgba(255,204,102,.12), transparent 60%),
+        radial-gradient(1200px 520px at 25% -10%, rgba(122,167,255,.22), transparent 60%),
+        radial-gradient(900px 480px at 95% 10%, rgba(124,247,166,.18), transparent 55%),
+        radial-gradient(700px 420px at 30% 110%, rgba(255,204,102,.10), transparent 60%),
         var(--bg);
       color:var(--text);
     }
     header{
-      position:sticky; top:0; z-index:20;
+      position:sticky; top:0; z-index:50;
       backdrop-filter: blur(10px);
-      background: linear-gradient(to bottom, rgba(11,16,32,.86), rgba(11,16,32,.55));
+      background: linear-gradient(to bottom, rgba(11,16,32,.90), rgba(11,16,32,.55));
       border-bottom:1px solid var(--line);
     }
-    .wrap{max-width:1200px; margin:0 auto; padding:14px 16px;}
-    .top{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
-    .brand{display:flex; gap:12px; align-items:center;}
+    .wrap{max-width:1200px;margin:0 auto;padding:14px 16px;}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px}
     .badge{
-      width:42px; height:42px; border-radius:14px;
-      background: radial-gradient(circle at 30% 30%, rgba(124,247,166,.9), rgba(122,167,255,.85));
+      width:42px;height:42px;border-radius:14px;
+      background: radial-gradient(circle at 30% 30%, rgba(124,247,166,.95), rgba(122,167,255,.85));
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
-    h1{font-size:18px; margin:0; letter-spacing:.2px}
-    .sub{font-size:12px; color:var(--muted); margin-top:2px}
-    .tiny{font-size:11px; color:rgba(243,246,255,.55); margin-top:6px}
-    code.k{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11px; color:rgba(243,246,255,.75)}
+    h1{margin:0;font-size:18px}
+    .sub{color:var(--muted);font-size:12px;margin-top:2px}
+    .sig{color:rgba(243,246,255,.55);font-size:11px;margin-top:6px}
+    code.k{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:rgba(243,246,255,.78)}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+    button{
+      border:0;
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      color:#061016;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+    button.secondary{
+      color:var(--text);
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    button.warn{
+      color:#1a1200;
+      background: linear-gradient(135deg, var(--warn), #ffdca0);
+    }
+    button:disabled{opacity:.55;cursor:not-allowed}
 
     .grid{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px 22px;
       display:grid;
       grid-template-columns: 420px 1fr;
       gap:14px;
-      padding:14px 16px 24px;
-      max-width:1200px;
-      margin:0 auto;
     }
-    @media (max-width: 980px){
-      .grid{grid-template-columns:1fr}
-    }
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} }
 
     .card{
-      background: linear-gradient(180deg, rgba(18,26,51,.92), rgba(15,23,48,.92));
+      background: linear-gradient(180deg, rgba(18,26,51,.94), rgba(15,23,48,.94));
       border:1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .card .hd{
-      padding:14px 14px 10px;
+    .hd{
+      padding:14px;
       border-bottom:1px solid var(--line);
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
       flex-wrap:wrap;
     }
-    .card .hd strong{font-size:14px}
-    .card .bd{padding:14px}
+    .hd strong{font-size:14px}
+    .bd{padding:14px}
 
-    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
-    .full{grid-column:1/-1}
+    .status{
+      font-size:12px;
+      padding:9px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+      word-break:break-word;
+    }
+    .status.good{border-color: rgba(124,247,166,.35); color: rgba(124,247,166,.95)}
+    .status.bad{border-color: rgba(255,107,122,.35); color: rgba(255,107,122,.95)}
+    .status.warn{border-color: rgba(255,204,102,.35); color: rgba(255,204,102,.95)}
 
-    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
     input, select, textarea{
       width:100%;
       padding:10px 12px;
@@ -92,95 +121,34 @@
       outline:none;
     }
     textarea{min-height:110px; resize:vertical}
-    input::placeholder, textarea::placeholder{color:rgba(243,246,255,.45)}
-    input:focus, select:focus, textarea:focus{
-      border-color: rgba(124,247,166,.55);
-      box-shadow: 0 0 0 3px rgba(124,247,166,.15);
-    }
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .full{grid-column:1/-1}
+    .note{font-size:12px;color:var(--muted);line-height:1.35}
 
-    .btns{display:flex; gap:10px; flex-wrap:wrap}
-    button{
-      border:0;
-      border-radius: 14px;
-      padding:10px 12px;
-      font-weight:800;
-      cursor:pointer;
-      color:#061016;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-    }
-    button.secondary{
-      color: var(--text);
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    button.warn{
-      color:#1a1200;
-      background: linear-gradient(135deg, var(--warn), #ffdca0);
-    }
-    button:disabled{opacity:.6; cursor:not-allowed}
-
-    .note{font-size:12px; color:var(--muted); line-height:1.35;}
-    .status{
-      font-size:12px;
-      padding:8px 10px;
-      border-radius: 12px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-      color: var(--muted);
-      word-break:break-word;
-    }
-    .status.good{border-color: rgba(124,247,166,.35); color: rgba(124,247,166,.95)}
-    .status.bad{border-color: rgba(255,107,122,.35); color: rgba(255,107,122,.95)}
-
-    .list{
-      display:flex; flex-direction:column; gap:8px;
-      max-height: 540px;
-      overflow:auto;
-      padding-right: 6px;
-    }
+    .list{display:flex;flex-direction:column;gap:8px;max-height:560px;overflow:auto;padding-right:6px}
     .item{
       border:1px solid rgba(255,255,255,.12);
       border-radius: 14px;
       background: rgba(6,10,22,.35);
-      padding:10px 10px;
-      display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+      padding:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
     }
-    .item .a{font-weight:900; font-size:12px}
-    .item .b{font-size:12px; color:var(--muted); margin-top:2px}
-    .item .c{font-size:12px; color:rgba(122,167,255,.9); margin-top:6px}
+    .item .a{font-weight:950;font-size:12px}
+    .item .b{font-size:12px;color:var(--muted);margin-top:2px}
+    .item .c{font-size:12px;color:rgba(122,167,255,.9);margin-top:6px}
     .item button{
-      padding:8px 10px; border-radius: 12px; font-weight:900;
+      padding:8px 10px;
+      border-radius: 12px;
+      font-weight:900;
       background: rgba(124,247,166,.18);
       color: rgba(124,247,166,.95);
       border:1px solid rgba(124,247,166,.25);
     }
 
-    .cartlink{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      text-decoration:none;
-      font-weight:900;
-    }
-    .cartlink:hover{background: rgba(255,255,255,.10)}
-    .cartwrap{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-
-    .uploadbar{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-      margin-top:6px;
-    }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: var(--muted);
-      font-size:12px;
-    }
     .prog{
       width:100%;
       height:10px;
@@ -207,730 +175,470 @@
       <div class="brand">
         <div class="badge" aria-hidden="true"></div>
         <div>
-          <h1>Toro v1 Inventory System</h1>
-          <div class="sub">Clean admin • Add + Edit • Tokenless • JSONP • Git-safe Image Upload</div>
-          <div class="tiny">Backend: <code class="k" id="backendSig">not connected</code></div>
+          <h1>Toro Admin (Fresh Start)</h1>
+          <div class="sub">Simple • Schema-driven • JSONP • GitHub-safe upload</div>
+          <div class="sig">Backend: <code class="k" id="backendSig">not connected</code></div>
         </div>
       </div>
-
-      <div class="cartwrap">
-        <!-- <a class="cartlink" href="https://www.tekpakinc.store/cart" target="_blank" rel="noopener">🛒 View Cart</a> -->
-
-        <div class="btns">
-          <button class="secondary" id="btnReloadDropdowns" type="button">Reload Dropdowns</button>
-          <button class="secondary" id="btnRefreshList" type="button">Refresh List</button>
-        </div>
+      <div class="btns">
+        <button class="secondary" id="btnReload" type="button">Reload</button>
+        <button class="secondary" id="btnNew" type="button">New</button>
+        <button class="warn" id="btnSave" type="button">Save</button>
       </div>
     </div>
   </div>
 </header>
 
 <div class="grid">
-  <!-- LEFT: Search + List -->
+  <!-- LEFT -->
   <section class="card">
     <div class="hd">
-      <strong>Find & Edit Existing Items</strong>
-      <button class="secondary" id="btnNew" type="button">New Item</button>
+      <strong>Items</strong>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+        <input id="q" placeholder="Search Item ID / Manufacturer / Model…" style="min-width:240px" />
+      </div>
     </div>
     <div class="bd">
-      <div class="row">
-        <div class="full">
-          <label>Search (Item ID / Manufacturer / Model / Category)</label>
-          <input id="q" placeholder="Type to filter…" />
-        </div>
-      </div>
-
+      <div class="status" id="listStatus">Loading…</div>
       <div style="height:10px"></div>
-
-      <div class="status" id="listStatus">List not loaded yet.</div>
-
-      <div style="height:10px"></div>
-
       <div class="list" id="list"></div>
-
       <div style="height:10px"></div>
-      <div class="note">
-        Click <b>Load</b> to edit. Save updates that same Item ID.
-      </div>
+      <div class="note">Click <b>Load</b> to edit, then <b>Save</b>.</div>
     </div>
   </section>
 
-  <!-- RIGHT: Form -->
+  <!-- RIGHT -->
   <section class="card">
     <div class="hd">
-      <strong>Add / Edit Item</strong>
+      <strong>Editor</strong>
       <div class="btns">
-        <button class="warn" id="btnSave" type="button">Save (Create/Update)</button>
+        <button class="secondary" id="btnUpload" type="button">Upload Images</button>
       </div>
     </div>
-
     <div class="bd">
       <div class="status" id="status">Connecting…</div>
+      <div class="prog" id="prog"><div id="progBar"></div></div>
 
       <div style="height:12px"></div>
+      <div id="form"></div>
 
-      <div class="row">
-        <div>
-          <label>Item ID</label>
-          <input id="Item ID" placeholder="Leave blank to auto-generate" />
-        </div>
-        <div>
-          <label>Availability</label>
-          <select id="Availability"></select>
-        </div>
-
-        <div>
-          <label>Category</label>
-          <select id="Category"></select>
-        </div>
-        <div>
-          <label>Manufacturer</label>
-          <select id="Manufacturer"></select>
-        </div>
-
-        <div>
-          <label>Model</label>
-          <input id="Model" placeholder="e.g., Latitude 5420" />
-        </div>
-        <div>
-          <label>Color</label>
-          <select id="Color"></select>
-        </div>
-
-        <div>
-          <label>Screen Size</label>
-          <select id="Screen Size"></select>
-        </div>
-        <div>
-          <label>CPU</label>
-          <select id="CPU"></select>
-        </div>
-
-        <div>
-          <label>Storage</label>
-          <select id="Storage"></select>
-        </div>
-        <div>
-          <label>GPU</label>
-          <select id="GPU"></select>
-        </div>
-
-        <div>
-          <label>Memory</label>
-          <select id="Memory"></select>
-        </div>
-        <div>
-          <label>Condition</label>
-          <select id="Condition"></select>
-        </div>
-
-        <div>
-          <label>Operating System</label>
-          <select id="Operating System"></select>
-        </div>
-        <div>
-          <label>Warranty</label>
-          <select id="Warranty"></select>
-        </div>
-
-        <div>
-          <label>Shipping</label>
-          <select id="Shipping"></select>
-        </div>
-        <div>
-          <label>Location</label>
-          <select id="Location"></select>
-        </div>
-
-        <div class="full">
-          <label>Features</label>
-          <input id="Features" placeholder="e.g., Touchscreen, Backlit keyboard, USB-C…" />
-        </div>
-
-        <div>
-          <label>Series</label>
-          <input id="Series" placeholder="e.g., ThinkPad T-series" />
-        </div>
-        <div>
-          <label>Connectivity</label>
-          <input id="Connectivity" placeholder="Wi-Fi, BT, LTE, Ethernet…" />
-        </div>
-
-        <div>
-          <label>Price</label>
-          <input id="Price" placeholder="e.g., 199.99" />
-        </div>
-        <div>
-          <label>Buy Link</label>
-          <input id="Buy Link" placeholder="PayPal link or button URL…" />
-        </div>
-
-        <div>
-          <label>PayPal Button</label>
-          <select id="PayPal Button"></select>
-        </div>
-        <div>
-          <label>Weight</label>
-          <input id="Weight" placeholder="lbs" />
-        </div>
-
-        <div class="row3 full">
-          <div>
-            <label>LengthIn</label>
-            <input id="LengthIn" placeholder="inches" />
-          </div>
-          <div>
-            <label>WidthIn</label>
-            <input id="WidthIn" placeholder="inches" />
-          </div>
-          <div>
-            <label>HeightIn</label>
-            <input id="HeightIn" placeholder="inches" />
-          </div>
-        </div>
-
-        <div class="full">
-          <label>Description (public)</label>
-          <textarea id="Description" placeholder="Clean, buyer-friendly description…"></textarea>
-        </div>
-
-        <div class="full">
-          <label>Notes (internal only)</label>
-          <textarea id="Notes" placeholder="Internal notes — not shown on store…"></textarea>
-        </div>
-
-        <div class="row3 full">
-          <div><label>Image 1</label><input id="Image 1" placeholder="https://…" /></div>
-          <div><label>Image 2</label><input id="Image 2" placeholder="https://…" /></div>
-          <div><label>Image 3</label><input id="Image 3" placeholder="https://…" /></div>
-        </div>
-
-        <div class="row3 full">
-          <div><label>Image 4</label><input id="Image 4" placeholder="https://…" /></div>
-          <div><label>Image 5</label><input id="Image 5" placeholder="https://…" /></div>
-          <div><label>Image 6</label><input id="Image 6" placeholder="https://…" /></div>
-        </div>
-
-        <!-- Upload Images (GitHub-safe) -->
-        <div class="full" style="margin-top:6px">
-          <div class="uploadbar">
-            <button class="secondary" id="btnUploadImages" type="button">Upload Images</button>
-
-            <span class="pill" id="uploadHint">Select up to 6 images • Auto-fills Image 1–6</span>
-          </div>
-
-          <div class="prog" id="uploadProg"><div id="uploadProgBar"></div></div>
-
-          <input id="filePicker" type="file" accept="image/*" multiple style="display:none" />
-
-          <div class="note" style="margin-top:8px">
-            Uploads to Drive via Apps Script using a GitHub-safe flow (POST trigger + JSONP status polling).
-          </div>
-        </div>
-      </div>
-
+      <input id="filePicker" type="file" accept="image/*" multiple style="display:none" />
       <div style="height:12px"></div>
       <div class="note">
-        Save uses <b>Item ID</b> as the key:
-        <ul>
-          <li>If it exists in Inventory → it updates that row.</li>
-          <li>If it doesn’t → it appends a new row.</li>
-        </ul>
+        Upload fills <b>Image 1–6</b>. If Drive folder ID isn’t set in script properties, upload will error (that’s normal).
       </div>
     </div>
   </section>
 </div>
 
 <script>
-/* ============================================================================
-  TORO v1 Admin (GitHub-safe)
-  - JSONP for reads (ping/list/get/upsert/dropdowns)
-  - Upload: POST (no-cors) trigger + JSONP polling => returns Drive URLs
-============================================================================ */
+  // ✅ Your new backend
+  const API_URL = "https://script.google.com/macros/s/AKfycbxBhLMKXr6cr2NRc7K5TRbZ91vM32MzJWrm0P6zeA74sGUukcnBdoV-Z0Z8ldwyXO-SaQ/exec";
 
-/** IMPORTANT: your CURRENT deployed Web App URL (must end with /exec) */
-const API_URL = "https://script.google.com/macros/s/AKfycbyWZvkbE5ns-1ogcK7v3ABudMb9NEomuijcPzst5rehCJBUFwHjrluCAJ2jge37_-mlmQ/exec";
+  const $ = (id) => document.getElementById(id);
+  const ui = {
+    backendSig: $("backendSig"),
+    status: $("status"),
+    listStatus: $("listStatus"),
+    list: $("list"),
+    q: $("q"),
+    form: $("form"),
+    btnReload: $("btnReload"),
+    btnNew: $("btnNew"),
+    btnSave: $("btnSave"),
+    btnUpload: $("btnUpload"),
+    filePicker: $("filePicker"),
+    prog: $("prog"),
+    progBar: $("progBar"),
+  };
 
-/** Optional debug: set to true to log JSONP URLs */
-const DEBUG = false;
+  let INV_HEADERS = [];
+  let DD_HEADERS = [];
+  let DROPDOWNS = {};
+  let CONTROLS = {}; // header -> input/select/textarea element
+  let ITEMS = [];
 
-const INVENTORY_HEADERS = [
-  "Item ID","Availability",
-  "Category","Manufacturer","Model","Color","Screen Size","CPU","Storage","Features","GPU",
-  "Series","Memory","Connectivity","Condition",
-  "Image 1","Image 2","Image 3","Image 4","Image 5","Image 6",
-  "Operating System","Warranty","Description","Notes",
-  "Price","Buy Link","PayPal Button",
-  "Shipping","LengthIn","WidthIn","HeightIn","Weight","Location"
-];
-
-const DROPDOWN_HEADERS = [
-  "Availability",
-  "Category","Manufacturer","Color","Screen Size","CPU","Storage","GPU","Memory","Condition",
-  "Operating System","Warranty","Shipping","Location",
-  "PayPal Button"
-];
-
-const el = (id) => document.getElementById(id);
-const safe = (fn) => { try { return fn(); } catch(e){ console.error(e); } };
-const dbg = (...a) => { if (DEBUG) console.log("[TORO]", ...a); };
-
-function jsonp(params = {}) {
-  return new Promise((resolve, reject) => {
-    const cb = "ToroCB_" + Math.random().toString(36).slice(2);
-    const script = document.createElement("script");
-    const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
-
-    const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
-    script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
-    dbg("JSONP:", script.src);
-
-    let done = false;
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error("JSONP timeout. Backend didn’t respond. (Most often: wrong /exec URL or permissions)."));
-    }, 18000);
-
-    function cleanup() {
-      if (done) return;
-      done = true;
-      clearTimeout(timeout);
-      script.remove();
-      try { delete window[cb]; } catch(_) { window[cb] = undefined; }
-    }
-
-    window[cb] = (data) => {
-      cleanup();
-      resolve(data);
-    };
-
-    script.onerror = () => {
-      cleanup();
-      reject(new Error("JSONP load error. Could not load Apps Script endpoint (wrong URL / not deployed / blocked)."));
-    };
-
-    document.body.appendChild(script);
-  });
-}
-
-function escapeHtml(s){
-  return String(s ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function fillSelect(id, options) {
-  const s = el(id);
-  if (!s) return;
-  const current = s.value;
-  const opts = Array.isArray(options) ? options.slice() : [];
-  s.innerHTML = "";
-
-  const empty = document.createElement("option");
-  empty.value = "";
-  empty.textContent = "—";
-  s.appendChild(empty);
-
-  opts.forEach(v => {
-    const o = document.createElement("option");
-    o.value = v;
-    o.textContent = v;
-    s.appendChild(o);
-  });
-
-  if ([...s.options].some(o => o.value === current)) s.value = current;
-}
-
-function generateItemId() {
-  const d = new Date();
-  const pad = (n) => String(n).padStart(2, "0");
-  const stamp =
-    d.getFullYear() +
-    pad(d.getMonth()+1) +
-    pad(d.getDate()) + "-" +
-    pad(d.getHours()) +
-    pad(d.getMinutes()) +
-    pad(d.getSeconds());
-  const rand = Math.random().toString(36).slice(2,6).toUpperCase();
-  return `TORO-${stamp}-${rand}`;
-}
-
-/* UI refs */
-let ui = null;
-
-function setBusy(isBusy){
-  if (!ui) return;
-  const btns = [ui.btnReloadDropdowns, ui.btnRefreshList, ui.btnSave, ui.btnNew, ui.btnUploadImages];
-  btns.forEach(b => { if (b) b.disabled = !!isBusy; });
-  if (ui.q) ui.q.disabled = !!isBusy;
-}
-
-function setStatus(msg, kind="") {
-  if (!ui || !ui.status) return;
-  ui.status.className = "status" + (kind ? (" " + kind) : "");
-  ui.status.textContent = msg;
-}
-
-function setListStatus(msg, kind="") {
-  if (!ui || !ui.listStatus) return;
-  ui.listStatus.className = "status" + (kind ? (" " + kind) : "");
-  ui.listStatus.textContent = msg;
-}
-
-function setBackendSig(text){
-  if (!ui || !ui.backendSig) return;
-  ui.backendSig.textContent = text || "unknown";
-}
-
-function setUploadProgress(show, pct=0){
-  if (!ui) return;
-  if (!ui.uploadProg || !ui.uploadProgBar) return;
-  ui.uploadProg.style.display = show ? "block" : "none";
-  ui.uploadProgBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
-}
-
-function clearForm() {
-  INVENTORY_HEADERS.forEach(h => {
-    const node = el(h);
-    if (node) node.value = "";
-  });
-  if (el("Availability")) el("Availability").value = "Unlisted";
-}
-
-function collectPayload() {
-  const payload = {};
-  INVENTORY_HEADERS.forEach(h => {
-    const node = el(h);
-    if (node) payload[h] = node.value;
-  });
-
-  if (!String(payload["Availability"] || "").trim()) payload["Availability"] = "Unlisted";
-
-  if (!String(payload["Item ID"] || "").trim()) {
-    payload["Item ID"] = generateItemId();
-    if (ui && ui.itemId) ui.itemId.value = payload["Item ID"];
-  }
-  return payload;
-}
-
-async function pingBackend(){
-  const res = await jsonp({ action: "ping" });
-  if (!res || !res.ok) throw new Error(res?.error || "Ping failed");
-  const sig = `${res.message || "pong"} • ${res.ts || ""}`.trim();
-  setBackendSig(sig);
-  return res;
-}
-
-async function reloadDropdowns() {
-  setStatus("Loading dropdowns…");
-  const res = await jsonp({ action: "getDropdowns" });
-  if (!res.ok) throw new Error(res.error || "Failed to load dropdowns");
-  const dd = res.dropdowns || {};
-  DROPDOWN_HEADERS.forEach(key => fillSelect(key, dd[key] || []));
-
-  if (el("Availability") && el("Availability").options.length <= 1) {
-    fillSelect("Availability", ["Listed","Unlisted","Pending","Hold"]);
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
   }
 
-  setStatus("Dropdowns loaded.", "good");
-  return true;
-}
-
-function renderList(items) {
-  if (!ui) return;
-  ui.list.innerHTML = "";
-  const q = (ui.q.value || "").trim().toLowerCase();
-
-  const filtered = (items || []).filter(it => {
-    if (!q) return true;
-    const hay = [
-      it["Item ID"], it["Manufacturer"], it["Model"], it["Category"], it["Condition"], it["Location"]
-    ].join(" ").toLowerCase();
-    return hay.includes(q);
-  });
-
-  if (!filtered.length) {
-    ui.list.innerHTML = `<div class="note">No matches.</div>`;
-    return;
+  function setStatus(msg, kind=""){
+    ui.status.className = "status" + (kind ? (" " + kind) : "");
+    ui.status.textContent = msg;
   }
 
-  filtered.forEach(it => {
-    const id = (it["Item ID"] || "").toString();
-    const title = `${it["Manufacturer"] || ""} ${it["Model"] || ""}`.trim() || "(No Model)";
-    const sub = `${it["Category"] || ""} • ${it["Condition"] || ""} • ${it["Location"] || ""}`.trim();
-    const price = (it["Price"] || "").toString().trim();
-
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <div style="min-width:0">
-        <div class="a">${escapeHtml(id)}</div>
-        <div class="b">${escapeHtml(title)}</div>
-        <div class="c">${escapeHtml(sub)}${price ? " • $" + escapeHtml(price) : ""}</div>
-      </div>
-      <div><button type="button" data-load="${escapeHtml(id)}">Load</button></div>
-    `;
-    ui.list.appendChild(div);
-  });
-
-  ui.list.querySelectorAll("button[data-load]").forEach(btn => {
-    btn.addEventListener("click", () => loadItem(btn.getAttribute("data-load")));
-  });
-}
-
-async function refreshList() {
-  setListStatus("Loading list…");
-  const res = await jsonp({ action: "listItems" });
-  if (!res.ok) throw new Error(res.error || "Failed to load list");
-  window.__TORO_ITEMS__ = res.items || [];
-  renderList(window.__TORO_ITEMS__);
-  setListStatus(`Loaded ${window.__TORO_ITEMS__.length} items.`, "good");
-  return true;
-}
-
-async function loadItem(itemId) {
-  setStatus("Loading item " + itemId + "…");
-  try {
-    const res = await jsonp({ action: "getItem", itemId });
-    if (!res.ok) throw new Error(res.error || "Failed to load item");
-    const item = res.item || {};
-    INVENTORY_HEADERS.forEach(h => {
-      const node = el(h);
-      if (node) node.value = (item[h] !== undefined && item[h] !== null) ? String(item[h]) : "";
-    });
-    setStatus("Item loaded. Edit fields then Save to update.", "good");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  } catch (err) {
-    setStatus("Load error: " + err.message, "bad");
-  }
-}
-
-async function saveItem() {
-  setStatus("Saving…");
-  setBusy(true);
-  try {
-    const payload = collectPayload();
-    const res = await jsonp({ action: "upsertItem", payload: JSON.stringify(payload) });
-    if (!res.ok) throw new Error(res.error || "Save failed");
-    setStatus(`Saved! (${res.mode}) • Row ${res.row} • Item ID ${res.itemId}`, "good");
-    await refreshList();
-  } catch (err) {
-    setStatus("Save error: " + err.message, "bad");
-  } finally {
-    setBusy(false);
-  }
-}
-
-/* =========================
-   GitHub-safe image upload:
-   - pick files
-   - convert to dataUrl
-   - POST trigger: action=uploadImagesJob (no-cors)
-   - JSONP poll: action=uploadStatus&jobId=...
-========================= */
-
-function readFileAsDataUrl(file){
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = () => resolve(String(fr.result || ""));
-    fr.onerror = () => reject(new Error("File read error: " + (file?.name || "unknown")));
-    fr.readAsDataURL(file);
-  });
-}
-
-function makeJobId(){
-  return (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("job_" + Math.random().toString(16).slice(2));
-}
-
-async function uploadImagesFromGit(files){
-  const itemId = String(ui.itemId.value || "").trim() || generateItemId();
-  ui.itemId.value = itemId;
-
-  const picked = Array.from(files || []).slice(0, 6);
-  if (!picked.length) throw new Error("No files selected.");
-
-  setStatus(`Preparing ${picked.length} image(s)…`);
-  setUploadProgress(true, 5);
-
-  // Convert to dataUrls
-  const payloadFiles = [];
-  for (let i=0;i<picked.length;i++){
-    setUploadProgress(true, 5 + Math.round((i / picked.length) * 25));
-    const f = picked[i];
-    const dataUrl = await readFileAsDataUrl(f);
-    payloadFiles.push({
-      name: f.name,
-      mime: f.type || "image/jpeg",
-      dataUrl
-    });
+  function setListStatus(msg, kind=""){
+    ui.listStatus.className = "status" + (kind ? (" " + kind) : "");
+    ui.listStatus.textContent = msg;
   }
 
-  const jobId = makeJobId();
+  function setBusy(b){
+    [ui.btnReload, ui.btnNew, ui.btnSave, ui.btnUpload].forEach(x => x && (x.disabled = !!b));
+    ui.q.disabled = !!b;
+  }
 
-  // Fire-and-forget POST (GitHub cannot read response due to CORS)
-  setStatus("Uploading to Drive…");
-  setUploadProgress(true, 35);
+  function setProg(show, pct=0){
+    ui.prog.style.display = show ? "block" : "none";
+    ui.progBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+  }
 
-  await fetch(API_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({
-      action: "uploadImagesJob",
-      jobId,
-      payload: { itemId, files: payloadFiles, makePublic: true }
-    })
-  });
+  function jsonp(params={}){
+    return new Promise((resolve, reject) => {
+      const cb = "ToroCB_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+      const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
 
-  // Poll
-  const start = Date.now();
-  const maxWaitMs = 120000;
+      const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
+      script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
 
-  while (true){
-    setUploadProgress(true, 55);
+      let done = false;
+      const t = setTimeout(() => {
+        cleanup();
+        reject(new Error("JSONP timeout (15s). Check deployment access + /exec URL."));
+      }, 15000);
 
-    const res = await jsonp({ action: "uploadStatus", jobId });
-
-    if (res && res.status === "done" && res.result && res.result.ok){
-      const images = (res.result.images || []);
-      const urls = images.map(x => x.url).filter(Boolean);
-
-      // Fill Image 1..6
-      for (let i=0;i<6;i++){
-        const input = el(`Image ${i+1}`);
-        if (input) input.value = urls[i] || "";
+      function cleanup(){
+        if (done) return;
+        done = true;
+        clearTimeout(t);
+        script.remove();
+        try { delete window[cb]; } catch(_) { window[cb] = undefined; }
       }
 
-      setUploadProgress(true, 100);
-      setTimeout(() => setUploadProgress(false, 0), 700);
+      window[cb] = (data) => { cleanup(); resolve(data); };
+      script.onerror = () => { cleanup(); reject(new Error("JSONP load error (endpoint blocked / wrong URL).")); };
 
-      setStatus(`Uploaded ${urls.length} image(s). Filled Image 1–${Math.min(6, urls.length)}.`, "good");
+      document.body.appendChild(script);
+    });
+  }
+
+  async function ping(){
+    const r = await jsonp({ action: "ping" });
+    if (!r?.ok) throw new Error(r?.error || "Ping failed");
+    ui.backendSig.textContent = `${r.version || ""} • sheet ${String(r.spreadsheetId||"").slice(0,8)}… • ${r.ts || ""}`;
+  }
+
+  async function loadSchema(){
+    const r = await jsonp({ action: "schema" });
+    if (!r?.ok) throw new Error(r?.error || "Schema failed");
+    INV_HEADERS = Array.isArray(r.inventoryHeaders) ? r.inventoryHeaders : [];
+    DD_HEADERS = Array.isArray(r.dropdownHeaders) ? r.dropdownHeaders : [];
+    if (!INV_HEADERS.length) throw new Error("Inventory headers empty. Check Inventory tab row 1.");
+  }
+
+  async function loadDropdowns(){
+    const r = await jsonp({ action: "getDropdowns" });
+    if (!r?.ok) throw new Error(r?.error || "Dropdowns failed");
+    DROPDOWNS = r.dropdowns || {};
+  }
+
+  function isTextAreaField(h){
+    const k = String(h||"").toLowerCase();
+    return (k === "description" || k === "notes");
+  }
+
+  function isImageField(h){
+    return /^image\s[1-6]$/i.test(String(h||"").trim());
+  }
+
+  function buildForm(){
+    ui.form.innerHTML = "";
+    CONTROLS = {};
+
+    const container = document.createElement("div");
+    container.className = "row";
+
+    INV_HEADERS.forEach((h) => {
+      const field = document.createElement("div");
+      field.className = "full";
+
+      // Layout: pair most fields in 2-col, but keep Description/Notes full width
+      const full = isTextAreaField(h) || isImageField(h);
+      field.className = full ? "full" : "";
+
+      const lab = document.createElement("label");
+      lab.textContent = h;
+
+      let input;
+
+      const opts = Array.isArray(DROPDOWNS[h]) ? DROPDOWNS[h] : null;
+      if (opts && opts.length) {
+        input = document.createElement("select");
+        const empty = document.createElement("option");
+        empty.value = "";
+        empty.textContent = "—";
+        input.appendChild(empty);
+        opts.forEach(v => {
+          const o = document.createElement("option");
+          o.value = v;
+          o.textContent = v;
+          input.appendChild(o);
+        });
+      } else if (isTextAreaField(h)) {
+        input = document.createElement("textarea");
+        input.placeholder = h === "Notes" ? "Internal only" : "Public description";
+      } else {
+        input = document.createElement("input");
+        input.placeholder = h === "Item ID" ? "Leave blank to auto-generate" : "";
+      }
+
+      input.id = "f_" + h;
+      CONTROLS[h] = input;
+
+      field.appendChild(lab);
+      field.appendChild(input);
+
+      container.appendChild(field);
+    });
+
+    // Make it 2-col by default
+    // We already use .row grid; just ensure non-full fields take 1 col
+    [...container.children].forEach(child => {
+      if (!child.className) child.className = ""; // 2-col
+      if (child.className !== "full") child.style.minWidth = "0";
+    });
+
+    ui.form.appendChild(container);
+  }
+
+  function clearForm(){
+    INV_HEADERS.forEach(h => {
+      const c = CONTROLS[h];
+      if (!c) return;
+      c.value = "";
+    });
+    // If Availability exists and dropdown has Unlisted, default it
+    if (CONTROLS["Availability"] && (DROPDOWNS["Availability"] || []).includes("Unlisted")) {
+      CONTROLS["Availability"].value = "Unlisted";
+    }
+  }
+
+  function collectPayload(){
+    const payload = {};
+    INV_HEADERS.forEach(h => {
+      const c = CONTROLS[h];
+      if (!c) return;
+      payload[h] = c.value;
+    });
+    return payload;
+  }
+
+  function renderList(){
+    ui.list.innerHTML = "";
+    const q = (ui.q.value || "").trim().toLowerCase();
+
+    const filtered = (ITEMS || []).filter(it => {
+      if (!q) return true;
+      const hay = [
+        it["Item ID"], it["Manufacturer"], it["Model"], it["Category"], it["Condition"], it["Location"]
+      ].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+
+    if (!filtered.length){
+      ui.list.innerHTML = `<div class="note">No matches.</div>`;
       return;
     }
 
-    if (res && res.status === "error"){
-      throw new Error(res.error || "Upload failed");
-    }
+    filtered.forEach(it => {
+      const id = String(it["Item ID"] || "").trim();
+      const title = `${it["Manufacturer"] || ""} ${it["Model"] || ""}`.trim() || "(No Model)";
+      const sub = `${it["Category"] || ""} • ${it["Condition"] || ""} • ${it["Location"] || ""}`.trim();
+      const price = String(it["Price"] || "").trim();
 
-    if (Date.now() - start > maxWaitMs){
-      throw new Error("Upload timed out. (Job took too long or status endpoint missing.)");
-    }
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div style="min-width:0">
+          <div class="a">${esc(id)}</div>
+          <div class="b">${esc(title)}</div>
+          <div class="c">${esc(sub)}${price ? " • $" + esc(price) : ""}</div>
+        </div>
+        <div><button type="button" data-load="${esc(id)}">Load</button></div>
+      `;
+      ui.list.appendChild(div);
+    });
 
-    await new Promise(r => setTimeout(r, 1200));
+    ui.list.querySelectorAll("button[data-load]").forEach(btn => {
+      btn.addEventListener("click", () => loadItem(btn.getAttribute("data-load")));
+    });
   }
-}
 
-/* Global error guards */
-window.addEventListener("error", (e) => {
-  console.error("[TORO] JS error:", e.message, e.filename, e.lineno);
-  safe(() => setStatus("JS error: " + e.message, "bad"));
-});
-window.addEventListener("unhandledrejection", (e) => {
-  console.error("[TORO] Promise error:", e.reason);
-  safe(() => setStatus("Promise error: " + (e.reason?.message || e.reason), "bad"));
-});
+  async function refreshList(){
+    setListStatus("Loading items…");
+    const r = await jsonp({ action: "listItems" });
+    if (!r?.ok) throw new Error(r?.error || "List failed");
+    ITEMS = Array.isArray(r.items) ? r.items : [];
+    setListStatus(`Loaded ${ITEMS.length} item(s).`, "good");
+    renderList();
+  }
 
-/* DOM Init */
-function buildUIRefs(){
-  ui = {
-    status: el("status"),
-    q: el("q"),
-    list: el("list"),
-    listStatus: el("listStatus"),
-    backendSig: el("backendSig"),
-    btnReloadDropdowns: el("btnReloadDropdowns"),
-    btnRefreshList: el("btnRefreshList"),
-    btnNew: el("btnNew"),
-    btnSave: el("btnSave"),
-    btnUploadImages: el("btnUploadImages"),
-    filePicker: el("filePicker"),
-    uploadProg: el("uploadProg"),
-    uploadProgBar: el("uploadProgBar"),
-    itemId: el("Item ID"),
-  };
-}
+  async function loadItem(itemId){
+    setStatus("Loading " + itemId + "…");
+    try{
+      const r = await jsonp({ action: "getItem", itemId });
+      if (!r?.ok) throw new Error(r?.error || "Get failed");
+      const item = r.item || {};
+      INV_HEADERS.forEach(h => {
+        const c = CONTROLS[h];
+        if (c) c.value = (item[h] ?? "");
+      });
+      setStatus("Loaded. Edit and Save.", "good");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }catch(e){
+      setStatus("Load error: " + e.message, "bad");
+    }
+  }
 
-function wireEvents(){
-  if (!ui) return;
-
-  ui.btnReloadDropdowns?.addEventListener("click", async () => {
+  async function save(){
     setBusy(true);
-    try { await reloadDropdowns(); }
-    catch(e){ setStatus("Dropdown error: " + e.message, "bad"); }
-    setBusy(false);
-  });
+    setStatus("Saving…");
+    try{
+      const payload = collectPayload();
+      const r = await jsonp({ action: "upsertItem", payload: JSON.stringify(payload) });
+      if (!r?.ok) throw new Error(r?.error || "Save failed");
+      setStatus(`Saved (${r.mode}) • Row ${r.row} • Item ID ${r.itemId}`, "good");
+      await refreshList();
+      // Ensure form has generated Item ID if backend created it
+      if (CONTROLS["Item ID"] && r.itemId) CONTROLS["Item ID"].value = r.itemId;
+    }catch(e){
+      setStatus("Save error: " + e.message, "bad");
+    }finally{
+      setBusy(false);
+    }
+  }
 
-  ui.btnRefreshList?.addEventListener("click", async () => {
+  // Upload helpers
+  function readFileAsDataUrl(file){
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result || ""));
+      fr.onerror = () => reject(new Error("File read error: " + (file?.name || "unknown")));
+      fr.readAsDataURL(file);
+    });
+  }
+  function makeJobId(){
+    return (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("job_" + Math.random().toString(16).slice(2));
+  }
+
+  async function uploadImages(files){
+    const picked = Array.from(files || []).slice(0, 6);
+    if (!picked.length) throw new Error("No files selected.");
+
+    const itemId = String(CONTROLS["Item ID"]?.value || "").trim(); // may be blank; backend will still name as UNASSIGNED, but we prefer real ID
+    if (!itemId){
+      setStatus("Tip: save once first so Item ID exists, then upload images.", "warn");
+    }
+
+    setProg(true, 5);
+    setStatus(`Preparing ${picked.length} image(s)…`);
+
+    const payloadFiles = [];
+    for (let i=0;i<picked.length;i++){
+      setProg(true, 5 + Math.round((i / picked.length) * 25));
+      const f = picked[i];
+      const dataUrl = await readFileAsDataUrl(f);
+      payloadFiles.push({ name: f.name, mime: f.type || "image/jpeg", dataUrl });
+    }
+
+    const jobId = makeJobId();
+    setStatus("Uploading to Drive…");
+    setProg(true, 35);
+
+    // fire-and-forget
+    await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "uploadImagesJob",
+        jobId,
+        payload: { itemId: itemId || "UNASSIGNED", files: payloadFiles, makePublic: true }
+      })
+    });
+
+    // poll status
+    const start = Date.now();
+    const maxWaitMs = 120000;
+
+    while (true){
+      setProg(true, 55);
+      const r = await jsonp({ action: "uploadStatus", jobId });
+
+      if (r?.status === "done" && r?.result?.ok){
+        const images = r.result.images || [];
+        const urls = images.map(x => x.url).filter(Boolean);
+
+        // fill Image 1..6 (if fields exist in sheet)
+        for (let i=0;i<6;i++){
+          const h = `Image ${i+1}`;
+          if (CONTROLS[h]) CONTROLS[h].value = urls[i] || "";
+        }
+
+        setProg(true, 100);
+        setTimeout(() => setProg(false, 0), 700);
+        setStatus(`Uploaded ${urls.length} image(s). Filled Image 1–${Math.min(6, urls.length)}.`, "good");
+        return;
+      }
+
+      if (r?.status === "error"){
+        throw new Error(r.error || "Upload failed");
+      }
+
+      if (Date.now() - start > maxWaitMs){
+        throw new Error("Upload timed out (2 min).");
+      }
+
+      await new Promise(r => setTimeout(r, 1200));
+    }
+  }
+
+  async function fullReload(){
     setBusy(true);
-    try { await refreshList(); }
-    catch(e){ setListStatus("List error: " + e.message, "bad"); }
-    setBusy(false);
-  });
+    try{
+      await ping();
+      await loadSchema();
+      await loadDropdowns();
+      buildForm();
+      clearForm();
+      await refreshList();
+      setStatus("Ready.", "good");
+    }catch(e){
+      ui.backendSig.textContent = "NOT CONNECTED";
+      setStatus("Startup error: " + e.message, "bad");
+      setListStatus("Not loaded.", "bad");
+    }finally{
+      setBusy(false);
+    }
+  }
 
-  ui.btnNew?.addEventListener("click", () => {
-    clearForm();
-    setStatus("New item mode. Fill it out and Save.", "");
-  });
+  // Wire
+  ui.btnReload.addEventListener("click", fullReload);
+  ui.btnNew.addEventListener("click", () => { clearForm(); setStatus("New item. Fill and Save.", ""); });
+  ui.btnSave.addEventListener("click", save);
+  ui.q.addEventListener("input", renderList);
 
-  ui.btnSave?.addEventListener("click", saveItem);
-
-  ui.q?.addEventListener("input", () => renderList(window.__TORO_ITEMS__ || []));
-
-  // Upload button triggers file picker
-  ui.btnUploadImages?.addEventListener("click", () => {
-    ui.filePicker.value = "";
-    ui.filePicker.click();
-  });
-
-  // File picker selection => upload
-  ui.filePicker?.addEventListener("change", async () => {
+  ui.btnUpload.addEventListener("click", () => { ui.filePicker.value=""; ui.filePicker.click(); });
+  ui.filePicker.addEventListener("change", async () => {
     if (!ui.filePicker.files || !ui.filePicker.files.length) return;
     setBusy(true);
-    try {
-      await uploadImagesFromGit(ui.filePicker.files);
-    } catch (e) {
-      setUploadProgress(false, 0);
+    try{
+      await uploadImages(ui.filePicker.files);
+    }catch(e){
+      setProg(false, 0);
       setStatus("Upload error: " + e.message, "bad");
-    } finally {
+    }finally{
       setBusy(false);
     }
   });
-}
 
-async function init(){
-  DROPDOWN_HEADERS.forEach(h => fillSelect(h, []));
-
-  setStatus("Connecting to backend…");
-  setListStatus("List not loaded yet.");
-  setBackendSig("not connected");
-  setBusy(true);
-
-  try{
-    await pingBackend();
-
-    try { await reloadDropdowns(); }
-    catch(e){ console.warn("Dropdown autoload failed:", e); setStatus("Dropdown autoload failed: " + e.message, "bad"); }
-
-    try { await refreshList(); }
-    catch(e){ console.warn("List autoload failed:", e); setListStatus("List autoload failed: " + e.message, "bad"); }
-
-    setStatus("Ready.", "good");
-  } catch(e){
-    setBackendSig("NOT CONNECTED");
-    setStatus("Backend ping failed: " + e.message, "bad");
-  } finally {
-    setBusy(false);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  buildUIRefs();
-  wireEvents();
-  init();
-});
+  // Go
+  fullReload();
 </script>
 </body>
 </html>
