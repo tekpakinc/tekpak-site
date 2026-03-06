@@ -168,6 +168,16 @@
       justify-content:flex-end;
     }
 
+    .itemId{
+      margin-top:8px;
+      padding-top:8px;
+      border-top:1px dashed rgba(100,116,139,.25);
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.2;
+      word-break:break-word;
+    }
+
     a.btnlink{
       display:inline-flex;
       align-items:center;
@@ -332,10 +342,6 @@
     return "$" + raw;
   }
 
-  function nonBlank(val){
-    return String(val ?? "").trim() !== "";
-  }
-
   function addSpec(specs, label, value){
     const v = String(value ?? "").trim();
     if (!v) return;
@@ -454,6 +460,7 @@
     }
 
     filtered.forEach(it => {
+      const id = String(it["Item ID"] || "").trim();
       const manufacturer = String(it["Manufacturer"] || "").trim();
       const model = String(it["Model"] || "").trim();
       const series = String(it["Series"] || "").trim();
@@ -481,7 +488,6 @@
       addSpec(specs, "Condition", it["Condition"]);
       addSpec(specs, "Operating System", it["Operating System"]);
       addSpec(specs, "Warranty", it["Warranty"]);
-      // Item ID intentionally hidden per your "do not show" list.
 
       const card = document.createElement("div");
       card.className = "card";
@@ -503,6 +509,8 @@
             <div class="price">${esc(displayPrice(priceRaw))}</div>
             <div class="buySlot"></div>
           </div>
+
+          ${id ? `<div class="itemId">Item ID: ${esc(id)}</div>` : ""}
         </div>
       `;
 
