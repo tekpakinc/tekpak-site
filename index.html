@@ -1,465 +1,21 @@
-<!-- =========================
-TEK-PAK HEADER (UPDATED MENU)
-========================= -->
-<header class="tp-header">
-  <div class="tp-header-accent"></div>
-  <div class="tp-header-sheen"></div>
-
-  <div class="tp-header-inner">
-    <!-- Brand -->
-    <a href="/index" class="tp-brand" aria-label="Tek-Pak Home">
-      <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-logo" />
-    </a>
-
-    <!-- Center Title (descriptive, NOT a button) -->
-    <div class="tp-page-title" aria-label="Page title">
-      <div class="tp-page-title-top">Commercial Tech</div>
-      <div class="tp-page-title-sub">Store</div>
-    </div>
-
-    <!-- Mobile Toggle -->
-    <button class="tp-menu-toggle" aria-expanded="false" aria-controls="tpNav" aria-label="Toggle navigation" type="button">
-      <span></span><span></span><span></span>
-    </button>
-
-    <!-- Nav -->
-    <nav id="tpNav" class="tp-nav" aria-label="Primary Navigation">
-      <ul class="tp-menu">
-        <!-- Home -->
-        <li><a href="/index">Home</a></li>
-
-        <!-- Services Dropdown -->
-        <li class="tp-dropdown">
-          <button class="tp-dropdown-btn" aria-expanded="false" aria-haspopup="true" type="button">Services</button>
-          <ul class="tp-submenu" role="menu" aria-label="Services submenu">
-            <li><a href="/it-support">IT Support</a></li>
-            <li><a href="https://www.ncelectronicrecycling.com" target="_blank" rel="noopener noreferrer">Electronic Recycling</a></li>
-            <li><a href="/development">Development</a></li>
-          </ul>
-        </li>
-
-        <!-- Shop Dropdown -->
-        <li class="tp-dropdown">
-          <button class="tp-dropdown-btn" aria-expanded="false" aria-haspopup="true" type="button">Shop</button>
-          <ul class="tp-submenu" role="menu" aria-label="Shop submenu">
-            <li><a href="https://www.tekpakinc.store/surplus" target="_blank" rel="noopener noreferrer">Surplus Electronics</a></li>
-            <li><a href="https://www.tekpakinc.store/refurbished" target="_blank" rel="noopener noreferrer">Refurbished Electronics</a></li>
-            <li><a href="https://www.thercreserve.com/#shop" target="_blank" rel="noopener noreferrer">Remote Control Hobbies</a></li>
-            <li><a href="https://www.tekpak.store/software" target="_blank" rel="noopener noreferrer">Software</a></li>
-          </ul>
-        </li>
-      </ul>
-    </nav>
-  </div>
-</header>
-
-<style>
-  :root{
-    --tp-bg:#ffffff;
-    --tp-text:#0f172a;
-    --tp-line:#e5eaf1;
-    --tp-lime:#97ff3f;
-    --tp-lime-deep:#69d020;
-    --tp-shadow-soft:0 8px 24px rgba(15,23,42,.10);
-    --tp-shadow-3d:0 18px 38px rgba(15,23,42,.14), 0 4px 14px rgba(15,23,42,.08);
-  }
-
-  *{box-sizing:border-box}
-
-  .tp-header{
-    position:sticky;
-    top:0;
-    z-index:5000;
-    background:var(--tp-bg);
-    border-bottom:1px solid var(--tp-line);
-    box-shadow:var(--tp-shadow-soft);
-    overflow:visible;
-  }
-
-  .tp-header-accent{
-    position:absolute;
-    left:0; right:0; bottom:0;
-    height:4px;
-    background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime),var(--tp-lime-deep));
-    filter:saturate(1.1);
-    pointer-events:none;
-  }
-
-  .tp-header-sheen{
-    position:absolute;
-    top:0; left:-40%;
-    width:35%;
-    height:100%;
-    background:linear-gradient(100deg,transparent 0%, rgba(255,255,255,.9) 48%, transparent 100%);
-    transform:skewX(-20deg);
-    animation:tpSheen 7s linear infinite;
-    pointer-events:none;
-    opacity:.38;
-  }
-
-  @keyframes tpSheen{
-    0%{left:-40%}
-    100%{left:140%}
-  }
-
-  .tp-header-inner{
-    max-width:1240px;
-    margin:0 auto;
-    padding:10px 18px;
-    display:flex;
-    align-items:center;
-    gap:18px;
-    min-height:96px;
-    position:relative;
-    overflow:visible;
-  }
-
-  .tp-brand{
-    display:flex;
-    align-items:center;
-    text-decoration:none;
-    flex:0 0 auto;
-    z-index:2;
-  }
-
-  /* Bigger logo */
-  .tp-logo{
-    width:124px;
-    height:124px;
-    object-fit:contain;
-    filter:
-      drop-shadow(0 6px 10px rgba(15,23,42,.20))
-      drop-shadow(0 0 10px rgba(151,255,63,.20));
-    transition:transform .2s ease, filter .2s ease;
-  }
-
-  .tp-brand:hover .tp-logo{
-    transform:translateY(-1px) scale(1.02);
-    filter:
-      drop-shadow(0 8px 14px rgba(15,23,42,.24))
-      drop-shadow(0 0 14px rgba(151,255,63,.32));
-  }
-
-  /* ✅ Centered title: centered from all axes within the header */
-  .tp-page-title{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    pointer-events:none; /* purely descriptive */
-    z-index:1;
-    padding:0 10px;
-  }
-
-  /* Better font styling (still system-safe) */
-  .tp-page-title-top{
-    font-weight:1000;
-    letter-spacing:.6px;
-    text-transform:uppercase;
-    font-size:16px;
-    color:var(--tp-text);
-    line-height:1.05;
-  }
-
-  .tp-page-title-sub{
-    margin-top:4px;
-    font-weight:800;
-    letter-spacing:.25px;
-    font-size:12px;
-    color:#4b5563;
-    line-height:1.05;
-  }
-
-  .tp-nav{ margin-left:auto; overflow:visible; z-index:2; }
-
-  .tp-menu{
-    list-style:none;
-    margin:0;
-    padding:0;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    overflow:visible;
-  }
-
-  .tp-menu > li{ position:relative; }
-
-  .tp-menu a,
-  .tp-dropdown-btn{
-    position:relative;
-    isolation:isolate;
-    overflow:hidden;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    text-decoration:none;
-    color:var(--tp-text);
-    font-weight:800;
-    font-size:.95rem;
-    letter-spacing:.2px;
-    padding:10px 14px;
-    border-radius:12px;
-    border:1px solid #dbe2ec;
-    background:linear-gradient(180deg,#ffffff 0%, #f4f7fb 100%);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.95),
-      0 2px 0 rgba(15,23,42,.05),
-      0 8px 16px rgba(91,102,120,.12);
-    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-    cursor:pointer;
-    font-family:inherit;
-    white-space:nowrap;
-  }
-
-  .tp-menu a::before,
-  .tp-dropdown-btn::before{
-    content:"";
-    position:absolute;
-    left:-120%;
-    top:0;
-    width:80%;
-    height:100%;
-    background:linear-gradient(100deg,transparent 0%, rgba(151,255,63,.55) 50%, transparent 100%);
-    transform:skewX(-24deg);
-    transition:left .45s ease;
-    z-index:-1;
-  }
-
-  .tp-menu a:hover,
-  .tp-dropdown-btn:hover{
-    transform:translateY(-1px);
-    border-color:#c9d3e2;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.98),
-      0 4px 0 rgba(15,23,42,.06),
-      0 12px 22px rgba(91,102,120,.16);
-  }
-
-  .tp-menu a:hover::before,
-  .tp-dropdown-btn:hover::before{ left:140%; }
-
-  .tp-menu a:active,
-  .tp-dropdown-btn:active{
-    transform:translateY(1px);
-    box-shadow:
-      inset 0 2px 7px rgba(15,23,42,.10),
-      0 1px 0 rgba(15,23,42,.05);
-  }
-
-  .tp-menu a.active{
-    border-color:#83e92f;
-    color:#0b1304;
-    background:linear-gradient(180deg,#eaffd7 0%, #bbff79 35%, #97ff3f 70%, #79dc29 100%);
-    text-shadow:0 1px 0 rgba(255,255,255,.55);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.8),
-      0 3px 0 rgba(66,125,19,.30),
-      0 12px 20px rgba(121,220,41,.35);
-  }
-
-  .tp-dropdown{ position:relative; overflow:visible; }
-
-  .tp-submenu{
-    position:absolute;
-    top:calc(100% + 10px);
-    right:0;
-    min-width:270px;
-    list-style:none;
-    margin:0;
-    padding:8px;
-    background:#fff;
-    border:1px solid #dbe2ec;
-    border-radius:14px;
-    box-shadow:var(--tp-shadow-3d);
-    display:none;
-    z-index:6000;
-  }
-
-  .tp-dropdown.open .tp-submenu{ display:block; }
-
-  .tp-submenu a{
-    display:block;
-    border-radius:10px;
-    padding:9px 10px;
-    border:1px solid transparent;
-    background:transparent;
-    box-shadow:none;
-    font-weight:700;
-    color:#0f172a;
-  }
-
-  .tp-submenu a:hover{
-    background:#f6fbf1;
-    border-color:#d7f2bf;
-    transform:none;
-  }
-
-  .tp-menu-toggle{
-    display:none;
-    margin-left:auto;
-    width:46px;
-    height:40px;
-    border-radius:12px;
-    border:1px solid #dbe2ec;
-    background:linear-gradient(180deg,#fff,#f3f6fb);
-    box-shadow:0 5px 12px rgba(15,23,42,.10);
-    padding:8px;
-    cursor:pointer;
-    z-index:3;
-  }
-
-  .tp-menu-toggle span{
-    display:block;
-    height:2px;
-    margin:5px 0;
-    background:#4b5563;
-    border-radius:2px;
-  }
-
-  @media (max-width:980px){
-    .tp-logo{width:86px;height:86px}
-    .tp-header-inner{min-height:84px}
-    .tp-menu-toggle{display:block}
-
-    /* Keep title centered, but smaller */
-    .tp-page-title-top{font-size:14px}
-    .tp-page-title-sub{font-size:11px}
-
-    .tp-nav{
-      position:absolute;
-      left:0; right:0; top:100%;
-      background:#fff;
-      border-top:1px solid #eef2f7;
-      border-bottom:1px solid var(--tp-line);
-      box-shadow:var(--tp-shadow-3d);
-      max-height:0;
-      overflow:hidden;
-      transition:max-height .28s ease;
-      z-index:5500;
-    }
-    .tp-nav.open{max-height:620px}
-
-    .tp-menu{
-      padding:12px;
-      flex-direction:column;
-      align-items:stretch;
-      gap:8px;
-    }
-
-    .tp-dropdown .tp-submenu{
-      position:static;
-      margin-top:8px;
-      min-width:0;
-      box-shadow:none;
-      border-color:#e6ebf2;
-      background:#fbfcfe;
-      z-index:auto;
-    }
-  }
-
-  @media (max-width:640px){
-    .tp-logo{width:70px;height:70px}
-    .tp-page-title{display:none} /* hide title if space is tight */
-    .tp-header-inner{padding:8px 12px}
-  }
-</style>
-
-<script>
-  (function(){
-    const nav = document.getElementById('tpNav');
-    const toggle = document.querySelector('.tp-menu-toggle');
-    const dropdowns = document.querySelectorAll('.tp-dropdown');
-
-    // Mobile nav toggle
-    if(toggle && nav){
-      toggle.addEventListener('click', () => {
-        const expanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', String(!expanded));
-        nav.classList.toggle('open');
-      });
-    }
-
-    // Dropdown open/close
-    dropdowns.forEach((dd) => {
-      const btn = dd.querySelector('.tp-dropdown-btn');
-      if(!btn) return;
-
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const wasOpen = dd.classList.contains('open');
-
-        dropdowns.forEach((el) => {
-          if(el !== dd){
-            el.classList.remove('open');
-            const b = el.querySelector('.tp-dropdown-btn');
-            if(b) b.setAttribute('aria-expanded','false');
-          }
-        });
-
-        dd.classList.toggle('open', !wasOpen);
-        btn.setAttribute('aria-expanded', String(!wasOpen));
-      });
-    });
-
-    // Click outside closes dropdowns
-    document.addEventListener('click', (e) => {
-      if(!e.target.closest('.tp-dropdown')){
-        dropdowns.forEach((el) => {
-          el.classList.remove('open');
-          const b = el.querySelector('.tp-dropdown-btn');
-          if(b) b.setAttribute('aria-expanded','false');
-        });
-      }
-    });
-
-    // ESC closes dropdowns + mobile nav
-    document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape'){
-        dropdowns.forEach((el) => {
-          el.classList.remove('open');
-          const b = el.querySelector('.tp-dropdown-btn');
-          if(b) b.setAttribute('aria-expanded','false');
-        });
-        if(nav && toggle){
-          nav.classList.remove('open');
-          toggle.setAttribute('aria-expanded','false');
-        }
-      }
-    });
-
-    // Auto-highlight current internal page
-    const current = (location.pathname.replace(/\/+$/, '') || '/').toLowerCase();
-    document.querySelectorAll('.tp-menu a[href]').forEach(a => {
-      const href = a.getAttribute('href');
-      if(!href || href.startsWith('http')) return; // skip external links
-      const path = (new URL(href, location.origin).pathname.replace(/\/+$/, '') || '/').toLowerCase();
-      if(path === current) a.classList.add('active');
-    });
-
-    // Close mobile nav when link clicked
-    document.querySelectorAll('.tp-menu a').forEach(link => {
-      link.addEventListener('click', () => {
-        if(window.matchMedia('(max-width: 980px)').matches && nav && toggle){
-          nav.classList.remove('open');
-          toggle.setAttribute('aria-expanded','false');
-        }
-      });
-    });
-  })();
-</script>
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Toro Store (Fresh)</title>
+
   <style>
     :root{
+      --tp-bg:#ffffff;
+      --tp-text:#0f172a;
+      --tp-muted:#64748b;
+      --tp-line:#e5eaf1;
+      --tp-lime:#97ff3f;
+      --tp-lime-deep:#69d020;
+      --tp-shadow-soft:0 8px 24px rgba(15,23,42,.10);
+      --tp-shadow-3d:0 18px 38px rgba(15,23,42,.14), 0 4px 14px rgba(15,23,42,.08);
+
       --bg:#f6f7fb;
       --card:#fff;
       --line:#e6e9f2;
@@ -480,6 +36,264 @@ TEK-PAK HEADER (UPDATED MENU)
       color:var(--text);
     }
 
+    /* =========================
+       TEK-PAK HEADER
+    ========================= */
+    .tp-header{
+      position:sticky;
+      top:0;
+      z-index:5000;
+      background:var(--tp-bg);
+      border-bottom:1px solid var(--tp-line);
+      box-shadow:var(--tp-shadow-soft);
+      overflow:visible;
+    }
+
+    .tp-header-accent{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:4px;
+      background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime),var(--tp-lime-deep));
+      filter:saturate(1.1);
+      pointer-events:none;
+    }
+
+    .tp-header-sheen{
+      position:absolute;
+      top:0; left:-40%;
+      width:35%;
+      height:100%;
+      background:linear-gradient(100deg,transparent 0%, rgba(255,255,255,.9) 48%, transparent 100%);
+      transform:skewX(-20deg);
+      animation:tpSheen 7s linear infinite;
+      pointer-events:none;
+      opacity:.38;
+    }
+
+    @keyframes tpSheen{
+      0%{left:-40%}
+      100%{left:140%}
+    }
+
+    .tp-header-inner{
+      max-width:1240px;
+      margin:0 auto;
+      padding:10px 18px;
+      display:flex;
+      align-items:center;
+      gap:18px;
+      min-height:96px;
+      position:relative;
+      overflow:visible;
+    }
+
+    .tp-brand{
+      display:flex;
+      align-items:center;
+      text-decoration:none;
+      flex:0 0 auto;
+      z-index:2;
+    }
+
+    .tp-logo{
+      width:124px;
+      height:124px;
+      object-fit:contain;
+      filter:
+        drop-shadow(0 6px 10px rgba(15,23,42,.20))
+        drop-shadow(0 0 10px rgba(151,255,63,.20));
+      transition:transform .2s ease, filter .2s ease;
+    }
+
+    .tp-brand:hover .tp-logo{
+      transform:translateY(-1px) scale(1.02);
+      filter:
+        drop-shadow(0 8px 14px rgba(15,23,42,.24))
+        drop-shadow(0 0 14px rgba(151,255,63,.32));
+    }
+
+    .tp-page-title{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      pointer-events:none;
+      z-index:1;
+      padding:0 10px;
+    }
+
+    .tp-page-title-top{
+      font-weight:1000;
+      letter-spacing:.6px;
+      text-transform:uppercase;
+      font-size:16px;
+      color:var(--tp-text);
+      line-height:1.05;
+    }
+
+    .tp-page-title-sub{
+      margin-top:4px;
+      font-weight:800;
+      letter-spacing:.25px;
+      font-size:12px;
+      color:#4b5563;
+      line-height:1.05;
+    }
+
+    .tp-nav{ margin-left:auto; overflow:visible; z-index:2; }
+
+    .tp-menu{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      overflow:visible;
+    }
+
+    .tp-menu > li{ position:relative; }
+
+    .tp-menu a,
+    .tp-dropdown-btn{
+      position:relative;
+      isolation:isolate;
+      overflow:hidden;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      color:var(--tp-text);
+      font-weight:800;
+      font-size:.95rem;
+      letter-spacing:.2px;
+      padding:10px 14px;
+      border-radius:12px;
+      border:1px solid #dbe2ec;
+      background:linear-gradient(180deg,#ffffff 0%, #f4f7fb 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.95),
+        0 2px 0 rgba(15,23,42,.05),
+        0 8px 16px rgba(91,102,120,.12);
+      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      cursor:pointer;
+      font-family:inherit;
+      white-space:nowrap;
+    }
+
+    .tp-menu a::before,
+    .tp-dropdown-btn::before{
+      content:"";
+      position:absolute;
+      left:-120%;
+      top:0;
+      width:80%;
+      height:100%;
+      background:linear-gradient(100deg,transparent 0%, rgba(151,255,63,.55) 50%, transparent 100%);
+      transform:skewX(-24deg);
+      transition:left .45s ease;
+      z-index:-1;
+    }
+
+    .tp-menu a:hover,
+    .tp-dropdown-btn:hover{
+      transform:translateY(-1px);
+      border-color:#c9d3e2;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.98),
+        0 4px 0 rgba(15,23,42,.06),
+        0 12px 22px rgba(91,102,120,.16);
+    }
+
+    .tp-menu a:hover::before,
+    .tp-dropdown-btn:hover::before{ left:140%; }
+
+    .tp-menu a:active,
+    .tp-dropdown-btn:active{
+      transform:translateY(1px);
+      box-shadow:
+        inset 0 2px 7px rgba(15,23,42,.10),
+        0 1px 0 rgba(15,23,42,.05);
+    }
+
+    .tp-menu a.active{
+      border-color:#83e92f;
+      color:#0b1304;
+      background:linear-gradient(180deg,#eaffd7 0%, #bbff79 35%, #97ff3f 70%, #79dc29 100%);
+      text-shadow:0 1px 0 rgba(255,255,255,.55);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.8),
+        0 3px 0 rgba(66,125,19,.30),
+        0 12px 20px rgba(121,220,41,.35);
+    }
+
+    .tp-dropdown{ position:relative; overflow:visible; }
+
+    .tp-submenu{
+      position:absolute;
+      top:calc(100% + 10px);
+      right:0;
+      min-width:270px;
+      list-style:none;
+      margin:0;
+      padding:8px;
+      background:#fff;
+      border:1px solid #dbe2ec;
+      border-radius:14px;
+      box-shadow:var(--tp-shadow-3d);
+      display:none;
+      z-index:6000;
+    }
+
+    .tp-dropdown.open .tp-submenu{ display:block; }
+
+    .tp-submenu a{
+      display:block;
+      border-radius:10px;
+      padding:9px 10px;
+      border:1px solid transparent;
+      background:transparent;
+      box-shadow:none;
+      font-weight:700;
+      color:#0f172a;
+    }
+
+    .tp-submenu a:hover{
+      background:#f6fbf1;
+      border-color:#d7f2bf;
+      transform:none;
+    }
+
+    .tp-menu-toggle{
+      display:none;
+      margin-left:auto;
+      width:46px;
+      height:40px;
+      border-radius:12px;
+      border:1px solid #dbe2ec;
+      background:linear-gradient(180deg,#fff,#f3f6fb);
+      box-shadow:0 5px 12px rgba(15,23,42,.10);
+      padding:8px;
+      cursor:pointer;
+      z-index:3;
+    }
+
+    .tp-menu-toggle span{
+      display:block;
+      height:2px;
+      margin:5px 0;
+      background:#4b5563;
+      border-radius:2px;
+    }
+
+    /* =========================
+       STORE
+    ========================= */
     .wrap{max-width:1200px;margin:0 auto;padding:16px}
 
     .topbar{
@@ -546,12 +360,56 @@ TEK-PAK HEADER (UPDATED MENU)
       display:grid;
       place-items:center;
       overflow:hidden;
+      position:relative;
     }
 
-    .img img{
+    .imgButton{
+      position:relative;
+      width:100%;
+      height:100%;
+      padding:0;
+      margin:0;
+      border:0;
+      background:none;
+      display:block;
+      cursor:zoom-in;
+      overflow:hidden;
+      border-radius:0;
+    }
+
+    .imgButton img{
       width:100%;
       height:100%;
       object-fit:cover;
+      transition:transform .22s ease;
+      display:block;
+    }
+
+    .imgButton:hover img{
+      transform:scale(1.035);
+    }
+
+    .imgBadge,
+    .imgHint{
+      position:absolute;
+      left:10px;
+      bottom:10px;
+      z-index:2;
+      background:rgba(15,23,42,.72);
+      color:#fff;
+      font-size:11px;
+      font-weight:800;
+      padding:6px 8px;
+      border-radius:999px;
+      backdrop-filter:blur(6px);
+      pointer-events:none;
+    }
+
+    .imgBadge{
+      left:auto;
+      right:10px;
+      bottom:10px;
+      background:rgba(37,99,235,.88);
     }
 
     .ph{
@@ -676,10 +534,511 @@ TEK-PAK HEADER (UPDATED MENU)
       font-size:12px;
       padding:10px 2px;
     }
+
+    /* =========================
+       LIGHTBOX / GALLERY MODAL
+    ========================= */
+    .lb{
+      position:fixed;
+      inset:0;
+      z-index:99999;
+      display:none;
+    }
+
+    .lb.open{
+      display:block;
+    }
+
+    .lb-backdrop{
+      position:absolute;
+      inset:0;
+      background:rgba(2,6,23,.82);
+      backdrop-filter:blur(6px);
+    }
+
+    .lb-dialog{
+      position:relative;
+      z-index:1;
+      width:min(1100px, calc(100vw - 28px));
+      height:min(86vh, 900px);
+      margin:calc(7vh) auto;
+      background:#0b1220;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      box-shadow:0 40px 100px rgba(0,0,0,.45);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .lb-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      background:rgba(255,255,255,.04);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      color:#fff;
+    }
+
+    .lb-title{
+      font-weight:900;
+      font-size:14px;
+      line-height:1.25;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .lb-meta{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .lb-count{
+      font-size:12px;
+      color:rgba(255,255,255,.78);
+      font-weight:700;
+    }
+
+    .lb-close{
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      padding:9px 12px;
+      border-radius:12px;
+      font-weight:900;
+      cursor:pointer;
+      line-height:1;
+    }
+
+    .lb-main{
+      position:relative;
+      flex:1;
+      min-height:0;
+      background:#050b16;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    .lb-stage{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px 74px;
+    }
+
+    .lb-stage img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      border-radius:14px;
+      box-shadow:0 16px 50px rgba(0,0,0,.35);
+      background:#0f172a;
+    }
+
+    .lb-nav{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:50px;
+      height:50px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.10);
+      color:#fff;
+      font-size:24px;
+      font-weight:900;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      user-select:none;
+      backdrop-filter:blur(8px);
+      z-index:2;
+    }
+
+    .lb-nav:hover{
+      background:rgba(255,255,255,.16);
+    }
+
+    .lb-prev{ left:14px; }
+    .lb-next{ right:14px; }
+
+    .lb-nav[disabled]{
+      opacity:.35;
+      cursor:not-allowed;
+    }
+
+    .lb-bottom{
+      padding:12px 14px 14px;
+      background:rgba(255,255,255,.04);
+      border-top:1px solid rgba(255,255,255,.08);
+    }
+
+    .lb-thumbs{
+      display:flex;
+      gap:10px;
+      overflow:auto;
+      padding-bottom:2px;
+    }
+
+    .lb-thumb{
+      flex:0 0 auto;
+      width:86px;
+      height:64px;
+      padding:0;
+      border-radius:12px;
+      overflow:hidden;
+      border:2px solid transparent;
+      background:#0f172a;
+      cursor:pointer;
+    }
+
+    .lb-thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      opacity:.82;
+      transition:opacity .18s ease, transform .18s ease;
+    }
+
+    .lb-thumb:hover img{
+      opacity:1;
+      transform:scale(1.03);
+    }
+
+    .lb-thumb.active{
+      border-color:#60a5fa;
+      box-shadow:0 0 0 3px rgba(96,165,250,.20);
+    }
+
+    .lb-thumb.active img{
+      opacity:1;
+    }
+
+    body.lb-open{
+      overflow:hidden;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+    .tp-footer{
+      position:relative;
+      overflow:hidden;
+      margin:22px auto 16px;
+      max-width:1200px;
+      background:var(--tp-bg);
+      border:1px solid var(--tp-line);
+      border-radius:24px;
+      box-shadow:var(--tp-shadow-soft);
+    }
+
+    .tp-footer-accent{
+      position:absolute;
+      left:0; right:0; top:0;
+      height:4px;
+      background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime),var(--tp-lime-deep));
+      filter:saturate(1.1);
+      pointer-events:none;
+    }
+
+    .tp-footer-sheen{
+      position:absolute;
+      top:0; left:-40%;
+      width:35%;
+      height:100%;
+      background:linear-gradient(100deg,transparent 0%, rgba(255,255,255,.95) 48%, transparent 100%);
+      transform:skewX(-20deg);
+      animation:tpFooterSheen 9s linear infinite;
+      pointer-events:none;
+      opacity:.22;
+    }
+
+    @keyframes tpFooterSheen{
+      0%{left:-40%}
+      100%{left:140%}
+    }
+
+    .tp-footer-inner{
+      position:relative;
+      z-index:1;
+      max-width:1240px;
+      margin:0 auto;
+      padding:16px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    .tp-footer-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:240px;
+    }
+
+    .tp-footer-logo{
+      width:78px;
+      height:78px;
+      object-fit:contain;
+      filter:
+        drop-shadow(0 6px 10px rgba(15,23,42,.16))
+        drop-shadow(0 0 10px rgba(151,255,63,.18));
+    }
+
+    .tp-footer-text{display:flex;flex-direction:column;gap:3px}
+
+    .tp-footer-tagline{
+      font-weight:900;
+      letter-spacing:.2px;
+      color:var(--tp-text);
+    }
+
+    .tp-footer-small{
+      font-size:12px;
+      color:var(--tp-muted);
+      line-height:1.3;
+    }
+
+    .tp-footer-links{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px 16px;
+      align-items:center;
+      justify-content:center;
+      flex:1;
+      min-width:260px;
+    }
+
+    .tp-footer-links a{
+      text-decoration:none;
+      color:var(--tp-muted);
+      font-weight:800;
+      font-size:.92rem;
+      letter-spacing:.12px;
+      padding:4px 0;
+      transition:color .16s ease, transform .16s ease;
+      position:relative;
+      white-space:nowrap;
+    }
+
+    .tp-footer-links a::after{
+      content:"";
+      position:absolute;
+      left:0;
+      bottom:-2px;
+      width:0;
+      height:2px;
+      background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime));
+      transition:width .18s ease;
+      border-radius:999px;
+    }
+
+    .tp-footer-links a:hover{
+      color:var(--tp-text);
+      transform:translateY(-1px);
+    }
+
+    .tp-footer-links a:hover::after{
+      width:100%;
+    }
+
+    .tp-footer-right{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      min-width:180px;
+    }
+
+    .tp-footer-badge{
+      height:44px;
+      width:auto;
+      object-fit:contain;
+      padding:6px 10px;
+      border:1px solid #dbe2ec;
+      border-radius:14px;
+      background:#fff;
+      box-shadow:0 10px 18px rgba(91,102,120,.12);
+    }
+
+    .tp-footer-bottom{
+      position:relative;
+      z-index:1;
+      border-top:1px solid var(--tp-line);
+      background:rgba(0,0,0,.02);
+      padding:12px 16px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+      font-size:.88rem;
+      color:var(--tp-muted);
+      border-bottom-left-radius:24px;
+      border-bottom-right-radius:24px;
+    }
+
+    .tp-sep{opacity:.65}
+
+    @media (max-width:980px){
+      .tp-logo{width:86px;height:86px}
+      .tp-header-inner{min-height:84px}
+      .tp-menu-toggle{display:block}
+      .tp-page-title-top{font-size:14px}
+      .tp-page-title-sub{font-size:11px}
+
+      .tp-nav{
+        position:absolute;
+        left:0; right:0; top:100%;
+        background:#fff;
+        border-top:1px solid #eef2f7;
+        border-bottom:1px solid var(--tp-line);
+        box-shadow:var(--tp-shadow-3d);
+        max-height:0;
+        overflow:hidden;
+        transition:max-height .28s ease;
+        z-index:5500;
+      }
+
+      .tp-nav.open{max-height:620px}
+
+      .tp-menu{
+        padding:12px;
+        flex-direction:column;
+        align-items:stretch;
+        gap:8px;
+      }
+
+      .tp-dropdown .tp-submenu{
+        position:static;
+        margin-top:8px;
+        min-width:0;
+        box-shadow:none;
+        border-color:#e6ebf2;
+        background:#fbfcfe;
+        z-index:auto;
+      }
+
+      .tp-footer-inner{justify-content:center;text-align:center}
+      .tp-footer-left{justify-content:center}
+      .tp-footer-right{justify-content:center}
+
+      .lb-dialog{
+        width:min(100vw - 16px, 1100px);
+        height:min(88vh, 900px);
+        margin:8px auto;
+      }
+
+      .lb-stage{
+        padding:14px 56px;
+      }
+    }
+
+    @media (max-width:640px){
+      .tp-logo{width:70px;height:70px}
+      .tp-page-title{display:none}
+      .tp-header-inner{padding:8px 12px}
+
+      .lb-top{
+        padding:10px 10px;
+      }
+
+      .lb-title{
+        font-size:13px;
+      }
+
+      .lb-stage{
+        padding:10px 46px;
+      }
+
+      .lb-nav{
+        width:42px;
+        height:42px;
+        font-size:20px;
+      }
+
+      .lb-prev{ left:8px; }
+      .lb-next{ right:8px; }
+
+      .lb-thumb{
+        width:72px;
+        height:56px;
+      }
+    }
+
+    @media (max-width:560px){
+      .tp-footer-logo{width:64px;height:64px}
+      .tp-footer-badge{height:40px}
+      .tp-footer-links{min-width:100%; gap:10px 14px}
+    }
   </style>
 </head>
 
 <body>
+  <!-- =========================
+       TEK-PAK HEADER
+  ========================= -->
+  <header class="tp-header">
+    <div class="tp-header-accent"></div>
+    <div class="tp-header-sheen"></div>
+
+    <div class="tp-header-inner">
+      <a href="/index" class="tp-brand" aria-label="Tek-Pak Home">
+        <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-logo" />
+      </a>
+
+      <div class="tp-page-title" aria-label="Page title">
+        <div class="tp-page-title-top">Commercial Tech</div>
+        <div class="tp-page-title-sub">Store</div>
+      </div>
+
+      <button class="tp-menu-toggle" aria-expanded="false" aria-controls="tpNav" aria-label="Toggle navigation" type="button">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav id="tpNav" class="tp-nav" aria-label="Primary Navigation">
+        <ul class="tp-menu">
+          <li><a href="/index">Home</a></li>
+
+          <li class="tp-dropdown">
+            <button class="tp-dropdown-btn" aria-expanded="false" aria-haspopup="true" type="button">Services</button>
+            <ul class="tp-submenu" role="menu" aria-label="Services submenu">
+              <li><a href="/it-support">IT Support</a></li>
+              <li><a href="https://www.ncelectronicrecycling.com" target="_blank" rel="noopener noreferrer">Electronic Recycling</a></li>
+              <li><a href="/development">Development</a></li>
+            </ul>
+          </li>
+
+          <li class="tp-dropdown">
+            <button class="tp-dropdown-btn" aria-expanded="false" aria-haspopup="true" type="button">Shop</button>
+            <ul class="tp-submenu" role="menu" aria-label="Shop submenu">
+              <li><a href="https://www.tekpakinc.store/surplus" target="_blank" rel="noopener noreferrer">Surplus Electronics</a></li>
+              <li><a href="https://www.tekpakinc.store/refurbished" target="_blank" rel="noopener noreferrer">Refurbished Electronics</a></li>
+              <li><a href="https://www.thercreserve.com/#shop" target="_blank" rel="noopener noreferrer">Remote Control Hobbies</a></li>
+              <li><a href="https://www.tekpak.store/software" target="_blank" rel="noopener noreferrer">Software</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- =========================
+       STORE
+  ========================= -->
   <div class="wrap">
     <div class="topbar">
       <div class="field wide">
@@ -716,555 +1075,600 @@ TEK-PAK HEADER (UPDATED MENU)
     <div class="grid" id="grid"></div>
   </div>
 
-<script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbxBhLMKXr6cr2NRc7K5TRbZ91vM32MzJWrm0P6zeA74sGUukcnBdoV-Z0Z8ldwyXO-SaQ/exec";
+  <!-- =========================
+       LIGHTBOX / GALLERY MODAL
+  ========================= -->
+  <div class="lb" id="lightbox" aria-hidden="true">
+    <div class="lb-backdrop" id="lbBackdrop"></div>
 
-  const el = (id) => document.getElementById(id);
-  const ui = {
-    grid: el("grid"),
-    q: el("q"),
-    cat: el("cat"),
-    mfg: el("mfg"),
-    sort: el("sort"),
-    btnClear: el("btnClear"),
-    btnReload: el("btnReload"),
-  };
-
-  let STORE_ITEMS = [];
-
-  function esc(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  function jsonp(params = {}){
-    return new Promise((resolve, reject) => {
-      const cb = "ToroStoreCB_" + Math.random().toString(36).slice(2);
-      const script = document.createElement("script");
-      const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
-
-      const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
-      script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
-
-      const t = setTimeout(() => {
-        cleanup();
-        reject(new Error("JSONP timeout (15s)."));
-      }, 15000);
-
-      function cleanup(){
-        clearTimeout(t);
-        script.remove();
-        try { delete window[cb]; } catch(_) { window[cb] = undefined; }
-      }
-
-      window[cb] = (data) => {
-        cleanup();
-        resolve(data);
-      };
-
-      script.onerror = () => {
-        cleanup();
-        reject(new Error("JSONP load error (endpoint blocked/wrong URL)."));
-      };
-
-      document.body.appendChild(script);
-    });
-  }
-
-  function firstImage(item){
-    for (let i = 1; i <= 6; i++){
-      const v = String(item[`Image ${i}`] || "").trim();
-      if (v) return v;
-    }
-    return "";
-  }
-
-  function priceNumber(p){
-    const s = String(p ?? "").replace(/[^0-9.]/g,"").trim();
-    const n = parseFloat(s);
-    return Number.isFinite(n) ? n : NaN;
-  }
-
-  function displayPrice(p){
-    const raw = String(p ?? "").trim();
-    if (!raw) return "—";
-    if (raw.startsWith("$")) return raw;
-    return "$" + raw;
-  }
-
-  function addSpec(specs, label, value){
-    const v = String(value ?? "").trim();
-    if (!v) return;
-    specs.push(
-      `<div class="spec"><span class="specLabel">${esc(label)}:</span>${esc(v)}</div>`
-    );
-  }
-
-  function buildFilters(items){
-    const cats = new Set();
-    const mfgs = new Set();
-
-    items.forEach(it => {
-      const c = String(it["Category"] || "").trim();
-      const m = String(it["Manufacturer"] || "").trim();
-      if (c) cats.add(c);
-      if (m) mfgs.add(m);
-    });
-
-    const fill = (sel, values) => {
-      const current = sel.value;
-      sel.innerHTML = `<option value="">All</option>`;
-      [...values].sort((a,b)=>a.localeCompare(b)).forEach(v => {
-        const o = document.createElement("option");
-        o.value = v;
-        o.textContent = v;
-        sel.appendChild(o);
-      });
-      if ([...sel.options].some(o => o.value === current)) sel.value = current;
-    };
-
-    fill(ui.cat, cats);
-    fill(ui.mfg, mfgs);
-  }
-
-  function matches(item){
-    const q = ui.q.value.trim().toLowerCase();
-    const cat = ui.cat.value.trim().toLowerCase();
-    const mfg = ui.mfg.value.trim().toLowerCase();
-
-    if (cat && String(item["Category"] || "").trim().toLowerCase() !== cat) return false;
-    if (mfg && String(item["Manufacturer"] || "").trim().toLowerCase() !== mfg) return false;
-
-    if (q){
-      const hay = [
-        item["Item ID"],
-        item["Category"],
-        item["Manufacturer"],
-        item["Model"],
-        item["Series"],
-        item["Screen Size"],
-        item["CPU"],
-        item["GPU"],
-        item["Storage"],
-        item["Memory"],
-        item["Features"],
-        item["Connectivity"],
-        item["Condition"],
-        item["Operating System"],
-        item["Warranty"],
-        item["Description"]
-      ].join(" ").toLowerCase();
-
-      if (!hay.includes(q)) return false;
-    }
-
-    return true;
-  }
-
-  function sortItems(items){
-    const mode = ui.sort.value;
-    const copy = items.slice();
-
-    if (mode === "priceAsc"){
-      copy.sort((a,b)=> {
-        const av = priceNumber(a["Price"]);
-        const bv = priceNumber(b["Price"]);
-        return (Number.isFinite(av) ? av : Infinity) - (Number.isFinite(bv) ? bv : Infinity);
-      });
-    } else if (mode === "priceDesc"){
-      copy.sort((a,b)=> {
-        const av = priceNumber(a["Price"]);
-        const bv = priceNumber(b["Price"]);
-        return (Number.isFinite(bv) ? bv : -Infinity) - (Number.isFinite(av) ? av : -Infinity);
-      });
-    } else if (mode === "az"){
-      copy.sort((a,b)=> {
-        const ta = `${a["Manufacturer"] || ""} ${a["Model"] || ""} ${a["Series"] || ""}`.trim();
-        const tb = `${b["Manufacturer"] || ""} ${b["Model"] || ""} ${b["Series"] || ""}`.trim();
-        return ta.localeCompare(tb);
-      });
-    } else {
-      copy.sort((a,b)=> String(b["Item ID"] || "").localeCompare(String(a["Item ID"] || "")));
-    }
-
-    return copy;
-  }
-
-  function isHtmlSnippet(s){
-    const t = String(s || "").trim();
-    return t.includes("<") && t.includes(">");
-  }
-
-  function looksLikePayPal(s){
-    return String(s || "").toLowerCase().includes("paypal");
-  }
-
-  function render(){
-    ui.grid.innerHTML = "";
-
-    const filtered = sortItems(STORE_ITEMS.filter(matches));
-
-    if (!filtered.length){
-      ui.grid.innerHTML = `<div class="noMatches">No matches.</div>`;
-      return;
-    }
-
-    filtered.forEach(it => {
-      const id = String(it["Item ID"] || "").trim();
-      const manufacturer = String(it["Manufacturer"] || "").trim();
-      const model = String(it["Model"] || "").trim();
-      const series = String(it["Series"] || "").trim();
-      const desc = String(it["Description"] || "").trim();
-      const priceRaw = String(it["Price"] || "").trim();
-      const img = firstImage(it);
-
-      const paypalBtn = String(it["PayPal Button"] || "").trim();
-      const buyLink = String(it["Buy Link"] || "").trim();
-
-      const title = [manufacturer, model, series].filter(Boolean).join(" ") || "(Item)";
-
-      const specs = [];
-      addSpec(specs, "Category", it["Category"]);
-      addSpec(specs, "Manufacturer", it["Manufacturer"]);
-      addSpec(specs, "Model", it["Model"]);
-      addSpec(specs, "Series", it["Series"]);
-      addSpec(specs, "Screen Size", it["Screen Size"]);
-      addSpec(specs, "CPU", it["CPU"]);
-      addSpec(specs, "GPU", it["GPU"]);
-      addSpec(specs, "Storage", it["Storage"]);
-      addSpec(specs, "Memory", it["Memory"]);
-      addSpec(specs, "Features", it["Features"]);
-      addSpec(specs, "Connectivity", it["Connectivity"]);
-      addSpec(specs, "Condition", it["Condition"]);
-      addSpec(specs, "Operating System", it["Operating System"]);
-      addSpec(specs, "Warranty", it["Warranty"]);
-
-      const card = document.createElement("div");
-      card.className = "card";
-
-      const imgHtml = img
-        ? `<img src="${esc(img)}" alt="${esc(title)}" loading="lazy" referrerpolicy="no-referrer" />`
-        : `<div class="ph">No image</div>`;
-
-      card.innerHTML = `
-        <div class="img">${imgHtml}</div>
-        <div class="bd">
-          <div class="title">${esc(title)}</div>
-
-          ${specs.length ? `<div class="specs">${specs.join("")}</div>` : ""}
-
-          ${desc ? `<div class="desc">${esc(desc)}</div>` : ""}
-
-          <div class="priceRow">
-            <div class="price">${esc(displayPrice(priceRaw))}</div>
-            <div class="buySlot"></div>
-          </div>
-
-          ${id ? `<div class="itemId">Item ID: ${esc(id)}</div>` : ""}
+    <div class="lb-dialog" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+      <div class="lb-top">
+        <div class="lb-title" id="lbTitle">Item Images</div>
+        <div class="lb-meta">
+          <div class="lb-count" id="lbCount">1 / 1</div>
+          <button class="lb-close" id="lbClose" type="button" aria-label="Close image viewer">Close ✕</button>
         </div>
-      `;
+      </div>
 
-      const slot = card.querySelector(".buySlot");
+      <div class="lb-main">
+        <button class="lb-nav lb-prev" id="lbPrev" type="button" aria-label="Previous image">‹</button>
 
-      if (paypalBtn && isHtmlSnippet(paypalBtn) && looksLikePayPal(paypalBtn)){
-        const wrap = document.createElement("div");
-        wrap.className = "ppwrap";
-        wrap.innerHTML = paypalBtn;
-        slot.appendChild(wrap);
-      } else if (buyLink) {
-        if (isHtmlSnippet(buyLink)){
-          slot.innerHTML = buyLink;
-        } else {
-          const a = document.createElement("a");
-          a.className = "btnlink";
-          a.href = buyLink;
-          a.target = "_blank";
-          a.rel = "noopener";
-          a.textContent = "Buy";
-          slot.appendChild(a);
-        }
-      } else {
-        const a = document.createElement("a");
-        a.className = "btnlink secondary";
-        a.href = "#";
-        a.onclick = (e) => {
-          e.preventDefault();
-          alert("No Buy Link / PayPal button set yet.");
-        };
-        a.textContent = "Unavailable";
-        slot.appendChild(a);
-      }
+        <div class="lb-stage">
+          <img id="lbImage" src="" alt="" />
+        </div>
 
-      ui.grid.appendChild(card);
-    });
-  }
+        <button class="lb-nav lb-next" id="lbNext" type="button" aria-label="Next image">›</button>
+      </div>
 
-  async function load(){
-    try{
-      const r = await jsonp({ action: "storeItems" });
-      if (!r?.ok) throw new Error(r?.error || "storeItems failed");
+      <div class="lb-bottom">
+        <div class="lb-thumbs" id="lbThumbs"></div>
+      </div>
+    </div>
+  </div>
 
-      STORE_ITEMS = Array.isArray(r.items) ? r.items : [];
-      buildFilters(STORE_ITEMS);
-      render();
-    } catch(e){
-      ui.grid.innerHTML = `<div class="errorBox"><b>Store load failed:</b> ${esc(e.message)}</div>`;
-    }
-  }
+  <!-- =========================
+       FOOTER
+  ========================= -->
+  <footer class="tp-footer" aria-label="Tek-Pak Footer">
+    <div class="tp-footer-accent" aria-hidden="true"></div>
+    <div class="tp-footer-sheen" aria-hidden="true"></div>
 
-  function clearFilters(){
-    ui.q.value = "";
-    ui.cat.value = "";
-    ui.mfg.value = "";
-    ui.sort.value = "newest";
-    render();
-  }
+    <div class="tp-footer-inner">
+      <div class="tp-footer-left">
+        <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-footer-logo">
+        <div class="tp-footer-text">
+          <div class="tp-footer-tagline">Your tech go-to, for all tech.</div>
+          <div class="tp-footer-small">Enterprise-grade IT services • Real human support • Fast response</div>
+        </div>
+      </div>
 
-  ui.q.addEventListener("input", render);
-  ui.cat.addEventListener("change", render);
-  ui.mfg.addEventListener("change", render);
-  ui.sort.addEventListener("change", render);
-  ui.btnClear.addEventListener("click", clearFilters);
-  ui.btnReload.addEventListener("click", load);
+      <nav class="tp-footer-links" aria-label="Footer links">
+        <a href="/it-services">IT Services</a>
+        <a href="https://www.ncelectronicrecycling.com">Electronic Recycling</a>
+        <a href="/development.html">Software</a>
+        <a href="/policies.html">Policies</a>
+        <a href="/contact">Contact</a>
+        <a href="/support">Support</a>
+      </nav>
 
-  load();
-</script>
-</body>
-</html>
-<!-- =========================
-TEK-PAK CONDENSED FOOTER (MATCHES HEADER • SIMPLE LINKS)
-Drop this near bottom of <body>
-========================= -->
-<footer class="tp-footer" aria-label="Tek-Pak Footer">
-  <div class="tp-footer-accent" aria-hidden="true"></div>
-  <div class="tp-footer-sheen" aria-hidden="true"></div>
-
-  <div class="tp-footer-inner">
-    <div class="tp-footer-left">
-      <img src="tekpaklogo.png" alt="Tek-Pak Logo" class="tp-footer-logo">
-      <div class="tp-footer-text">
-        <div class="tp-footer-tagline">Your tech go-to, for all tech.</div>
-        <div class="tp-footer-small">Enterprise-grade IT services • Real human support • Fast response</div>
+      <div class="tp-footer-right" aria-label="Affiliations and compliance">
+        <img src="dorlogo.png" alt="DOR Logo" class="tp-footer-badge">
+        <img src="compliant.png" alt="Compliance Logo" class="tp-footer-badge">
       </div>
     </div>
 
-    <nav class="tp-footer-links" aria-label="Footer links">
-      <a href="/it-services">IT Services</a>
-      <a href="https://www.ncelectronicrecycling.com">Electronic Recycling</a>
-      <a href="/development.html">Software</a>
-      <a href="/policies.html">Policies</a>
-      <a href="/contact">Contact</a>
-      <a href="/support">Support</a>
-    </nav>
-
-    <div class="tp-footer-right" aria-label="Affiliations and compliance">
-      <img src="dorlogo.png" alt="DOR Logo" class="tp-footer-badge">
-      <img src="compliant.png" alt="Compliance Logo" class="tp-footer-badge">
+    <div class="tp-footer-bottom">
+      <span>© <span id="tpYear"></span> Tek-Pak Inc.</span>
+      <span class="tp-sep">•</span>
+      <span>Built for secure, reliable business IT operations.</span>
     </div>
-  </div>
+  </footer>
 
-  <div class="tp-footer-bottom">
-    <span>© <span id="tpYear"></span> Tek-Pak Inc.</span>
-    <span class="tp-sep">•</span>
-    <span>Built for secure, reliable business IT operations.</span>
-  </div>
-</footer>
+  <script>
+    /* =========================
+       HEADER / MENU SCRIPT
+    ========================= */
+    (function(){
+      const nav = document.getElementById('tpNav');
+      const toggle = document.querySelector('.tp-menu-toggle');
+      const dropdowns = document.querySelectorAll('.tp-dropdown');
 
-<style>
-  :root{
-    --tp-bg:#ffffff;
-    --tp-text:#0f172a;
-    --tp-muted:#64748b;
-    --tp-line:#e5eaf1;
-    --tp-lime:#97ff3f;
-    --tp-lime-deep:#69d020;
-    --tp-shadow-soft:0 8px 24px rgba(15,23,42,.10);
-  }
+      if(toggle && nav){
+        toggle.addEventListener('click', () => {
+          const expanded = toggle.getAttribute('aria-expanded') === 'true';
+          toggle.setAttribute('aria-expanded', String(!expanded));
+          nav.classList.toggle('open');
+        });
+      }
 
-  *{box-sizing:border-box}
+      dropdowns.forEach((dd) => {
+        const btn = dd.querySelector('.tp-dropdown-btn');
+        if(!btn) return;
 
-  .tp-footer{
-    position:relative;
-    overflow:hidden;
-    margin-top:clamp(22px,3vw,40px);
-    background:var(--tp-bg);
-    border:1px solid var(--tp-line);
-    border-radius:24px;
-    box-shadow:var(--tp-shadow-soft);
-  }
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const wasOpen = dd.classList.contains('open');
 
-  .tp-footer-accent{
-    position:absolute;
-    left:0; right:0; top:0;
-    height:4px;
-    background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime),var(--tp-lime-deep));
-    filter:saturate(1.1);
-    pointer-events:none;
-  }
+          dropdowns.forEach((el) => {
+            if(el !== dd){
+              el.classList.remove('open');
+              const b = el.querySelector('.tp-dropdown-btn');
+              if(b) b.setAttribute('aria-expanded','false');
+            }
+          });
 
-  .tp-footer-sheen{
-    position:absolute;
-    top:0; left:-40%;
-    width:35%;
-    height:100%;
-    background:linear-gradient(100deg,transparent 0%, rgba(255,255,255,.95) 48%, transparent 100%);
-    transform:skewX(-20deg);
-    animation:tpFooterSheen 9s linear infinite;
-    pointer-events:none;
-    opacity:.22;
-  }
+          dd.classList.toggle('open', !wasOpen);
+          btn.setAttribute('aria-expanded', String(!wasOpen));
+        });
+      });
 
-  @keyframes tpFooterSheen{
-    0%{left:-40%}
-    100%{left:140%}
-  }
+      document.addEventListener('click', (e) => {
+        if(!e.target.closest('.tp-dropdown')){
+          dropdowns.forEach((el) => {
+            el.classList.remove('open');
+            const b = el.querySelector('.tp-dropdown-btn');
+            if(b) b.setAttribute('aria-expanded','false');
+          });
+        }
+      });
 
-  .tp-footer-inner{
-    position:relative;
-    z-index:1;
-    max-width:1240px;
-    margin:0 auto;
-    padding:16px 18px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-    flex-wrap:wrap;
-  }
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape'){
+          dropdowns.forEach((el) => {
+            el.classList.remove('open');
+            const b = el.querySelector('.tp-dropdown-btn');
+            if(b) b.setAttribute('aria-expanded','false');
+          });
+          if(nav && toggle){
+            nav.classList.remove('open');
+            toggle.setAttribute('aria-expanded','false');
+          }
+        }
+      });
 
-  .tp-footer-left{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    min-width:240px;
-  }
+      const current = (location.pathname.replace(/\/+$/, '') || '/').toLowerCase();
+      document.querySelectorAll('.tp-menu a[href]').forEach(a => {
+        const href = a.getAttribute('href');
+        if(!href || href.startsWith('http')) return;
+        const path = (new URL(href, location.origin).pathname.replace(/\/+$/, '') || '/').toLowerCase();
+        if(path === current) a.classList.add('active');
+      });
 
-  .tp-footer-logo{
-    width:78px;
-    height:78px;
-    object-fit:contain;
-    filter:
-      drop-shadow(0 6px 10px rgba(15,23,42,.16))
-      drop-shadow(0 0 10px rgba(151,255,63,.18));
-  }
+      document.querySelectorAll('.tp-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+          if(window.matchMedia('(max-width: 980px)').matches && nav && toggle){
+            nav.classList.remove('open');
+            toggle.setAttribute('aria-expanded','false');
+          }
+        });
+      });
+    })();
 
-  .tp-footer-text{display:flex;flex-direction:column;gap:3px}
+    /* =========================
+       STORE SCRIPT
+    ========================= */
+    const API_URL = "https://script.google.com/macros/s/AKfycbxBhLMKXr6cr2NRc7K5TRbZ91vM32MzJWrm0P6zeA74sGUukcnBdoV-Z0Z8ldwyXO-SaQ/exec";
 
-  .tp-footer-tagline{
-    font-weight:900;
-    letter-spacing:.2px;
-    color:var(--tp-text);
-  }
+    const el = (id) => document.getElementById(id);
+    const ui = {
+      grid: el("grid"),
+      q: el("q"),
+      cat: el("cat"),
+      mfg: el("mfg"),
+      sort: el("sort"),
+      btnClear: el("btnClear"),
+      btnReload: el("btnReload"),
+    };
 
-  .tp-footer-small{
-    font-size:12px;
-    color:var(--tp-muted);
-    line-height:1.3;
-  }
+    const lb = {
+      root: el("lightbox"),
+      backdrop: el("lbBackdrop"),
+      title: el("lbTitle"),
+      count: el("lbCount"),
+      image: el("lbImage"),
+      thumbs: el("lbThumbs"),
+      prev: el("lbPrev"),
+      next: el("lbNext"),
+      close: el("lbClose"),
+      images: [],
+      index: 0,
+      itemTitle: ""
+    };
 
-  /* ✅ Traditional footer links (no button styling) */
-  .tp-footer-links{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px 16px;
-    align-items:center;
-    justify-content:center;
-    flex:1;
-    min-width:260px;
-  }
+    let STORE_ITEMS = [];
 
-  .tp-footer-links a{
-    text-decoration:none;           /* no underline */
-    color:var(--tp-muted);          /* softer footer color */
-    font-weight:800;
-    font-size:.92rem;
-    letter-spacing:.12px;
-    padding:4px 0;                  /* tiny click padding, still “link-like” */
-    transition:color .16s ease, transform .16s ease;
-    position:relative;
-    white-space:nowrap;
-  }
+    function esc(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
 
-  /* subtle lime underline only on hover (still feels “traditional”) */
-  .tp-footer-links a::after{
-    content:"";
-    position:absolute;
-    left:0;
-    bottom:-2px;
-    width:0;
-    height:2px;
-    background:linear-gradient(90deg,var(--tp-lime-deep),var(--tp-lime));
-    transition:width .18s ease;
-    border-radius:999px;
-  }
+    function jsonp(params = {}){
+      return new Promise((resolve, reject) => {
+        const cb = "ToroStoreCB_" + Math.random().toString(36).slice(2);
+        const script = document.createElement("script");
+        const _cbust = Date.now().toString(36) + Math.random().toString(36).slice(2);
 
-  .tp-footer-links a:hover{
-    color:var(--tp-text);
-    transform:translateY(-1px);
-  }
+        const q = new URLSearchParams({ ...params, callback: cb, _cbust }).toString();
+        script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + q;
 
-  .tp-footer-links a:hover::after{
-    width:100%;
-  }
+        const t = setTimeout(() => {
+          cleanup();
+          reject(new Error("JSONP timeout (15s)."));
+        }, 15000);
 
-  .tp-footer-right{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    justify-content:flex-end;
-    min-width:180px;
-  }
+        function cleanup(){
+          clearTimeout(t);
+          script.remove();
+          try { delete window[cb]; } catch(_) { window[cb] = undefined; }
+        }
 
-  .tp-footer-badge{
-    height:44px;
-    width:auto;
-    object-fit:contain;
-    padding:6px 10px;
-    border:1px solid #dbe2ec;
-    border-radius:14px;
-    background:#fff;
-    box-shadow:0 10px 18px rgba(91,102,120,.12);
-  }
+        window[cb] = (data) => {
+          cleanup();
+          resolve(data);
+        };
 
-  .tp-footer-bottom{
-    position:relative;
-    z-index:1;
-    border-top:1px solid var(--tp-line);
-    background:rgba(0,0,0,.02);
-    padding:12px 16px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    align-items:center;
-    justify-content:center;
-    font-size:.88rem;
-    color:var(--tp-muted);
-    border-bottom-left-radius:24px;
-    border-bottom-right-radius:24px;
-  }
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("JSONP load error (endpoint blocked/wrong URL)."));
+        };
 
-  .tp-sep{opacity:.65}
+        document.body.appendChild(script);
+      });
+    }
 
-  @media (max-width:980px){
-    .tp-footer-inner{justify-content:center;text-align:center}
-    .tp-footer-left{justify-content:center}
-    .tp-footer-right{justify-content:center}
-  }
+    function itemImages(item){
+      const out = [];
+      for (let i = 1; i <= 6; i++){
+        const v = String(item[`Image ${i}`] || "").trim();
+        if (v) out.push(v);
+      }
+      return out;
+    }
 
-  @media (max-width:560px){
-    .tp-footer-logo{width:64px;height:64px}
-    .tp-footer-badge{height:40px}
-    .tp-footer-links{min-width:100%; gap:10px 14px}
-  }
-</style>
+    function firstImage(item){
+      const imgs = itemImages(item);
+      return imgs[0] || "";
+    }
 
-<script>
-  (function(){
-    var y = document.getElementById('tpYear');
-    if(y) y.textContent = new Date().getFullYear();
-  })();
-</script>
+    function priceNumber(p){
+      const s = String(p ?? "").replace(/[^0-9.]/g,"").trim();
+      const n = parseFloat(s);
+      return Number.isFinite(n) ? n : NaN;
+    }
+
+    function displayPrice(p){
+      const raw = String(p ?? "").trim();
+      if (!raw) return "—";
+      if (raw.startsWith("$")) return raw;
+      return "$" + raw;
+    }
+
+    function addSpec(specs, label, value){
+      const v = String(value ?? "").trim();
+      if (!v) return;
+      specs.push(
+        `<div class="spec"><span class="specLabel">${esc(label)}:</span>${esc(v)}</div>`
+      );
+    }
+
+    function buildFilters(items){
+      const cats = new Set();
+      const mfgs = new Set();
+
+      items.forEach(it => {
+        const c = String(it["Category"] || "").trim();
+        const m = String(it["Manufacturer"] || "").trim();
+        if (c) cats.add(c);
+        if (m) mfgs.add(m);
+      });
+
+      const fill = (sel, values) => {
+        const current = sel.value;
+        sel.innerHTML = `<option value="">All</option>`;
+        [...values].sort((a,b)=>a.localeCompare(b)).forEach(v => {
+          const o = document.createElement("option");
+          o.value = v;
+          o.textContent = v;
+          sel.appendChild(o);
+        });
+        if ([...sel.options].some(o => o.value === current)) sel.value = current;
+      };
+
+      fill(ui.cat, cats);
+      fill(ui.mfg, mfgs);
+    }
+
+    function matches(item){
+      const q = ui.q.value.trim().toLowerCase();
+      const cat = ui.cat.value.trim().toLowerCase();
+      const mfg = ui.mfg.value.trim().toLowerCase();
+
+      if (cat && String(item["Category"] || "").trim().toLowerCase() !== cat) return false;
+      if (mfg && String(item["Manufacturer"] || "").trim().toLowerCase() !== mfg) return false;
+
+      if (q){
+        const hay = [
+          item["Item ID"],
+          item["Category"],
+          item["Manufacturer"],
+          item["Model"],
+          item["Series"],
+          item["Screen Size"],
+          item["CPU"],
+          item["GPU"],
+          item["Storage"],
+          item["Memory"],
+          item["Features"],
+          item["Connectivity"],
+          item["Condition"],
+          item["Operating System"],
+          item["Warranty"],
+          item["Description"]
+        ].join(" ").toLowerCase();
+
+        if (!hay.includes(q)) return false;
+      }
+
+      return true;
+    }
+
+    function sortItems(items){
+      const mode = ui.sort.value;
+      const copy = items.slice();
+
+      if (mode === "priceAsc"){
+        copy.sort((a,b)=> {
+          const av = priceNumber(a["Price"]);
+          const bv = priceNumber(b["Price"]);
+          return (Number.isFinite(av) ? av : Infinity) - (Number.isFinite(bv) ? bv : Infinity);
+        });
+      } else if (mode === "priceDesc"){
+        copy.sort((a,b)=> {
+          const av = priceNumber(a["Price"]);
+          const bv = priceNumber(b["Price"]);
+          return (Number.isFinite(bv) ? bv : -Infinity) - (Number.isFinite(av) ? av : -Infinity);
+        });
+      } else if (mode === "az"){
+        copy.sort((a,b)=> {
+          const ta = `${a["Manufacturer"] || ""} ${a["Model"] || ""} ${a["Series"] || ""}`.trim();
+          const tb = `${b["Manufacturer"] || ""} ${b["Model"] || ""} ${b["Series"] || ""}`.trim();
+          return ta.localeCompare(tb);
+        });
+      } else {
+        copy.sort((a,b)=> String(b["Item ID"] || "").localeCompare(String(a["Item ID"] || "")));
+      }
+
+      return copy;
+    }
+
+    function isHtmlSnippet(s){
+      const t = String(s || "").trim();
+      return t.includes("<") && t.includes(">");
+    }
+
+    function looksLikePayPal(s){
+      return String(s || "").toLowerCase().includes("paypal");
+    }
+
+    function openLightbox(images, startIndex, title){
+      if (!Array.isArray(images) || !images.length) return;
+
+      lb.images = images.slice();
+      lb.index = Math.max(0, Math.min(startIndex || 0, lb.images.length - 1));
+      lb.itemTitle = title || "Item Images";
+
+      lb.root.classList.add("open");
+      lb.root.setAttribute("aria-hidden", "false");
+      document.body.classList.add("lb-open");
+
+      renderLightbox();
+    }
+
+    function closeLightbox(){
+      lb.root.classList.remove("open");
+      lb.root.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("lb-open");
+      lb.images = [];
+      lb.index = 0;
+      lb.itemTitle = "";
+      lb.image.src = "";
+      lb.image.alt = "";
+      lb.thumbs.innerHTML = "";
+    }
+
+    function renderLightbox(){
+      const total = lb.images.length;
+      if (!total) return;
+
+      const src = lb.images[lb.index];
+      lb.title.textContent = lb.itemTitle || "Item Images";
+      lb.count.textContent = `${lb.index + 1} / ${total}`;
+      lb.image.src = src;
+      lb.image.alt = `${lb.itemTitle || "Item image"} (${lb.index + 1} of ${total})`;
+
+      lb.prev.disabled = total <= 1;
+      lb.next.disabled = total <= 1;
+
+      lb.thumbs.innerHTML = "";
+      lb.images.forEach((imgSrc, idx) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "lb-thumb" + (idx === lb.index ? " active" : "");
+        b.setAttribute("aria-label", `View image ${idx + 1}`);
+        b.innerHTML = `<img src="${esc(imgSrc)}" alt="" referrerpolicy="no-referrer" />`;
+        b.addEventListener("click", () => {
+          lb.index = idx;
+          renderLightbox();
+        });
+        lb.thumbs.appendChild(b);
+      });
+    }
+
+    function prevImage(){
+      if (!lb.images.length) return;
+      lb.index = (lb.index - 1 + lb.images.length) % lb.images.length;
+      renderLightbox();
+    }
+
+    function nextImage(){
+      if (!lb.images.length) return;
+      lb.index = (lb.index + 1) % lb.images.length;
+      renderLightbox();
+    }
+
+    function render(){
+      ui.grid.innerHTML = "";
+
+      const filtered = sortItems(STORE_ITEMS.filter(matches));
+
+      if (!filtered.length){
+        ui.grid.innerHTML = `<div class="noMatches">No matches.</div>`;
+        return;
+      }
+
+      filtered.forEach(it => {
+        const id = String(it["Item ID"] || "").trim();
+        const manufacturer = String(it["Manufacturer"] || "").trim();
+        const model = String(it["Model"] || "").trim();
+        const series = String(it["Series"] || "").trim();
+        const desc = String(it["Description"] || "").trim();
+        const priceRaw = String(it["Price"] || "").trim();
+        const images = itemImages(it);
+        const img = images[0] || "";
+
+        const paypalBtn = String(it["PayPal Button"] || "").trim();
+        const buyLink = String(it["Buy Link"] || "").trim();
+
+        const title = [manufacturer, model, series].filter(Boolean).join(" ") || "(Item)";
+
+        const specs = [];
+        addSpec(specs, "Category", it["Category"]);
+        addSpec(specs, "Manufacturer", it["Manufacturer"]);
+        addSpec(specs, "Model", it["Model"]);
+        addSpec(specs, "Series", it["Series"]);
+        addSpec(specs, "Screen Size", it["Screen Size"]);
+        addSpec(specs, "CPU", it["CPU"]);
+        addSpec(specs, "GPU", it["GPU"]);
+        addSpec(specs, "Storage", it["Storage"]);
+        addSpec(specs, "Memory", it["Memory"]);
+        addSpec(specs, "Features", it["Features"]);
+        addSpec(specs, "Connectivity", it["Connectivity"]);
+        addSpec(specs, "Condition", it["Condition"]);
+        addSpec(specs, "Operating System", it["Operating System"]);
+        addSpec(specs, "Warranty", it["Warranty"]);
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const imgHtml = img
+          ? `
+            <button class="imgButton" type="button" aria-label="Open image gallery for ${esc(title)}">
+              <img src="${esc(img)}" alt="${esc(title)}" loading="lazy" referrerpolicy="no-referrer" />
+              <span class="imgHint">Click to enlarge</span>
+              ${images.length > 1 ? `<span class="imgBadge">${images.length} photos</span>` : ""}
+            </button>
+          `
+          : `<div class="ph">No image</div>`;
+
+        card.innerHTML = `
+          <div class="img">${imgHtml}</div>
+          <div class="bd">
+            <div class="title">${esc(title)}</div>
+
+            ${specs.length ? `<div class="specs">${specs.join("")}</div>` : ""}
+
+            ${desc ? `<div class="desc">${esc(desc)}</div>` : ""}
+
+            <div class="priceRow">
+              <div class="price">${esc(displayPrice(priceRaw))}</div>
+              <div class="buySlot"></div>
+            </div>
+
+            ${id ? `<div class="itemId">Item ID: ${esc(id)}</div>` : ""}
+          </div>
+        `;
+
+        const imgButton = card.querySelector(".imgButton");
+        if (imgButton){
+          imgButton.addEventListener("click", () => openLightbox(images, 0, title));
+        }
+
+        const slot = card.querySelector(".buySlot");
+
+        if (paypalBtn && isHtmlSnippet(paypalBtn) && looksLikePayPal(paypalBtn)){
+          const wrap = document.createElement("div");
+          wrap.className = "ppwrap";
+          wrap.innerHTML = paypalBtn;
+          slot.appendChild(wrap);
+        } else if (buyLink) {
+          if (isHtmlSnippet(buyLink)){
+            slot.innerHTML = buyLink;
+          } else {
+            const a = document.createElement("a");
+            a.className = "btnlink";
+            a.href = buyLink;
+            a.target = "_blank";
+            a.rel = "noopener";
+            a.textContent = "Buy";
+            slot.appendChild(a);
+          }
+        } else {
+          const a = document.createElement("a");
+          a.className = "btnlink secondary";
+          a.href = "#";
+          a.onclick = (e) => {
+            e.preventDefault();
+            alert("No Buy Link / PayPal button set yet.");
+          };
+          a.textContent = "Unavailable";
+          slot.appendChild(a);
+        }
+
+        ui.grid.appendChild(card);
+      });
+    }
+
+    async function load(){
+      try{
+        const r = await jsonp({ action: "storeItems" });
+        if (!r?.ok) throw new Error(r?.error || "storeItems failed");
+
+        STORE_ITEMS = Array.isArray(r.items) ? r.items : [];
+        buildFilters(STORE_ITEMS);
+        render();
+      } catch(e){
+        ui.grid.innerHTML = `<div class="errorBox"><b>Store load failed:</b> ${esc(e.message)}</div>`;
+      }
+    }
+
+    function clearFilters(){
+      ui.q.value = "";
+      ui.cat.value = "";
+      ui.mfg.value = "";
+      ui.sort.value = "newest";
+      render();
+    }
+
+    ui.q.addEventListener("input", render);
+    ui.cat.addEventListener("change", render);
+    ui.mfg.addEventListener("change", render);
+    ui.sort.addEventListener("change", render);
+    ui.btnClear.addEventListener("click", clearFilters);
+    ui.btnReload.addEventListener("click", load);
+
+    lb.close.addEventListener("click", closeLightbox);
+    lb.backdrop.addEventListener("click", closeLightbox);
+    lb.prev.addEventListener("click", prevImage);
+    lb.next.addEventListener("click", nextImage);
+
+    document.addEventListener("keydown", (e) => {
+      if (!lb.root.classList.contains("open")) return;
+
+      if (e.key === "Escape"){
+        e.preventDefault();
+        closeLightbox();
+      } else if (e.key === "ArrowLeft"){
+        e.preventDefault();
+        prevImage();
+      } else if (e.key === "ArrowRight"){
+        e.preventDefault();
+        nextImage();
+      }
+    });
+
+    load();
+
+    /* =========================
+       FOOTER YEAR
+    ========================= */
+    (function(){
+      var y = document.getElementById('tpYear');
+      if(y) y.textContent = new Date().getFullYear();
+    })();
+  </script>
+</body>
+</html>
