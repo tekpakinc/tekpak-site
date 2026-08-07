@@ -1,4 +1,4 @@
-const CACHE='tekpak-app-store-v1';
+const CACHE='tekpak-app-store-v2';
 const SHELL=[
   './','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png',
   '../tekpaklogo.png','../assets/apps/hot-flash-logo.png','../assets/apps/provya-logo.png',
