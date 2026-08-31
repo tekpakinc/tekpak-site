@@ -1,8 +1,8 @@
-const CACHE='tekpak-app-store-v3';
+const CACHE='tekpak-app-store-v4';
 const SHELL=[
   './','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png',
   '../tekpaklogo.png','../assets/apps/hot-flash-logo.png','../assets/apps/provya-logo.png',
-  '../assets/apps/quiet-focus-logo.png','../assets/apps/rc-reserve-logo.png'
+  '../assets/apps/quiet-focus-logo.png','../assets/apps/rc-reserve-logo.png','../assets/apps/meet-freely-logo.png'
 ];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
